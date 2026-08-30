@@ -1,5 +1,9 @@
 # Code Transpiler
 
+<a href="https://get.microsoft.com/installer/download/9n1kb1kxxtmn?referrer=appbadge" target="_self" >
+	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
+</a>
+
 Code Transpiler (UCT) is an experimental matrix-driven many-to-many source-code transpiler. It uses a shared CIR and target emitters so supported languages can translate through one architecture instead of maintaining a separate transpiler for every language pair.
 
 Supported languages: **R, Go, Rust, C++, C, Python, Zig, Julia, Nim, C#, Java, Kotlin, and Swift**.
