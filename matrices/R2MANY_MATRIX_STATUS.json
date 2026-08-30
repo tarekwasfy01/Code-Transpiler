@@ -1,0 +1,23 @@
+{
+  "project": "R2Many",
+  "targets": [
+    "go",
+    "rust",
+    "cpp",
+    "c",
+    "python",
+    "zig",
+    "julia",
+    "nim",
+    "csharp",
+    "java",
+    "kotlin",
+    "swift"
+  ],
+  "target_count": 12,
+  "r_primitives": 702,
+  "matrix_routes": 8424,
+  "route_coverage_percent": 100.0,
+  "architecture": "R source -> shared frontend -> primitive lookup -> target matrix route -> target runtime dispatch",
+  "exact_semantics": "Common primitives have direct handlers in several targets. Every remaining matrix primitive routes to an explicit target error until exact semantics are added; no silent fallback."
+}

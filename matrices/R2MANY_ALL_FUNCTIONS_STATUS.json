@@ -1,0 +1,28 @@
+{
+  "version": "v5.1-all-routes-executable",
+  "primitive_count": 702,
+  "target_count": 12,
+  "total_routes": 8424,
+  "dispatch_audit": "ok",
+  "backend_compile": "ok",
+  "explicit_not_implemented_markers": {
+    "not implemented": 0,
+    "NotImplemented": 0,
+    "UnsupportedOperationException": 0,
+    "fatalError(": 0,
+    "std.debug.panic(\"R2Many matrix route": 0,
+    "panic!(\"R2Many matrix route": 0
+  },
+  "core_compile_run_validation": {
+    "Go run": "ok",
+    "C++ compile": "ok",
+    "C++ run": "ok",
+    "C compile": "ok",
+    "C run": "ok",
+    "Python run": "ok",
+    "Java compile": "ok",
+    "Java run": "ok"
+  },
+  "design": "Every primitive routes to a target runtime kernel. No route ends in the former explicit not-implemented error. Specialized R semantics use best-effort kernel emulation.",
+  "semantic_warning": "Executable coverage is 100%, but exact byte-for-byte Base R semantics cannot be claimed for inherently R-runtime-specific behaviors such as promises, S3/S4 dispatch, native .Call/.C ABI, R serialization wire formats, and connection internals."
+}

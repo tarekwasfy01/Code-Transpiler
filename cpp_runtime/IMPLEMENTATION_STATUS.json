@@ -1,0 +1,28 @@
+{
+  "backend": "C++17",
+  "primitive_registry_entries": 702,
+  "primitive_routes": 702,
+  "route_coverage_percent": 100.0,
+  "explicit_named_handlers_detected": 106,
+  "parser": {
+    "lexer": true,
+    "pratt_expression_parser": true,
+    "assignments": true,
+    "if_else": true,
+    "while": true,
+    "for": true,
+    "repeat": true,
+    "functions": true,
+    "return_break_next": true,
+    "named_arguments": true,
+    "indexing": true,
+    "operators": true
+  },
+  "runtime": "standalone C++17; generated .cpp contains the runtime; no embedded R runtime",
+  "validation": {
+    "go_backend_compiled_with_temporary_go_1_23_module": true,
+    "generated_cpp_compiled_with_gpp_cpp17": true,
+    "extended_r_smoke_program_executed": true
+  },
+  "compatibility_note": "All 702 matrix primitives have a C++ kernel route. Common primitives have direct executable handlers. Rare/stateful primitives without an exact handler fail explicitly at runtime instead of silently returning incorrect results."
+}
