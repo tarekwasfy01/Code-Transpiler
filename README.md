@@ -1,96 +1,313 @@
 # Code Transpiler
 
-Go module: `github.com/tarekwasfy01/Code-Transpiler`
+A matrix-driven many-to-many source-code transpiler with a serializable universal semantic representation.
 
-```go
-import transpiler "github.com/tarekwasfy01/Code-Transpiler"
+Code Transpiler currently supports 13 languages:
 
-goSource, err := transpiler.Transpile("c", "go", cSource)
-semanticJSON, err := transpiler.SemanticJSON("python", pythonSource)
-rustSource, err := transpiler.TranspileSemanticJSON("rust", semanticJSON)
+- R
+- Go
+- Rust
+- C++
+- C
+- Python
+- Zig
+- Julia
+- Nim
+- C#
+- Java
+- Kotlin
+- Swift
+
+This provides 156 directed source-to-target routes.
+
+## Architecture
+
+```text
+Source Language
+      │
+      ▼
+Frontend / Matrix Analysis
+      │
+      ▼
+SemanticProgram
+ ├─ Executable AST
+ ├─ Structured Types
+ ├─ Effects
+ ├─ Bindings and Scopes
+ ├─ Control Flow
+ ├─ Data Flow
+ ├─ Evaluation Order
+ └─ Capability Contracts
+      │
+      ▼
+Target Backend
+      │
+      ▼
+Go / Rust / C / C++ / Python / …
 ```
 
-The public package exposes all 13 registered languages, all 156 directed
-cross-language routes, SemanticProgram JSON and backend capability contracts.
+`SemanticProgram` is a versioned JSON interchange format. It contains the executable program tree and does not require the original source code after serialization.
 
-Code Transpiler (UCT) is an experimental matrix-driven many-to-many source-code transpiler. It uses a shared CIR and target emitters so supported languages can translate through one architecture instead of maintaining a separate transpiler for every language pair.
+## Go Package
 
-Supported languages: **R, Go, Rust, C++, C, Python, Zig, Julia, Nim, C#, Java, Kotlin, and Swift**.
+```bash
+go get github.com/tarekwasfy01/Code-Transpiler
+```
 
-The architecture exposes **156 directed cross-language routes** (13 × 12). Route availability does not imply exact full-language semantic compatibility; complex language-specific constructs are still being expanded.
+Example:
 
-Code Transpiler combines R transpilation to **Go, Rust, C++, C, Python, Zig, Julia, Nim, C#, Java, Kotlin and Swift**.
+```go
+package main
 
-## Matrix resolution
+import (
+	"fmt"
+	"log"
 
-The common matrix has **702 R primitive entries × 12 targets = 8,424 target routes**.
+	transpiler "github.com/tarekwasfy01/Code-Transpiler"
+)
 
-All 12 targets now use the same R lexer/parser instead of the former line-by-line fallback parser. The shared frontend parses:
+func main() {
+	source := `
+x = 2
+print(x + 3)
+`
 
-- assignments (`<-`, `<<-`, `=`)
-- calls and named arguments
-- unary and binary operators
-- vector/index expressions
-- `if / else`
-- `while`
-- `for`
-- `repeat`
-- function definitions
-- `return`, `break`, `next`
+	code, err := transpiler.Transpile("python", "go", source)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-The target generators lower operators and primitive calls through the target matrix/runtime dispatch.
+	fmt.Println(code)
+}
+```
 
-## Compatibility policy
+### SemanticProgram JSON
 
-A matrix route is not the same thing as exact Base-R semantics. Common primitives have executable native handlers. A rare primitive whose exact semantics are not implemented produces an explicit target-runtime error. Code Transpiler does **not** silently substitute an incorrect implementation.
+```go
+semanticJSON, err := transpiler.SemanticJSON("python", source)
+if err != nil {
+	log.Fatal(err)
+}
 
-This is important for environments, promises, active bindings, S3/S4 dispatch, serialization wire formats, native `.Call/.C`, connection internals and other stateful Base-R behavior.
+rustCode, err := transpiler.TranspileSemanticJSON("rust", semanticJSON)
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+### Language Registry
+
+```go
+for _, language := range transpiler.Languages() {
+	fmt.Println(language.ID, language.Extensions)
+}
+```
+
+### Backend Capabilities
+
+```go
+capability := transpiler.BackendCapability("core", "go")
+fmt.Println(capability.Status, capability.Reason)
+```
+
+Capability states are:
+
+- `native`
+- `lowering`
+- `emulated`
+- `unsupported`
+
+Unsupported semantics are reported explicitly rather than silently replaced.
+
+## Command-Line Interface
+
+List languages:
+
+```powershell
+CodeTranspiler.exe languages
+```
+
+List all 156 routes:
+
+```powershell
+CodeTranspiler.exe routes
+```
+
+Translate C to Go:
+
+```powershell
+CodeTranspiler.exe transpile `
+  -source c `
+  -target go `
+  input.c `
+  -o output.go
+```
+
+Translate Python to Rust:
+
+```powershell
+CodeTranspiler.exe transpile `
+  -source python `
+  -target rust `
+  input.py `
+  -o output.rs
+```
+
+Flags may appear before or after the input filename.
+
+## SemanticProgram CLI
+
+Export a source file as SemanticProgram JSON:
+
+```powershell
+CodeTranspiler.exe semantic-export `
+  -source python `
+  input.py `
+  -o program.semantic.json
+```
+
+Generate Rust from the stored SemanticProgram:
+
+```powershell
+CodeTranspiler.exe semantic-transpile `
+  -target rust `
+  program.semantic.json `
+  -o output.rs
+```
+
+The second operation does not require the original Python source.
+
+## Batch Translation
+
+`transpile-batch` reads a JSON array from standard input:
+
+```json
+[
+  {
+    "id": "example",
+    "source": "c",
+    "target": "go",
+    "code": "int main() { return 0; }"
+  }
+]
+```
+
+Run:
+
+```powershell
+Get-Content requests.json |
+  CodeTranspiler.exe transpile-batch |
+  Set-Content responses.json
+```
+
+Response:
+
+```json
+[
+  {
+    "id": "example",
+    "code": "package main\n..."
+  }
+]
+```
+
+Errors are returned per request without terminating the entire batch.
+
+## Running Programs
+
+Execute R with the embedded compatibility runtime:
+
+```powershell
+CodeTranspiler.exe run input.R
+```
+
+Translate and execute through an installed target toolchain:
+
+```powershell
+CodeTranspiler.exe run -target go input.R
+CodeTranspiler.exe run -target rust input.R
+CodeTranspiler.exe run -target python input.R
+```
+
+External compilers and interpreters are not bundled.
 
 ## Build
 
-Run `powershell -ExecutionPolicy Bypass -File .\build-onefile.ps1`.
+Requirements:
 
-Output: `dist\CodeTranspiler.exe`
+- Windows x64
+- Go 1.26 or newer
+- PowerShell
 
-## CLI
+Build and test:
 
-`Code Transpiler.exe targets`
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build-onefile.ps1
+```
 
-`CodeTranspiler.exe routes`
+Output:
 
-`CodeTranspiler.exe transpile -source c -target go input.c -o output.go`
+```text
+dist\CodeTranspiler.exe
+```
 
-`CodeTranspiler.exe semantic-export -source python input.py -o program.semantic.json`
+The build performs package tests, embeds the Windows icon and validates the generated PE executable.
 
-`CodeTranspiler.exe semantic-transpile -target rust program.semantic.json -o output.rs`
+## Current Validation
 
-`Code Transpiler.exe transpile -target cpp input.R -o output.cpp`
+The current release has been checked for:
 
-`Code Transpiler.exe transpile -target rust input.R -o output.rs`
+- 156/156 directed CLI routes producing target output
+- complete SemanticProgram JSON roundtrip
+- direct SemanticProgram execution
+- JSON-to-target generation without original source
+- external Go-module consumption
+- GitHub Actions package tests
 
-`Code Transpiler.exe transpile -target python input.R -o output.py`
+Route generation does not imply complete semantic compatibility with every feature of every language. The supported common subset is continuously expanded, and unresolved semantics remain explicit.
 
+## Semantic Matrices
 
-## Kernel resolution v3
+SemanticProgram stores sparse relations for:
 
-Every generated primitive call now carries both its matrix kernel and primitive name into the target runtime. Go and Python received broad executable kernel implementations for arithmetic/vector recycling, reductions, numeric functions, predicates/coercion, ordering, character functions, random generation, filesystem/environment and time functions. Other target runtimes use the same kernel-aware call ABI and are being filled against the same matrix.
+- syntax
+- control flow
+- data flow
+- bindings
+- effects
+- scopes
+- evaluation order
+- call modes
 
+The effect system distinguishes operations including I/O, file access, memory access, exceptions, FFI, time, randomness, synchronization and unknown calls.
 
-## v5 — all matrix routes executable
+## GPU Dialect
 
-All 702 primitive names are now routed in every one of the 12 target languages (8,424 routes total). The former explicit `not implemented` terminal path was replaced by 34 executable kernel fallbacks covering runtime, IO, environment, language, matrix, character, numeric, random, predicate, system, replacement, attribute, serialization, reduction, bitwise, matching, ordering, datetime, subset, cumulative, logical, missingness, iteration and coercion categories. Exact Base-R behavior for runtime-specific internals remains an emulation rather than the original R runtime.
+SemanticProgram includes a capability-gated dialect mechanism for specialized domains.
 
+A future GPU adapter can represent:
 
-## GUI redesign / embedded R runtime
+- compute kernels
+- workgroups
+- buffers
+- textures
+- samplers
+- barriers
+- atomics
+- subgroup operations
+- cooperative matrices
 
-The GUI now follows the R2Go editor layout and styling: high-contrast syntax highlighting, R editor left, target editor right, centered Convert button, target dropdown in the upper row, and Copy / Save As in the lower-left action row. A Run R button executes the left editor with the Pure-Go compatibility runtime embedded in Code Transpiler.exe. Generated target source continues to embed its target-specific compatibility runtime.
+CPU backends reject unsupported GPU capabilities explicitly. CrossTL/CrossGL is being evaluated as an external GPU backend rather than bundled into the universal core.
 
+## License
 
-## CLI target execution
+The project is licensed under the MIT License.
 
-`Code Transpiler.exe run input.R` uses the embedded Code Transpiler R runtime. `Code Transpiler.exe run -target go input.R`, `-target rust`, `-target python`, and the other target IDs transpile to a temporary target source and execute it with the matching installed toolchain/interpreter. Temporary files are removed after execution. Open CMD now opens a persistent terminal in the EXE directory.
+Third-party components and development-tool notices are documented in:
 
+- `THIRD_PARTY_NOTICES.md`
+- `THIRD_PARTY_NOTICES.txt`
 
-## Embedded target runtimes
+## Repository
 
-All 12 target compatibility runtimes are now stored under `internal/runtimeassets/data` and compiled into the one-file executable with Go `embed.FS`. `run -target <language>` materializes the matching bundle in its temporary work directory. The bundle also carries the existing full R2Rust `rust_runtime` tree and the available R2Go runtime provenance/source material.
+https://github.com/tarekwasfy01/Code-Transpiler
