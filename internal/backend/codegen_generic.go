@@ -6,20 +6,37 @@ import (
 )
 
 type targetGen struct {
-	target   string
-	indent   int
-	b        strings.Builder
-	declared []map[string]bool
-	funcs    map[string]bool
-	temp     int
+	source       string
+	target       string
+	indent       int
+	b            strings.Builder
+	declared     []map[string]bool
+	funcs        map[string]bool
+	inline       map[string]*FunctionExpr
+	bindings     []map[string]string
+	temp         int
+	activeInline map[*FunctionExpr]bool
+	helpers      []string
+	usedNames    map[string]bool
+	cValues      map[string]bool
+	generatedAt  map[string]int
 }
 
 func generateTarget(target string, ast *BlockStmt) (string, error) {
-	g := &targetGen{target: target, declared: []map[string]bool{{}}, funcs: map[string]bool{}}
+	return generateTargetFrom("r", target, ast)
+}
+func generateTargetFrom(source, target string, ast *BlockStmt) (string, error) {
+	g := &targetGen{source: source, target: target, declared: []map[string]bool{{}}, funcs: map[string]bool{}, inline: map[string]*FunctionExpr{}, activeInline: map[*FunctionExpr]bool{}}
+	g.usedNames = reserveSymbols(ast)
+	g.cValues = map[string]bool{}
 	for _, s := range ast.List {
 		if a, ok := s.(*AssignStmt); ok {
 			if _, ok := a.Value.(*FunctionExpr); ok {
-				g.funcs[safeName(a.Name)] = true
+				name := g.name(a.Name)
+				g.funcs[name] = true
+				if inlineFunction(a.Value.(*FunctionExpr)) {
+					g.inline[name] = a.Value.(*FunctionExpr)
+				}
 			}
 		}
 	}
@@ -30,7 +47,7 @@ func generateTarget(target string, ast *BlockStmt) (string, error) {
 				return "", err
 			}
 		}
-		return targetPrelude(target) + "\n" + g.b.String(), nil
+		return targetPrelude(target) + "\n" + strings.Join(g.helpers, "\n") + "\n" + g.b.String(), nil
 	default:
 		g.line(mainOpen(target))
 		g.indent++
@@ -44,7 +61,7 @@ func generateTarget(target string, ast *BlockStmt) (string, error) {
 		}
 		g.indent--
 		g.line(mainClose(target))
-		return targetPrelude(target) + "\n" + g.b.String(), nil
+		return targetPrelude(target) + "\n" + strings.Join(g.helpers, "\n") + "\n" + g.b.String(), nil
 	}
 }
 func (g *targetGen) line(s string) {
@@ -109,7 +126,7 @@ func (g *targetGen) stmt(s Stmt) error {
 		g.indent--
 		g.line("}")
 	case *AssignStmt:
-		n := safeName(x.Name)
+		n := g.name(x.Name)
 		if fn, ok := x.Value.(*FunctionExpr); ok {
 			return g.functionAssign(n, fn)
 		}
@@ -117,7 +134,7 @@ func (g *targetGen) stmt(s Stmt) error {
 		if err != nil {
 			return err
 		}
-		g.line(assignSyntax(g.target, n, e))
+		g.line(g.assignment(n, e))
 	case *ExprStmt:
 		e, err := g.expr(x.X)
 		if err != nil {
@@ -177,13 +194,27 @@ func (g *targetGen) stmt(s Stmt) error {
 				g.indent--
 			}
 		default:
-			g.line("if (" + truthCall(g.target, c) + ")")
-			if err = g.stmt(x.Then); err != nil {
+			g.line("if (" + truthCall(g.target, c) + ") {")
+			g.indent++
+			if err = g.stmtBody(x.Then); err != nil {
 				return err
 			}
+			g.indent--
 			if x.Else != nil {
-				g.line("else")
-				return g.stmt(x.Else)
+				if g.target == "go" {
+					g.line("} else {")
+				} else {
+					g.line("}")
+					g.line("else {")
+				}
+				g.indent++
+				if err = g.stmtBody(x.Else); err != nil {
+					return err
+				}
+				g.indent--
+				g.line("}")
+			} else {
+				g.line("}")
 			}
 		}
 	case *WhileStmt:
@@ -213,14 +244,22 @@ func (g *targetGen) stmt(s Stmt) error {
 			g.indent--
 			return err
 		}
-		g.line("while (" + truthCall(g.target, c) + ")")
-		return g.stmt(x.Body)
+		if g.target == "go" {
+			g.line("for " + truthCall(g.target, c) + " {")
+		} else {
+			g.line("while (" + truthCall(g.target, c) + ") {")
+		}
+		g.indent++
+		err = g.stmtBody(x.Body)
+		g.indent--
+		g.line("}")
+		return err
 	case *ForStmt:
 		seq, err := g.expr(x.Seq)
 		if err != nil {
 			return err
 		}
-		n := safeName(x.Name)
+		n := g.name(x.Name)
 		switch g.target {
 		case "python":
 			g.line("for " + n + " in r_iter(" + seq + "):")
@@ -270,8 +309,20 @@ func (g *targetGen) stmt(s Stmt) error {
 			g.line("}")
 			return err
 		case "java":
-			g.line("for (Object " + n + " : rIter(" + seq + ")) {")
+			g.line("for (Object " + n + " : R2.rIter(" + seq + ")) {")
 			g.indent++
+			err = g.stmtBody(x.Body)
+			g.indent--
+			g.line("}")
+			return err
+		case "c":
+			g.temp++
+			sequence := fmt.Sprintf("__sequence_%d", g.temp)
+			index := fmt.Sprintf("__index_%d", g.temp)
+			g.line("RValue " + sequence + " = " + seq + ";")
+			g.line("for (size_t " + index + " = 0; " + index + " < " + sequence + ".len; ++" + index + ") {")
+			g.indent++
+			g.line("RValue " + n + " = " + sequence + ".v[" + index + "];")
 			err = g.stmtBody(x.Body)
 			g.indent--
 			g.line("}")
@@ -290,8 +341,15 @@ func (g *targetGen) stmt(s Stmt) error {
 			g.indent--
 			g.line("}")
 			return err
+		case "zig":
+			g.line("for (rIter(" + seq + ")) |" + n + "| {")
+			g.indent++
+			err = g.stmtBody(x.Body)
+			g.indent--
+			g.line("}")
+			return err
 		default:
-			g.line(targetComment(g.target, "for loop lowered through r_iter; exact syntax backend pending"))
+			return fmt.Errorf("target %s has no iterable-loop lowering; refusing to omit its body", g.target)
 		}
 	case *RepeatStmt:
 		switch g.target {
@@ -354,13 +412,20 @@ func (g *targetGen) stmtBody(s Stmt) error {
 }
 
 func (g *targetGen) functionAssign(n string, fn *FunctionExpr) error {
+	_, flowErr := buildFunctionFlow(fn)
+	if flowErr == nil {
+		return nil
+	}
+	if _, unsafe := flowErr.(*flowSafetyError); unsafe {
+		return flowErr
+	}
 	// Functions are emitted as target-native closures/named functions using a universal argument vector.
 	switch g.target {
 	case "python":
 		g.line("def " + n + "(*__args):")
 		g.indent++
 		for i, p := range fn.Params {
-			g.line(fmt.Sprintf("%s = r_bind(__args, %d, %s)", safeName(p.Name), i, defaultExprPy(g, p.Default)))
+			g.line(fmt.Sprintf("%s = r_bind(__args, %d, %s)", g.name(p.Name), i, defaultExprPy(g, p.Default)))
 		}
 		for _, s := range fn.Body.List {
 			if err := g.stmt(s); err != nil {
@@ -373,7 +438,7 @@ func (g *targetGen) functionAssign(n string, fn *FunctionExpr) error {
 		g.line("function " + n + "(__args...)")
 		g.indent++
 		for i, p := range fn.Params {
-			g.line(fmt.Sprintf("%s = r_bind(__args, %d, %s)", safeName(p.Name), i+1, defaultExprGeneric(g, p.Default)))
+			g.line(fmt.Sprintf("%s = r_bind(__args, %d, %s)", g.name(p.Name), i+1, defaultExprGeneric(g, p.Default)))
 		}
 		for _, s := range fn.Body.List {
 			if err := g.stmt(s); err != nil {
@@ -387,7 +452,7 @@ func (g *targetGen) functionAssign(n string, fn *FunctionExpr) error {
 		g.line(n + " := func(__args ...any) any {")
 		g.indent++
 		for i, p := range fn.Params {
-			g.line(fmt.Sprintf("%s := rBind(__args, %d, %s)", safeName(p.Name), i, defaultExprGeneric(g, p.Default)))
+			g.line(fmt.Sprintf("%s := rBind(__args, %d, %s)", g.name(p.Name), i, defaultExprGeneric(g, p.Default)))
 		}
 		for _, s := range fn.Body.List {
 			if err := g.stmt(s); err != nil {
@@ -401,7 +466,7 @@ func (g *targetGen) functionAssign(n string, fn *FunctionExpr) error {
 		g.line("let mut " + n + " = |__args: Vec<RValue>| -> RValue {")
 		g.indent++
 		for i, p := range fn.Params {
-			g.line(fmt.Sprintf("let %s = r_bind(&__args, %d, %s);", safeName(p.Name), i, defaultExprGeneric(g, p.Default)))
+			g.line(fmt.Sprintf("let %s = r_bind(&__args, %d, %s);", g.name(p.Name), i, defaultExprGeneric(g, p.Default)))
 		}
 		for _, s := range fn.Body.List {
 			if err := g.stmt(s); err != nil {
@@ -415,7 +480,7 @@ func (g *targetGen) functionAssign(n string, fn *FunctionExpr) error {
 		g.line("std::function<RValue(std::vector<RValue>)> " + n + " = [&](std::vector<RValue> __args)->RValue {")
 		g.indent++
 		for i, p := range fn.Params {
-			g.line(fmt.Sprintf("RValue %s = r_bind(__args, %d, %s);", safeName(p.Name), i, defaultExprGeneric(g, p.Default)))
+			g.line(fmt.Sprintf("RValue %s = r_bind(__args, %d, %s);", g.name(p.Name), i, defaultExprGeneric(g, p.Default)))
 		}
 		for _, s := range fn.Body.List {
 			if err := g.stmt(s); err != nil {
@@ -426,8 +491,7 @@ func (g *targetGen) functionAssign(n string, fn *FunctionExpr) error {
 		g.indent--
 		g.line("};")
 	default:
-		g.line(targetComment(g.target, "function "+n+" lowered to runtime closure"))
-		g.line(assignSyntax(g.target, n, emitDispatch(g.target, "function", []string{targetString(g.target, n)})))
+		return fmt.Errorf("target %s has no general closure lowering for %s", g.target, n)
 	}
 	return nil
 }
@@ -447,8 +511,30 @@ func defaultExprGeneric(g *targetGen, e Expr) string {
 }
 
 func (g *targetGen) expr(e Expr) (string, error) {
+	if x, ok := e.(*IterationExpr); ok {
+		value, err := g.expr(x.Value)
+		if err != nil {
+			return "", err
+		}
+		switch x.Kind {
+		case "snapshot":
+			return g.snapshotIteration(value)
+		case "size":
+			return emitDispatch(g.target, "length", []string{value}), nil
+		default:
+			return "", fmt.Errorf("unknown iteration intrinsic %q", x.Kind)
+		}
+	}
 	switch x := e.(type) {
 	case *IdentExpr:
+		for i := len(g.bindings) - 1; i >= 0; i-- {
+			if value, ok := g.bindings[i][g.name(x.Name)]; ok {
+				return value, nil
+			}
+		}
+		if strings.HasPrefix(x.Name, "\x00") {
+			return "", fmt.Errorf("unbound internal state slot %q", x.Name)
+		}
 		switch x.Name {
 		case "TRUE", "T":
 			return targetBool(g.target, true), nil
@@ -465,7 +551,12 @@ func (g *targetGen) expr(e Expr) (string, error) {
 		case "pi":
 			return targetNumber(g.target, "3.14159265358979323846"), nil
 		}
-		return safeName(x.Name), nil
+		name := g.name(x.Name)
+		g.cValues[name] = true
+		if g.target == "rust" {
+			return name + ".clone()", nil
+		}
+		return name, nil
 	case *LiteralExpr:
 		if x.Kind == "string" {
 			return targetString(g.target, unquote(x.Text)), nil
@@ -477,7 +568,7 @@ func (g *targetGen) expr(e Expr) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		return emitDispatch(g.target, "__unary_"+x.Op, []string{a}), nil
+		return g.lowerUnary(x.Op, a)
 	case *BinaryExpr:
 		a, err := g.expr(x.L)
 		if err != nil {
@@ -486,6 +577,9 @@ func (g *targetGen) expr(e Expr) (string, error) {
 		b, err := g.expr(x.R)
 		if err != nil {
 			return "", err
+		}
+		if x.Op == "&&" || x.Op == "||" {
+			return g.lowerLogical(x.Op, a, b), nil
 		}
 		return emitDispatch(g.target, "__binary_"+x.Op, []string{a, b}), nil
 	case *IndexExpr:
@@ -508,8 +602,18 @@ func (g *targetGen) expr(e Expr) (string, error) {
 			return "", err
 		}
 		if id, ok := x.Fun.(*IdentExpr); ok {
-			n := safeName(id.Name)
+			n := g.name(id.Name)
 			if g.funcs[n] {
+				if fn, ok := g.inline[n]; ok {
+					if x.Eager {
+						previous := g.source
+						g.source = "eager"
+						result, err := g.inlineCall(fn, x.Args, args)
+						g.source = previous
+						return result, err
+					}
+					return g.inlineCall(fn, x.Args, args)
+				}
 				return callUser(g.target, n, args), nil
 			}
 			if _, ok := PrimitiveRoute(g.target, id.Name); ok {
@@ -545,13 +649,46 @@ func (g *targetGen) args(args []Arg) ([]string, error) {
 }
 
 func safeName(s string) string { return strings.NewReplacer(".", "_", "$", "_").Replace(s) }
+
+// Encode source names injectively for Nim's style-insensitive identifier rules.
+// Source names and generated temporaries use disjoint prefixes, so keywords,
+// underscores, case differences and runtime helper names cannot collide.
+func (g *targetGen) name(s string) string {
+	if strings.HasPrefix(s, "\x00") {
+		return s
+	}
+	if g.target == "nim" {
+		return fmt.Sprintf("r2ms%x", s)
+	}
+	return safeName(s)
+}
+
+func inlineFunction(fn *FunctionExpr) bool {
+	_, err := buildFunctionFlow(fn)
+	return err == nil
+}
+
+func (g *targetGen) assignment(name, expression string) string {
+	for i := len(g.declared) - 1; i >= 0; i-- {
+		if g.declared[i][name] {
+			return reassignSyntax(g.target, name, expression)
+		}
+	}
+	g.declared[len(g.declared)-1][name] = true
+	return assignSyntax(g.target, name, expression)
+}
 func stmtEnd(t string) string {
 	if t == "python" || t == "julia" || t == "nim" || t == "kotlin" || t == "swift" {
 		return ""
 	}
 	return ";"
 }
-func exprStmt(t, e string) string { return e + stmtEnd(t) }
+func exprStmt(t, e string) string {
+	if t == "nim" {
+		return "discard " + e
+	}
+	return e + stmtEnd(t)
+}
 func assignSyntax(t, n, e string) string {
 	switch t {
 	case "python", "julia":
@@ -559,7 +696,7 @@ func assignSyntax(t, n, e string) string {
 	case "nim":
 		return "var " + n + " = " + e
 	case "go":
-		return n + " := " + e
+		return "var " + n + " any = " + e
 	case "rust":
 		return "let mut " + n + " = " + e + ";"
 	case "cpp":
@@ -579,8 +716,14 @@ func assignSyntax(t, n, e string) string {
 	}
 	return n + " = " + e
 }
+
+func reassignSyntax(t, n, e string) string {
+	return n + " = " + e + stmtEnd(t)
+}
 func truthCall(t, e string) string {
 	switch t {
+	case "nim":
+		return "rTruth(" + e + ")"
 	case "go":
 		return "rTruth(" + e + ")"
 	case "rust":

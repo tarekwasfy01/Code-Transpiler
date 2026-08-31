@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -8,12 +9,12 @@ import (
 	"strings"
 
 	"gioui.org/app"
-	"r2many/internal/backend"
-	"r2many/internal/manytomany"
-	"r2many/internal/platform"
-	"r2many/internal/runtimeassets"
-	"r2many/internal/targetrun"
-	"r2many/internal/ui"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/runtimeassets"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/targetrun"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/ui"
 )
 
 func main() {
@@ -28,8 +29,9 @@ func main() {
 	case "help", "--help", "-h":
 		fmt.Print(helpText)
 	case "version", "--version":
-		fmt.Println("Code Transpiler v0.4")
-	case "targets":
+		fmt.Println("Code Transpiler v1.0 - SemanticProgram v1")
+	case "targets", "languages":
+		fmt.Println("r\tR\t.R")
 		for _, l := range backend.Languages {
 			fmt.Printf("%s\t%s\t%s\n", l.ID, l.Name, l.Extension)
 		}
@@ -40,7 +42,7 @@ func main() {
 				fmt.Printf("%s\terror: %v\n", t, err)
 				continue
 			}
-			fmt.Printf("%s\t%d embedded runtime files\n", t, len(files))
+			fmt.Printf("%s\t%d embedded runtime source files (external compiler required)\n", t, len(files))
 		}
 	case "run":
 		if err := runR(os.Args[2:]); err != nil {
@@ -52,10 +54,94 @@ func main() {
 			fmt.Fprintln(os.Stderr, "r2many:", err)
 			os.Exit(1)
 		}
+	case "transpile-batch":
+		if err := transpileBatch(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	case "routes":
+		for _, source := range manytomany.Languages {
+			for _, target := range manytomany.Languages {
+				if source != target {
+					fmt.Printf("%s\t%s\n", source, target)
+				}
+			}
+		}
+	case "semantic-export":
+		if err := semanticExport(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
+	case "semantic-transpile":
+		if err := semanticTranspile(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
+	case "capability":
+		if len(os.Args) != 4 {
+			fmt.Fprintln(os.Stderr, "usage: CodeTranspiler.exe capability <target> <feature>")
+			os.Exit(2)
+		}
+		result := backend.BackendCapability(os.Args[3], os.Args[2])
+		_ = json.NewEncoder(os.Stdout).Encode(result)
 	default:
 		fmt.Print(helpText)
 		os.Exit(2)
 	}
+}
+
+func semanticExport(args []string) error {
+	fs := flag.NewFlagSet("semantic-export", flag.ContinueOnError)
+	source := fs.String("source", "r", "source language")
+	out := fs.String("o", "", "SemanticProgram JSON output path")
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-source": true, "-o": true})); err != nil {
+		return err
+	}
+	if fs.NArg() != 1 || *out == "" {
+		return fmt.Errorf("usage: semantic-export -source <language> input -o program.semantic.json")
+	}
+	data, err := os.ReadFile(fs.Arg(0))
+	if err != nil {
+		return err
+	}
+	program, err := manytomany.Parse(*source, string(data))
+	if err != nil {
+		return err
+	}
+	encoded, err := program.Semantic.MarshalSemanticJSON()
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(*out, encoded, 0644)
+}
+
+func semanticTranspile(args []string) error {
+	fs := flag.NewFlagSet("semantic-transpile", flag.ContinueOnError)
+	target := fs.String("target", "go", "target language")
+	out := fs.String("o", "", "output path")
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-target": true, "-o": true})); err != nil {
+		return err
+	}
+	if fs.NArg() != 1 {
+		return fmt.Errorf("usage: semantic-transpile -target <language> program.semantic.json [-o output]")
+	}
+	data, err := os.ReadFile(fs.Arg(0))
+	if err != nil {
+		return err
+	}
+	program, err := manytomany.ParseDocument(data)
+	if err != nil {
+		return err
+	}
+	code, err := manytomany.Emit(*target, program)
+	if err != nil {
+		return err
+	}
+	if *out == "" {
+		fmt.Print(code)
+		return nil
+	}
+	return os.WriteFile(*out, []byte(code), 0644)
 }
 func launchGUI() {
 	go func() {
@@ -71,7 +157,7 @@ func launchGUI() {
 func runR(args []string) error {
 	fs := flag.NewFlagSet("run", flag.ContinueOnError)
 	target := fs.String("target", "embedded", "execution target: embedded, go, rust, cpp, c, python, zig, julia, nim, csharp, java, kotlin, swift")
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-target": true})); err != nil {
 		return err
 	}
 	if fs.NArg() != 1 {
@@ -98,7 +184,7 @@ func transpile(args []string) error {
 	source := fs.String("source", "r", "source language")
 	target := fs.String("target", "go", "target language")
 	out := fs.String("o", "", "output path")
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-source": true, "-target": true, "-o": true})); err != nil {
 		return err
 	}
 	if fs.NArg() != 1 {
@@ -115,15 +201,80 @@ func transpile(args []string) error {
 	}
 	if *out == "" {
 		l, ok := backend.ByID(*target)
-		if !ok {
+		if !ok && *target != "r" {
 			return fmt.Errorf("unknown target %q", *target)
+		}
+		if *target == "r" {
+			l.Extension = ".R"
 		}
 		*out = strings.TrimSuffix(in, filepath.Ext(in)) + l.Extension
 	}
 	return os.WriteFile(*out, []byte(code), 0644)
 }
 
-const helpText = `R2Many - R to many languages transpiler
+// reorderValueFlags accepts the documented CLI style where output flags may
+// follow the input file, while retaining the standard flag package.
+func reorderValueFlags(args []string, supported map[string]bool) []string {
+	flags, positional := make([]string, 0, len(args)), make([]string, 0, len(args))
+	for i := 0; i < len(args); i++ {
+		if supported[args[i]] && i+1 < len(args) {
+			flags = append(flags, args[i], args[i+1])
+			i++
+			continue
+		}
+		positional = append(positional, args[i])
+	}
+	return append(flags, positional...)
+}
+
+type batchRequest struct {
+	ID     string `json:"id"`
+	Source string `json:"source"`
+	Target string `json:"target"`
+	Code   string `json:"code"`
+}
+type batchResponse struct {
+	ID    string `json:"id"`
+	Code  string `json:"code,omitempty"`
+	Error string `json:"error,omitempty"`
+}
+
+func translateRequest(r batchRequest) (out batchResponse) {
+	out.ID = r.ID
+	defer func() {
+		if p := recover(); p != nil {
+			out.Code = ""
+			out.Error = fmt.Sprintf("translation panic: %v", p)
+		}
+	}()
+	code, err := manytomany.Transpile(r.Source, r.Target, r.Code)
+	if err != nil {
+		out.Error = err.Error()
+	} else {
+		out.Code = code
+	}
+	return
+}
+func transpileBatch() error {
+	var requests []batchRequest
+	if err := json.NewDecoder(os.Stdin).Decode(&requests); err != nil {
+		return err
+	}
+	responses := make([]batchResponse, len(requests))
+	for i, r := range requests {
+		responses[i] = translateRequest(r)
+	}
+	return json.NewEncoder(os.Stdout).Encode(responses)
+}
+
+const helpText = `Code Transpiler v1.0 - SemanticProgram v1
+Experimental common-subset translation; not full semantic compatibility.
+Runtime support SOURCE is embedded. Native target compilers are not bundled.
+
+BATCH TRANSLATION
+  CodeTranspiler.exe transpile-batch
+      Read a JSON array of {id,source,target,code} from stdin.
+      Write a JSON array of {id,code,error} to stdout. No code is executed.
 
 GENERAL
   CodeTranspiler.exe
@@ -143,6 +294,21 @@ GENERAL
 
   CodeTranspiler.exe targets
       List all target-language IDs.
+
+  CodeTranspiler.exe languages
+      List all source/target language IDs and extensions.
+
+  CodeTranspiler.exe routes
+      List all 156 directed source-to-target routes.
+
+  CodeTranspiler.exe semantic-export -source c input.c -o program.semantic.json
+      Parse source and save the complete SemanticProgram JSON document.
+
+  CodeTranspiler.exe semantic-transpile -target rust program.semantic.json -o output.rs
+      Load SemanticProgram JSON and emit a target without original source.
+
+  CodeTranspiler.exe capability go core
+      Print the backend capability contract as JSON.
 
   CodeTranspiler.exe runtimes
       List the runtime bundles embedded directly in CodeTranspiler.exe.

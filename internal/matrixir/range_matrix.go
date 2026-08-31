@@ -1,0 +1,102 @@
+package matrixir
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+type rangeLowering struct {
+	Name, Begin, End, Condition, Advance string
+	Counting                             bool
+	// [begin,end,1] * Affine normalizes an exclusive upper endpoint.
+	Affine Matrix
+}
+
+func planRange(source, text string, profile Vector) (rangeLowering, error) {
+	p := rangeLowering{Affine: NewMatrix(3, 3)}
+	for i := 0; i < 3; i++ {
+		p.Affine.Set(i, i, 1)
+	}
+	h := headerExpression(text, "for")
+	clauses := splitTopLevel(h, ';')
+	if len(clauses) == 3 {
+		var ok bool
+		p.Name, p.Begin, ok = assignmentExpression(significant(Tokenize(source, clauses[0])), clauses[0])
+		if !ok {
+			return p, fmt.Errorf("counting-loop initialization is not supported")
+		}
+		p.Counting = true
+		p.Condition = normalizeExpression(source, clauses[1], profile)
+		step := strings.Join(strings.Fields(clauses[2]), "")
+		switch step {
+		case p.Name + "++", "++" + p.Name, p.Name + "+=1":
+			p.Advance = p.Name + " <- " + p.Name + " + 1"
+		case p.Name + "--", "--" + p.Name, p.Name + "-=1":
+			p.Advance = p.Name + " <- " + p.Name + " - 1"
+		default:
+			return p, fmt.Errorf("counting-loop step %q requires explicit lowering", clauses[2])
+		}
+		p.Begin = normalizeExpression(source, p.Begin, profile)
+		return p, nil
+	}
+	expression := ""
+	if in := strings.Index(h, " in "); in >= 0 {
+		p.Name = strings.TrimSpace(h[:in])
+		expression = strings.TrimSpace(h[in+4:])
+	} else if source == "zig" {
+		open, close := strings.Index(h, "("), strings.Index(h, ")")
+		if open >= 0 && close > open {
+			expression = h[open+1 : close]
+			p.Name = strings.Trim(strings.TrimSpace(h[close+1:]), "| ")
+		}
+	}
+	names := significant(Tokenize(source, p.Name))
+	if len(names) != 1 || names[0].Class != TokenIdentifier {
+		return p, fmt.Errorf("range binding is not a single identifier")
+	}
+	exclusive := 0.0
+	if strings.HasPrefix(expression, "range(") && strings.HasSuffix(expression, ")") {
+		parts := splitTopLevel(expression[len("range("):len(expression)-1], ',')
+		switch len(parts) {
+		case 1:
+			p.Begin, p.End = "0", parts[0]
+		case 2:
+			p.Begin, p.End = parts[0], parts[1]
+		default:
+			return p, fmt.Errorf("range step requires explicit signed-step semantics")
+		}
+		exclusive = 1
+	} else {
+		found := false
+		for _, op := range []string{"..=", "...", "..", ":"} {
+			if at := strings.Index(expression, op); at >= 0 {
+				p.Begin, p.End = expression[:at], expression[at+len(op):]
+				found = true
+				if op == ".." && (source == "rust" || profile[GrammarExclusiveRangeEnd] != 0) {
+					exclusive = 1
+				}
+				break
+			}
+		}
+		if !found {
+			return p, fmt.Errorf("iterable range %q requires an iterable representation", expression)
+		}
+	}
+	if strings.TrimSpace(p.Begin) == "" || strings.TrimSpace(p.End) == "" {
+		return p, fmt.Errorf("range endpoint is missing")
+	}
+	p.Begin = normalizeExpression(source, p.Begin, profile)
+	p.End = normalizeExpression(source, p.End, profile)
+	p.Affine.Set(2, 1, -exclusive)
+	// Numeric endpoints are computed with the same affine matrix as symbolic
+	// ones. Symbolic expressions retain their dependency on the bound value.
+	if end, err := strconv.Atoi(strings.TrimSpace(p.End)); err == nil {
+		values, _ := MatrixFromRows([][]float64{{0, float64(end), 1}})
+		normalized, _ := values.Multiply(p.Affine)
+		p.End = strconv.FormatFloat(normalized.At(0, 1), 'f', -1, 64)
+	} else if coefficient := p.Affine.At(2, 1); coefficient != 0 {
+		p.End = "(" + p.End + ") - " + strconv.FormatFloat(-coefficient, 'f', -1, 64)
+	}
+	return p, nil
+}

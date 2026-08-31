@@ -68,6 +68,24 @@ func Run(src string) (string, error) {
 	return st.out.String(), nil
 }
 
+// RunSemantic executes the semantic tree directly. It is used for IR
+// round-trip equivalence checks and never reconstructs source text.
+func RunSemantic(program *SemanticProgram) (string, error) {
+	if program == nil || program.Body == nil {
+		return "", fmt.Errorf("missing semantic program body")
+	}
+	st := &runState{rng: rand.New(rand.NewSource(1)), maxSteps: 1_000_000}
+	env := newRunEnv(nil)
+	_, sig, err := st.block(env, program.Body)
+	if err != nil {
+		return st.out.String(), err
+	}
+	if sig == runBreak || sig == runNext {
+		return st.out.String(), fmt.Errorf("loop control used outside loop")
+	}
+	return st.out.String(), nil
+}
+
 func (st *runState) tick() error {
 	st.steps++
 	if st.steps > st.maxSteps {

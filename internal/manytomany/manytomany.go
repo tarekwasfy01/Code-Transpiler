@@ -6,7 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"r2many/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
 // Language is both a supported source and target language.
@@ -22,88 +23,106 @@ const (
 )
 
 type Statement struct {
-	Kind IRKind
-	Name string
-	Expr string
+	Kind       IRKind // retained for diagnostics; emission uses Semantic
+	Name       string
+	Expr       string
+	Semantic   matrixir.Vector
+	MatrixNode int
 }
 
 type Program struct {
-	Source     string
-	Statements []Statement
+	Semantic     *backend.SemanticProgram
+	Source       string
+	Statements   []Statement
+	Graph        *matrixir.Graph
+	Requirements matrixir.Vector
+	// CanonicalR is retained only as a compatibility diagnostic serialization.
+	// Emit, function-flow and route fanout use Semantic exclusively.
+	CanonicalR string
+	Actions    matrixir.Matrix
+	Grammar    matrixir.Vector
+}
+
+// Document returns the neutral interchange representation. No caller needs to
+// read CanonicalR in order to pass a parsed program to another target.
+func (p Program) Document() (backend.SemanticDocument, error) {
+	if p.Semantic == nil {
+		return backend.SemanticDocument{}, fmt.Errorf("program has no semantic representation")
+	}
+	return p.Semantic.Document()
+}
+
+// ParseDocument accepts only the versioned semantic interchange format. It is
+// intentionally separate from Parse(source, code): source frontends are free
+// to evolve, while transport between them is language-neutral.
+func ParseDocument(data []byte) (Program, error) {
+	semantic, err := backend.ParseSemanticJSON(data)
+	if err != nil {
+		return Program{}, err
+	}
+	view, err := semantic.RSource(false)
+	if err != nil {
+		return Program{}, err
+	}
+	graph, _, err := matrixir.BuildLexicalGraph("r", view)
+	if err != nil {
+		return Program{}, err
+	}
+	return Program{Source: "semantic", Semantic: semantic, Graph: graph, Requirements: graph.Requirements(), CanonicalR: view}, nil
 }
 
 // Parse lowers a conservative common subset of each supported source language
 // into R2Many CIR. It deliberately rejects constructs it cannot lower safely.
 func Parse(source, code string) (Program, error) {
 	source = normalize(source)
-	if source == "r" {
-		return Program{Source: source, Statements: []Statement{{Kind: IRExpr, Expr: code}}}, nil
-	}
 	if !supported(source) {
 		return Program{}, fmt.Errorf("unsupported source language %q", source)
 	}
-
-	var out []Statement
-	lines := strings.Split(code, "\n")
-	mainDepth := 0
-	for _, raw := range lines {
-		line := strings.TrimSpace(stripComment(source, raw))
-		if line == "" {
-			continue
+	if semantic, recognized, err := backend.DecodeGenerated(source, code); recognized {
+		if err != nil {
+			return Program{}, err
 		}
-
-		// Ignore language boilerplate that does not carry program semantics.
-		if isBoilerplate(source, line) {
-			continue
+		graph, _, err := matrixir.BuildLexicalGraph(source, code)
+		if err != nil {
+			return Program{}, err
 		}
-		if isMainWrapper(source, line) {
-			mainDepth++
-			continue
+		view, err := semantic.RSource(false)
+		if err != nil {
+			return Program{}, err
 		}
-		if line == "{" {
-			if mainDepth > 0 {
-				mainDepth++
-				continue
-			}
-			return Program{}, fmt.Errorf("%s source construct not yet lowerable to CIR: %s", source, line)
-		}
-		if line == "}" || line == "};" {
-			if mainDepth > 0 {
-				mainDepth--
-				continue
-			}
-			continue
-		}
-
-		line = strings.TrimSuffix(line, ";")
-
-		if x, ok := parsePrint(source, line); ok {
-			out = append(out, Statement{Kind: IRPrint, Expr: x})
-			continue
-		}
-		if strings.HasPrefix(line, "return ") {
-			e := strings.TrimSpace(strings.TrimPrefix(line, "return "))
-			// main's conventional success return is wrapper boilerplate, not CIR semantics.
-			if mainDepth > 0 && (e == "0" || e == "EXIT_SUCCESS") {
-				continue
-			}
-			out = append(out, Statement{Kind: IRReturn, Expr: e})
-			continue
-		}
-		if n, e, ok := parseAssign(source, line); ok {
-			out = append(out, Statement{Kind: IRAssign, Name: n, Expr: e})
-			continue
-		}
-		// Keep plain calls/expressions; reject structural syntax rather than inventing semantics.
-		if strings.ContainsAny(line, "{}") || strings.HasPrefix(line, "if ") || strings.HasPrefix(line, "for ") ||
-			strings.HasPrefix(line, "while ") || strings.HasPrefix(line, "func ") || strings.HasPrefix(line, "fn ") ||
-			strings.HasPrefix(line, "def ") || strings.HasPrefix(line, "class ") || strings.HasPrefix(line, "fun ") ||
-			strings.HasPrefix(line, "struct ") || strings.HasPrefix(line, "enum ") || strings.HasPrefix(line, "template") {
-			return Program{}, fmt.Errorf("%s source construct not yet lowerable to CIR: %s", source, line)
-		}
-		out = append(out, Statement{Kind: IRExpr, Expr: line})
+		return Program{Source: source, Semantic: semantic, Graph: graph, Requirements: graph.Requirements(), CanonicalR: view}, nil
 	}
-	return Program{Source: source, Statements: out}, nil
+	if source == "r" {
+		graph, _, err := matrixir.BuildLexicalGraph(source, code)
+		if err != nil {
+			return Program{}, err
+		}
+		semantic, err := backend.ParseSemantic(source, code)
+		if err != nil {
+			return Program{}, err
+		}
+		view, err := semantic.RSource(false)
+		if err != nil {
+			return Program{}, err
+		}
+		return Program{Source: source, Semantic: semantic, Graph: graph, Requirements: graph.Requirements(), CanonicalR: view}, nil
+	}
+	canonical, err := matrixir.Canonicalize(source, code)
+	if err != nil {
+		return Program{}, err
+	}
+	// The source adapter contributes structured action nodes. SemanticProgram is
+	// lowered from those actions; CanonicalProgram.R is not consumed by this
+	// normal path and never carries semantics across stages.
+	semantic, err := backend.LowerMatrixEvents(source, canonical.Events)
+	if err != nil {
+		return Program{}, err
+	}
+	view, err := semantic.RSource(false)
+	if err != nil {
+		return Program{}, err
+	}
+	return Program{Source: source, Semantic: semantic, Graph: canonical.Graph, Requirements: canonical.Graph.Requirements(), CanonicalR: view, Actions: canonical.Actions, Grammar: canonical.Grammar}, nil
 }
 
 func Emit(target string, p Program) (string, error) {
@@ -111,6 +130,25 @@ func Emit(target string, p Program) (string, error) {
 	if !supported(target) {
 		return "", fmt.Errorf("unsupported target %q", target)
 	}
+	if p.Semantic != nil {
+		return backend.EmitSemantic(target, p.Semantic)
+	}
+	if p.CanonicalR != "" {
+		if target == "r" {
+			return p.CanonicalR, nil
+		}
+		return backend.TranspileFrom(p.Source, target, p.CanonicalR)
+	}
+	if err := validateLoweringMatrix(p, target); err != nil {
+		return "", err
+	}
+	statements, err := orderedStatements(p)
+	if err != nil {
+		return "", err
+	}
+	// From here onward the control relation matrix is the source of statement
+	// order; the original slice is retained only as node payload storage.
+	p.Statements = statements
 	if p.Source == "r" {
 		return backend.Transpile(target, p.Statements[0].Expr)
 	}
@@ -167,7 +205,11 @@ func Transpile(source, target, code string) (string, error) {
 func emitR(p Program) string {
 	var b strings.Builder
 	for _, s := range p.Statements {
-		switch s.Kind {
+		kind, err := vectorKind(s)
+		if err != nil {
+			continue
+		}
+		switch kind {
 		case IRAssign:
 			fmt.Fprintf(&b, "%s <- %s\n", s.Name, toRExpr(p.Source, s.Expr))
 		case IRPrint:
@@ -187,7 +229,11 @@ func emitStmt(t string, s Statement) string {
 	if t == "python" || t == "swift" || t == "julia" || t == "nim" {
 		ind = ""
 	}
-	switch s.Kind {
+	kind, err := vectorKind(s)
+	if err != nil {
+		return ""
+	}
+	switch kind {
 	case IRAssign:
 		switch t {
 		case "go":
@@ -218,7 +264,10 @@ func emitStmt(t string, s Statement) string {
 		case "rust":
 			return ind + "println!(\"{:?}\", " + e + ");\n"
 		case "cpp":
-			return ind + "std::cout << " + e + " << std::endl;\n"
+			// Parenthesize the whole translated expression. C++ stream insertion
+			// binds tighter than relational operators, so an unwrapped `a < b`
+			// would otherwise be parsed as `(std::cout << a) < b`.
+			return ind + "std::cout << (" + e + ") << std::endl;\n"
 		case "c":
 			return ind + "printf(\"%g\\n\", (double)(" + e + "));\n"
 		case "python":
@@ -396,26 +445,10 @@ func stripComment(src, s string) string {
 	return s
 }
 func normalize(s string) string {
-	s = strings.ToLower(strings.TrimSpace(s))
-	switch s {
-	case "c++":
-		return "cpp"
-	case "c#":
-		return "csharp"
-	case "py":
-		return "python"
-	case "rs":
-		return "rust"
-	}
-	return s
+	return backend.NormalizeLanguage(s)
 }
 func supported(s string) bool {
-	for _, x := range Languages {
-		if x == s {
-			return true
-		}
-	}
-	return false
+	return backend.HasFrontend(s)
 }
 
 var _ = strconv.Itoa

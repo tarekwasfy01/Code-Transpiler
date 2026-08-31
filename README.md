@@ -1,8 +1,17 @@
 # Code Transpiler
 
-<a href="https://get.microsoft.com/installer/download/9n1kb1kxxtmn?referrer=appbadge" target="_self" >
-	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
-</a>
+Go module: `github.com/tarekwasfy01/Code-Transpiler`
+
+```go
+import transpiler "github.com/tarekwasfy01/Code-Transpiler"
+
+goSource, err := transpiler.Transpile("c", "go", cSource)
+semanticJSON, err := transpiler.SemanticJSON("python", pythonSource)
+rustSource, err := transpiler.TranspileSemanticJSON("rust", semanticJSON)
+```
+
+The public package exposes all 13 registered languages, all 156 directed
+cross-language routes, SemanticProgram JSON and backend capability contracts.
 
 Code Transpiler (UCT) is an experimental matrix-driven many-to-many source-code transpiler. It uses a shared CIR and target emitters so supported languages can translate through one architecture instead of maintaining a separate transpiler for every language pair.
 
@@ -39,13 +48,21 @@ This is important for environments, promises, active bindings, S3/S4 dispatch, s
 
 ## Build
 
-Run `build-uct-onefile.bat`.
+Run `powershell -ExecutionPolicy Bypass -File .\build-onefile.ps1`.
 
-Output: `dist\Code Transpiler.exe`
+Output: `dist\CodeTranspiler.exe`
 
 ## CLI
 
 `Code Transpiler.exe targets`
+
+`CodeTranspiler.exe routes`
+
+`CodeTranspiler.exe transpile -source c -target go input.c -o output.go`
+
+`CodeTranspiler.exe semantic-export -source python input.py -o program.semantic.json`
+
+`CodeTranspiler.exe semantic-transpile -target rust program.semantic.json -o output.rs`
 
 `Code Transpiler.exe transpile -target cpp input.R -o output.cpp`
 

@@ -6,9 +6,26 @@ import (
 	"strings"
 )
 
-func targetString(t, s string) string { return strconv.Quote(s) }
+func targetString(t, s string) string {
+	q := strconv.Quote(s)
+	switch t {
+	case "nim":
+		return "rStr(" + q + ")"
+	case "rust":
+		return "RValue::Str(" + q + ".to_string())"
+	case "cpp":
+		return "RValue(" + q + ")"
+	case "c":
+		return "r_str(" + q + ")"
+	case "zig":
+		return "RValue{ .str = " + q + " }"
+	}
+	return q
+}
 func targetNumber(t, s string) string {
 	switch t {
+	case "nim":
+		return "rNum(float64(" + s + "))"
 	case "go":
 		if !strings.ContainsAny(s, ".eE") {
 			return "float64(" + s + ")"
@@ -30,13 +47,22 @@ func targetNumber(t, s string) string {
 	case "java":
 		return "new R2.RValue((double)" + s + ")"
 	case "kotlin":
-		return "RValue.Num(" + s + ".0)"
+		if !strings.ContainsAny(s, ".eE") {
+			s += ".0"
+		}
+		return "RValue.Num(" + s + ")"
 	case "swift":
 		return "RValue.num(" + s + ")"
 	}
 	return s
 }
 func targetBool(t string, b bool) string {
+	if t == "nim" {
+		return fmt.Sprintf("rBool(%t)", b)
+	}
+	if t == "zig" {
+		return fmt.Sprintf("RValue{ .boolean = %t }", b)
+	}
 	if t == "python" {
 		if b {
 			return "True"
@@ -79,7 +105,7 @@ func targetNull(t string) string {
 	case "julia":
 		return "nothing"
 	case "nim":
-		return "nil"
+		return "rNull()"
 	case "go":
 		return "nil"
 	case "rust":
@@ -108,7 +134,7 @@ func targetNA(t string) string {
 	case "julia":
 		return "NaN"
 	case "nim":
-		return "NaN"
+		return "rNum(NaN)"
 	case "go":
 		return "math.NaN()"
 	case "rust":
@@ -137,7 +163,7 @@ func targetInf(t string) string {
 	case "julia":
 		return "Inf"
 	case "nim":
-		return "Inf"
+		return "rNum(Inf)"
 	case "go":
 		return "math.Inf(1)"
 	case "rust":
@@ -188,6 +214,9 @@ func emitDispatch(t, name string, args []string) string {
 	case "cpp":
 		return fmt.Sprintf("r_call(%q, %q, {%s})", kernel, name, a)
 	case "c":
+		if len(args) == 0 {
+			return fmt.Sprintf("r_call(%q, %q, NULL, 0)", kernel, name)
+		}
 		return fmt.Sprintf("r_call(%q, %q, (RValue[]){%s}, %d)", kernel, name, a, len(args))
 	case "python":
 		return fmt.Sprintf("r_call(%q, %q, [%s])", kernel, name, a)
@@ -249,7 +278,7 @@ func rIter(x any)[]any{if v,ok:=x.([]any);ok{return v};return []any{x}}
 func rBind(a []any,i int,d any)any{if i<len(a){return a[i]};return d}
 func rText(v any)string{if v==nil{return"NULL"};return fmt.Sprint(v)}
 func rMap(x any,f func(any)any)any{z:=rIter(x);o:=make([]any,len(z));for i,v:=range z{o[i]=f(v)};if _,ok:=x.([]any);ok{return o};return o[0]}
-func rBin(op string,a,b any)any{av,bv:=rIter(a),rIter(b);n:=len(av);if len(bv)>n{n=len(bv)};f:=func(x,y any)any{X,Y:=rNum(x),rNum(y);switch op{case"+":return X+Y;case"-":return X-Y;case"*":return X*Y;case"/":return X/Y;case"^","**":return math.Pow(X,Y);case"%%":return math.Mod(X,Y);case"%/%":return math.Floor(X/Y);case"==":return rText(x)==rText(y);case"!=":return rText(x)!=rText(y);case"<":return X<Y;case"<=":return X<=Y;case">":return X>Y;case">=":return X>=Y;case"&","&&":return rTruth(x)&&rTruth(y);case"|","||":return rTruth(x)||rTruth(y)};panic("op "+op)};if len(av)==1&&len(bv)==1{return f(av[0],bv[0])};o:=make([]any,n);for i:=0;i<n;i++{o[i]=f(av[i%len(av)],bv[i%len(bv)])};return o}
+func rBin(op string,a,b any)any{av,bv:=rIter(a),rIter(b);n:=len(av);if len(bv)>n{n=len(bv)};f:=func(x,y any)any{X,Y:=rNum(x),rNum(y);switch op{case"+":return X+Y;case"-":return X-Y;case"*":return X*Y;case"/":return X/Y;case"^","**":return math.Pow(X,Y);case"%%":return math.Mod(X,Y);case"%/%":return math.Floor(X/Y);case":":o:=[]any{};step:=1.0;if X>Y{step=-1};for q:=X;(step>0&&q<=Y)||(step<0&&q>=Y);q+=step{o=append(o,q)};return o;case"==":return rText(x)==rText(y);case"!=":return rText(x)!=rText(y);case"<":return X<Y;case"<=":return X<=Y;case">":return X>Y;case">=":return X>=Y;case"&","&&":return rTruth(x)&&rTruth(y);case"|","||":return rTruth(x)||rTruth(y)};panic("op "+op)};if len(av)==1&&len(bv)==1{return f(av[0],bv[0])};o:=make([]any,n);for i:=0;i<n;i++{o[i]=f(av[i%len(av)],bv[i%len(bv)])};return o}
 func rReduce(n string,x any)any{z:=rIter(x);if len(z)==0{if n=="sum"{return 0.0};if n=="prod"{return 1.0};return math.NaN()};s,p:=0.0,1.0;mn,mx:=rNum(z[0]),rNum(z[0]);for _,v:=range z{q:=rNum(v);s+=q;p*=q;if q<mn{mn=q};if q>mx{mx=q}};switch n{case"sum":return s;case"prod":return p;case"mean":return s/float64(len(z));case"min":return mn;case"max":return mx};return nil}
 func rCall(kernel,n string,a []any)any{
  if strings.HasPrefix(n,"__binary_"){return rBin(strings.TrimPrefix(n,"__binary_"),a[0],a[1])}
@@ -332,9 +361,10 @@ fn r_num(v:&RValue)->f64{match v{RValue::Num(x)=>*x,RValue::Bool(x)=>if *x{1.0}e
 fn r_truth(v:&RValue)->bool{match v{RValue::Bool(x)=>*x,RValue::Num(x)=>*x!=0.0&&!x.is_nan(),RValue::Null=>false,_=>true}}
 fn r_iter(v:RValue)->Vec<RValue>{match v{RValue::Vec(x)=>x,x=>vec![x]}}
 fn r_bind(a:&Vec<RValue>,i:usize,d:RValue)->RValue{a.get(i).cloned().unwrap_or(d)}
+fn r_print(v:&RValue){match v{RValue::Null=>print!("NULL"),RValue::Num(x)=>print!("{}",x),RValue::Bool(x)=>print!("{}",if *x{"TRUE"}else{"FALSE"}),RValue::Str(x)=>print!("{}",x),RValue::Vec(x)=>{print!("[");for(i,q)in x.iter().enumerate(){if i>0{print!(", ")};r_print(q)};print!("]")}}}
 fn r_call(_kernel:&str,n:&str,a:Vec<RValue>)->RValue{
- if let Some(op)=n.strip_prefix("__binary_"){let x=r_num(&a[0]);let y=r_num(&a[1]);return match op{"+"=>RValue::Num(x+y),"-"=>RValue::Num(x-y),"*"=>RValue::Num(x*y),"/"=>RValue::Num(x/y),"=="=>RValue::Bool(x==y),"<"=>RValue::Bool(x<y),">"=>RValue::Bool(x>y),_=>panic!("operator {}",op)}}
- match n{"c"|"list"=>RValue::Vec(a),"print"=>{let v=a.get(0).cloned().unwrap_or(RValue::Null);println!("{:?}",v);v},"length"=>RValue::Num(a.get(0).cloned().map(r_iter).unwrap_or_default().len() as f64),_=>if _kernel=="predicate"||_kernel=="numeric-predicate"||_kernel=="missingness"{RValue::Bool(false)}else if _kernel=="random"{RValue::Num(0.5)}else{a.get(0).cloned().unwrap_or(RValue::Null)}}
+ if let Some(op)=n.strip_prefix("__binary_"){let x=r_num(&a[0]);let y=r_num(&a[1]);return match op{"+"=>RValue::Num(x+y),"-"=>RValue::Num(x-y),"*"=>RValue::Num(x*y),"/"=>RValue::Num(x/y),"%%"=>RValue::Num(x%y),"%/%"=>RValue::Num((x/y).floor()),"^"|"**"=>RValue::Num(x.powf(y)),":"=>{let mut o=Vec::new();let mut q=x;let step=if x<=y{1.0}else{-1.0};while(if step>0.0{q<=y}else{q>=y}){o.push(RValue::Num(q));q+=step};RValue::Vec(o)},"=="=>RValue::Bool(x==y),"!="=>RValue::Bool(x!=y),"<"=>RValue::Bool(x<y),"<="=>RValue::Bool(x<=y),">"=>RValue::Bool(x>y),">="=>RValue::Bool(x>=y),_=>panic!("operator {}",op)}}
+ match n{"c"|"list"=>RValue::Vec(a),"print"=>{let v=a.get(0).cloned().unwrap_or(RValue::Null);r_print(&v);println!();v},"["|"[["=>{let z=r_iter(a[0].clone());let i=r_num(&a[1]) as usize;if i>=1&&i<=z.len(){z[i-1].clone()}else{RValue::Null}},"length"=>RValue::Num(a.get(0).cloned().map(r_iter).unwrap_or_default().len() as f64),_=>if _kernel=="predicate"||_kernel=="numeric-predicate"||_kernel=="missingness"{RValue::Bool(false)}else if _kernel=="random"{RValue::Num(0.5)}else{a.get(0).cloned().unwrap_or(RValue::Null)}}
 }`
 
 const cppPrelude = `#include <algorithm>
@@ -353,18 +383,18 @@ static std::vector<RValue> r_iter(const RValue&v){if(auto p=std::get_if<std::vec
 static RValue r_bind(const std::vector<RValue>&a,size_t i,RValue d){return i<a.size()?a[i]:d;}
 static void r_print(const RValue&x){if(auto p=std::get_if<double>(&x.v))std::cout<<*p;else if(auto p=std::get_if<bool>(&x.v))std::cout<<(*p?"TRUE":"FALSE");else if(auto p=std::get_if<std::string>(&x.v))std::cout<<*p;else if(auto p=std::get_if<std::vector<RValue>>(&x.v)){std::cout<<"[";for(size_t i=0;i<p->size();++i){if(i)std::cout<<", ";r_print((*p)[i]);}std::cout<<"]";}}
 static RValue r_reduce(const std::string&n,const RValue&v){auto z=r_iter(v);if(z.empty())return RValue(NAN);double s=0,p=1,mn=r_num(z[0]),mx=mn;for(auto&q:z){double x=r_num(q);s+=x;p*=x;mn=std::min(mn,x);mx=std::max(mx,x);}if(n=="sum")return RValue(s);if(n=="prod")return RValue(p);if(n=="mean")return RValue(s/z.size());if(n=="min")return RValue(mn);if(n=="max")return RValue(mx);return RValue(NAN);}
-static RValue r_call(const std::string&kernel,const std::string&n,std::initializer_list<RValue>il){(void)kernel;std::vector<RValue>a(il);if(n.rfind("__binary_",0)==0){auto op=n.substr(9);double x=r_num(a[0]),y=r_num(a[1]);if(op=="+")return RValue(x+y);if(op=="-")return RValue(x-y);if(op=="*")return RValue(x*y);if(op=="/")return RValue(x/y);if(op=="==")return RValue(x==y);if(op=="<")return RValue(x<y);if(op==">")return RValue(x>y);}if(n=="c"||n=="list")return RValue(a);if(n=="print"){RValue v=a.empty()?RValue::null():a[0];r_print(v);std::cout<<"\n";return v;}if(n=="length")return RValue((double)r_iter(a[0]).size());if(n=="sum"||n=="prod"||n=="mean"||n=="min"||n=="max")return r_reduce(n,a[0]);if(n=="sqrt")return RValue(std::sqrt(r_num(a[0])));if(n=="abs")return RValue(std::abs(r_num(a[0])));if(n=="sin")return RValue(std::sin(r_num(a[0])));if(n=="cos")return RValue(std::cos(r_num(a[0])));if(n=="log")return RValue(std::log(r_num(a[0])));if(n=="exp")return RValue(std::exp(r_num(a[0])));if(kernel=="combine"||kernel=="matrix")return RValue(a);if(kernel=="attribute"||kernel=="environment"||kernel=="io"||kernel=="system"||kernel=="serialization"||kernel=="language"||kernel=="runtime"||kernel=="numeric-complex"||kernel=="iteration")return a.empty()?RValue::null():a[0];if(kernel=="predicate"||kernel=="numeric-predicate"||kernel=="missingness")return RValue(false);if(kernel=="coercion-atomic"||kernel=="coercion-mode")return a.empty()?RValue::null():a[0];if(kernel=="logical-reduction")return RValue(!a.empty()&&r_truth(a[0]));if(kernel=="datetime")return RValue(0.0);if(kernel=="random")return RValue(0.5);if(kernel=="replacement")return a.empty()?RValue::null():a.back();if(kernel=="subset"&&a.size()>1){auto z=r_iter(a[0]);int i=(int)r_num(a[1]);return i>=1&&i<=(int)z.size()?z[i-1]:RValue::null();}return a.empty()?RValue::null():a[0];}`
+static RValue r_call(const std::string&kernel,const std::string&n,std::initializer_list<RValue>il){(void)kernel;std::vector<RValue>a(il);if(n.rfind("__binary_",0)==0){auto op=n.substr(9);double x=r_num(a[0]),y=r_num(a[1]);if(op=="+")return RValue(x+y);if(op=="-")return RValue(x-y);if(op=="*")return RValue(x*y);if(op=="/")return RValue(x/y);if(op=="%%")return RValue(std::fmod(x,y));if(op=="%/%")return RValue(std::floor(x/y));if(op=="^"||op=="**")return RValue(std::pow(x,y));if(op==":"){std::vector<RValue>o;double step=x<=y?1:-1;for(double q=x;step>0?q<=y:q>=y;q+=step)o.emplace_back(q);return RValue(o);}if(op=="==")return RValue(x==y);if(op=="!=")return RValue(x!=y);if(op=="<")return RValue(x<y);if(op=="<=")return RValue(x<=y);if(op==">")return RValue(x>y);if(op==">=")return RValue(x>=y);}if(n=="c"||n=="list")return RValue(a);if(n=="print"){RValue v=a.empty()?RValue::null():a[0];r_print(v);std::cout<<"\n";return v;}if(n=="length")return RValue((double)r_iter(a[0]).size());if(n=="sum"||n=="prod"||n=="mean"||n=="min"||n=="max")return r_reduce(n,a[0]);if(n=="sqrt")return RValue(std::sqrt(r_num(a[0])));if(n=="abs")return RValue(std::abs(r_num(a[0])));if(n=="sin")return RValue(std::sin(r_num(a[0])));if(n=="cos")return RValue(std::cos(r_num(a[0])));if(n=="log")return RValue(std::log(r_num(a[0])));if(n=="exp")return RValue(std::exp(r_num(a[0])));if(kernel=="combine"||kernel=="matrix")return RValue(a);if(kernel=="attribute"||kernel=="environment"||kernel=="io"||kernel=="system"||kernel=="serialization"||kernel=="language"||kernel=="runtime"||kernel=="numeric-complex"||kernel=="iteration")return a.empty()?RValue::null():a[0];if(kernel=="predicate"||kernel=="numeric-predicate"||kernel=="missingness")return RValue(false);if(kernel=="coercion-atomic"||kernel=="coercion-mode")return a.empty()?RValue::null():a[0];if(kernel=="logical-reduction")return RValue(!a.empty()&&r_truth(a[0]));if(kernel=="datetime")return RValue(0.0);if(kernel=="random")return RValue(0.5);if(kernel=="replacement")return a.empty()?RValue::null():a.back();if((n=="["||n=="[["||kernel=="subset")&&a.size()>1){auto z=r_iter(a[0]);int i=(int)r_num(a[1]);return i>=1&&i<=(int)z.size()?z[i-1]:RValue::null();}return a.empty()?RValue::null():a[0];}`
 
 const cPrelude = `#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef enum{R_NULL,R_NUM,R_BOOL,R_VEC}RType;
-typedef struct RValue RValue;struct RValue{RType t;double n;RValue*v;size_t len;};
-static RValue r_null(void){RValue x={R_NULL,0,NULL,0};return x;}static RValue r_num(double n){RValue x={R_NUM,n,NULL,0};return x;}static RValue r_bool(int b){RValue x={R_BOOL,b?1:0,NULL,0};return x;}
+typedef enum{R_NULL,R_NUM,R_BOOL,R_STR,R_VEC}RType;
+typedef struct RValue RValue;struct RValue{RType t;double n;const char*s;RValue*v;size_t len;};
+static RValue r_null(void){RValue x={R_NULL,0,NULL,NULL,0};return x;}static RValue r_num(double n){RValue x={R_NUM,n,NULL,NULL,0};return x;}static RValue r_bool(int b){RValue x={R_BOOL,b?1:0,NULL,NULL,0};return x;}static RValue r_str(const char*s){RValue x={R_STR,0,s,NULL,0};return x;}
 static int r_truth(RValue x){return x.t!=R_NULL&&x.n!=0;}
-static void r_print(RValue x){if(x.t==R_NUM)printf("%g",x.n);else if(x.t==R_BOOL)printf("%s",x.n?"TRUE":"FALSE");else if(x.t==R_NULL)printf("NULL");else if(x.t==R_VEC){printf("[");for(size_t i=0;i<x.len;i++){if(i)printf(", ");r_print(x.v[i]);}printf("]");}}
-static RValue r_call(const char*kernel,const char*n,RValue*a,size_t z){if(!strncmp(n,"__binary_",9)){const char*op=n+9;if(!strcmp(op,"+"))return r_num(a[0].n+a[1].n);if(!strcmp(op,"-"))return r_num(a[0].n-a[1].n);if(!strcmp(op,"*"))return r_num(a[0].n*a[1].n);if(!strcmp(op,"/"))return r_num(a[0].n/a[1].n);}if(!strcmp(n,"c")||!strcmp(n,"list")){RValue x={R_VEC,0,a,z};return x;}if(!strcmp(n,"print")){RValue x=z?a[0]:r_null();r_print(x);printf("\n");return x;}if(!strcmp(n,"length"))return r_num(z&&a[0].t==R_VEC?(double)a[0].len:1);if(!strcmp(n,"sum")||!strcmp(n,"prod")||!strcmp(n,"mean")||!strcmp(n,"min")||!strcmp(n,"max")){RValue x=a[0];if(x.t!=R_VEC)return x;double sum=0,prod=1,mn=x.len?x.v[0].n:NAN,mx=mn;for(size_t i=0;i<x.len;i++){double q=x.v[i].n;sum+=q;prod*=q;if(q<mn)mn=q;if(q>mx)mx=q;}if(!strcmp(n,"sum"))return r_num(sum);if(!strcmp(n,"prod"))return r_num(prod);if(!strcmp(n,"mean"))return r_num(sum/x.len);if(!strcmp(n,"min"))return r_num(mn);return r_num(mx);}if(!strcmp(n,"sqrt"))return r_num(sqrt(a[0].n));if(!strcmp(n,"abs"))return r_num(fabs(a[0].n));if(!strcmp(kernel,"predicate")||!strcmp(kernel,"numeric-predicate")||!strcmp(kernel,"missingness"))return r_bool(0);if(!strcmp(kernel,"random"))return r_num(0.5);if(!strcmp(kernel,"datetime"))return r_num(0);if(!strcmp(kernel,"replacement")&&z)return a[z-1];if(z)return a[0];return r_null();}`
+static void r_print(RValue x){if(x.t==R_NUM)printf("%g",x.n);else if(x.t==R_BOOL)printf("%s",x.n?"TRUE":"FALSE");else if(x.t==R_STR)printf("%s",x.s);else if(x.t==R_NULL)printf("NULL");else if(x.t==R_VEC){printf("[");for(size_t i=0;i<x.len;i++){if(i)printf(", ");r_print(x.v[i]);}printf("]");}}
+static RValue r_call(const char*kernel,const char*n,RValue*a,size_t z){if(!strncmp(n,"__binary_",9)){const char*op=n+9;double x=a[0].n,y=a[1].n;if(!strcmp(op,"+"))return r_num(x+y);if(!strcmp(op,"-"))return r_num(x-y);if(!strcmp(op,"*"))return r_num(x*y);if(!strcmp(op,"/"))return r_num(x/y);if(!strcmp(op,"%%"))return r_num(fmod(x,y));if(!strcmp(op,"%/%"))return r_num(floor(x/y));if(!strcmp(op,"^")||!strcmp(op,"**"))return r_num(pow(x,y));if(!strcmp(op,":")){int len=(int)fabs(y-x)+1;RValue*items=(RValue*)malloc(sizeof(RValue)*(size_t)len);double step=x<=y?1:-1;for(int i=0;i<len;i++)items[i]=r_num(x+i*step);RValue out={R_VEC,0,NULL,items,(size_t)len};return out;}if(!strcmp(op,"=="))return r_bool(x==y);if(!strcmp(op,"!="))return r_bool(x!=y);if(!strcmp(op,"<"))return r_bool(x<y);if(!strcmp(op,"<="))return r_bool(x<=y);if(!strcmp(op,">"))return r_bool(x>y);if(!strcmp(op,">="))return r_bool(x>=y);}if(!strcmp(n,"c")||!strcmp(n,"list")){RValue*items=z?(RValue*)malloc(sizeof(RValue)*z):NULL;if(z&&!items){fprintf(stderr,"allocation failed\n");exit(1);}if(z)memcpy(items,a,sizeof(RValue)*z);RValue x={R_VEC,0,NULL,items,z};return x;}if(!strcmp(n,"print")){RValue x=z?a[0]:r_null();r_print(x);printf("\n");return x;}if((!strcmp(n,"[")||!strcmp(n,"[[")||!strcmp(kernel,"subset"))&&z>1){int i=(int)a[1].n;return a[0].t==R_VEC&&i>=1&&(size_t)i<=a[0].len?a[0].v[i-1]:r_null();}if(!strcmp(n,"length"))return r_num(z&&a[0].t==R_VEC?(double)a[0].len:1);if(!strcmp(n,"sum")||!strcmp(n,"prod")||!strcmp(n,"mean")||!strcmp(n,"min")||!strcmp(n,"max")){RValue x=a[0];if(x.t!=R_VEC)return x;double sum=0,prod=1,mn=x.len?x.v[0].n:NAN,mx=mn;for(size_t i=0;i<x.len;i++){double q=x.v[i].n;sum+=q;prod*=q;if(q<mn)mn=q;if(q>mx)mx=q;}if(!strcmp(n,"sum"))return r_num(sum);if(!strcmp(n,"prod"))return r_num(prod);if(!strcmp(n,"mean"))return r_num(sum/x.len);if(!strcmp(n,"min"))return r_num(mn);return r_num(mx);}if(!strcmp(n,"sqrt"))return r_num(sqrt(a[0].n));if(!strcmp(n,"abs"))return r_num(fabs(a[0].n));if(!strcmp(kernel,"predicate")||!strcmp(kernel,"numeric-predicate")||!strcmp(kernel,"missingness"))return r_bool(0);if(!strcmp(kernel,"random"))return r_num(0.5);if(!strcmp(kernel,"datetime"))return r_num(0);if(!strcmp(kernel,"replacement")&&z)return a[z-1];if(z)return a[0];return r_null();}`
 
 const pythonPrelude = `import math, os, random, re, time
 def r_truth(v):
@@ -376,6 +406,9 @@ def r_truth(v):
     return bool(v)
 def r_iter(v):return v if isinstance(v,list) else [v]
 def r_bind(a,i,d=None):return a[i] if i<len(a) else d
+def r_format(v):
+    if isinstance(v,float) and math.isfinite(v) and v.is_integer() and abs(v)<9.0e15:return str(int(v))
+    return str(v)
 def r_num(v):
     if isinstance(v,bool):return 1.0 if v else 0.0
     try:return float(v)
@@ -385,6 +418,7 @@ def r_bin(op,a,b):
     av,bv=r_iter(a),r_iter(b);n=max(len(av),len(bv))
     def one(x,y):
         X,Y=r_num(x),r_num(y)
+        if op==":":return list(range(int(X),int(Y)+(1 if X<=Y else -1),1 if X<=Y else -1))
         return {"+":lambda:X+Y,"-":lambda:X-Y,"*":lambda:X*Y,"/":lambda:X/Y,"^":lambda:X**Y,"**":lambda:X**Y,"%%":lambda:X%Y,"%/%":lambda:math.floor(X/Y),"==":lambda:x==y,"!=":lambda:x!=y,"<":lambda:X<Y,"<=":lambda:X<=Y,">":lambda:X>Y,">=":lambda:X>=Y,"&":lambda:r_truth(x) and r_truth(y),"&&":lambda:r_truth(x) and r_truth(y),"|":lambda:r_truth(x) or r_truth(y),"||":lambda:r_truth(x) or r_truth(y)}[op]()
     out=[one(av[i%len(av)],bv[i%len(bv)]) for i in range(n)]
     return out[0] if len(av)==len(bv)==1 and not isinstance(a,list) and not isinstance(b,list) else out
@@ -405,7 +439,7 @@ def r_call(kernel,n,a):
         op=n[8:];return r_map(a[0],lambda x:-r_num(x) if op=="-" else (not r_truth(x) if op=="!" else x))
     if n in ("c","list","expression"):return a
     if n in ("print","show"):
-        v=a[0] if a else None;print(v);return v
+        v=a[0] if a else None;print(r_format(v));return v
     if n in ("identity","invisible","force"):return a[0] if a else None
     if n=="length":return len(r_iter(a[0]))
     if n in ("sum","prod","mean","min","max"):return r_reduce(n,a[0])
@@ -513,7 +547,30 @@ def r_kernel_fallback(kernel,n,a):
     return first
 `
 
-const zigPrelude = `const std=@import("std");const RValue=union(enum){null,num:f64,boolean:bool,str:[]const u8};fn rTruth(v:RValue)bool{return switch(v){.null=>false,.num=>|x|x!=0,.boolean=>|x|x,.str=>true};}fn rCall(kernel:[]const u8,n:[]const u8,a:[]const RValue)RValue{_ = kernel;_ = a;if(std.mem.eql(u8,kernel,"predicate") or std.mem.eql(u8,kernel,"numeric-predicate") or std.mem.eql(u8,kernel,"missingness")) return RValue{ .boolean=false };if(a.len>0)return a[0];return .null;}`
+const zigPrelude = `const std = @import("std");
+const RValue = union(enum) { null, num: f64, boolean: bool, str: []const u8, vec: []const RValue };
+fn rNum(v: RValue) f64 { return switch(v) { .num => |x| x, .boolean => |x| if(x) 1 else 0, else => std.math.nan(f64) }; }
+fn rTruth(v: RValue) bool { return switch(v) { .null => false, .num => |x| x != 0, .boolean => |x| x, .str => |x| x.len != 0, .vec => |x| x.len != 0 }; }
+fn rIter(v: RValue) []const RValue { return switch(v) { .vec => |x| x, else => blk: { const a = std.heap.page_allocator.alloc(RValue, 1) catch @panic("allocation failed"); a[0] = v; break :blk a; } }; }
+fn rPrint(v: RValue) void { switch(v) { .null => std.debug.print("null", .{}), .num => |x| std.debug.print("{d}", .{x}), .boolean => |x| std.debug.print("{}", .{x}), .str => |x| std.debug.print("{s}", .{x}), .vec => |a| { for(a, 0..) |x,i| { if(i != 0) std.debug.print(" ", .{}); rPrint(x); } } } }
+fn rCall(kernel: []const u8, n: []const u8, a: []const RValue) RValue {
+ _ = kernel;
+ if(std.mem.eql(u8,n,"print")) { const v = if(a.len != 0) a[0] else RValue.null; rPrint(v); std.debug.print("\n", .{}); return v; }
+ if(std.mem.eql(u8,n,"c") or std.mem.eql(u8,n,"list")) return .{ .vec = std.heap.page_allocator.dupe(RValue,a) catch @panic("allocation failed") };
+ if(std.mem.startsWith(u8,n,"__binary_") and a.len == 2) {
+  const op = n[9..]; const x = rNum(a[0]); const y = rNum(a[1]);
+  if(std.mem.eql(u8,op,"+")) return .{.num=x+y}; if(std.mem.eql(u8,op,"-")) return .{.num=x-y};
+  if(std.mem.eql(u8,op,"*")) return .{.num=x*y}; if(std.mem.eql(u8,op,"/")) return .{.num=x/y};
+  if(std.mem.eql(u8,op,"%/%")) return .{.num=@floor(x/y)};
+  if(std.mem.eql(u8,op,"<")) return .{.boolean=x<y}; if(std.mem.eql(u8,op,"<=")) return .{.boolean=x<=y};
+  if(std.mem.eql(u8,op,">")) return .{.boolean=x>y}; if(std.mem.eql(u8,op,">=")) return .{.boolean=x>=y};
+  if(std.mem.eql(u8,op,"==")) return .{.boolean=x==y}; if(std.mem.eql(u8,op,"!=")) return .{.boolean=x!=y};
+  if(std.mem.eql(u8,op,":")) { const count: usize = @intFromFloat(@abs(y-x)+1); const values = std.heap.page_allocator.alloc(RValue,count) catch @panic("allocation failed"); const step: f64 = if(x<=y) 1 else -1; for(values,0..) |*v,i| v.* = .{.num=x+@as(f64,@floatFromInt(i))*step}; return .{.vec=values}; }
+ }
+ if((std.mem.eql(u8,n,"[") or std.mem.eql(u8,n,"[[")) and a.len == 2) { const values = rIter(a[0]); const index = rNum(a[1]); if(index<1 or index>@as(f64,@floatFromInt(values.len))) return .null; return values[@as(usize,@intFromFloat(index))-1]; }
+ if(std.mem.eql(u8,n,"length") and a.len == 1) return .{.num=@floatFromInt(rIter(a[0]).len)};
+ @panic("unsupported runtime operation");
+}`
 
 const juliaPrelude = `r_truth(v)=Bool(v)
 r_iter(v)=v isa AbstractArray ? v : Any[v]
@@ -528,22 +585,19 @@ function r_call(kernel,n,a)
  return isempty(a) ? nothing : a[1]
 end`
 
-const nimPrelude = `import math,algorithm
-proc rTruth[T](v:T):bool=bool(v)
-proc rIter[T](v:T):seq[T]=@[v]
-proc rCall[T](kernel:string,n:string,a:seq[T]):T=(if a.len>0: a[0] else: default(T))`
-
 const csharpPrelude = `using System;using System.Collections;using System.Collections.Generic;class RValue{public static readonly object Null=null;}static class RR{public static bool Truth(object v)=>v!=null&&(!(v is bool)|| (bool)v);public static object Call(string kernel,string n,object[]a){if(n=="c"||n=="list")return a;if(n=="print"){var v=a.Length>0?a[0]:null;Console.WriteLine(v);return v;}if(kernel=="predicate"||kernel=="numeric-predicate"||kernel=="missingness")return false;if(kernel=="random")return 0.5;if(kernel=="replacement"&&a.Length>0)return a[a.Length-1];return a.Length>0?a[0]:null;}}static object RCall(string kernel,string n,object[]a)=>RR.Call(kernel,n,a);static bool RTruth(object v)=>RR.Truth(v);static IEnumerable<object> RIter(object v)=>v is object[]x?x:new[]{v};`
 
 const javaPrelude = `import java.util.*;
 class R2 {
- static class RValue{Double n;RValue(double x){n=x;}static final Object NULL=null;}
+ static class RValue{Double n;RValue(double x){n=x;}static final Object NULL=null;public String toString(){return Double.isFinite(n)&&n==Math.rint(n)&&Math.abs(n)<9.0e15?Long.toString(n.longValue()):Double.toString(n);}}
  static double num(Object v){if(v instanceof RValue)return ((RValue)v).n;if(v instanceof Number)return((Number)v).doubleValue();return Double.NaN;}
  static boolean rTruth(Object v){return v!=null&&(!(v instanceof Boolean)||((Boolean)v));}
  static Iterable<Object> rIter(Object v){return v instanceof Object[]?Arrays.asList((Object[])v):Arrays.asList(v);}
  static Object rCall(String kernel,String n,Object[]a){
+  if(n.startsWith("__binary_")){String op=n.substring(9);double x=num(a[0]),y=num(a[1]);if(op.equals(":")){int len=(int)Math.abs(y-x)+1;Object[]o=new Object[len];double step=x<=y?1:-1;for(int i=0;i<len;i++)o[i]=new RValue(x+i*step);return o;}switch(op){case"+":return new RValue(x+y);case"-":return new RValue(x-y);case"*":return new RValue(x*y);case"/":return new RValue(x/y);case"%%":return new RValue(x%y);case"%/%":return new RValue(Math.floor(x/y));case"^":case"**":return new RValue(Math.pow(x,y));case"==":return x==y;case"!=":return x!=y;case"<":return x<y;case"<=":return x<=y;case">":return x>y;case">=":return x>=y;}}
   if(n.equals("c")||n.equals("list"))return a;
-  if(n.equals("print")){Object v=a.length>0?a[0]:null;if(v instanceof Object[])System.out.println(Arrays.toString((Object[])v));else if(v instanceof RValue)System.out.println(((RValue)v).n);else System.out.println(v);return v;}
+  if(n.equals("print")){Object v=a.length>0?a[0]:null;if(v instanceof Object[])System.out.println(Arrays.toString((Object[])v));else System.out.println(v);return v;}
+  if((n.equals("[")||n.equals("[[")||kernel.equals("subset"))&&a.length>1){Object[]z=(Object[])a[0];int i=(int)num(a[1]);return i>=1&&i<=z.length?z[i-1]:null;}
   if(n.equals("length"))return new RValue(a[0] instanceof Object[]?((Object[])a[0]).length:1);
   if(n.equals("sum")||n.equals("prod")||n.equals("mean")||n.equals("min")||n.equals("max")){Object[]z=(Object[])a[0];double sum=0,prod=1,mn=num(z[0]),mx=mn;for(Object q:z){double x=num(q);sum+=x;prod*=x;mn=Math.min(mn,x);mx=Math.max(mx,x);}if(n.equals("sum"))return new RValue(sum);if(n.equals("prod"))return new RValue(prod);if(n.equals("mean"))return new RValue(sum/z.length);if(n.equals("min"))return new RValue(mn);return new RValue(mx);}
   if(n.equals("sqrt"))return new RValue(Math.sqrt(num(a[0])));if(n.equals("abs"))return new RValue(Math.abs(num(a[0])));

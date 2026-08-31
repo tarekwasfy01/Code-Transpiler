@@ -34,10 +34,11 @@ type token struct {
 func lex(src string) ([]token, error) {
 	r := []rune(src)
 	out := make([]token, 0, len(r)/2)
+	expressionDepth := 0
 	for i := 0; i < len(r); {
 		c := r[i]
 		if unicode.IsSpace(c) {
-			if c == '\n' {
+			if c == '\n' && expressionDepth == 0 {
 				out = append(out, token{tokSemicolon, ";", i})
 			}
 			i++
@@ -94,10 +95,14 @@ func lex(src string) ([]token, error) {
 		switch c {
 		case '(':
 			out = append(out, token{tokLParen, "(", i})
+			expressionDepth++
 			i++
 			continue
 		case ')':
 			out = append(out, token{tokRParen, ")", i})
+			if expressionDepth > 0 {
+				expressionDepth--
+			}
 			i++
 			continue
 		case '{':
@@ -110,10 +115,14 @@ func lex(src string) ([]token, error) {
 			continue
 		case '[':
 			out = append(out, token{tokLBracket, "[", i})
+			expressionDepth++
 			i++
 			continue
 		case ']':
 			out = append(out, token{tokRBracket, "]", i})
+			if expressionDepth > 0 {
+				expressionDepth--
+			}
 			i++
 			continue
 		case ',':
@@ -179,8 +188,9 @@ type Arg struct {
 	Missing bool
 }
 type CallExpr struct {
-	Fun  Expr
-	Args []Arg
+	Fun   Expr
+	Args  []Arg
+	Eager bool // explicit call boundary, including decoded R force wrappers
 }
 
 func (*CallExpr) exprNode() {}

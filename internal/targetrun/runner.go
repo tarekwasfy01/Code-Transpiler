@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"r2many/internal/backend"
-	"r2many/internal/runtimeassets"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/runtimeassets"
 )
 
 type Result struct {

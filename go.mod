@@ -1,4 +1,4 @@
-module r2many
+module github.com/tarekwasfy01/Code-Transpiler
 
 go 1.26
 

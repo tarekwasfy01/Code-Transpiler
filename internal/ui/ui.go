@@ -25,10 +25,10 @@ import (
 	"github.com/oligo/gvcode/textstyle/syntax"
 	gvwidget "github.com/oligo/gvcode/widget"
 
-	"r2many/internal/backend"
-	"r2many/internal/highlight"
-	"r2many/internal/manytomany"
-	"r2many/internal/platform"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/highlight"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
 )
 
 type conversionResult struct {
@@ -743,8 +743,8 @@ TARGET TOOLS USED BY run -target
   Kotlin: kotlinc + java
   Swift: swift / swiftc
 
-Runtime bundles are physically embedded in CodeTranspiler.exe with go:embed.
-run -target materializes the selected runtime into its temporary work directory.
+Runtime support source is compiled into CodeTranspiler.exe. Native compilers are external.
+run -target materializes runtime source in its temporary work directory. Language coverage is experimental.
 
 Open CMD starts in the CodeTranspiler.exe directory, executes CodeTranspiler.exe help
 automatically, and then stays open.`
