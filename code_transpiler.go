@@ -1,9 +1,7 @@
-// Package r2many exposes the stable many-to-many transpiler API.
+// Package codetranspiler exposes the stable many-to-many Code Transpiler API.
 //
-// The package translates the supported common semantic subset between every
-// registered language. SemanticProgram JSON is the versioned interchange
-// format for callers that need to store, inspect or route programs.
-package r2many
+// Import path: github.com/tarekwasfy01/Code-Transpiler
+package codetranspiler
 
 import (
 	"encoding/json"

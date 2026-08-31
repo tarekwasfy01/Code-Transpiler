@@ -1,4 +1,4 @@
-package r2many
+package codetranspiler
 
 import "testing"
 

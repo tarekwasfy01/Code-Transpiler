@@ -16,6 +16,8 @@ build-onefile.ps1
 cmd/r2many/main_test.go
 cmd/r2many/main.go
 cmd/r2many/r2many_windows.syso
+code_transpiler_test.go
+code_transpiler.go
 CROSSTL_DESIGN.md
 dist/CodeTranspiler.exe
 go.mod
@@ -86,8 +88,6 @@ internal/runtimeassets/runtimeassets.go
 internal/targetrun/runner.go
 internal/ui/ui.go
 LICENSE
-r2many_test.go
-r2many.go
 README.md
 SEMANTIC_PROGRAM.md
 THIRD_PARTY_NOTICES.md
