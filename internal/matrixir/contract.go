@@ -61,7 +61,10 @@ func GrammarProfileMatrix() Matrix {
 	set("rust", GrammarBrace, GrammarSemicolon, GrammarNewline, GrammarTypedDeclaration, GrammarMainWrapper, GrammarIntegerSlashTruncates)
 	set("cpp", GrammarBrace, GrammarSemicolon, GrammarNewline, GrammarTypedDeclaration, GrammarMainWrapper, GrammarIntegerSlashTruncates)
 	set("c", GrammarBrace, GrammarSemicolon, GrammarNewline, GrammarTypedDeclaration, GrammarMainWrapper, GrammarIntegerSlashTruncates)
-	set("python", GrammarIndent, GrammarNewline, GrammarExclusiveRangeEnd)
+	// Python semicolons are real top-level statement separators. They are
+	// syntax, not a C-family declaration convention, and therefore belong in
+	// the language grammar vector as well as indentation and newlines.
+	set("python", GrammarIndent, GrammarSemicolon, GrammarNewline, GrammarExclusiveRangeEnd)
 	set("zig", GrammarBrace, GrammarSemicolon, GrammarNewline, GrammarTypedDeclaration, GrammarMainWrapper, GrammarExclusiveRangeEnd)
 	set("julia", GrammarEnd, GrammarNewline, GrammarOneBasedIndex)
 	set("nim", GrammarIndent, GrammarNewline)

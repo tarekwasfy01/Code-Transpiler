@@ -1,0 +1,13 @@
+﻿component,allocation,dynamic_dispatch,filesystem,global_state,io,mutation,network,random,reflection,time
+ast,2,0,1,0,5,21,0,4,4,0
+binding,0,0,0,0,0,0,0,0,0,0
+codegen,7,0,0,1,0,6,0,0,0,0
+docs,74,24,4,18,115,80,58,46,20,3
+grammar,1,0,1,0,5,2,0,0,4,2
+ir,0,0,0,1,0,0,0,0,0,0
+lexer,0,0,0,0,6,2,0,0,0,0
+optimizer,0,0,0,0,3,1,0,0,0,1
+other,393,45,116,22,610,778,1930,308,102,246
+runtime,85,3,1,6,58,61,4,11,2,12
+tests,158,31,38,6,362,206,583,264,36,35
+types,0,0,0,0,0,0,4,1,0,0

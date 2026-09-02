@@ -19,6 +19,10 @@ func parameterDemand(fn *FunctionExpr) matrixir.Matrix {
 	var visit func(Expr)
 	visit = func(e Expr) {
 		switch x := e.(type) {
+		case *OperationExpr:
+			for _, operand := range x.Operands {
+				visit(operand)
+			}
 		case *IdentExpr:
 			identifiers = append(identifiers, x.Name)
 		case *UnaryExpr:
@@ -76,6 +80,9 @@ func parameterDemand(fn *FunctionExpr) matrixir.Matrix {
 
 func (g *targetGen) effectFree(e Expr, active map[*FunctionExpr]bool) bool {
 	switch x := e.(type) {
+	case *OperationExpr:
+		// Type checks can fail; conservatively preserve operation ordering.
+		return x.Operation.Name == "integer.literal"
 	case *LiteralExpr, *IdentExpr:
 		return true
 	case *UnaryExpr:
@@ -136,7 +143,11 @@ func (g *targetGen) sequenceExpression(parts []string) string {
 	case "c", "cpp":
 		return "(" + strings.Join(parts, ", ") + ")"
 	case "go":
-		return "func() any { " + strings.Join(prefix, "; ") + "; return " + last + " }()"
+		statements := make([]string, len(prefix))
+		for i, expression := range prefix {
+			statements[i] = exprStmt("go", expression)
+		}
+		return "func() any { " + strings.Join(statements, " ") + " return " + last + " }()"
 	case "rust":
 		return "{ " + strings.Join(prefix, "; ") + "; " + last + " }"
 	case "java":

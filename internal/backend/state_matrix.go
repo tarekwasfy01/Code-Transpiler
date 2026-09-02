@@ -33,6 +33,10 @@ func analyzeFlowState(f *functionFlow, fn *FunctionExpr) error {
 	var read func(int, Expr)
 	read = func(i int, e Expr) {
 		switch x := e.(type) {
+		case *OperationExpr:
+			for _, operand := range x.Operands {
+				read(i, operand)
+			}
 		case *IterationExpr:
 			read(i, x.Value)
 		case *IdentExpr:
@@ -375,9 +379,9 @@ func (g *targetGen) lowerStateFlow(f *functionFlow, scope map[string]string) (st
 			for i, n := range captures {
 				parameters[i] = n + ": RValue"
 			}
-			g.helpers = append(g.helpers, "proc "+helper+"("+strings.Join(parameters, ", ")+"): RValue =\n    "+strings.ReplaceAll(strings.TrimSuffix(code, "\n"), "\n", "\n    ")+"\n")
+			g.requireHelper("helper.state."+helper, "proc "+helper+"("+strings.Join(parameters, ", ")+"): RValue =\n    "+strings.ReplaceAll(strings.TrimSuffix(code, "\n"), "\n", "\n    ")+"\n")
 		} else if g.target == "python" {
-			g.helpers = append(g.helpers, "def "+helper+"("+strings.Join(captures, ", ")+"):\n    "+strings.ReplaceAll(strings.TrimSuffix(code, "\n"), "\n", "\n    ")+"\n")
+			g.requireHelper("helper.state."+helper, "def "+helper+"("+strings.Join(captures, ", ")+"):\n    "+strings.ReplaceAll(strings.TrimSuffix(code, "\n"), "\n", "\n    ")+"\n")
 		} else {
 			parameters := make([]string, len(captures))
 			for i, n := range captures {
@@ -387,7 +391,7 @@ func (g *targetGen) lowerStateFlow(f *functionFlow, scope map[string]string) (st
 			if signature == "" {
 				signature = "void"
 			}
-			g.helpers = append(g.helpers, "static RValue "+helper+"("+signature+") {\n"+code+"}\n")
+			g.requireHelper("helper.state."+helper, "static RValue "+helper+"("+signature+") {\n"+code+"}\n")
 		}
 		return helper + "(" + strings.Join(captures, ", ") + ")", nil
 	case "go":

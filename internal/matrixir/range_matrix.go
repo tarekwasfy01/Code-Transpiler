@@ -8,7 +8,12 @@ import (
 
 type rangeLowering struct {
 	Name, Begin, End, Condition, Advance string
-	Counting                             bool
+	Counting, Iterable                   bool
+	Sequence                             string
+	// BindingNames is an ordered, non-resting destructuring pattern. It is a
+	// frontend fact for the existing BindingPattern UAST structure, never a
+	// source-specific AST node.
+	BindingNames []string
 	// [begin,end,1] * Affine normalizes an exclusive upper endpoint.
 	Affine Matrix
 }
@@ -53,7 +58,15 @@ func planRange(source, text string, profile Vector) (rangeLowering, error) {
 	}
 	names := significant(Tokenize(source, p.Name))
 	if len(names) != 1 || names[0].Class != TokenIdentifier {
-		return p, fmt.Errorf("range binding is not a single identifier")
+		var pattern []string
+		if source == "python" {
+			pattern = simplePythonBindingPattern(p.Name)
+		}
+		if len(pattern) == 0 {
+			return p, fmt.Errorf("range binding is not a single identifier")
+		}
+		p.BindingNames = pattern
+		p.Name = "(" + strings.Join(pattern, ",") + ")"
 	}
 	exclusive := 0.0
 	if strings.HasPrefix(expression, "range(") && strings.HasSuffix(expression, ")") {
@@ -63,6 +76,28 @@ func planRange(source, text string, profile Vector) (rangeLowering, error) {
 			p.Begin, p.End = "0", parts[0]
 		case 2:
 			p.Begin, p.End = parts[0], parts[1]
+		case 3:
+			// A literal non-zero Python step has a complete common contract:
+			// evaluate start/end once, exclude end in the step direction, then
+			// iterate the existing `seq` runtime primitive.  Symbolic steps still
+			// need a separate zero/direction proof and stay explicit gaps.
+			step, err := strconv.Atoi(strings.TrimSpace(parts[2]))
+			if err != nil || step == 0 {
+				return p, fmt.Errorf("range step requires explicit signed-step semantics")
+			}
+			if step == 1 {
+				p.Begin, p.End = parts[0], parts[1]
+				break
+			}
+			begin := normalizeExpression(source, parts[0], profile)
+			end := normalizeExpression(source, parts[1], profile)
+			adjust := "- 1"
+			if step < 0 {
+				adjust = "+ 1"
+			}
+			p.Iterable = true
+			p.Sequence = fmt.Sprintf("seq(%s, (%s) %s, by = %d)", begin, end, adjust, step)
+			return p, nil
 		default:
 			return p, fmt.Errorf("range step requires explicit signed-step semantics")
 		}
@@ -80,6 +115,15 @@ func planRange(source, text string, profile Vector) (rangeLowering, error) {
 			}
 		}
 		if !found {
+			// Python's `for name in iterable` is already represented by the
+			// canonical ForEachStmt and its target emitters.  It is not a numeric
+			// range, so forcing it through endpoint arithmetic both loses semantics
+			// and rejects otherwise proven source programs.
+			if source == "python" && strings.TrimSpace(expression) != "" {
+				p.Iterable = true
+				p.Sequence = normalizeExpression(source, expression, profile)
+				return p, nil
+			}
 			return p, fmt.Errorf("iterable range %q requires an iterable representation", expression)
 		}
 	}
@@ -99,4 +143,34 @@ func planRange(source, text string, profile Vector) (rangeLowering, error) {
 		p.End = "(" + p.End + ") - " + strconv.FormatFloat(-coefficient, 'f', -1, 64)
 	}
 	return p, nil
+}
+
+// simplePythonBindingPattern accepts only an ordered tuple/list of distinct
+// identifier bindings. Starred, nested and attribute patterns carry additional
+// cardinality or assignment semantics and remain explicit gaps. The accepted
+// quotient is represented by the existing BindingPattern contract.
+func simplePythonBindingPattern(text string) []string {
+	t := strings.TrimSpace(text)
+	if len(t) < 3 {
+		return nil
+	}
+	if (strings.HasPrefix(t, "(") && strings.HasSuffix(t, ")")) || (strings.HasPrefix(t, "[") && strings.HasSuffix(t, "]")) {
+		t = strings.TrimSpace(t[1 : len(t)-1])
+	}
+	parts := splitTopLevel(t, ',')
+	if len(parts) < 2 {
+		return nil
+	}
+	seen := map[string]bool{}
+	out := make([]string, 0, len(parts))
+	for _, part := range parts {
+		name := strings.TrimSpace(part)
+		tokens := significant(Tokenize("python", name))
+		if len(tokens) != 1 || tokens[0].Class != TokenIdentifier || name == "_" || seen[name] {
+			return nil
+		}
+		seen[name] = true
+		out = append(out, name)
+	}
+	return out
 }

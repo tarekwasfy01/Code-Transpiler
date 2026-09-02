@@ -14,10 +14,16 @@ func SummarizeEffects(program *SemanticProgram) SemanticEffectSummary {
 		out.ConservativePure, out.Unknown = false, true
 		return out
 	}
-	for column, axis := range program.Evidence.EffectAxes {
+	evidence := program.Evidence
+	if program.UniversalAST != nil {
+		// This analysis reads the canonical matrix directly and therefore does
+		// not require the temporary statement/expression compatibility view.
+		evidence = program.UniversalAST.Evidence
+	}
+	for column, axis := range evidence.EffectAxes {
 		count := 0
-		for row := 0; row < program.Evidence.Effects.Rows; row++ {
-			if program.Evidence.Effects.At(row, column) != 0 {
+		for row := 0; row < evidence.Effects.Rows; row++ {
+			if evidence.Effects.At(row, column) != 0 {
 				count++
 			}
 		}

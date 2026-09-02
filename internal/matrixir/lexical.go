@@ -230,6 +230,24 @@ func Tokenize(source, code string) []Lexeme {
 			add(TokenComment, start, i)
 			continue
 		}
+		// C-family block comments are lexically inert. Handling them here keeps
+		// the same source-independent token contract for C, C++, Go, Rust,
+		// Java, C#, Swift, Zig and Kotlin; the parser must never interpret the
+		// opening slash as a division expression.
+		if c == '/' && i+1 < len(runes) && runes[i+1] == '*' && source != "python" && source != "r" && source != "julia" {
+			start := i
+			i += 2
+			for i+1 < len(runes) && !(runes[i] == '*' && runes[i+1] == '/') {
+				i++
+			}
+			if i+1 < len(runes) {
+				i += 2
+			} else {
+				i = len(runes)
+			}
+			add(TokenComment, start, i)
+			continue
+		}
 		if c == '/' && i+1 < len(runes) && runes[i+1] == '/' && source != "python" {
 			start := i
 			i += 2

@@ -1,10 +1,89 @@
 package backend
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"strconv"
 	"strings"
 )
+
+// MatrixFrontendLanguages exposes every language currently backed by the
+// matrix grammar extractor. Each uses the same typed-event contract.
+func MatrixFrontendLanguages() []string {
+	return append([]string(nil), matrixir.Languages[:]...)
+}
+
+// LowerMatrixLanguage is the shared frontend path for every currently
+// matrix-recognised source language. Parser-specific facts remain transient;
+// the returned SemanticProgram owns only the canonical UAST.
+func LowerMatrixLanguage(language, source string) (*SemanticProgram, error) {
+	canonical, err := matrixir.Canonicalize(language, source)
+	if err != nil {
+		return nil, err
+	}
+	builder := &FrontendFactsBuilder{}
+	if _, err = LowerMatrixEventsWithFactSink(language, canonical.Events, builder); err != nil {
+		return nil, err
+	}
+	offsets := make([]int, 0, len(canonical.Events))
+	for _, event := range canonical.Events {
+		offsets = append(offsets, event.Source)
+	}
+	offsetFacts, err := json.Marshal(offsets)
+	if err != nil {
+		return nil, err
+	}
+	facts := builder.Facts
+	facts.LanguageFacts = map[string]json.RawMessage{language + ".matrix_event_offsets": offsetFacts, language + ".typed_event_count": json.RawMessage(strconv.Itoa(len(canonical.SemanticEvents)))}
+	u, err := BuildCanonicalUniversalASTFromFrontendFacts(facts)
+	if err != nil {
+		return nil, err
+	}
+	// The frontend facts and its temporary compatibility projection are now
+	// discarded. SemanticProgram owns only the canonical UAST.
+	return &SemanticProgram{
+		Evaluation:       u.Evaluation,
+		ValueModel:       u.ValueModel,
+		IndexBase:        u.IndexBase,
+		Types:            u.Types,
+		Origin:           u.Origin,
+		Metadata:         u.Metadata,
+		Extensions:       u.Extensions,
+		Contracts:        u.Contracts,
+		Dialects:         u.Dialects,
+		SemanticFeatures: u.SemanticFeatures,
+		UniversalAST:     u,
+		Evidence:         u.Evidence,
+	}, nil
+}
+
+// LowerMatrixEventsWithFactSink is the productive MatrixIR parser boundary.
+// Canonical event text is parsed once into short-lived ParsedNode handles and
+// facts; no SemanticDocument or legacy AST is built on this route.
+func LowerMatrixEventsWithFactSink(language string, events []matrixir.CanonicalEvent, sink *FrontendFactsBuilder) (*SemanticProgram, error) {
+	parts := make([]string, 0, len(events))
+	for _, event := range events {
+		if strings.TrimSpace(event.Text) != "" {
+			parts = append(parts, event.Text)
+		}
+	}
+	facts, err := parseFrontendFacts(language, strings.Join(parts, "\n"), sink)
+	if err != nil {
+		return nil, err
+	}
+	u, err := BuildCanonicalUniversalASTFromFrontendFacts(facts)
+	if err != nil {
+		return nil, err
+	}
+	return &SemanticProgram{Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Metadata: u.Metadata, Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects, SemanticFeatures: u.SemanticFeatures, UniversalAST: u, Evidence: u.Evidence}, nil
+}
+
+// LowerPython keeps the concrete frontend entry point while delegating to the
+// language-neutral matrix extractor.
+func LowerPython(source string) (*SemanticProgram, error) {
+	return LowerMatrixLanguage("python", source)
+}
 
 // LowerMatrixActions is the common-subset frontend boundary. MatrixIR has
 // already recognized the source grammar and selected normalized actions; this

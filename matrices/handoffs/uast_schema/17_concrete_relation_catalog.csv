@@ -1,0 +1,56 @@
+relation,meaning,applies_to,layer
+abi.calls,foreign call -> ABI contract,FFI,core
+annotation.applies,annotation -> semantic target,annotations,core
+binding.declares,declaration -> binding,declarations,core
+binding.refers,SymbolRef -> Binding,references,core
+binding.shadows,Binding -> Binding,shadowing,core
+call.calls,Call -> Function/dispatch set,calls,core
+capture.captures,Closure -> Binding,closures,core
+compiletime.depends,compile-time computation -> dependency,compile-time,analysis
+concurrency.atomic_order,atomic -> ordering contract,atomics,core
+concurrency.communicates,send/receive -> channel,channels,core
+concurrency.spawns,spawn -> task/goroutine,concurrency,core
+concurrency.synchronizes,operation -> operation,happens-before,core
+contract.requires,semantic entity -> required contract,contracts,core
+control.false,condition -> false successor,branch,core
+control.loop_back,body -> loop header,loops,core
+control.next,statement -> possible successor,control flow,core
+control.true,condition -> true successor,branch,core
+conversion.converts,source value/type -> target value/type,conversions,core
+coroutine.suspends,suspension point -> continuation/state,coroutines,core
+data.def_use,definition -> use,values,core
+data.operand,operation -> operand,expressions,core
+data.result,operation -> result,expressions,core
+dialect.requires,dialect operation -> capability,dialects,core
+dispatch.resolves,call/member -> target set,interfaces/virtual calls,core
+effect.has,Node -> Effect,side effects,core
+evaluation.before,node -> node,evaluation order,core
+exception.unwinds_to,throw/failure -> handler/cleanup,exceptions,core
+initialization.before,initialization -> initialization,initialization order,core
+language.contract,node/operation -> language-defined/undefined contract,language semantics,core
+layout.field,record -> field offset/alignment,layout,core
+lifetime.outlives,region/lifetime -> region/lifetime,lifetimes,core
+linkage.links,declaration -> linkage identity,linkage,core
+lowering.requires,semantic feature -> backend capability,backends,analysis
+memory.aliases,value -> value,aliasing,core
+memory.borrows,reference -> owner/region,references,core
+memory.owns,owner -> allocation/value,ownership,core
+module.exports,module -> exported symbol,modules,core
+module.imports,module -> module/symbol,modules,core
+name.resolves,reference/name -> declaration/binding,name resolution,core
+operation.kind,operation node -> semantic operation kind,operations,core
+overload.candidate,call/operator -> candidate declaration,overload resolution,core
+pointer.provenance,pointer/reference -> provenance object/region,pointer semantics,core
+preprocessor.expands,macro/directive -> expansion,preprocessor,dialect
+runtime.requires,semantic entity -> runtime contract,runtime,analysis
+scope.parent,scope nesting,Scope,core
+storage.resides_in,value/object -> storage region,storage duration,core
+syntax.child,parent-child structural containment,all nodes,core
+template.instantiates,generic/template -> instantiation,generics,core
+type.constraint,TypeParameter -> Constraint,generics,core
+type.convert,source Type -> target Type,conversions,core
+type.has,Node -> Type,typed nodes,core
+type.origin,typed entity -> source/inference origin,type evidence,analysis
+type.parameter,Type -> TypeParameter,generics,core
+validation.proves,evidence -> validated contract,validation,analysis
+value.category,expression/value -> value category,value semantics,core

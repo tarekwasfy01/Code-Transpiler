@@ -240,7 +240,9 @@ func (g *targetGen) letExpression(bindings []valueBinding, result string) string
 			body.WriteString("RValue " + b.Name + " = " + b.Value + "; ")
 		}
 		body.WriteString("return " + result + "; }")
-		g.helpers = append(g.helpers, body.String())
+		// Binding/capture facts and the helper name were resolved before this
+		// renderer runs; the source is payload of a named requirement only.
+		g.requireHelper("helper.binding.capture."+name, body.String())
 		return name + "(" + strings.Join(captures, ", ") + ")"
 	case "go":
 		body.WriteString("func() any { ")
@@ -261,11 +263,40 @@ func (g *targetGen) letExpression(bindings []valueBinding, result string) string
 		}
 		body.WriteString("return " + result + "; }()")
 	case "java":
-		body.WriteString("((java.util.function.Supplier<Object>)(() -> { ")
+		// Java lambdas cannot capture a local that is reassigned later. The
+		// same capture vector used by the C adapter is therefore passed as
+		// explicit method arguments. This preserves the ordered binding
+		// expression without imposing Java's effectively-final restriction.
+		bound := map[string]bool{}
+		for _, b := range bindings {
+			bound[b.Name] = true
+		}
+		all := result
+		for _, b := range bindings {
+			all += " " + b.Value
+		}
+		captureSet := map[string]bool{}
+		for _, t := range matrixir.Tokenize("java", all) {
+			// Generated temporaries belong to nested binding expressions, not the
+			// surrounding Java scope; only source bindings can be captured here.
+			if t.Class == matrixir.TokenIdentifier && g.cValues[t.Text] && !bound[t.Text] && g.generatedAt[t.Text] == 0 {
+				captureSet[t.Text] = true
+			}
+		}
+		captures := make([]string, 0, len(captureSet))
+		for n := range captureSet {
+			captures = append(captures, n)
+		}
+		sort.Strings(captures)
+		parameters := make([]string, len(captures))
+		for i, n := range captures {
+			parameters[i] = "Object " + n
+		}
+		body.WriteString("(new Object(){ Object eval(" + strings.Join(parameters, ", ") + "){ ")
 		for _, b := range bindings {
 			body.WriteString("Object " + b.Name + " = " + b.Value + "; ")
 		}
-		body.WriteString("return " + result + "; })).get()")
+		body.WriteString("return " + result + "; } }).eval(" + strings.Join(captures, ", ") + ")")
 	case "csharp":
 		body.WriteString("((Func<object>)(() => { ")
 		for _, b := range bindings {
@@ -313,6 +344,10 @@ func reserveSymbols(ast *BlockStmt) map[string]bool {
 	var stmt func(Stmt)
 	expr = func(e Expr) {
 		switch x := e.(type) {
+		case *OperationExpr:
+			for _, operand := range x.Operands {
+				expr(operand)
+			}
 		case *IdentExpr:
 			names[safeName(x.Name)] = true
 		case *UnaryExpr:

@@ -1,0 +1,13 @@
+﻿gap_id,area,current_state,universal_ast_change,priority
+GLOBAL001,value_model,SemanticDocument requires tagged_dynamic_binary64,Replace global fixed model with a versioned semantic value contract; numeric representation belongs to each SemanticType/operation.,P0
+GLOBAL002,index_base,SemanticDocument requires IndexBase == 1,Remove universal global index base. Store indexing/slicing semantics on IndexExpr/SliceExpr or source dialect contract.,P0
+GLOBAL003,evaluation,Only lazy_demand/eager_left_to_right accepted globally,Keep a program default only; allow local evaluation order/call semantics and unspecified order where language requires it.,P0
+GLOBAL004,declarations,SemanticStatement cannot explicitly represent module/import/type/var/const declarations,Add declaration node families with stable Binding IDs and type references.,P0
+GLOBAL005,aggregate expressions,No explicit tuple/array/map/slice/member-access semantic shapes,Add structural aggregate/member/slice nodes; do not encode as generic calls.,P0
+GLOBAL006,control,No explicit switch/select/defer/panic/type-switch/goto representation,Add high-level control nodes and lower later; preserve language-specific contracts.,P0
+GLOBAL007,concurrency,No explicit goroutine/channel/select/atomic/memory-model semantic schema,Add core concurrency graph and operations; Go frontend populates exact contracts.,P0
+GLOBAL008,abi_layout,Types have fields but no explicit ABI/layout/calling-convention contracts,Add ABIContract/LayoutContract and relations; required for C/Go/Rust interoperability.,P1
+GLOBAL009,capabilities,Backend registries declare only core,Populate capabilities from language matrices; use native/lowering/emulated/unsupported per semantic feature.,P0
+GLOBAL010,frontend_transport,Source-specific adapters must emit typed semantic nodes directly,Do not normalize into another source language/text form; typed events/AST -> SemanticProgram.,P0
+GLOBAL011,graph_relations,Evidence has several matrices but universal relation vocabulary is not schema-stable,Version relation names and serialize relation registry/axes so new language matrices compose safely.,P1
+GLOBAL012,dialects,Dialects exist but need typed payload schemas/capability contracts,"Use dialects only for truly non-universal semantics (unsafe/cgo/compiler directives), never as a dumping ground.",P1

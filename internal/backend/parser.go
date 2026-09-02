@@ -188,9 +188,10 @@ type Arg struct {
 	Missing bool
 }
 type CallExpr struct {
-	Fun   Expr
-	Args  []Arg
-	Eager bool // explicit call boundary, including decoded R force wrappers
+	Fun        Expr
+	Args       []Arg
+	Eager      bool // explicit call boundary, including decoded R force wrappers
+	Resolution *SemanticCallResolution
 }
 
 func (*CallExpr) exprNode() {}
@@ -204,15 +205,19 @@ type IndexExpr struct {
 func (*IndexExpr) exprNode() {}
 
 type FunctionExpr struct {
-	Params []Param
-	Body   *BlockStmt
+	Binding           string
+	DefaultEvaluation string
+	Params            []Param
+	Body              *BlockStmt
 }
 
 func (*FunctionExpr) exprNode() {}
 
 type Param struct {
+	Mode    string
 	Name    string
 	Default Expr
+	Type    *SemanticType // exact executable parameter type; nil is legacy dynamic
 }
 
 type Stmt interface{ stmtNode() }
@@ -271,16 +276,24 @@ type NextStmt struct{}
 func (*NextStmt) stmtNode() {}
 
 type parser struct {
-	t []token
-	i int
+	t    []token
+	i    int
+	sink FrontendFactSink
 }
 
 func parse(src string) (*BlockStmt, error) {
+	return parseWithFactSink(src, nil)
+}
+
+// parseWithFactSink keeps the tested parser decision core in one place while
+// allowing its callers to receive proved frontend facts. Legacy AST output is
+// retained only for compatibility callers during the staged migration.
+func parseWithFactSink(src string, sink FrontendFactSink) (*BlockStmt, error) {
 	ts, e := lex(src)
 	if e != nil {
 		return nil, e
 	}
-	p := &parser{t: ts}
+	p := &parser{t: ts, sink: sink}
 	return p.program()
 }
 func (p *parser) cur() token { return p.t[p.i] }

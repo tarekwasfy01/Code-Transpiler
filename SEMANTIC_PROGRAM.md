@@ -1,5 +1,19 @@
 # SemanticProgram v1
 
+## Canonical invariant
+
+`SemanticProgram` and the Universal AST are one canonical IR. Once a frontend
+has performed the one-time legacy projection, `UniversalASTDocument` is the
+only semantic truth owned by a `SemanticProgram`. `Body`, `SemanticDocument`
+and the old statement/expression values are detached views regenerated from
+that UAST. Mutating such a view cannot overwrite the UAST.
+
+A legacy `SemanticDocument` without UAST may still be imported once. A valid
+but richer UAST can be serialized and validated directly; execution is refused
+unless the active backend proves it preserves the complete payload. The
+deterministic reverse-and-reproject check rejects extra facets, fields or
+relations that the temporary legacy backend adapter would otherwise lose.
+
 ## As authoring format
 
 `SemanticProgram` is a complete JSON transport for the executable core, not a
@@ -48,10 +62,23 @@ access, network, allocation, exceptions, thread spawning, synchronization,
 FFI, time, randomness, unknown calls and control flow. `SummarizeEffects`
 derives a conservative purity result from that matrix.
 
-`RunSemantic` executes the deserialized tree directly. The round-trip test now
-compares deterministic observations (stdout, error and effect summary) for the
-original SemanticProgram and its JSON-decoded copy, without regenerating R or
-another source language.
+`RunSemantic` validates and executes the canonical UAST graph directly. It
+uses UAST fields plus `syntax.child`, branch, call and operand relations; it no
+longer reconstructs a `SemanticDocument` or reads a legacy `BlockStmt` as
+semantic input. After successful execution it rematerializes the public
+`Body` compatibility view so external legacy mutations cannot become a second
+semantic truth. Round-trip tests compare deterministic observations without
+regenerating R or another source language.
+
+R output, signature checks, call resolution and typed-operation validation are
+also direct UAST consumers. Generic target emission and function-flow analysis
+currently use small, transient syntax-subtree views derived from UAST nodes;
+they do not create a full legacy document or write data back into the UAST.
+
+The facet execution gate multiplies demanded structure, facet and relation
+vectors by the target capability planes. Each matrix cell is `direct`,
+`lowerable`, `runtime-required`, `unsupported` or `unknown`; unsupported and
+unknown semantic demand is rejected explicitly.
 
 ## Registries and GPU dialect boundary
 
@@ -122,8 +149,10 @@ matrices. JSON import recomputes evidence from the executable body and rejects a
 document whose graph, axes or contract has changed. COO matrix input rejects
 duplicate and out-of-range entries.
 
-`SourceSpan` fields, per-node static types and declaration-timing proof are not
-yet present. The v1 binding matrix is lexical-candidate evidence; it does not
+Source spans and per-node type fields are present. Structural type, occurrence,
+incidence and nominal-reference matrices are derived and validated on import.
+These representations do not establish complete static type checking or
+declaration-timing proof. The v1 binding matrix is lexical-candidate evidence; it does not
 claim exact dynamic-environment or shadowing semantics.
 
 ## Next expansion
@@ -132,3 +161,29 @@ The next compatible schema version should add first-class static integer widths,
 aggregate/layout types, pointer provenance, ownership/lifetime and ABI calls.
 Those additions need independent source and target evidence; they must not alter
 the meaning of v1 documents.
+# Embedded eight-language semantic feature space
+
+SemanticProgram carries a calculated feature model for Go, Python, R, Rust,
+C/C++, Kotlin, Java and C#. It contains 98 shared features, 434 namespaced
+language-specific features, 82 universal node kinds and 23 relation kinds. The
+active language is a one-hot vector. Generic, dialect, node and relation demand
+vectors are matrix products and are recomputed during JSON validation.
+
+## Universal AST schema matrix v1
+
+`SemanticProgram.UniversalAST` is the canonical matrix-derived schema. Each
+node has exactly one of 109 structural kinds, a sparse subset of 334 exact
+semantic quotient facets and a field mask derived from the structural/facet
+applicability matrices. Relations use the closed catalog of 55 concrete kinds.
+The embedded basis also preserves 44 semantic axes, 23 relation axes, 57 fields,
+17 layers and the SemanticProgram coverage lower/upper interval matrices.
+
+JSON import checks the 553-to-334 one-hot quotient, exact signature classes,
+dimensions, coverage intervals, language-facet vector, node field masks,
+relation applicability and references. Custom UAST payloads remain representable
+but executable backends reject them until a lowering proves preservation.
+
+The generated coverage report is written to
+`outputs/uast-coverage/coverage.json` and `coverage.csv`. It distinguishes
+schema representability, compatibility projection and direct execution; none
+of these counts is presented as full language-semantic parity.

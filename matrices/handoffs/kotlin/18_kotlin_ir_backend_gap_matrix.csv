@@ -1,0 +1,21 @@
+﻿feature,family,importance,coverage,base_gap,evidence_files,dominant_source_groups,detection_terms
+kotlin.js_backend_lowering,ir_backends,0.874000,0.018800,0.857569,3470,ir_codegen_backends,js.translator;js backend;js lowering
+kotlin.suspend_resume,coroutines_concurrency,0.860142,0.023300,0.840100,865,behavior_tests;ir_codegen_backends;interop_abi;plugins_extensions,suspend;resumeWith;suspendcoroutine
+kotlin.coroutine_suspension_points,coroutines_concurrency,0.840573,0.023300,0.820988,1122,behavior_tests;interop_abi;stdlib_contract;ir_codegen_backends,suspension point;suspendcall;coroutine
+kotlin.ir_semantics,ir_backends,0.824363,0.018800,0.808865,1121,behavior_tests;plugins_extensions;interop_abi;compiler_frontend_core,ir element;irfunction;irexpression;.ir.txt
+kotlin.fir_data_flow,ir_backends,0.823368,0.018800,0.807888,1079,behavior_tests;ir_codegen_backends;plugins_extensions;interop_abi,fir data flow;dataflowanalyzer;smartcast
+kotlin.klib_metadata,multiplatform_interop,0.799002,0.046200,0.762088,2909,behavior_tests;tools_build;compiler_frontend_core;interop_abi,klib;metadata serialization;kotlin metadata
+kotlin.native_c_objc_interop,multiplatform_interop,0.768383,0.040200,0.737494,1643,behavior_tests;interop_abi;tools_build;native_runtime,c interop;objc interop;objective-c;interop
+kotlin.native_backend_lowering,ir_backends,0.746493,0.018800,0.732459,651,compiler_frontend_core;behavior_tests;ir_codegen_backends;other,backend.native;native backend;konan
+kotlin.wasm_backend_lowering,ir_backends,0.724708,0.018800,0.711083,1067,stdlib_contract;behavior_tests;ir_codegen_backends;tools_build,wasm backend;wasm lowering;wasm
+kotlin.expect_actual,multiplatform_interop,0.710752,0.040200,0.682179,205,behavior_tests;core_types_descriptors;ir_codegen_backends;tools_build,expect ;actual ;expectactual;actualization
+kotlin.continuation_state_machine,coroutines_concurrency,0.640523,0.023300,0.625599,29,behavior_tests;stdlib_contract;native_runtime;compiler_frontend_core,continuation;coroutine state machine;continuationimpl
+kotlin.jvm_boxing_unboxing,memory_abi,0.614029,0.045500,0.586091,177,behavior_tests;ir_codegen_backends;compiler_frontend_core;native_runtime,boxing;unboxing;boximpl;unboximpl
+kotlin.suspend_lambda,coroutines_concurrency,0.560026,0.023300,0.546977,35,behavior_tests;ir_codegen_backends;spec_docs;plugins_extensions,suspend lambda;suspendlambda
+kotlin.fir_to_ir,ir_backends,0.554398,0.018800,0.543976,16,behavior_tests;spec_docs;plugins_extensions,fir2ir;fir to ir;fir2irclassifierstorage
+kotlin.jvm_signature_mangling,memory_abi,0.525967,0.045500,0.502035,60,behavior_tests;other;ir_codegen_backends;interop_abi,signature mangling;mangle;jvm signature
+kotlin.fir_semantic_resolution,ir_backends,0.492281,0.018800,0.483026,4,behavior_tests;plugins_extensions,firresolve;fir resolve;fir session;fir symbol
+kotlin.jvm_backend_lowering,ir_backends,0.366514,0.018800,0.359624,1,other,jvm lowering;backend.jvm;jvm backend
+kotlin.java_nullability_enhancement,multiplatform_interop,0.369000,0.040200,0.354166,0,,nullability enhancement;java type enhancement;enhanced nullability
+kotlin.compiler_plugin_extension_points,ir_backends,0.348832,0.018800,0.342274,4,plugins_extensions,compiler plugin;irgenerationextension;fir extension
+kotlin.js_dynamic_external,multiplatform_interop,0.279000,0.040200,0.267784,0,,dynamic type;external declaration;js external

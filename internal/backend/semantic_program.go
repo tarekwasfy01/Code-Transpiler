@@ -8,21 +8,25 @@ import (
 )
 
 // SemanticProgram owns the executable tree. Canonical R is now a diagnostic
-// serialization, not the only carrier of evaluation semantics. Numeric values
-// here have the existing runtime's binary64 contract, NOT source integer-width
-// equivalence. Unknown types/effects are represented explicitly in the matrices.
+// serialization, not the carrier of evaluation semantics. Legacy values retain
+// the binary64 contract; typed operations use an explicit exact-scalar contract
+// and integer-width domains. Unknown types/effects remain explicit in matrices.
 type SemanticProgram struct {
-	Body       *BlockStmt           `json:"-"`
-	Evaluation string               `json:"evaluation"`
-	ValueModel string               `json:"value_model"`
-	IndexBase  int                  `json:"index_base"`
-	Types      SemanticTypeContract `json:"type_contract"`
-	Origin     SemanticOrigin       `json:"origin"`
-	Metadata   map[string]string    `json:"metadata,omitempty"`
-	Extensions map[string]any       `json:"extensions,omitempty"`
-	Contracts  SemanticContracts    `json:"contracts,omitempty"`
-	Dialects   []SemanticDialect    `json:"dialects,omitempty"`
-	Evidence   SemanticEvidence     `json:"evidence"`
+	nodeSources      map[int]SemanticSourceSpan
+	sourceTree       []byte
+	Body             *BlockStmt            `json:"-"`
+	Evaluation       string                `json:"evaluation"`
+	ValueModel       string                `json:"value_model"`
+	IndexBase        int                   `json:"index_base"`
+	Types            SemanticTypeContract  `json:"type_contract"`
+	Origin           SemanticOrigin        `json:"origin"`
+	Metadata         map[string]string     `json:"metadata,omitempty"`
+	Extensions       map[string]any        `json:"extensions,omitempty"`
+	Contracts        SemanticContracts     `json:"contracts,omitempty"`
+	Dialects         []SemanticDialect     `json:"dialects,omitempty"`
+	SemanticFeatures *SemanticFeatureModel `json:"semantic_features,omitempty"`
+	UniversalAST     *UniversalASTDocument `json:"universal_ast,omitempty"`
+	Evidence         SemanticEvidence      `json:"evidence"`
 }
 
 // SemanticContracts state assertions made by a producer. They are data, not
@@ -128,41 +132,110 @@ func ParseSemantic(source, code string) (*SemanticProgram, error) {
 	}
 	p := NewSemanticProgram(body, evaluation)
 	p.Origin.SourceLanguage = source
+	if semanticProfileLanguage(source) != "" {
+		if err := p.AttachSemanticFeatureProfile(source); err != nil {
+			return nil, err
+		}
+	}
+	// ParseSemantic is a legacy ingress API. Project once at ingress so every
+	// runtime and target backend receives the canonical UAST only.
+	if _, err := p.Document(); err != nil {
+		return nil, err
+	}
 	return p, nil
 }
 func NewSemanticProgram(body *BlockStmt, evaluation string) *SemanticProgram {
 	p := &SemanticProgram{Body: body, Evaluation: evaluation, ValueModel: "tagged_dynamic_binary64", IndexBase: 1, Types: defaultSemanticTypeContract(), Origin: SemanticOrigin{SourceLanguage: "semantic", EntryPoint: "main"}}
 	p.Evidence = p.analyze()
+	for _, node := range p.Evidence.Nodes {
+		if node.Kind == "typed_operation" {
+			p.ValueModel = "tagged_exact_scalars_v1"
+			p.Types.Numeric = "binary64_and_fixed_width_integer"
+			p.Types.IntegerWidth = "per_operation"
+			break
+		}
+	}
 	return p
 }
 func EmitSemantic(target string, p *SemanticProgram) (string, error) {
-	if p == nil || p.Body == nil {
-		return "", fmt.Errorf("missing semantic tree")
+	if err := ValidateSemanticProgram(p); err != nil {
+		return "", err
 	}
-	if p.Evaluation != "lazy_demand" && p.Evaluation != "eager_left_to_right" {
-		return "", fmt.Errorf("unknown evaluation contract %q", p.Evaluation)
+	if err := validateExecutableDialects(p); err != nil {
+		return "", err
 	}
-	if p.ValueModel != "tagged_dynamic_binary64" || p.IndexBase != 1 || !p.Types.valid() {
+	u, err := canonicalUniversalAST(p)
+	if err != nil {
+		return "", err
+	}
+	graph, err := newUASTExecutionGraph(u)
+	if err != nil {
+		return "", err
+	}
+	if err := validateUASTTargetCapabilities(u, target); err != nil {
+		return "", err
+	}
+	if err := validateUASTTargetPreservation(u, target); err != nil {
+		return "", err
+	}
+	if exact, err := validateDirectSignatureContracts(graph); err != nil {
+		return "", err
+	} else if exact {
+		return "", fmt.Errorf("target %q does not implement %s", target, ExactSignatureCapability)
+	}
+	if resolved, err := validateDirectCallResolutions(graph); err != nil {
+		return "", err
+	} else if resolved {
+		return "", fmt.Errorf("target %q does not implement %s", target, ExactCallResolutionCapability)
+	}
+	operations, err := directTypedRequirements(graph)
+	if err != nil {
+		return "", err
+	}
+	if len(operations) > 0 {
+		if err := TypedImplementationMatrix().Check(operations, "target."+NormalizeLanguage(target)); err != nil {
+			return "", err
+		}
+	}
+	if u.Evaluation != "lazy_demand" && u.Evaluation != "eager_left_to_right" {
+		return "", fmt.Errorf("unknown evaluation contract %q", u.Evaluation)
+	}
+	if !validValueContract(u.ValueModel, u.Types) || u.IndexBase != 1 {
 		return "", fmt.Errorf("unmodeled value or indexing contract")
 	}
-	for _, dialect := range p.Dialects {
+	for _, dialect := range u.Dialects {
 		for _, capability := range dialect.Capabilities {
 			if !SupportsCapability(BackendCapabilities(target), capability) {
 				return "", fmt.Errorf("target %q does not support dialect %q capability %q", target, dialect.Name, capability)
 			}
 		}
 	}
+	if len(u.Contracts.Requires) > 0 {
+		capabilities := SemanticCapabilityMatrix(u.Contracts.Requires)
+		rejected, err := capabilities.RejectedTargets(u.Contracts.Requires)
+		if err != nil {
+			return "", err
+		}
+		found := false
+		for col, name := range capabilities.Targets {
+			if name == NormalizeLanguage(target) {
+				found = true
+				if rejected.At(0, col) > 0 {
+					return "", fmt.Errorf("target %q has %.0f unsupported semantic requirements: %v", target, rejected.At(0, col), u.Contracts.Requires)
+				}
+			}
+		}
+		if !found {
+			return "", fmt.Errorf("unknown target %q", target)
+		}
+	}
 	if target == "r" {
-		return p.RSource(true)
+		return universalRSource(u, true)
 	}
 	if _, ok := ByID(target); !ok {
 		return "", fmt.Errorf("unknown target %q", target)
 	}
-	source := "eager"
-	if p.Evaluation == "lazy_demand" {
-		source = "r"
-	}
-	return generateTargetFrom(source, target, p.Body)
+	return generateTargetFromUniversal(u.Evaluation, target, graph)
 }
 
 // The node projections preserve lexical scope and ordered operand occurrences.
@@ -217,6 +290,30 @@ func (p *SemanticProgram) analyze() SemanticEvidence {
 		}
 		kind, sym, typ, eff := "unknown", "", 7, -1
 		switch x := v.(type) {
+		case *OperationExpr:
+			kind, sym = "typed_operation", x.Operation.Name
+			if x.Operation.Name != "integer.literal" {
+				eff = 10
+			}
+			result := x.Operation.resultType()
+			if result.Kind == "boolean" {
+				typ = 2
+			} else if result.Kind == "string" {
+				typ = 1
+			} else {
+				axis := integerFeature(result)
+				typ = -1
+				for i, name := range e.TypeAxes {
+					if name == axis {
+						typ = i
+						break
+					}
+				}
+				if typ < 0 {
+					typ = len(e.TypeAxes)
+					e.TypeAxes = append(e.TypeAxes, axis)
+				}
+			}
 		case *LiteralExpr:
 			kind = "literal"
 			sym = x.Text
@@ -290,6 +387,10 @@ func (p *SemanticProgram) analyze() SemanticEvidence {
 		var ids []int
 		ordered := true
 		switch x := v.(type) {
+		case *OperationExpr:
+			for _, operand := range x.Operands {
+				ids = append(ids, expr(operand, scope))
+			}
 		case *UnaryExpr:
 			ids = []int{expr(x.X, scope)}
 		case *BinaryExpr:
@@ -311,8 +412,27 @@ func (p *SemanticProgram) analyze() SemanticEvidence {
 			scopes++
 			scopeParents = append(scopeParents, scope)
 			for _, param := range x.Params {
-				pid := add("parameter", param.Name, childScope, 7, 1)
-				children(pid, []int{expr(param.Default, childScope)}, false)
+				typeColumn := 7
+				if param.Type != nil {
+					axis := integerFeature(*param.Type)
+					typeColumn = -1
+					for i, name := range e.TypeAxes {
+						if name == axis {
+							typeColumn = i
+							break
+						}
+					}
+					if typeColumn < 0 {
+						typeColumn = len(e.TypeAxes)
+						e.TypeAxes = append(e.TypeAxes, axis)
+					}
+				}
+				pid := add("parameter", param.Name, childScope, typeColumn, 1)
+				defaultScope := childScope
+				if x.Binding == "exact_v1" && x.DefaultEvaluation == "definition" {
+					defaultScope = scope
+				}
+				children(pid, []int{expr(param.Default, defaultScope)}, false)
 				ids = append(ids, pid)
 			}
 			ids = append(ids, stmt(x.Body, childScope))
@@ -458,12 +578,11 @@ func (p *SemanticProgram) analyze() SemanticEvidence {
 // RSource writes executable R syntax from the typed tree. In eager mode calls
 // with user functions are handled by the explicit call-boundary lowering below.
 func (p *SemanticProgram) RSource(enforce bool) (string, error) {
-	w := &semanticWriter{eager: enforce && p.Evaluation == "eager_left_to_right", enforce: enforce, used: reserveSymbols(p.Body)}
-	out, err := w.statement(p.Body)
+	u, err := canonicalUniversalAST(p)
 	if err != nil {
 		return "", err
 	}
-	return strings.Join(w.helpers, "\n") + out, nil
+	return universalRSource(u, enforce)
 }
 
 type semanticWriter struct {
@@ -521,6 +640,9 @@ func (w *semanticWriter) expression(v Expr) (string, error) {
 		}
 		return fn + "(" + strings.Join(args, ", ") + ")", nil
 	case *FunctionExpr:
+		if x.Binding != "" {
+			return "", fmt.Errorf("R text cannot preserve %s", ExactSignatureCapability)
+		}
 		params := make([]string, len(x.Params))
 		for i, p := range x.Params {
 			params[i] = p.Name

@@ -22,6 +22,9 @@ int main(void) { int x = 2; while (x < 5) { x = x + 1; } printf("%g\\n", (double
 	if err != nil {
 		t.Fatal(err)
 	}
+	if q.CanonicalR != "" || q.Graph != nil {
+		t.Fatal("document import rebuilt legacy R diagnostics")
+	}
 	for _, target := range []string{"go", "rust", "python", "c"} {
 		a, err := Emit(target, p)
 		if err != nil {

@@ -54,35 +54,40 @@ func AnalyzeFunctionFlows(canonical string) ([]FunctionFlowEvidence, error) {
 	return AnalyzeSemanticFunctionFlows(program)
 }
 
-// AnalyzeSemanticFunctionFlows is the semantic-IR entry point. The older
-// string function above remains solely a compatibility adapter for callers
+// AnalyzeSemanticFunctionFlows is the canonical UAST flow entry point. The
+// older string function above remains a compatibility adapter for callers
 // that still have R text; no target generator needs that text as state.
 func AnalyzeSemanticFunctionFlows(program *SemanticProgram) ([]FunctionFlowEvidence, error) {
-	if program == nil || program.Body == nil {
+	if program == nil {
 		return nil, fmt.Errorf("missing semantic program")
 	}
+	u, err := canonicalUniversalAST(program)
+	if err != nil {
+		return nil, err
+	}
+	graph, err := newUASTExecutionGraph(u)
+	if err != nil {
+		return nil, err
+	}
 	result := []FunctionFlowEvidence{}
-	for _, s := range program.Body.List {
-		a, ok := s.(*AssignStmt)
-		if !ok {
+	for _, item := range graph.many(graph.root, "statement") {
+		assignment := graph.common[item.ID]
+		if assignment.Kind != "assign" {
 			continue
 		}
-		fn, ok := a.Value.(*FunctionExpr)
-		if !ok {
+		expression, ok, err := graph.one(item.ID, "expression", false)
+		if err != nil {
+			return nil, err
+		}
+		if !ok || graph.common[expression].Kind != "function" {
 			continue
 		}
-		e := FunctionFlowEvidence{Name: a.Name}
-		f, err := buildFunctionFlow(fn)
+		e := FunctionFlowEvidence{Name: assignment.Name}
+		f, err := buildUASTFunctionFlow(graph, expression)
 		if err != nil {
 			e.Error = err.Error()
 		} else {
-			e.Entry, e.Always, e.WhenTrue, e.WhenFalse, e.Reachable = f.entry, f.A, f.T, f.F, f.reachable
-			e.Cycles, e.StateMachine, e.Slots, e.Reads, e.Writes, e.Defined = f.cycles, f.stateMachine, f.slots, f.reads, f.writes, f.defined
-			e.Initial = f.initial
-			e.Iterations = f.iterations
-			for _, node := range f.nodes {
-				e.Nodes = append(e.Nodes, fmt.Sprintf("%T", node))
-			}
+			e = f.evidence(assignment.Name)
 		}
 		result = append(result, e)
 	}

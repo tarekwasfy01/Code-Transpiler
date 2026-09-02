@@ -1,0 +1,765 @@
+﻿feature,category,file,line,snippet
+abi_calling_convention,memory,copying.txt,17,"IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+abi_calling_convention,memory,copying.txt,20,"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,"
+abi_calling_convention,memory,security.md,14,## Reporting a Vulnerability
+abi_calling_convention,memory,security.md,16,"If you have discovered a vulnerability, please notify us about it via"
+abi_calling_convention,memory,security.md,20,Please do not report vulnerabilities via GitHub issues.
+abi_calling_convention,memory,changelogs/changelog_0_19_0.md,185,zero-copy interoperability with ``cstring``. Compile your code with the
+abi_calling_convention,memory,changelogs/changelog_0_20_0.md,222,interoperability. (Bug #9619.)
+abi_calling_convention,memory,changelogs/changelog_1_4_0.md,176,cannot be applied to every use case. The limitations and the (lack of) reliability
+allocation,effect,changelogs/changelog_0_18_1.md,656,"- Fixed ""New Allocator Fails On >=4GB Requests"""
+allocation,effect,changelogs/changelog_1_0_0.md,75,- core/allocators
+allocation,effect,changelogs/changelog_1_2_0.md,472,"- Fixed ""Arrays are passed by copy to iterators, causing crashes, unnecessary allocations and slowdowns"""
+allocation,effect,changelogs/changelog_1_4_0.md,75,"allocations, similar to `streams.readLine` (#13857)."
+allocation,effect,changelogs/changelog_1_4_0.md,609,"- Fixed ""newWideCString allocates a multiple of the memory needed"""
+allocation,effect,changelogs/changelog_1_4_0.md,841,"- Fixed ""memory corruption for seq.add(seq) with gc:arc and d:useMalloc """
+allocation,effect,changelogs/changelog_1_6_0.md,694,"- The allocator for Nintendo Switch, which was nonfunctional because"
+allocation,effect,changelogs/changelog_1_6_0.md,695,"of breaking changes in libnx, was removed, in favor of the new `-d:nimAllocPagesViaMalloc` option."
+array_list,expression,changelogs/changelog_1_4_0.md,369,"- Fixed ""crash on openarray interator with argument in stmtListExpr"""
+array_list,expression,changelogs/changelog_1_6_0.md,670,"- Array literals now use JS typed arrays when the corresponding JS typed array exists,"
+array_list,expression,compiler/ast.nim,1578,"if n.kind in {nkStmtList, nkStmtListExpr}:"
+array_list,expression,compiler/ast2nif.nim,1654,"of nkStmtList, nkStmtListExpr:"
+array_list,expression,compiler/ccgcalls.nim,267,while q.kind == nkStmtListExpr and q.len > 0:
+array_list,expression,compiler/ccgcalls.nim,274,while q.kind == nkStmtListExpr and q.len > 0:
+array_list,expression,compiler/ccgexprs.nim,1369,of nkStmtListExpr:
+array_list,expression,compiler/ccgexprs.nim,3311,template genStmtListExprImpl(exprOrStmt) {.dirty.} =
+array_type,type,changelogs/changelog_0_18_1.md,103,"support. There is a new ""heterogeneous"" slice type ``system.HSlice`` that takes 2"
+array_type,type,compiler/astdef.nim,349,"# carry an array type), so it must survive copies + serialization."
+array_type,type,compiler/astdef.nim,354,# tyArray type represeting a varargs list
+array_type,type,compiler/astdef.nim,409,tfWeakCovariant # covariant generic param mimicking a seq/array type
+array_type,type,compiler/cbuilderdecls.nim,115,"template addArrayTypedef(builder: var Builder, name: string, len: BiggestInt, typeBody: typed) ="
+array_type,type,compiler/cbuilderdecls.nim,116,"## adds an array typedef declaration to the builder with name `name`,"
+array_type,type,compiler/ccgtypes.nim,1130,"m.s[cfsTypes].addArrayTypedef(name = result, len = 1):"
+array_type,type,compiler/ccgtypes.nim,1139,"m.s[cfsTypes].addArrayTypedef(name = result, len = n):"
+assignment,expression,changelogs/changelog_0_18_1.md,354,"- Fixed ""Seq assignment is slower than expected"""
+assignment,expression,changelogs/changelog_0_18_1.md,382,"- Fixed ""var s = @[0,1,2,...] can generate thousand of single assignments in C code"""
+assignment,expression,changelogs/changelog_0_19_0.md,14,"- Assignments that would ""slice"" an object into its supertype are now prevented"
+assignment,expression,changelogs/changelog_1_4_0.md,160,"- `std/with`, `sugar.dup` now support object field assignment expressions:"
+assignment,expression,changelogs/changelog_1_4_0.md,389,"- Fixed ""simple 'var openarray[char]' assignment crash when the openarray source is a local string and using gc:arc"""
+assignment,expression,changelogs/changelog_1_4_0.md,487,"- Fixed ""[gc:arc] case object assignment SIGSEGV: destroy not called for primitive type """
+assignment,expression,changelogs/changelog_1_4_0.md,605,"- Fixed ""Cannot borrow var float64 in infix assignment"""
+assignment,expression,changelogs/changelog_1_4_0.md,761,"- Fixed ""[ARC] SIGSEGV with tuple assignment caused by cursor inference"""
+atomic,concurrency,changelogs/changelog_0_18_1.md,269,- ``atomic`` and ``generic`` are no longer keywords in Nim. ``generic`` used to be
+atomic,concurrency,changelogs/changelog_0_18_1.md,270,"an alias for ``concept``, ``atomic`` was not used for anything."
+atomic,concurrency,changelogs/changelog_1_0_0.md,83,- concurrency/atomics
+atomic,concurrency,changelogs/changelog_1_2_0.md,260,"- Fixed ""Enums should be considered Trivial types in Atomics"""
+atomic,concurrency,changelogs/changelog_2_0_0_details.md,25,- `std/sysatomics`
+atomic,concurrency,changelogs/changelog_2_2_0.md,71,- The `Atomic[T]` type on C++ now uses C11 primitives by default instead of
+atomic,concurrency,changelogs/changelog_2_2_0.md,72,"`std::atomic`. To use `std::atomic` instead, `-d:nimUseCppAtomics` can be defined."
+atomic,concurrency,compiler/btrees.nim,72,when defined(gcArc) or defined(gcOrc) or defined(gcAtomicArc) or defined(gcYrc):
+attribute_annotation,declaration,changelog.md,67,- `copyFileWithPermissions` to preserve file attributes
+attribute_annotation,declaration,changelog.md,73,- `copyDirWithPermissions` to recursively preserve attributes
+attribute_annotation,declaration,changelog.md,168,- Added documentation for the `completeStruct` pragma in the manual.
+attribute_annotation,declaration,.github/ISSUE_TEMPLATE/bug_report.yml,8,attributes:
+attribute_annotation,declaration,.github/ISSUE_TEMPLATE/bug_report.yml,15,attributes:
+attribute_annotation,declaration,.github/ISSUE_TEMPLATE/bug_report.yml,25,attributes:
+attribute_annotation,declaration,.github/ISSUE_TEMPLATE/bug_report.yml,35,attributes:
+attribute_annotation,declaration,.github/ISSUE_TEMPLATE/bug_report.yml,43,attributes:
+await,expression,changelogs/changelog_0_18_1.md,527,"- Fixed ""await inside array/dict literal produces invalid code - Part 2"""
+await,expression,changelogs/changelog_1_4_0.md,367,"- Fixed ""Critical: 1 completed Future, multiple await: Only 1 await will be awakened (the last one)"""
+await,expression,changelogs/changelog_1_4_0.md,579,"- Fixed ""Nested await expressions regression: `await a(await expandValue())` doesnt compile"""
+await,expression,changelogs/changelog_1_6_0.md,273,"await fetch(""https://api.github.com/users/torvalds"".cstring)"
+await,expression,doc/idetools.md,198,In both cases the server will start up and await further commands.
+await,expression,lib/js/asyncjs.nim,37,## var game = await loadGame(name)
+await,expression,lib/js/asyncjs.nim,132,"proc await[T](f: Future[T]): T {.importjs: ""(await #)"", used.}"
+await,expression,lib/js/asyncjs.nim,213,if n > 0: result = n * await asyncFact(n-1)
+binary_op,expression,compiler/cbuilderexprs.nim,163,type TypedBinaryOp = enum
+binary_op,expression,compiler/cbuilderexprs.nim,167,"const typedBinaryOperators: array[TypedBinaryOp, string] = ["
+binary_op,expression,compiler/cbuilderexprs.nim,188,type UntypedBinaryOp = enum
+binary_op,expression,compiler/cbuilderexprs.nim,192,"const untypedBinaryOperators: array[UntypedBinaryOp, string] = ["
+binary_op,expression,compiler/cbuilderexprs.nim,210,"proc addOp(builder: var Builder, binOp: TypedBinaryOp, t: Snippet, a, b: Snippet) ="
+binary_op,expression,compiler/cbuilderexprs.nim,214,builder.add(typedBinaryOperators[binOp])
+binary_op,expression,compiler/cbuilderexprs.nim,226,"proc addOp(builder: var Builder, binOp: UntypedBinaryOp, a, b: Snippet) ="
+binary_op,expression,compiler/cbuilderexprs.nim,230,builder.add(untypedBinaryOperators[binOp])
+break,control,compiler/astdef.nim,182,"nkLastBlockStmts* = {nkRaiseStmt, nkReturnStmt, nkBreakStmt, nkContinueStmt}"
+break,control,compiler/ccgexprs.nim,3762,"of nkBreakStmt: genBreakStmt(p, n)"
+break,control,compiler/ccgstmts.nim,791,"proc genBreakStmt(p: BProc, t: PNode) ="
+break,control,compiler/closureiters.nim,799,"let brk = newTree(nkBreakStmt, ctx.g.emptyNode)"
+break,control,compiler/closureiters.nim,892,"proc transformBreakStmt(ctx: var Ctx, n: PNode): PNode ="
+break,control,compiler/closureiters.nim,965,of nkBreakStmt: result = ctx.transformBreakStmt(n)
+break,control,compiler/closureiters.nim,1212,"let breakState = newNodeI(nkBreakStmt, n.info)"
+break,control,compiler/dfa.nim,449,"of nkBreakStmt: genBreak(c, n)"
+bytecode_vm,meta,compiler/modulegraphs.nim,898,"## body consumption sites (vmgen's proc compilation, the getImpl opcodes)."
+bytecode_vm,meta,compiler/parampatterns.nim,22,TAliasRequest* = enum # first byte of the bytecode determines alias checking
+bytecode_vm,meta,compiler/parampatterns.nim,26,TOpcode = enum
+bytecode_vm,meta,compiler/parampatterns.nim,50,"proc add(code: var TPatternCode, op: TOpcode) {.inline.} ="
+bytecode_vm,meta,compiler/parampatterns.nim,366,case TOpcode(code[pc])
+bytecode_vm,meta,compiler/vm.nim,303,while c.code[pc].opcode == opcExcept:
+bytecode_vm,meta,compiler/vm.nim,309,while c.code[pc].opcode == opcExcept:
+bytecode_vm,meta,compiler/vm.nim,326,while c.code[pc].opcode == opcExcept:
+call,expression,compiler/ast.nim,593,proc isCallExpr*(n: PNode): bool =
+call,expression,compiler/astdef.nim,636,"locCall, # location is a call expression"
+call,expression,compiler/ccgcalls.nim,752,"localError(p.config, ri.info, ""call expression expected for C++ pattern"")"
+call,expression,compiler/ccgexprs.nim,2915,"""'toOpenArray' is only valid within a call expression"")"
+call,expression,compiler/lambdalifting.nim,555,if n.isCallExpr and n[0].isTypeOf:
+call,expression,compiler/lambdalifting.nim,851,if n.isCallExpr and n[0].isTypeOf:
+call,expression,compiler/semexprs.nim,2330,if isCallExpr(macroCall):
+call,expression,compiler/semexprs.nim,2641,"return localErrorNode(c, n, n[1].info, ""'spawn' takes a call expression; got: "" & $n[1])"
+capture,binding,changelogs/changelog_0_20_0.md,93,"- nre's `RegexMatch.{captureBounds,captures}[]` no longer return `Option` or"
+capture,binding,changelogs/changelog_0_20_0.md,94,"`nil`/`""""`, respectively. Use the newly added `n in p.captures` method to"
+capture,binding,changelogs/changelog_0_20_0.md,95,"check if a group is captured, otherwise you'll receive an exception."
+capture,binding,changelogs/changelog_0_20_0.md,97,"- nre's `RegexMatch.{captureBounds,captures}.toTable` no longer accept a"
+capture,binding,changelogs/changelog_0_20_0.md,98,default parameter. Instead uncaptured entries are left empty. Use
+capture,binding,changelogs/changelog_0_20_0.md,101,"- nre's `RegexMatch.captures.{items,toSeq}` now returns an `Option[string]`"
+capture,binding,changelogs/changelog_0_20_0.md,104,"of `capture == """"` or `capture == nil`, use `capture.isSome` to check if a capture is"
+capture,binding,changelogs/changelog_0_20_0.md,105,"present, and `capture.get` to get its value."
+cast_conversion,expression,azure-pipelines.yml,60,displayName: 'Disable auto conversion to CRLF by git (Windows-only)'
+cast_conversion,expression,changelog.md,36,"- Adds a new warning `--warning:ImplicitRangeConversion` that detects downsizing implicit conversions to range types (e.g., `int -> range[0..255]` or `range[1..256] -> range[0..255]`) that could cause runtime panics. Safe conversions like `range[0..255] -> ran"
+cast_conversion,expression,changelogs/changelog_0_20_0.md,44,- Compile time checks for integer and float conversions are now stricter.
+cast_conversion,expression,changelogs/changelog_0_20_0.md,55,"- With the exception of `uint` and `uint64`, conversion to unsigned types"
+cast_conversion,expression,changelogs/changelog_0_20_2.md,20,conversions like ``x.sin_family = uint16 toInt(nativesockets.AF_INET)``
+cast_conversion,expression,changelogs/changelog_1_2_0.md,154,"- Conversions to unsigned integers are unchecked at runtime, imitating earlier Nim"
+cast_conversion,expression,changelogs/changelog_1_2_0.md,184,"- Implicit conversions for `const` behave correctly now, meaning that code like"
+cast_conversion,expression,changelogs/changelog_1_2_0.md,190,- The compiler is now more strict about type conversions concerning proc
+channel,concurrency,readme.md,20,* [#nim IRC Channel (Libera Chat)][nim-irc] - a place to discuss Nim in real-time.
+channel,concurrency,readme.md,23,channels there are bridged to IRC.
+channel,concurrency,readme.md,25,is a bridge between Gitter and the IRC channel.
+channel,concurrency,readme.md,28,is the official Telegram channel. Not bridged to IRC.
+channel,concurrency,readme.md,170,"[Nim forum][nim-forum], or via IRC on [the \#nim channel][nim-irc]."
+channel,concurrency,changelogs/changelog_1_2_0.md,366,"- Fixed ""Channel messages are corrupted"""
+channel,concurrency,changelogs/changelog_1_6_0.md,705,"- The comment field in PNode AST was moved to a side channel, reducing overall"
+channel,concurrency,changelogs/changelog_2_0_0_details.md,48,- Enabling `-d:nimPreviewSlimSystem` removes the import of `channels_builtin` in
+class,declaration,changelogs/changelog_0_18_1.md,462,"- Fixed ""object variants superclass trigger bad codegen"""
+class,declaration,changelogs/changelog_0_19_0.md,204,``CatchableError`` and is the new base class for any exception that is guaranteed to
+class,declaration,changelogs/changelog_1_4_0.md,665,"- Fixed ""type alias for generic typeclass doesn't work"""
+class,declaration,changelogs/changelog_1_6_0.md,13,"The `iterable[T]` type class was added to match called iterators,"
+class,declaration,changelogs/changelog_2_0_0.md,185,class IPrinter {
+class,declaration,changelogs/changelog_2_0_0_details.md,232,unlike other type class AST.
+class,declaration,compiler/aliases.nim,97,if a.baseClass != nil:
+class,declaration,compiler/ast2nif.nim,113,## Converts a type ItemId to its SymId for the class index.
+closure_lambda,expression,changelogs/changelog_0_18_1.md,478,"- Fixed ""issues with 'not nil' applied to a closure proc"""
+closure_lambda,expression,changelogs/changelog_0_20_0.md,198,"- Added `sequtils.items` for closure iterators, allows closure iterators"
+closure_lambda,expression,changelogs/changelog_1_0_2.md,55,"* Mention ""lambdas"" and `=>` in the manual"
+closure_lambda,expression,changelogs/changelog_1_2_0.md,16,closure. This is an enhanced version of `closureScope`.
+closure_lambda,expression,changelogs/changelog_1_2_0.md,226,"- Fixed ""Closure iterator crashes on --newruntime due to ""dangling references"""""
+closure_lambda,expression,changelogs/changelog_1_2_0.md,228,"- Fixed ""No `=destroy` for elements of closure environments other than for latest devel --gc:destructors"""
+closure_lambda,expression,changelogs/changelog_1_2_0.md,390,"- Fixed ""Segfault with closure on arc"""
+closure_lambda,expression,changelogs/changelog_1_2_0.md,458,"- Fixed ""gc:arc + threads:on + closures compilation error"""
+code_generation,meta,changelog.md,34,"- Bitshift operators (`shl`, `shr`, `ashr`) now apply bitmasking to the right operand in the C/C++/VM/JS backends."
+code_generation,meta,changelog.md,38,- Procedure compatibility also checks the backend representation of the
+code_generation,meta,changelog.md,40,`--legacy:procParamTypeBackendAliases` to restore the older behavior.
+code_generation,meta,changelog.md,75,"- `system.setLenUninit` now supports refc, JS and VM backends."
+code_generation,meta,changelog.md,153,- The JS backend now implements write-through for `var openArray` parameters that
+code_generation,meta,koch.nim,94,-d:leanCompiler produce a compiler without JS codegen or
+code_generation,meta,koch.nim,726,"let backend = if doUseCpp(): ""cpp"" else: ""c"""
+code_generation,meta,koch.nim,727,"execFold(""build with -d:nimHasLibFFI"", ""nim $1 -d:release --noNimblePath -d:nimHasLibFFI --path:./dist -o:$2 compiler/nim.nim"" % [backend, nimFFI])"
+compile_time_eval,meta,koch.nim,683,"# per-runner, so `when defined(linux)` selects the Linux job at compile time."
+compile_time_eval,meta,changelogs/changelog_0_18_1.md,229,- Added support for casting between integers of same bitsize in VM (compile time and nimscript).
+compile_time_eval,meta,changelogs/changelog_0_19_0.md,240,compile time functions / static blocks. Only in templates / regular code it retains it's old behavior.
+compile_time_eval,meta,changelogs/changelog_0_20_0.md,44,- Compile time checks for integer and float conversions are now stricter.
+compile_time_eval,meta,changelogs/changelog_0_20_0.md,45,"For example, `const x = uint32(-1)` now gives a compile time error instead"
+compile_time_eval,meta,changelogs/changelog_1_4_0.md,659,"- Fixed ""mitems, mpairs doesn't work at compile time anymore"""
+compile_time_eval,meta,changelogs/changelog_1_4_0.md,763,"- Fixed ""Issue with --gc:arc at compile time"""
+compile_time_eval,meta,changelogs/changelog_1_6_0.md,508,"- `putEnv`, `delEnv` now work at compile time."
+comprehension,expression,changelogs/changelog_1_2_0.md,14,- Added `sugar.collect` that does comprehension for seq/set/table collections.
+comprehension,expression,lib/pure/sugar.nim,367,## Comprehension for seqs/sets/tables.
+comprehension,expression,testament/important_packages.nim,54,"pkg ""comprehension"", ""nimble test"", ""https://github.com/alehander92/comprehension"""
+constant,declaration,changelogs/changelog_0_18_1.md,135,- **Added ``sequtils.mapLiterals`` for easier construction of array and tuple literals.**
+constant,declaration,changelogs/changelog_0_18_1.md,527,"- Fixed ""await inside array/dict literal produces invalid code - Part 2"""
+constant,declaration,changelogs/changelog_0_18_1.md,633,"- Fixed ""mapLiterals fails with negative values"""
+constant,declaration,changelogs/changelog_0_19_0.md,23,- The ``'c`` and ``'C'`` suffix for octal literals is now deprecated to
+constant,declaration,changelogs/changelog_0_19_0.md,118,now escapes the content of string literals consistently.
+constant,declaration,changelogs/changelog_0_19_0.md,238,- macros.bindSym now capable to accepts not only literal string or string constant expression.
+constant,declaration,changelogs/changelog_0_20_0.md,245,- Tuple unpacking is now supported for constants and for loop variables.
+constant,declaration,changelogs/changelog_1_4_0.md,184,- Added `strutils.indentation` and `strutils.dedent` which enable indented string literals:
+continue,control,compiler/astdef.nim,182,"nkLastBlockStmts* = {nkRaiseStmt, nkReturnStmt, nkBreakStmt, nkContinueStmt}"
+continue,control,compiler/closureiters.nim,966,# of nkContinueStmt: # By this point all relevant continues should be
+continue,control,compiler/nifgen.nim,92,"of nkContinueStmt: ""continue"""
+continue,control,compiler/nifgen.nim,1543,"of nkDiscardStmt, nkBreakStmt, nkContinueStmt, nkRaiseStmt,"
+continue,control,compiler/nilcheck.nim,1051,"of nkReturnStmt, nkBreakStmt, nkContinueStmt, nkRaiseStmt:"
+continue,control,compiler/nodekinds.nim,147,"nkContinueStmt, # a continue statement"
+continue,control,compiler/parser.nim,1701,#| continueStmt = 'continue' optInd expr?
+continue,control,compiler/parser.nim,2418,#| | continueStmt | pragmaStmt | importStmt | exportStmt | fromStmt
+defer_cleanup,control,koch.nim,129,finally:
+defer_cleanup,control,koch.nim,520,finally:
+defer_cleanup,control,koch.nim,606,finally:
+defer_cleanup,control,koch.nim,769,finally:
+defer_cleanup,control,readme.md,90,"Finally, once you have finished the build steps (on Windows, Mac, or Linux) you"
+defer_cleanup,control,changelogs/changelog_0_18_1.md,18,arrays of char can! This means ``$`` for arrays can finally exist
+defer_cleanup,control,changelogs/changelog_0_18_1.md,340,"- Fixed ""ReraiseError when using try/except within finally block"""
+defer_cleanup,control,changelogs/changelog_0_19_0.md,180,- ``nil`` for strings/seqs is finally gone. Instead the default value for
+dynamic_dispatch,effect,changelogs/changelog_2_2_0.md,10,- Methods now support implementations based on a VTable by using `--experimental:vtables`. Methods are then confined to the same module where their type has been defined.
+dynamic_dispatch,effect,compiler/ccgcalls.nim,16,"# Its inferred effects describe only the base body, not every vtable target."
+dynamic_dispatch,effect,compiler/ccgtypes.nim,1892,"proc genVTable(result: var Builder, seqs: seq[PSym]) ="
+dynamic_dispatch,effect,compiler/ccgtypes.nim,1969,let vTablePointerName = getTempName(m)
+dynamic_dispatch,effect,compiler/ccgtypes.nim,1971,"name = vTablePointerName,"
+dynamic_dispatch,effect,compiler/ccgtypes.nim,1974,"genVTable(m.s[cfsVars], dispatchMethods)"
+dynamic_dispatch,effect,compiler/ccgtypes.nim,1977,"typeEntry.addFieldAssignment(name, ""vTable"", vTablePointerName)"
+dynamic_dispatch,effect,compiler/ccgtypes.nim,2050,"typeEntry.addField(typeInit, name = ""vTable""):"
+enum,declaration,changelog.md,62,- Exports `CopyFlag` enum and `FilePermission` type for fine-grained control of file operations
+enum,declaration,changelogs/changelog_0_18_1.md,272,- The memory manager now uses a variant of the TLSF algorithm that has much
+enum,declaration,changelogs/changelog_0_18_1.md,462,"- Fixed ""object variants superclass trigger bad codegen"""
+enum,declaration,changelogs/changelog_0_18_1.md,472,"- Fixed ""fields not initialized: array with enum index type as object field."""
+enum,declaration,changelogs/changelog_0_18_1.md,585,"- Fixed ""JS - Unicode enum string representation issue"""
+enum,declaration,changelogs/changelog_0_19_0.md,123,"also support ``ref`` and ``ptr`` types, pragmas on types and variant"
+enum,declaration,changelogs/changelog_0_20_0.md,39,used to select the variant at runtime. For backwards compatibility
+enum,declaration,changelogs/changelog_1_0_2.md,30,"* Fixed ""Compiler crash with invalid object variant"" [#12379](https://github.com/nim-lang/Nim/issues/12379)"
+exception_try,control,changelog.md,15,"- With `-d:nimPreviewCheckedClose`, the `close` function in the `std/syncio` module now raises an IO exception in case of an error."
+exception_try,control,changelog.md,22,- The bare `except:` now panics on `Defect`. Use `except Exception:` or `except Defect:` to catch `Defect`. `--legacy:noPanicOnExcept` is provided for a transition period.
+exception_try,control,changelog.md,102,- `std/jsonutils`: `fromJson` now throws an exception when converting to `array`/`seq` if the JSON isn't an array instead of silently failing
+exception_try,control,koch.nim,82,"toolsNoExternal builds Nim related tools (except external tools,"
+exception_try,control,koch.nim,129,finally:
+exception_try,control,koch.nim,359,## 3. We use nim2.exe to build nim3.exe. nim3.exe is equal to nim2.exe except for timestamps.
+exception_try,control,koch.nim,520,finally:
+exception_try,control,koch.nim,606,finally:
+ffi,memory,azure-pipelines.yml,107,# `:i386` (e.g. in `libffi-dev:i386`) is needed otherwise you may get:
+ffi,memory,azure-pipelines.yml,108,# `could not load: libffi.so` during dynamic loading.
+ffi,memory,azure-pipelines.yml,112,libsdl1.2-dev:i386 libsfml-dev:i386 libglib2.0-dev:i386 libffi-dev:i386
+ffi,memory,changelog.md,57,to more efficiently calculate the symmetric difference of bitsets.
+ffi,memory,koch.nim,70,external components.
+ffi,memory,koch.nim,72,external components (default).
+ffi,memory,koch.nim,82,"toolsNoExternal builds Nim related tools (except external tools,"
+ffi,memory,koch.nim,97,-d:nimHasLibFFI adds FFI support for allowing compile-time VM to
+filesystem,effect,koch.nim,45,"# If this fails with: `Error: cannot open file: std/os`, see"
+filesystem,effect,compiler/deps.nim,37,"## a genuine ""cannot open file"" error"
+filesystem,effect,compiler/deps.nim,751,## `cannot open file: pkg/harfbuzzy/raw` instead of a cascade of
+filesystem,effect,compiler/deps.nim,781,"c.nodes[i].files[0].nimFile & "": cannot open file: "" &"
+filesystem,effect,compiler/docgen.nim,1832,"warnUser, ""unable to open file \"""" & d.destFile &"
+filesystem,effect,compiler/layouter.nim,259,"rawMessage(em.config, errGenerated, ""cannot open file: "" & outFile.string)"
+filesystem,effect,compiler/lineinfos.nim,289,fullPath*: AbsoluteFile # This is a canonical full filesystem path
+filesystem,effect,compiler/modulepaths.nim,77,"localError(conf, n.info, ""cannot open file: "" & m)"
+for,control,compiler/ast2nif.nim,1519,of nkForStmt:
+for,control,compiler/ccgexprs.nim,3759,"of nkForStmt: internalError(p.config, n.info, ""for statement not eliminated"")"
+for,control,compiler/ccgexprs.nim,3832,"of nkParForStmt: genParForStmt(p, n)"
+for,control,compiler/ccgstmts.nim,752,"proc genParForStmt(p: BProc, t: PNode) ="
+for,control,compiler/closureiters.nim,1146,"of nkGotoState, nkForStmt:"
+for,control,compiler/injectdestructors.nim,706,of nkParForStmt:
+for,control,compiler/injectdestructors.nim,843,"nkIfExpr, nkCaseStmt, nkWhen, nkWhileStmt, nkParForStmt, nkTryStmt, nkPragmaBlock}:"
+for,control,compiler/inliner.nim,52,"of nkForStmt, nkParForStmt:"
+foreach_iteration,control,koch.nim,92,-d:nimUseLinenoise use the linenoise library for interactive mode
+foreach_iteration,control,koch.nim,104,csource -d:danger builds the C sources for installation
+foreach_iteration,control,changelogs/changelog_0_18_1.md,258,- To make Nim even more robust the system iterators ``..`` and ``countup``
+foreach_iteration,control,changelogs/changelog_0_18_1.md,493,"- Fixed ""Wrong behavior of ""split"" (proc and iterator)"""
+foreach_iteration,control,changelogs/changelog_0_18_1.md,499,"- Fixed ""Destructors does not work with implicit items iterator in for loop"""
+foreach_iteration,control,changelogs/changelog_0_18_1.md,539,"- Fixed ""Generic iterable concept with array crashes compiler"""
+foreach_iteration,control,changelogs/changelog_0_19_0.md,54,- ``math.`mod` `` for floats now behaves the same as ``mod`` for integers
+foreach_iteration,control,changelogs/changelog_0_19_0.md,113,- Added ``system.ashr`` an arithmetic right shift for integers.
+function,declaration,changelog.md,15,"- With `-d:nimPreviewCheckedClose`, the `close` function in the `std/syncio` module now raises an IO exception in case of an error."
+function,declaration,changelog.md,91,"- `min`, `max`, and `sequtils`' `minIndex`, `maxIndex` and `minmax` for `openArray`s now accept a comparison function."
+function,declaration,koch.nim,98,"interface with native functions (experimental,"
+function,declaration,changelogs/changelog_0_18_1.md,282,string for function return type placeholders.
+function,declaration,changelogs/changelog_0_18_1.md,404,"- Fixed ""Generated c code calls function twice"""
+function,declaration,changelogs/changelog_0_18_1.md,436,"- Fixed ""Using : (constructor arguments) for passing values to functions with default arguments causes a compiler crash."""
+function,declaration,changelogs/changelog_0_19_0.md,102,"- Added inverse hyperbolic functions, ``math.arcsinh``, ``math.arccosh`` and ``math.arctanh`` procs."
+function,declaration,changelogs/changelog_0_19_0.md,103,"- Added cotangent, secant and cosecant procs ``math.cot``, ``math.sec`` and ``math.csc``; and their hyperbolic, inverse and inverse hyperbolic functions, ``math.coth``, ``math.sech``, ``math.csch``, ``math.arccot``, ``math.arcsec``, ``math.arccsc``, ``math.arc"
+function_type,type,changelog.md,49,"implementation (refc, ARC/ORC and `--strings:sso`) with the same signature, so"
+function_type,type,changelogs/changelog_0_19_0.md,41,The proc signatures are the same so it should generally not break anything.
+function_type,type,changelogs/changelog_0_20_0.md,208,- Added `macros.signatureHash` that returns a stable identifier
+function_type,type,changelogs/changelog_0_20_0.md,209,derived from the signature of a symbol.
+function_type,type,changelogs/changelog_1_6_0.md,897,"- docgen now shows all routines in sidebar, and the proc signature is now shown in sidebar."
+function_type,type,changelogs/changelog_2_0_0_details.md,116,- Redefining templates with the same signature was previously
+function_type,type,compiler/ast.nim,1019,proc signatureLen*(t: PType): int {.inline.} =
+function_type,type,compiler/ast.nim,1093,iterator signature*(t: PType): PType =
+gc,memory,azure-pipelines.yml,133,- bash: brew install boehmgc make sfml
+gc,memory,.github/workflows/ci_packages.yml,55,run: brew install boehmgc make sfml gtk+3
+gc,memory,changelogs/changelog_0_18_1.md,566,"- Fixed ""GC deadlock"""
+gc,memory,changelogs/changelog_1_0_2.md,56,* Better documentation on Garbage Collector
+gc,memory,changelogs/changelog_1_4_0.md,531,"- Fixed ""Boehm GC does not scan thread-local storage"""
+gc,memory,changelogs/changelog_1_4_0.md,871,"- Fixed ""Out of date error message for GC options"""
+gc,memory,changelogs/changelog_1_6_0.md,458,"- Fixed premature garbage collection in `std/asyncdispatch`, when a stacktrace"
+gc,memory,compiler/ccgcalls.nim,363,"if needsTmp and a.lode.typ != nil and p.config.selectedGC in {gcArc, gcAtomicArc, gcOrc, gcYrc} and"
+generic,declaration,changelog.md,148,- Fixed a bug where `sizeof(T)` inside a `typedesc` template called from a generic type's
+generic,declaration,changelog.md,151,`tyTypeDesc(tyGenericParam)` as an unresolved generic parameter.
+generic,declaration,koch.nim,124,"template withDir(dir, body) ="
+generic,declaration,koch.nim,352,"template doUseCpp(): bool = getEnv(""NIM_COMPILE_TO_CPP"", ""false"") == ""true"""
+generic,declaration,koch.nim,515,"template withMingw(path, body) ="
+generic,declaration,koch.nim,555,"template `|`(a, b): string = (if a.len > 0: a else: b)"
+generic,declaration,koch.nim,626,"""tcompiletimeglobal"", ""tsighashstable"", ""tpureenum"", ""tgenericoffer"","
+generic,declaration,.github/workflows/stale.yml,18,"exempt-pr-labels: ""ARC,bounty,Codegen,Crash,Generics,High Priority,Macros,Next release,Showstopper,Static[T]"""
+generic_constraint,type,changelogs/changelog_0_18_1.md,270,"an alias for ``concept``, ``atomic`` was not used for anything."
+generic_constraint,type,changelogs/changelog_0_18_1.md,537,"- Fixed ""Concepts regression"""
+generic_constraint,type,changelogs/changelog_0_18_1.md,539,"- Fixed ""Generic iterable concept with array crashes compiler"""
+generic_constraint,type,changelogs/changelog_0_19_0.md,167,matches an expected type constraint.
+generic_constraint,type,changelogs/changelog_1_6_0.md,753,## New-style concepts
+generic_constraint,type,changelogs/changelog_1_6_0.md,758,"Comparable = concept # no T, an atom"
+generic_constraint,type,compiler/ast.nim,285,proc constraint*(s: PSym): lent PNode {.inline.} =
+generic_constraint,type,compiler/ast.nim,287,result = s.constraintImpl
+global_state,effect,changelogs/changelog_1_2_0.md,494,"- Fixed ""gc:arc destroys the global variable accidentally."""
+global_state,effect,compiler/ast2nif.nim,2443,## Supposed to be a global variable
+global_state,effect,compiler/astdef.nim,630,"locGlobalVar, # location is a global variable"
+global_state,effect,compiler/ccgstmts.nim,387,# Global variables should not be zeromem-ed within loops
+global_state,effect,compiler/ccgstmts.nim,391,# global variables will be initialized to zero.
+global_state,effect,compiler/cgen.nim,1538,# the 'unsureAsgn' is a nop. If it points to a global variable the
+global_state,effect,compiler/lineinfos.nim,211,"warnGlobalVarConstructorTemporary: ""global variable '$1' initialization requires a temporary variable"","
+global_state,effect,compiler/lineinfos.nim,243,"hintGlobalVar: ""global variable declared here"","
+goto_label,control,changelogs/changelog_1_2_0.md,354,"- Fixed ""--gc:arc with --exceptions:goto for ""nim c"" generate invalid c code"""
+goto_label,control,changelogs/changelog_1_2_0.md,452,"- Fixed ""cpp --gc:arc --exceptions:goto fails to raise with discard"""
+goto_label,control,changelogs/changelog_1_2_0.md,534,"- Fixed ""exceptions:goto accidentally reset the variable during exception handling"""
+goto_label,control,changelogs/changelog_1_4_0.md,601,"- Fixed ""[goto exceptions] {.noReturn.} pragma is not detected in a case expression"""
+goto_label,control,changelogs/changelog_1_4_0.md,667,"- Fixed ""exceptions:goto Bug devel codegen lvalue NIM_FALSE=NIM_FALSE"""
+goto_label,control,changelogs/changelog_2_0_0_details.md,463,generation of goto based exception handling. It can improve the produced code size but its effects can be subtle so use it with care.
+goto_label,control,compiler/astdef.nim,145,sfGoto # var is used for 'goto' code generation
+goto_label,control,compiler/cbuilderstmts.nim,269,"builder.add(""goto "")"
+identifier,expression,changelog.md,97,- `std/pegs` now correctly lexes UTF-8 bytes inside bare identifier-style
+identifier,expression,changelogs/changelog_0_18_1.md,556,"- Fixed ""Ambiguous identifier between set type and proc"""
+identifier,expression,changelogs/changelog_0_20_0.md,208,- Added `macros.signatureHash` that returns a stable identifier
+identifier,expression,changelogs/changelog_1_2_0.md,316,"- Fixed ""regression(1.0.4): undeclared identifier: 'readLines'; plus another regression and bug"""
+identifier,expression,changelogs/changelog_1_4_0.md,403,"- Fixed ""--gc:arc -d:useSysAssert undeclared identifier `cstderr` with newSeq"""
+identifier,expression,changelogs/changelog_1_4_0.md,639,"- Fixed ""Stropped identifiers don't work as field names in tuple literals"""
+identifier,expression,changelogs/changelog_2_0_0.md,75,The underscore identifier (`_`) is now generally not added to scope when
+identifier,expression,changelogs/changelog_2_0_0_details.md,150,- The underscore identifier (`_`) is now generally not added to scope when
+if,control,compiler/cbuilderexprs.nim,254,"template cIfExpr(cond, a, b: Snippet): Snippet ="
+if,control,compiler/cbuilderstmts.nim,57,"template addSingleIfStmt(builder: var Builder, cond: Snippet, body: typed) ="
+if,control,compiler/cbuilderstmts.nim,64,"template addSingleIfStmtWithCond(builder: var Builder, condBody: typed, body: typed) ="
+if,control,compiler/cbuilderstmts.nim,71,proc initIfStmt(builder: var Builder): IfBuilder =
+if,control,compiler/cbuilderstmts.nim,74,"proc finishIfStmt(builder: var Builder, stmt: IfBuilder) ="
+if,control,compiler/cbuilderstmts.nim,78,"template addIfStmt(builder: var Builder, stmt: out IfBuilder, body: typed) ="
+if,control,compiler/cbuilderstmts.nim,79,stmt = initIfStmt(builder)
+if,control,compiler/cbuilderstmts.nim,81,"finishIfStmt(builder, stmt)"
+import,declaration,azure-pipelines.yml,3,include:
+import,declaration,azure-pipelines.yml,8,include:
+import,declaration,azure-pipelines.yml,18,timeoutInMinutes: 90 # default `60` led to lots of cancelled jobs; use 0 for unlimited (may be undesirable)
+import,declaration,changelog.md,9,[Dragonbox](https://raw.githubusercontent.com/jk-jeon/dragonbox/master/other_files/Dragonbox.pdf) algorithm). Use `-d:nimLegacySprintf` to emulate old behaviors.
+import,declaration,changelog.md,22,- The bare `except:` now panics on `Defect`. Use `except Exception:` or `except Defect:` to catch `Defect`. `--legacy:noPanicOnExcept` is provided for a transition period.
+import,declaration,changelog.md,26,"- `std/parsesql` has been moved to a nimble package, use `nimble` or `atlas` to install it."
+import,declaration,changelog.md,28,"- With `-d:nimPreviewDuplicateModuleError`, importing two modules that share the same name becomes a compile-time error. This includes importing the same module more than once. Use `import foo as foo1` (or other aliases) to avoid collisions."
+import,declaration,changelog.md,36,"- Adds a new warning `--warning:ImplicitRangeConversion` that detects downsizing implicit conversions to range types (e.g., `int -> range[0..255]` or `range[1..256] -> range[0..255]`) that could cause runtime panics. Safe conversions like `range[0..255] -> ran"
+index,expression,compiler/cbuilderexprs.nim,78,"proc subscript(a, b: Snippet): Snippet ="
+index,expression,compiler/cbuilderstmts.nim,40,"template addSubscriptAssignment(builder: var Builder, lhs: Snippet, index: Snippet, rhs: Snippet) ="
+index,expression,compiler/ccgexprs.nim,1179,"putIntoDest(p, d, n, subscript(rdLoc(a), rdCharLoc(b)),"
+index,expression,compiler/ccgexprs.nim,1190,# semantic pass has already checked for const index expressions
+index,expression,compiler/ccgexprs.nim,1219,"putIntoDest(p, d, n, subscript(ra, cOp(Sub, NimInt, rcb, first)), a.storage)"
+index,expression,compiler/ccgexprs.nim,1227,"putIntoDest(p, d, n, subscript(ra, rcb), a.storage)"
+index,expression,compiler/ccgexprs.nim,1304,"putIntoDest(p, d, n, subscript(arrData, rcb), a.storage)"
+index,expression,compiler/ccgexprs.nim,1345,"putIntoDest(p, d, n, subscript(dataField(p, ra), rcb), a.storage)"
+interface_trait,declaration,changelog.md,108,"This makes the behavior of interfaces like `hash`, `$`, `==` etc. more"
+interface_trait,declaration,koch.nim,98,"interface with native functions (experimental,"
+interface_trait,declaration,koch.nim,628,"""tmodsymref"", ""tmethupref"", ""temit"", ""ttraitparam"", ""tnestasgn""]"
+interface_trait,declaration,changelogs/changelog_0_18_1.md,157,- Added ``typetraits.$`` as an alias for ``typetraits.name``.
+interface_trait,declaration,changelogs/changelog_0_20_0.md,192,"- Added `Rusage`, `getrusage`, `wait4` to the posix interface."
+interface_trait,declaration,changelogs/changelog_1_0_0.md,92,- typetraits
+interface_trait,declaration,changelogs/changelog_1_0_2.md,50,* Documentation improvements around the db interface
+interface_trait,declaration,changelogs/changelog_1_2_0.md,17,"- Added `typetraits.tupleLen` to get number of elements of a tuple/type tuple,"
+io,effect,changelog.md,163,- Added `--stdinfile` flag to name of the file used when running program from stdin (defaults to `stdinfile.nim`)
+io,effect,changelogs/changelog_0_18_1.md,89,- The ``readPasswordFromStdin`` proc has been moved from the ``rdstdin``
+io,effect,changelogs/changelog_0_18_1.md,214,- ``writeStackTrace`` is now proclaimed to have no IO effect (even though it does)
+io,effect,changelogs/changelog_0_20_2.md,14,- On Windows stderr/stdout/stdin are not opened as binary files anymore. Use the switch
+io,effect,changelogs/changelog_1_0_0.md,7,stdin/stdout/stderr are binary files again. This change only affects
+io,effect,changelogs/changelog_1_2_0.md,492,"- Fixed ""`echo 'echo 1' | nim c -r -` silently gives wrong results (nimBetterRun not updated for stdin)"""
+io,effect,changelogs/changelog_1_4_0.md,110,hangs if a process had both reads from stdin and writes (e.g. to stdout).
+io,effect,changelogs/changelog_1_4_0.md,115,"- `osproc.execCmdEx` now takes an optional `input` for stdin, `workingDir` and `env`"
+ir,meta,changelog.md,102,- `std/jsonutils`: `fromJson` now throws an exception when converting to `array`/`seq` if the JSON isn't an array instead of silently failing
+ir,meta,changelog.md,155,instead of silently writing to a copy. Fixed homogeneous numeric arrays
+ir,meta,koch.nim,524,# Rebuilding koch is necessary because it uses its pointer size to
+ir,meta,koch.nim,672,"doAssert cmd.len == 0, cmd # avoid silently ignoring"
+ir,meta,readme.md,42,"| Mac OS X (10.4 or greater) | x86, x86_64, ppc64, and Apple Silicon (ARM64) |"
+ir,meta,.github/workflows/stale.yml,20,stale-pr-message: >
+ir,meta,.github/workflows/stale.yml,24,close-pr-message: >
+ir,meta,changelogs/changelog_0_18_1.md,210,number generator as type ``Rand`` so multiple threads can easily use their
+layout_alignment,memory,changelog.md,148,- Fixed a bug where `sizeof(T)` inside a `typedesc` template called from a generic type's
+layout_alignment,memory,changelog.md,149,"`when` clause would error with ""'sizeof' requires '.importc' types to be '.completeStruct'""."
+layout_alignment,memory,koch.nim,301,""" nsis compiler/installer.ini"") % [VersionAsString, $(sizeof(pointer)*8)])"
+layout_alignment,memory,koch.nim,548,when sizeof(pointer) == 4:
+layout_alignment,memory,koch.nim,550,when sizeof(pointer) == 8:
+layout_alignment,memory,koch.nim,669,"[hostOS, hostCPU, $int.sizeof, $float.sizeof, $cpuEndian, getCurrentDir()]"
+layout_alignment,memory,changelogs/changelog_1_4_0.md,365,"- Fixed ""repr() not available for uint{,8,16,32,64} under --gc:arc"""
+layout_alignment,memory,changelogs/changelog_1_4_0.md,857,"- Fixed ""Sizeof of case object is incorrect. Showstopper"""
+lifetime,binding,compiler/closureiters.nim,1434,# bug #25596; lifetime extension for `addr`-taken locals as
+lifetime,binding,compiler/icnifcore.nim,225,## resident for the process lifetime; for the `nim ic` driver that reads these
+lifetime,binding,compiler/semexprs.nim,1949,proc scopedLifetime(c: PContext; ri: PNode): bool {.inline.} =
+lifetime,binding,compiler/semexprs.nim,1964,"scopedLifetime(c, ri):"
+lifetime,binding,compiler/varpartitions.nim,685,"# as the alias references it, so this lifetime rule does not apply;"
+lifetime,binding,doc/destructors.md,108,Lifetime-tracking hooks
+lifetime,binding,doc/destructors.md,113,"""Lifetime-tracking hooks"", which are particular [type bound operators]("
+lifetime,binding,doc/manual.md,4403,[Lifetime-tracking hooks](destructors.html#lifetimeminustracking-hooks).
+literal_boolean,expression,azure-pipelines.yml,13,value: false
+literal_boolean,expression,azure-pipelines.yml,37,NIM_COMPILE_TO_CPP: true
+literal_boolean,expression,azure-pipelines.yml,59,- bash: git config --global core.autocrlf false
+literal_boolean,expression,azure-pipelines.yml,70,echo '##vso[task.setvariable variable=skipci]true'
+literal_boolean,expression,azure-pipelines.yml,78,"condition: and(succeeded(), eq(variables['skipci'], 'false'))"
+literal_boolean,expression,azure-pipelines.yml,90,"condition: and(succeeded(), eq(variables['skipci'], 'false'), eq(variables['Agent.OS'], 'Linux'), eq(variables['CPU'], 'amd64'))"
+literal_boolean,expression,azure-pipelines.yml,131,"condition: and(succeeded(), eq(variables['skipci'], 'false'), eq(variables['Agent.OS'], 'Linux'), eq(variables['CPU'], 'i386'))"
+literal_boolean,expression,azure-pipelines.yml,135,"condition: and(succeeded(), eq(variables['skipci'], 'false'), eq(variables['Agent.OS'], 'Darwin'))"
+literal_null,expression,koch.nim,156,"nimexec((""cc $1 -r $3 --var:version=$2 --var:mingw=none csource "" &"
+literal_null,expression,koch.nim,241,"nimexec(""cc -r $2 --var:version=$1 --var:mingw=none --main:compiler/nim.nim scripts compiler/installer.ini"" %"
+literal_null,expression,koch.nim,243,"exec(""$# --var:version=$# --var:mingw=none --main:compiler/nim.nim zip compiler/installer.ini"" %"
+literal_null,expression,koch.nim,255,"nimexec(""cc -r $2 --var:version=$1 --var:mingw=none --main:compiler/nim.nim scripts compiler/installer.ini"" %"
+literal_null,expression,koch.nim,257,"exec(""$# --var:version=$# --var:mingw=none --main:compiler/nim.nim xz compiler/installer.ini"" %"
+literal_null,expression,koch.nim,304,"nimexec(""cc -r $# --var:version=$# --var:mingw=none --main:compiler/nim.nim scripts compiler/installer.ini $#"" %"
+literal_null,expression,.github/workflows/bisects.yml,10,"github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '!nim ') && github.event.issue.pull_request == null && github.event.comment.author_association != 'NONE'"
+literal_null,expression,changelogs/changelog_0_18_1.md,195,shown) and ``nil`` strings are equal to empty strings.
+literal_numeric,expression,changelogs/changelog_1_6_0.md,187,Custom numeric literals (e.g. `-128'bignum`) are now supported.
+literal_numeric,expression,compiler/ast.nim,1325,of nkFloatLiterals: result.floatVal = src.floatVal
+literal_numeric,expression,compiler/ast.nim,1398,of nkFloatLiterals: dst.floatVal = src.floatVal
+literal_numeric,expression,compiler/ast.nim,1477,of nkFloatLiterals: result = a.floatVal
+literal_numeric,expression,compiler/astdef.nim,905,nkFloatLiterals* = {nkFloatLit..nkFloat128Lit}
+literal_numeric,expression,compiler/lookups.nim,58,of nkLiterals - nkFloatLiterals: id.add(x.renderTree)
+literal_numeric,expression,compiler/types.nim,140,of nkFloatLiterals: n.floatVal
+literal_numeric,expression,doc/manual.md,522,See also [custom numeric literals].
+literal_string,expression,changelogs/changelog_0_19_0.md,118,now escapes the content of string literals consistently.
+literal_string,expression,changelogs/changelog_1_4_0.md,184,- Added `strutils.indentation` and `strutils.dedent` which enable indented string literals:
+literal_string,expression,changelogs/changelog_1_6_0.md,418,kept as string literals and one can use external BigNum libraries to handle these.
+literal_string,expression,changelogs/changelog_1_6_0.md,542,- Added support for const strings instead of just string literals.
+literal_string,expression,compiler/ast2nif.nim,1276,"w.deps.addStrLit child.strVal # raw string literal, no wrapper needed"
+literal_string,expression,compiler/ast2nif.nim,1293,"w.deps.addStrLit fp # raw string literal, no wrapper needed"
+literal_string,expression,compiler/ast2nif.nim,2255,"# Carry the generic body sym and the instance type as STRING LITERALS, not"
+literal_string,expression,compiler/ast2nif.nim,3445,"raiseAssert ""expected string literal but got "" & $n.kind"
+lock_mutex,concurrency,doc/manual.md,9156,pthread_mutex_lock(a)
+lock_mutex,concurrency,doc/manual.md,9161,pthread_mutex_unlock(a)
+lock_mutex,concurrency,doc/manual.md,9214,pthread_mutex_lock(counters[i].L)
+lock_mutex,concurrency,doc/manual.md,9219,pthread_mutex_unlock(counters[i].L)
+lock_mutex,concurrency,lib/genode_cpp/syslocks.h,16,#include <base/mutex.h>
+lock_mutex,concurrency,lib/genode_cpp/syslocks.h,25,"Genode::Mutex _mutex_a, _mutex_b;"
+lock_mutex,concurrency,lib/genode_cpp/syslocks.h,30,Genode::Mutex::Guard guard(_mutex_a);
+lock_mutex,concurrency,lib/genode_cpp/syslocks.h,32,_mutex_b.acquire();
+macro,meta,.github/workflows/stale.yml,18,"exempt-pr-labels: ""ARC,bounty,Codegen,Crash,Generics,High Priority,Macros,Next release,Showstopper,Static[T]"""
+macro,meta,changelogs/changelog_0_18_1.md,164,- Added ``macros.unpackVarargs``.
+macro,meta,changelogs/changelog_0_18_1.md,410,"- Fixed ""Table usage in a macro (SIGSEGV: Illegal storage access.)"""
+macro,meta,changelogs/changelog_0_18_1.md,431,"- Fixed ""Error when using `multisync` macro"""
+macro,meta,changelogs/changelog_0_18_1.md,505,"- Fixed ""json 'to' macro can not marshalize into tuples"""
+macro,meta,changelogs/changelog_0_18_1.md,581,"- Fixed ""compiler crash on simple macro"""
+macro,meta,changelogs/changelog_0_18_1.md,609,"- Fixed ""NPE when compile macro that returns concrete value"""
+macro,meta,changelogs/changelog_0_19_0.md,6,- ``macros.callsite`` is now deprecated. Since the introduction of ``varargs``
+manual_memory,memory,changelogs/changelog_0_18_1.md,656,"- Fixed ""New Allocator Fails On >=4GB Requests"""
+manual_memory,memory,changelogs/changelog_1_0_0.md,75,- core/allocators
+manual_memory,memory,changelogs/changelog_1_4_0.md,841,"- Fixed ""memory corruption for seq.add(seq) with gc:arc and d:useMalloc """
+manual_memory,memory,changelogs/changelog_1_6_0.md,694,"- The allocator for Nintendo Switch, which was nonfunctional because"
+manual_memory,memory,changelogs/changelog_1_6_0.md,695,"of breaking changes in libnx, was removed, in favor of the new `-d:nimAllocPagesViaMalloc` option."
+manual_memory,memory,changelogs/changelog_1_6_0.md,857,- On embedded devices `malloc` can now be used instead of `mmap` via `-d:nimAllocPagesViaMalloc`.
+manual_memory,memory,compiler/ccgthreadvars.nim,33,# allocator for it :-(
+manual_memory,memory,compiler/nifbackend.nim,284,"# (locks, allocators, threads, …) during codegen; the per-module backend"
+map_dict,expression,lib/pure/collections/tables.nim,11,## (also often named `dictionary`:idx: in other programming languages) that is
+map_dict,expression,tests/arc/dmodule.nim,3,minDictionary
+map_dict,expression,tests/arc/dmodule.nim,7,of minDictionary:
+map_dict,expression,tests/arc/dmodule.nim,15,of minDictionary:
+map_dict,expression,tests/arc/t14383.nim,30,if val.kind == minDictionary:
+map_type,type,compiler/ccgcalls.nim,205,"# bug #23321: In the function mapType, ptrs (tyPtr, tyVar, tyLent, tyRef)"
+map_type,type,compiler/ccgcalls.nim,399,"let needsIndirect = mapType(p.config, n.firstSon.typ, mapTypeChooser(n.firstSon) == skParam) != ctArray"
+map_type,type,compiler/ccgexprs.nim,907,"let mt = mapType(p.config, e.firstSon.typ, mapTypeChooser(e.firstSon) == skParam)"
+map_type,type,compiler/ccgexprs.nim,987,"elif mapType(p.config, e.firstSon.typ, mapTypeChooser(e.firstSon) == skParam) == ctArray or isCppRef(p, e.typ):"
+map_type,type,compiler/ccgtypes.nim,229,proc mapType(conf: ConfigRef; typ: PType; isParam: bool): TCTypeKind =
+map_type,type,compiler/ccgtypes.nim,244,"result = mapType(conf, typ.skipModifier, isParam)"
+map_type,type,compiler/ccgtypes.nim,247,"result = mapType(conf, skipModifier(typ), isParam)"
+map_type,type,compiler/ccgtypes.nim,258,"of tyRange: result = mapType(conf, typ.elementType, isParam)"
+member_access,expression,changelogs/changelog_1_0_2.md,28,* Fixed yield in nkCheckedFieldExpr
+member_access,expression,compiler/aliasanalysis.nim,7,"PathKinds0* = {nkDotExpr, nkCheckedFieldExpr,"
+member_access,expression,compiler/aliases.nim,43,"of nkDotExpr, nkCheckedFieldExpr:"
+member_access,expression,compiler/aliases.nim,54,"while cur.kind in {nkDotExpr, nkBracketExpr, nkCheckedFieldExpr, nkObjUpConv,"
+member_access,expression,compiler/aliases.nim,59,"of nkDotExpr, nkBracketExpr, nkCheckedFieldExpr, nkObjUpConv, nkObjDownConv,"
+member_access,expression,compiler/aliases.nim,224,"of nkObjUpConv, nkObjDownConv, nkCheckedFieldExpr:"
+member_access,expression,compiler/aliases.nim,232,"nkCheckedFieldExpr, nkHiddenAddr}"
+member_access,expression,compiler/astalgo.nim,744,if n.kind == nkCheckedFieldExpr: sfDiscriminant in n[0][1].sym.flags
+memory_model,concurrency,lib/std/sysatomics.nim,89,## to conform to the memory model specified by success_memmodel. There are no
+memory_model,concurrency,lib/std/sysatomics.nim,90,"## restrictions on what memory model can be used here. False is returned otherwise,"
+memory_model,concurrency,lib/std/sysatomics.nim,91,## and the execution is considered to conform to failure_memmodel. This memory model
+memory_model,concurrency,lib/std/sysatomics.nim,102,"## Perform the operation return the new value, all memory models are valid"
+memory_model,concurrency,lib/std/sysatomics.nim,116,"## Perform the operation return the old value, all memory models are valid"
+memory_model,concurrency,lib/std/sysatomics.nim,135,## All memory models are valid.
+memory_model,concurrency,lib/std/sysatomics.nim,146,## on the specified memory model. All memory orders are valid.
+memory_model,concurrency,lib/system/arc.nim,260,"# destroyed (which happens-before this destructor, or the program races"
+module,declaration,azure-pipelines.yml,16,- job: packages
+module,declaration,azure-pipelines.yml,41,# see also: `NIM_TEST_PACKAGES`
+module,declaration,azure-pipelines.yml,100,Package: libllvm6.0
+module,declaration,changelog.md,15,"- With `-d:nimPreviewCheckedClose`, the `close` function in the `std/syncio` module now raises an IO exception in case of an error."
+module,declaration,changelog.md,26,"- `std/parsesql` has been moved to a nimble package, use `nimble` or `atlas` to install it."
+module,declaration,changelog.md,28,"- With `-d:nimPreviewDuplicateModuleError`, importing two modules that share the same name becomes a compile-time error. This includes importing the same module more than once. Use `import foo as foo1` (or other aliases) to avoid collisions."
+module,declaration,koch.nim,20,# Note that Nimony uses Nim as a git submodule but we don't want to install
+module,declaration,koch.nim,80,distrohelper [bindir] helper for distro packagers
+mutation,effect,azure-pipelines.yml,165,# displayName: 'Restore built csourcesAny'
+mutation,effect,changelog.md,40,`--legacy:procParamTypeBackendAliases` to restore the older behavior.
+mutation,effect,changelog.md,154,receive a `toOpenArray` view (bug #15952): mutations reach the caller's storage
+mutation,effect,changelogs/changelog_0_19_0.md,49,- The ``times.Timezone`` is now an immutable ref-type that must be initialized
+mutation,effect,changelogs/changelog_1_2_0.md,134,to restore the old behavior.
+mutation,effect,changelogs/changelog_1_2_0.md,290,"- Fixed ""mutable iterator cannot yield named tuples"""
+mutation,effect,changelogs/changelog_1_2_0.md,292,"- Fixed ""parsecfg stores ""\r\n"" line breaks just as ""\n"""""
+mutation,effect,changelogs/changelog_1_4_0.md,52,- `strutils.formatFloat` with `precision = 0` has been restored to the version
+name_resolution,binding,lib/js/dom.nim,1558,proc lookupNamespaceURI*(n: Node): cstring
+name_resolution,binding,tests/errmsgs/tproper_stacktrace3.nim,12,proc actualResolver(x: ptr Container): ptr Container = x
+name_resolution,binding,tests/errmsgs/tproper_stacktrace3.nim,14,template resolve(): untyped = actualResolver(db)
+name_resolution,binding,tests/errmsgs/tproper_stacktrace3.nim,21,# actualResolver(db).val = myfail() # actualResolver is not included in stack trace.
+network,effect,koch.nim,84,doesn't require network connectivity
+network,effect,koch.nim,719,"execFold(""Run tester"", ""nim c -r --putenv:NIM_TESTAMENT_REMOTE_NETWORKING:1 -d:nimStrictMode testament/testament $# all -d:nimCoroutines"" % batchParam)"
+network,effect,changelogs/changelog_0_18_1.md,30,- `newAsyncSocket` taking an `AsyncFD` now runs `setBlocking(false)` on the
+network,effect,changelogs/changelog_0_18_1.md,81,- ``newNativeSocket`` is now named ``createNativeSocket``.
+network,effect,changelogs/changelog_0_18_1.md,83,- ``newAsyncNativeSocket`` is now named ``createAsyncNativeSocket``
+network,effect,changelogs/changelog_0_18_1.md,84,and it no longer raises an OS error but returns an ``osInvalidSocket`` when
+network,effect,changelogs/changelog_0_18_1.md,152,- Implemented an `accept` proc that works on a `SocketHandle` in
+network,effect,changelogs/changelog_0_18_1.md,153,``nativesockets``.
+optimizer,meta,changelogs/changelog_1_2_0.md,320,"- Fixed ""Sink to MemMove optimization in injectdestructors"""
+optimizer,meta,changelogs/changelog_1_2_0.md,510,"- Fixed ""Accidentally ""SIGSEGV: Illegal storage access"" error after arc optimizations (#13325)"""
+optimizer,meta,changelogs/changelog_1_6_0.md,703,## Performance / memory optimizations
+optimizer,meta,changelogs/changelog_2_0_0.md,233,With these important optimizations we improved the runtime of the compiler and important benchmarks by 0%! Wait ... what?
+optimizer,meta,changelogs/changelog_2_0_0.md,234,"Yes, unfortunately it turns out that for a modern optimizer like in GCC or LLVM there is no difference."
+optimizer,meta,changelogs/changelog_2_0_0_details.md,73,`sink` for optimization purposes.
+optimizer,meta,compiler/aliasanalysis.nim,54,# lower level C++ optimizer to specialize this code.
+optimizer,meta,compiler/ast.nim,845,# XXX Dead code. Remove
+optional_nullable,type,changelogs/changelog_0_18_1.md,205,- ``os.getEnv`` now takes an optional ``default`` parameter that tells ``getEnv``
+optional_nullable,type,changelogs/changelog_0_20_0.md,231,"- In `times` module, procs `format` and `parse` accept a new optional"
+optional_nullable,type,changelogs/changelog_1_2_0.md,151,- The `=sink` type bound operator is now optional. The compiler can now use a
+optional_nullable,type,changelogs/changelog_1_4_0.md,115,"- `osproc.execCmdEx` now takes an optional `input` for stdin, `workingDir` and `env`"
+optional_nullable,type,changelogs/changelog_1_6_0.md,216,## Block arguments now support optional parameters
+optional_nullable,type,changelogs/changelog_1_6_0.md,419,The `parseFloat` family of functions also has now optional `rawIntegers` and
+optional_nullable,type,changelogs/changelog_1_6_0.md,488,"- Added optional `options` argument to `copyFile`, `copyFileToDir`, and"
+optional_nullable,type,changelogs/changelog_1_6_0.md,497,- Added optional `followSymlinks` argument to `setFilePermissions`.
+overload_resolution,type,changelog.md,58,- `strutils.multiReplace` overload for character set replacements in a single pass.
+overload_resolution,type,changelog.md,138,See the [experimental manual](https://nim-lang.github.io/Nim/manual_experimental.html#typeminusbound-overloads)
+overload_resolution,type,changelogs/changelog_0_18_1.md,98,- The overloading rules changed slightly so that constrained generics are
+overload_resolution,type,changelogs/changelog_0_18_1.md,106,This means if you overload ``[]`` or ``[]=`` you need to ensure they also work
+overload_resolution,type,changelogs/changelog_0_18_1.md,123,- The experimental overloading of the dot ``.`` operators now take
+overload_resolution,type,changelogs/changelog_0_20_0.md,26,"Furthermore, an overload with positive stepping is available."
+overload_resolution,type,changelogs/changelog_1_0_0.md,71,- Consistent error handling of two `exec` overloads. (#10967)
+overload_resolution,type,changelogs/changelog_1_2_0.md,5,- Added overloaded `strformat.fmt` macro that use specified characters as
+ownership,memory,compiler/aliasanalysis.nim,38,(n.sym.typ.skipTypes(abstractInst-{tyOwned}).kind in {tyOwned})
+ownership,memory,compiler/ast.nim,1276,"let mask = elem.flags * {tfHasAsgn, tfHasOwned}"
+ownership,memory,compiler/ast.nim,1282,"# During the original compilation, propagateToOwner set tfHasAsgn/tfHasOwned on the type before it was sealed"
+ownership,memory,compiler/ast.nim,1536,## Generic instantiations are owned by their originating generic
+ownership,memory,compiler/ast.nim,1665,"template hasDestructor*(t: PType): bool = {tfHasAsgn, tfHasOwned} * t.flags != {}"
+ownership,memory,compiler/ast.nim,1695,s.kind == skParam and (s.typ.kind == tySink or tfHasOwned in s.typ.flags)
+ownership,memory,compiler/ast.nim,1698,t.kind == tySink or tfHasOwned in t.flags
+ownership,memory,compiler/ast2nif.nim,670,"## owned by member B is minted, not loaded -- keying on `currentModule` would"
+parameter,declaration,changelog.md,11,- The `default` parameter of `tables.getOrDefault` has been renamed to `def` to
+parameter,declaration,changelog.md,12,"avoid conflicts with `system.default`, so named argument usage for this"
+parameter,declaration,changelog.md,13,"parameter like `getOrDefault(..., default = ...)` will have to be changed."
+parameter,declaration,changelog.md,32,"- The second parameter of `succ`, `pred`, `inc`, and `dec` in `system` now accepts `SomeInteger` (previously `Ordinal`)."
+parameter,declaration,changelog.md,39,"parameter and result types, not just their source-level shape. Use"
+parameter,declaration,changelog.md,86,- `system.typeof` adds a new parameter `modifierMode` to specify how type modifiers are handled.
+parameter,declaration,changelog.md,100,- `std/uri`: The `?` operator now appends query parameters to an existing query
+parameter,declaration,changelog.md,151,`tyTypeDesc(tyGenericParam)` as an unresolved generic parameter.
+pattern,expression,koch.nim,495,proc removePattern(pattern: string) =
+pattern,expression,koch.nim,496,for f in walkFiles(pattern):
+pattern,expression,koch.nim,501,"removePattern(""web/*.html"")"
+pattern,expression,koch.nim,502,"removePattern(""doc/*.html"")"
+pattern,expression,changelogs/changelog_0_19_0.md,158,This feature enables custom pattern matchers.
+pattern,expression,changelogs/changelog_1_0_0.md,109,"takes a ""pattern"" for maximum flexibility."
+pattern,expression,changelogs/changelog_1_6_0.md,587,"- Added `ZZZ` and `ZZZZ` patterns to `times.nim` `DateTime` parsing, to match time"
+pattern,expression,changelogs/changelog_2_0_0.md,172,It's a common pattern in C++ to use inheritance to extend a library. Some even use multiple inheritance as a mechanism to make interfaces.
+pointer,type,changelogs/changelog_0_19_0.md,199,"- ""Memory regions"" for pointer types have been deprecated, they were hardly used"
+pointer,type,changelogs/changelog_1_2_0.md,21,"- `options` now treats `proc` like other pointer types, meaning `nil` proc variables"
+pointer,type,changelogs/changelog_1_4_0.md,64,"used must be castable to `ptr string`, any incompatible pointer type will not"
+pointer,type,changelogs/changelog_2_0_0_details.md,78,- `nil` literals can no longer be directly assigned to variables or fields of `distinct` pointer types. They must be converted instead.
+pointer,type,compiler/cbuilderdecls.nim,336,"obj.addField(name = ""m_type"", typ = ptrType(cgsymValue(m, ""TNimType"")))"
+pointer,type,compiler/cbuilderdecls.nim,338,"obj.addField(name = ""m_type"", typ = ptrType(cgsymValue(m, ""TNimTypeV2"")))"
+pointer,type,compiler/cbuilderexprs.nim,5,proc constPtrType(t: Snippet): Snippet =
+pointer,type,compiler/cbuilderexprs.nim,11,proc ptrType(t: Snippet): Snippet =
+primitive_bool,type,compiler/astdef.nim,262,"# boolean type classes such as `string|int`,`not seq`,"
+primitive_bool,type,compiler/cgmeth.nim,260,"let boolType = getSysType(g, unknownLineInfo, tyBool)"
+primitive_bool,type,compiler/cgmeth.nim,272,"var isn = newNodeIT(nkCall, base.info, boolType)"
+primitive_bool,type,compiler/cgmeth.nim,278,"var a = newNodeIT(nkCall, base.info, boolType)"
+primitive_bool,type,compiler/semexprs.nim,644,"let boolType = getSysType(c.graph, n.info, tyBool)"
+primitive_bool,type,compiler/semexprs.nim,646,n.typ = boolType
+primitive_bool,type,compiler/semexprs.nim,660,result.typ = boolType
+primitive_bool,type,compiler/vtables.nim,58,"let boolType = getSysType(g, unknownLineInfo, tyBool)"
+primitive_float,type,changelogs/changelog_0_20_0.md,237,- Vm support for float32<->int32 and float64<->int64 casts was added.
+primitive_float,type,changelogs/changelog_1_2_0.md,336,"- Fixed ""--gc:arc SIGSEGV (double free?)"""
+primitive_float,type,changelogs/changelog_1_2_0.md,412,"- Fixed ""Casting to float32 on NimVM is broken"""
+primitive_float,type,changelogs/changelog_1_4_0.md,605,"- Fixed ""Cannot borrow var float64 in infix assignment"""
+primitive_float,type,changelogs/changelog_1_4_0.md,831,"- Fixed ""Regression. Double sem check for procs."""
+primitive_float,type,changelogs/changelog_1_6_0.md,867,- docgen: RST files can now use single backticks instead of double backticks and
+primitive_float,type,changelogs/changelog_2_0_0_details.md,45,"- `PInt32`, `PInt64`, `PFloat32`, `PFloat64`, aliases to"
+primitive_float,type,changelogs/changelog_2_0_0_details.md,46,"`ptr int32`, `ptr int64`, `ptr float32`, `ptr float64`"
+primitive_integer,type,changelogs/changelog_0_19_0.md,45,"- ``proc `-`*(a, b: Time): int64`` in the ``times`` module has changed return type"
+primitive_integer,type,changelogs/changelog_0_20_0.md,45,"For example, `const x = uint32(-1)` now gives a compile time error instead"
+primitive_integer,type,changelogs/changelog_0_20_0.md,55,"- With the exception of `uint` and `uint64`, conversion to unsigned types"
+primitive_integer,type,changelogs/changelog_0_20_0.md,237,- Vm support for float32<->int32 and float64<->int64 casts was added.
+primitive_integer,type,changelogs/changelog_0_20_2.md,19,"- Mac OS X / BSD: TSa_Family is now the ``uint8`` type, so type"
+primitive_integer,type,changelogs/changelog_0_20_2.md,20,conversions like ``x.sin_family = uint16 toInt(nativesockets.AF_INET)``
+primitive_integer,type,changelogs/changelog_1_0_0.md,29,Rune16* = distinct int16
+primitive_integer,type,changelogs/changelog_1_0_0.md,115,- `uint64` is now finally a regular ordinal type. This means `high(uint64)` compiles
+primitive_string,type,compiler/ccgexprs.nim,249,# tfShallow flag for the built-in string type too! So we check only
+primitive_string,type,compiler/ccgtypes.nim,1405,"m.s[cfsTypeInit3].addFieldAssignment(nameHcr, ""name"", makeCString typename)"
+primitive_string,type,compiler/jsgen.nim,63,"etySeq, # Nim seq or string type"
+primitive_string,type,compiler/semmacrosanity.nim,173,"globalError(conf, n.info, ""string literal must be of some string type"")"
+primitive_string,type,compiler/vmdef.nim,17,type TInstrType* = uint64
+primitive_string,type,compiler/vmdef.nim,31,regOShift* = 0.TInstrType
+primitive_string,type,compiler/vmdef.nim,37,regOMask* = ((1.TInstrType shl regOBits) - 1)
+primitive_string,type,compiler/vmdef.nim,38,regAMask* = ((1.TInstrType shl regABits) - 1)
+random,effect,changelogs/changelog_0_18_1.md,208,- The ``random`` procs in ``random.nim`` have all been deprecated. Instead use
+random,effect,changelogs/changelog_0_18_1.md,209,the new ``rand`` procs. The module now exports the state of the random
+random,effect,changelogs/changelog_0_18_1.md,211,own random number generators that do not require locking. For more information
+random,effect,changelogs/changelog_0_18_1.md,521,"- Fixed ""issues with the random module"""
+random,effect,changelogs/changelog_1_0_2.md,29,"* Fixed ""`randomize()` from `random` not working on JS"" [#12418](https://github.com/nim-lang/Nim/issues/12418)"
+random,effect,changelogs/changelog_1_0_2.md,31,* fix type's case in random.nim
+random,effect,changelogs/changelog_1_4_0.md,135,"- Added `random.gauss`, that uses the ratio of uniforms method of sampling from a Gaussian distribution."
+random,effect,changelogs/changelog_1_6_0.md,153,"Cryptographically secure pseudorandom number generator,"
+reference,type,changelogs/changelog_1_2_0.md,157,- There is a new syntax for lvalue references: `var b {.byaddr.} = expr` enabled by
+reference,type,changelogs/changelog_1_2_0.md,160,"non-builtin pragmas, enabling things like lvalue references (see `decls.byaddr`)."
+reference,type,changelogs/changelog_1_4_0.md,375,"- Fixed """"distinct uint64"" type corruption on 32-bit, when using {.borrow.} operators"""
+reference,type,changelogs/changelog_1_4_0.md,605,"- Fixed ""Cannot borrow var float64 in infix assignment"""
+reference,type,changelogs/changelog_1_4_0.md,839,"- Fixed ""cannot borrow result; what it borrows from is potentially mutated"""
+reference,type,changelogs/changelog_1_6_0.md,909,- Fixed effect tracking for borrowed procs (see [#18882](https://github.com/nim-lang/Nim/pull/18882)).
+reference,type,changelogs/changelog_1_6_0.md,919,proc print(s: MyString) {.borrow.}
+reference,type,compiler/astdef.nim,99,"sfBorrow, # proc is borrowed"
+reflection,effect,changelogs/changelog_2_0_0_details.md,483,reflected in `typed` AST.
+reflection,effect,changelogs/changelog_2_0_0_details.md,491,"- The `gc` switch has been renamed to `mm` (""memory management"") in order to reflect the"
+reflection,effect,changelogs/changelog_2_2_0.md,209,(unless the other switch is enabled) and so doesn't reflect the regular
+reflection,effect,compiler/ast2nif.nim,69,"## The serialized NIF name of a type, recorded next to RTTI data"
+reflection,effect,compiler/ast2nif.nim,657,## and the backend's rtti/globals procs. The `o.typ == typ` confirmation is
+reflection,effect,compiler/ast2nif.nim,1348,"# sym/type counters here so freshly-minted backend ids (closure envs, RTTI"
+reflection,effect,compiler/ast2nif.nim,2495,"## backend syms (RTTI destroy wrappers, ...) into the same module. Both are"
+reflection,effect,compiler/ast2nif.nim,2498,## independently they could mint the same item: e.g. a `rttiDestroy` wrapper
+return,control,compiler/astdef.nim,182,"nkLastBlockStmts* = {nkRaiseStmt, nkReturnStmt, nkBreakStmt, nkContinueStmt}"
+return,control,compiler/ccgexprs.nim,3761,"of nkReturnStmt: genReturnStmt(p, n)"
+return,control,compiler/ccgstmts.nim,229,"proc blockLeaveActions(p: BProc, howManyTrys, howManyExcepts: int, isReturnStmt = false) ="
+return,control,compiler/ccgstmts.nim,261,if noSafePoints notin p.flags and not (isReturnStmt and isClosureIterator(p.prc.typ)):
+return,control,compiler/ccgstmts.nim,556,"proc genReturnStmt(p: BProc, t: PNode) ="
+return,control,compiler/ccgstmts.nim,564,isReturnStmt = true)
+return,control,compiler/cgen.nim,1262,of nkReturnStmt:
+return,control,compiler/cgen.nim,1284,of nkReturnStmt:
+scope,binding,changelogs/changelog_0_18_1.md,249,- Bodies of ``for`` loops now get their own scope:
+scope,binding,changelogs/changelog_1_2_0.md,16,closure. This is an enhanced version of `closureScope`.
+scope,binding,changelogs/changelog_1_6_0.md,85,to private fields for an object type in the current scope.
+scope,binding,changelogs/changelog_1_6_0.md,94,privateAccess(typeof(t)) # enables private access in this scope
+scope,binding,changelogs/changelog_1_6_0.md,749,"- Reusing a type name in a different scope now works, refs [#17710](https://github.com/nim-lang/Nim/pull/17710)."
+scope,binding,changelogs/changelog_2_0_0.md,75,The underscore identifier (`_`) is now generally not added to scope when
+scope,binding,changelogs/changelog_2_0_0_details.md,150,- The underscore identifier (`_`) is now generally not added to scope when
+scope,binding,changelogs/changelog_2_2_0.md,51,"- `const` values now open a new scope for each constant, meaning symbols"
+shadowing,binding,compiler/ast.nim,1189,## their structure (meta instance bodies shadowing a generic's canonical
+shadowing,binding,compiler/ast2nif.nim,1060,# e.g. nim-json-serialization's pure `JsonValueKind.Number` shadowing web3's
+shadowing,binding,compiler/astdef.nim,88,"sfShadowed, # a symbol that was shadowed in some inner scope"
+shadowing,binding,compiler/lambdalifting.nim,593,"v.flags = {sfShadowed, sfGeneratedOp}"
+shadowing,binding,compiler/lambdalifting.nim,617,"v.flags = {sfShadowed, sfGeneratedOp}"
+shadowing,binding,compiler/lambdalifting.nim,712,"incl(v.flagsImpl, sfShadowed)"
+shadowing,binding,compiler/layeredtable.nim,65,"## Looks up an ItemId directly, observing the same layer shadowing rules as"
+shadowing,binding,compiler/lineinfos.nim,75,"warnResultShadowed = ""ResultShadowed"","
+slice,expression,changelog.md,158,"write-through, pass-through, re-slicing and `@` (openArray-to-seq) of such views."
+slice,expression,changelogs/changelog_0_18_1.md,491,"- Fixed ""Inconsistent behavior with sequence and string slicing"""
+slice,expression,changelogs/changelog_0_18_1.md,559,"- Fixed ""Inconsistent behavior with sequence and string slicing"""
+slice,expression,changelogs/changelog_0_19_0.md,92,- Added ``system.toOpenArray`` in order to support zero-copy slicing
+slice,expression,compiler/jsgen.nim,1774,# slicing a `var openArray` view: rebase onto the same underlying storage
+slice,expression,compiler/jsgen.nim,2564,# re-slicing a `var openArray` view: materialize from the view's base/offset
+slice,expression,compiler/parser.nim,341,#| cmpExpr = sliceExpr (OP5 optInd sliceExpr)*
+slice,expression,compiler/parser.nim,342,#| sliceExpr = ampExpr (OP6 optInd ampExpr)*
+struct,declaration,changelogs/changelog_1_2_0.md,380,"- Fixed ""--gc:arc codegen bug copying objects bound to C structs with missing C struct fields"""
+struct,declaration,changelogs/changelog_2_0_0.md,178,struct Base {
+struct,declaration,changelogs/changelog_2_0_0.md,199,"struct $1 : public $3, public IPrinter {"
+struct,declaration,compiler/aliases.nim,85,"else: discard ""isPartOfAux(record case branch)"""
+struct,declaration,compiler/ast.nim,338,# records usages on them; the getter likewise doesn't assert.
+struct,declaration,compiler/ast2nif.nim,51,## sentinel and reconstruct it on load (see `createTypeStub`) without ever
+struct,declaration,compiler/ast2nif.nim,69,"## The serialized NIF name of a type, recorded next to RTTI data"
+struct,declaration,compiler/ast2nif.nim,301,# the matching struct member name regardless of which module references it.
+subtyping,type,changelogs/changelog_0_18_1.md,33,- ``mod`` and bitwise ``and`` do not produce ``range`` subtypes anymore. This
+subtyping,type,changelogs/changelog_0_18_1.md,400,"- Fixed ""Generic subtype matches worse than a generic"""
+subtyping,type,changelogs/changelog_0_19_0.md,15,at runtime. Use ``ref object`` with inheritance rather than ``object`` with
+subtyping,type,changelogs/changelog_0_19_0.md,16,inheritance to prevent this issue.
+subtyping,type,changelogs/changelog_1_2_0.md,326,"- Fixed ""typetraits feature request - get subtype of a generic type"""
+subtyping,type,changelogs/changelog_1_4_0.md,38,"ease the writing of multi-process servers, where sockets inheritance is"
+subtyping,type,changelogs/changelog_1_4_0.md,42,inheritance by default. This flag does **not** affect the `selectors` module
+subtyping,type,changelogs/changelog_1_4_0.md,47,socket inheritance. Not all platforms have these `proc`s defined.
+switch_match,control,compiler/cbuilderstmts.nim,160,"template addSwitchStmt(builder: var Builder, val: Snippet, body: typed) ="
+switch_match,control,compiler/ccgreset.nim,31,p.s(cpsStmts).addSwitchStmt(discField):
+switch_match,control,compiler/ccgstmts.nim,273,p.s(cpsStmts).addSwitchStmt(ra):
+switch_match,control,compiler/ccgstmts.nim,1014,p.s(cpsStmts).addSwitchStmt(
+switch_match,control,compiler/ccgstmts.nim,1102,p.s(cpsStmts).addSwitchStmt(rca):
+switch_match,control,compiler/ccgtrav.nim,44,p.s(cpsStmts).addSwitchStmt(discField):
+switch_match,control,compiler/extccomp.nim,28,"hasSwitchRange, # CC allows ranges in switch statements (GNU C)"
+switch_match,control,compiler/patterns.nim,237,"proc matchStmtList(c: PPatternContext, p, n: PNode): PNode ="
+symbol_table,binding,compiler/ast.nim,10,# abstract syntax tree + symbol table
+symbol_table,binding,compiler/astdef.nim,110,sfGenSym # symbol is 'gensym'ed; do not add to symbol table
+symbol_table,binding,compiler/astdef.nim,749,# (or not in symbol table)
+symbol_table,binding,compiler/astdef.nim,1149,"proc symTabReplaceRaw(data: var seq[PSym], prevSym: PSym, newSym: PSym) ="
+symbol_table,binding,compiler/astdef.nim,1159,"proc symTabReplace*(t: var TStrTable, prevSym: PSym, newSym: PSym) ="
+symbol_table,binding,compiler/astdef.nim,1160,"symTabReplaceRaw(t.data, prevSym, newSym)"
+symbol_table,binding,compiler/astdef.nim,1188,# times to the symbol table which we allow here with the 'it == n' check.
+symbol_table,binding,compiler/importer.nim,64,# have been put into the symbol table
+task_async,concurrency,azure-pipelines.yml,70,echo '##vso[task.setvariable variable=skipci]true'
+task_async,concurrency,azure-pipelines.yml,74,- task: NodeTool@0
+task_async,concurrency,azure-pipelines.yml,142,echo_run echo '##vso[task.prependpath]$(System.DefaultWorkingDirectory)/dist/mingw64/bin'
+task_async,concurrency,azure-pipelines.yml,147,- bash: echo '##vso[task.prependpath]$(System.DefaultWorkingDirectory)/bin'
+task_async,concurrency,azure-pipelines.yml,160,# - task: Cache@2
+task_async,concurrency,azure-pipelines.yml,168,# would could also show on failure: echo '##vso[task.complete result=Failed]'
+task_async,concurrency,koch.nim,111,"specifying a category, e.g. `tests cat async`)"
+task_async,concurrency,koch.nim,722,when defined(posix): # windows can be handled in future PR's
+thread,concurrency,koch.nim,589,"""threads"" notin programArgs and"
+thread,concurrency,changelogs/changelog_0_18_1.md,210,number generator as type ``Rand`` so multiple threads can easily use their
+thread,concurrency,changelogs/changelog_0_18_1.md,380,"- Fixed ""Can't compile dynlib with ``-d:useNimRtl`` and ``--threads:on``"""
+thread,concurrency,changelogs/changelog_0_19_0.md,76,- `threadpool`'s `await` and derivatives have been renamed to `blockUntil`
+thread,concurrency,changelogs/changelog_0_19_0.md,190,- Thread-local variables can now be declared inside procs. This implies all
+thread,concurrency,changelogs/changelog_1_0_0.md,85,- concurrency/threadpool
+thread,concurrency,changelogs/changelog_1_0_2.md,43,* threadpool: fix link in docs (#12258)
+thread,concurrency,changelogs/changelog_1_2_0.md,212,"- Fixed ""[TODO] regression: Error: Locks requires --threads:on option"""
+throw_raise,control,changelog.md,22,- The bare `except:` now panics on `Defect`. Use `except Exception:` or `except Defect:` to catch `Defect`. `--legacy:noPanicOnExcept` is provided for a transition period.
+throw_raise,control,changelog.md,36,"- Adds a new warning `--warning:ImplicitRangeConversion` that detects downsizing implicit conversions to range types (e.g., `int -> range[0..255]` or `range[1..256] -> range[0..255]`) that could cause runtime panics. Safe conversions like `range[0..255] -> ran"
+throw_raise,control,changelogs/changelog_0_18_1.md,295,"else: raise newException(ValueError, ""Invalid boolean"")"
+throw_raise,control,changelogs/changelog_0_18_1.md,297,"of nil, """": raise newException(ValueError, ""Invalid boolean"")"
+throw_raise,control,changelogs/changelog_0_18_1.md,487,"- Fixed ""Code that makes the compiler throw an error message and then hangs"""
+throw_raise,control,changelogs/changelog_0_18_1.md,489,"- Fixed ""Code that makes the compiler throw an error message and then hangs"""
+throw_raise,control,changelogs/changelog_0_18_1.md,631,"- Fixed ""newAsyncSocket should raise an OS error plus other inconsistencies"""
+throw_raise,control,changelogs/changelog_0_19_0.md,43,"For example ``parse(""2017-01-01 foo"", ""yyyy-MM-dd"")`` will now raise an error."
+time,effect,changelogs/changelog_1_0_0.md,69,- Added the `std/monotimes` module which implements monotonic timestamps.
+time,effect,compiler/docgen.nim,1739,"""time"", getClockStr(), ""content"", code,"
+time,effect,compiler/docgen.nim,1752,"""moduledesc"", d.modDescFinal, ""date"", getDateStr(), ""time"", getClockStr(),"
+time,effect,compiler/docgen.nim,1943,"""date"", getDateStr(), ""time"", getClockStr(),"
+time,effect,compiler/liftdestructors.nim,1367,let needsYrcLock = g.config.selectedGC == gcYrc and
+time,effect,compiler/liftdestructors.nim,1371,if needsYrcLock:
+time,effect,compiler/liftdestructors.nim,1374,if needsYrcLock:
+time,effect,compiler/options.nim,642,proc getClockStr*(): string =
+tuple,expression,changelogs/changelog_0_18_1.md,135,- **Added ``sequtils.mapLiterals`` for easier construction of array and tuple literals.**
+tuple,expression,changelogs/changelog_0_18_1.md,505,"- Fixed ""json 'to' macro can not marshalize into tuples"""
+tuple,expression,changelogs/changelog_0_19_0.md,8,"- Anonymous tuples with a single element can now be written as ``(1,)`` with a"
+tuple,expression,changelogs/changelog_0_19_0.md,9,trailing comma. The underlying AST is ``nnkTupleConstr(newLit 1)`` for this
+tuple,expression,changelogs/changelog_0_19_0.md,10,example. ``nnkTupleConstr`` is a new node kind your macros need to be able
+tuple,expression,changelogs/changelog_0_19_0.md,32,- The returned tuple of ``system.instantiationInfo`` now has a third field
+tuple,expression,changelogs/changelog_0_20_0.md,214,- The `Complex` type is now a generic object and not a tuple anymore.
+tuple,expression,changelogs/changelog_0_20_0.md,245,- Tuple unpacking is now supported for constants and for loop variables.
+tuple_type,type,compiler/ast.nim,1010,"iterator tupleTypePairs*(a, b: PType): (int, PType, PType) ="
+tuple_type,type,compiler/ast.nim,1039,proc isEmptyTupleType*(t: PType): bool {.inline.} = t.len == 0
+tuple_type,type,compiler/ast.nim,1040,proc isSingletonTupleType*(t: PType): bool {.inline.} = t.len == 1
+tuple_type,type,compiler/ccgexprs.nim,1059,# we found a unique tuple type which lacks field information
+tuple_type,type,compiler/ccgexprs.nim,3941,if p.vccAndC and validTupleTypeFields(t) == 0:
+tuple_type,type,compiler/ccgtypes.nim,1607,proc validTupleTypeFields(t: PType): int =
+tuple_type,type,compiler/ccgtypes.nim,1616,let nonVoidKids = validTupleTypeFields(typ)
+tuple_type,type,compiler/nodekinds.nim,177,"nkTupleClassTy, # tuple type class"
+type_inference,type,changelogs/changelog_0_18_1.md,342,"- Fixed ""Range type inference leads to counter-intuitive behaviour"""
+type_inference,type,changelogs/changelog_0_18_1.md,406,"- Fixed ""Range type inference leads to counter-intuitive behaviour"""
+type_inference,type,changelogs/changelog_0_18_1.md,552,"- Fixed ""Type inference for 'if' statements changed"""
+type_inference,type,changelogs/changelog_1_6_0.md,22,"# of type inference, overloading issues, and MCS."
+type_inference,type,changelogs/changelog_1_6_0.md,23,template sumOld(a: untyped): untyped = # no type inference possible
+type_inference,type,changelogs/changelog_2_0_0.md,24,### Improved type inference
+type_inference,type,changelogs/changelog_2_0_0.md,26,A new form of type inference called [top-down inference](https://nim-lang.github.io/Nim/manual_experimental.html#topminusdown-type-inference) has been implemented for a variety of basic cases.
+type_inference,type,changelogs/changelog_2_0_0_details.md,444,- A new form of type inference called [top-down inference](https://nim-lang.github.io/Nim/manual_experimental.html#topminusdown-type-inference)
+unary_op,expression,compiler/cbuilderexprs.nim,180,type TypedUnaryOp = enum
+unary_op,expression,compiler/cbuilderexprs.nim,183,"const typedUnaryOperators: array[TypedUnaryOp, string] = ["
+unary_op,expression,compiler/cbuilderexprs.nim,203,type UntypedUnaryOp = enum
+unary_op,expression,compiler/cbuilderexprs.nim,206,"const untypedUnaryOperators: array[UntypedUnaryOp, string] = ["
+unary_op,expression,compiler/cbuilderexprs.nim,219,"proc addOp(builder: var Builder, unOp: TypedUnaryOp, t: Snippet, a: Snippet) ="
+unary_op,expression,compiler/cbuilderexprs.nim,221,builder.add(typedUnaryOperators[unOp])
+unary_op,expression,compiler/cbuilderexprs.nim,235,"proc addOp(builder: var Builder, unOp: UntypedUnaryOp, a: Snippet) ="
+unary_op,expression,compiler/cbuilderexprs.nim,237,builder.add(untypedUnaryOperators[unOp])
+union_sum,type,compiler/cbuilderdecls.nim,181,## adds a field inside a struct/union type
+union_sum,type,compiler/cbuilderdecls.nim,193,## adds an array field inside a struct/union type
+union_sum,type,compiler/cbuilderdecls.nim,206,"## adds an field inside a struct/union type, based on an `skField` symbol"
+union_sum,type,compiler/cbuilderdecls.nim,384,template addUnionType(obj: var Builder; body: typed) =
+union_sum,type,compiler/cbuilderdecls.nim,385,## adds a union type i.e. `union { ... }` with fields according to `body`
+union_sum,type,compiler/ccgexprs.nim,2669,p.s(cpsLocals).addUnionType():
+union_sum,type,compiler/ccgexprs.nim,2677,p.s(cpsLocals).addUnionType():
+union_sum,type,compiler/ccgtypes.nim,1539,# this variant type's RTTI (emit-everywhere; RTTI has no single owner —
+unsafe,memory,changelog.md,47,raw `ptr UncheckedArray[char]` into a string's character data which stays valid
+unsafe,memory,changelogs/changelog_0_20_0.md,28,"- The `unchecked` pragma was removed, instead use `system.UncheckedArray`."
+unsafe,memory,changelogs/changelog_1_0_0.md,64,"- Added `unsafeColumnAt` procs, that return unsafe cstring from InstantRow. (#11647)"
+unsafe,memory,changelogs/changelog_1_2_0.md,154,"- Conversions to unsigned integers are unchecked at runtime, imitating earlier Nim"
+unsafe,memory,changelogs/changelog_1_4_0.md,230,of true: y: ptr UncheckedArray[float]
+unsafe,memory,changelogs/changelog_1_4_0.md,241,val: ptr UncheckedArray[float]
+unsafe,memory,changelogs/changelog_1_4_0.md,307,"preferred way of writing these, emphasizing their unsafe nature."
+unsafe,memory,changelogs/changelog_1_4_0.md,557,"- Fixed ""lent is unsafe: after #14447 you can modify variables with ""items"" loop for sequences"""
+variable,declaration,azure-pipelines.yml,11,variables:
+variable,declaration,azure-pipelines.yml,61,"condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))"
+variable,declaration,azure-pipelines.yml,70,echo '##vso[task.setvariable variable=skipci]true'
+variable,declaration,azure-pipelines.yml,78,"condition: and(succeeded(), eq(variables['skipci'], 'false'))"
+variable,declaration,azure-pipelines.yml,90,"condition: and(succeeded(), eq(variables['skipci'], 'false'), eq(variables['Agent.OS'], 'Linux'), eq(variables['CPU'], 'amd64'))"
+variable,declaration,azure-pipelines.yml,131,"condition: and(succeeded(), eq(variables['skipci'], 'false'), eq(variables['Agent.OS'], 'Linux'), eq(variables['CPU'], 'i386'))"
+variable,declaration,azure-pipelines.yml,135,"condition: and(succeeded(), eq(variables['skipci'], 'false'), eq(variables['Agent.OS'], 'Darwin'))"
+variable,declaration,azure-pipelines.yml,145,"condition: and(succeeded(), eq(variables['skipci'], 'false'), eq(variables['Agent.OS'], 'Windows_NT'))"
+visibility,declaration,changelogs/changelog_0_19_0.md,224,C++ code. This is done for all Nim code - internal and exported.
+visibility,declaration,changelogs/changelog_1_0_0.md,66,"- Make public `Sha1Digest` and `Sha1State` types and `newSha1State`,"
+visibility,declaration,changelogs/changelog_1_4_0.md,101,"- The fields of `times.DateTime` are now private, and are accessed with getters and deprecated setters."
+visibility,declaration,changelogs/changelog_1_4_0.md,158,- `asyncdispatch.PDispatcher.handles` is exported so that an external low-level libraries can access it.
+visibility,declaration,changelogs/changelog_1_4_0.md,415,"- Fixed ""Make debugSend and debugRecv procs public in smtp.nim"""
+visibility,declaration,changelogs/changelog_1_4_0.md,427,"- Fixed ""HCR: Can not link exported const, in external library"""
+visibility,declaration,changelogs/changelog_1_6_0.md,70,## Private imports and private field access
+visibility,declaration,changelogs/changelog_1_6_0.md,73,(public or private) from `foo`.
+while,control,compiler/cbuilderstmts.nim,238,"proc initWhileStmt(builder: var Builder, cond: Snippet): WhileBuilder ="
+while,control,compiler/cbuilderstmts.nim,244,"proc finishWhileStmt(builder: var Builder, stmt: var WhileBuilder) ="
+while,control,compiler/cbuilderstmts.nim,249,"template addWhileStmt(builder: var Builder, cond: Snippet, body: typed) ="
+while,control,compiler/ccgexprs.nim,3748,"of nkWhileStmt: genWhileStmt(p, n)"
+while,control,compiler/ccgstmts.nim,692,"proc genWhileStmt(p: BProc, t: PNode) ="
+while,control,compiler/ccgstmts.nim,712,"stmt = initWhileStmt(p.s(cpsStmts), cIntValue(1))"
+while,control,compiler/ccgstmts.nim,727,"finishWhileStmt(p.s(cpsStmts), stmt)"
+while,control,compiler/cgen.nim,1365,of nkWhileStmt:
+yield,expression,koch.nim,95,documentation generator in order to use less RAM
+yield,expression,readme.md,136,* ``config/`` - the configuration for the compiler and documentation generator.
+yield,expression,changelogs/changelog_0_18_1.md,210,number generator as type ``Rand`` so multiple threads can easily use their
+yield,expression,changelogs/changelog_0_18_1.md,211,own random number generators that do not require locking. For more information
+yield,expression,changelogs/changelog_0_18_1.md,323,the documentation generator. The old version 1 can still be accessed
+yield,expression,changelogs/changelog_1_0_2.md,28,* Fixed yield in nkCheckedFieldExpr
+yield,expression,changelogs/changelog_1_2_0.md,290,"- Fixed ""mutable iterator cannot yield named tuples"""
+yield,expression,changelogs/changelog_1_4_0.md,132,- Added `rstgen.rstToLatex` a convenience proc for `renderRstToOut` and `initRstGenerator`.

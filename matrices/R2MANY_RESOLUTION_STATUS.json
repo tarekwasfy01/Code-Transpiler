@@ -1,0 +1,37 @@
+{
+  "project": "R2Many",
+  "shared_parser": {
+    "lexer": true,
+    "pratt_expressions": true,
+    "binary_operators": true,
+    "unary_operators": true,
+    "function_calls": true,
+    "indexing": true,
+    "assignments": true,
+    "if_else": true,
+    "while": true,
+    "for": true,
+    "repeat": true,
+    "function_definitions": true,
+    "return_break_next": true,
+    "named_arguments": true
+  },
+  "targets": [
+    "go",
+    "rust",
+    "cpp",
+    "c",
+    "python",
+    "zig",
+    "julia",
+    "nim",
+    "csharp",
+    "java",
+    "kotlin",
+    "swift"
+  ],
+  "primitive_matrix_entries": 702,
+  "target_routes": 8424,
+  "routing_coverage_percent": 100.0,
+  "semantic_policy": "direct handler where implemented; explicit runtime error otherwise; never silently claim unsupported Base-R semantics"
+}

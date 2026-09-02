@@ -1,0 +1,10 @@
+element_type,element_id
+field,pattern
+field,receiver
+structure,AggregateExpr
+structure,BindingPattern
+structure,GotoLabelStmt
+structure,ImportDecl
+structure,MemberAccessExpr
+structure,ModuleDecl
+structure,TupleExpr

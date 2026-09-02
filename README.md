@@ -1,5 +1,61 @@
 # Code-Transpiler
 
+## Local development additions (not yet released)
+
+Native Go analysis is available through
+`NativeAnalysisJSON("go", "input.go", source)` and the CLI command
+`native-analysis -source go input.go -o analysis.json`.
+It uses Go's parser and type checker, preserving literal spelling, structured
+types, source spans, and lexical symbol relations. Imports are currently rejected.
+The output is an **analysis artifact, not an executable SemanticProgram**.
+
+The separate `NativeSemanticJSON("go", "input.go", source)` API and
+`semantic-export -native -source go input.go -o program.json` CLI path now
+produce an **executable SemanticProgram** for a bounded Go scalar/control
+subset. They preserve block shadowing and source mapping, and reject unsupported
+input without falling back to the old parser. Its Go target and embedded runtime
+are verified alongside Python, Rust, C and C++ for the bounded subset; other targets
+are gated by the `native.go.scalar` capability.
+Native helper functions support bool/string/fixed-width integer parameters, zero or one return
+value, direct calls and conditional returns. Their sparse caller-to-callee matrix
+orders declarations and rejects recursion. The additional `native.go.functions`
+capability enables the embedded runtime and Go/Python/Rust/C/C++ emission.
+Argument order, argument side effects and boolean short-circuit behavior are
+checked against original Go execution after a deterministic JSON roundtrip.
+Void fallthrough becomes an explicit semantic return. Empty functions, loop
+returns and ordered effectful operands are included in the executable fixture
+`internal/backend/testdata/native_functions.go`. C is also tested with `-O2`.
+Architecture-sized integers, floating-point native operations, general imports,
+recursive functions and Unicode are not yet part
+of this strict executable subset. Existing default translation remains legacy.
+
+`CapabilityMatrixJSON(features)` and `capability-matrix [feature ...]` expose
+feature-by-target status matrices. Required capabilities now gate emission;
+unknown dialect operations gate execution and emission.
+
+`ImplementationMatrixJSON()` and `implementation-matrix` expose 19 typed integer
+operations across JSON, runtime, all 13 source adapters and all 13 target adapters
+(19 x 28). This matrix gates emission directly from the actual operation nodes;
+removing a document's optional requirement strings cannot bypass it. Its route
+matrix describes declared availability, not execution-test evidence.
+
+The new `tagged_exact_scalars_v1` value contract preserves int8/16/32/64 and
+uint8/16/32/64 without binary64 conversion. Typed core nodes encode literals,
+loads, addition/subtraction/multiplication, bit operations, comparisons,
+formatting, and explicit integer conversions with modular wrap semantics.
+Division, remainder and shifts are not implemented in this subset. Integer
+parameter types and value-passing semantics survive the executable JSON codec.
+The 1,472-case integer matrix uses boundaries and seeded values across all
+eight domains, with an independent big.Int oracle and optional external runs.
+
+Implemented native input is currently **Go**. Exact integer target adapters are
+**Go, Python, Rust, C, C++, Java and C#**. Other native frontends and exact target adapters
+remain explicit unsupported matrix entries, not claimed implementations.
+
+See [frontend migration status](SEMANTIC_FRONTEND_V2.md) and the complete
+[development instructions](SEMANTIC_DEVELOPMENT.md) for implemented boundaries,
+the 1,024-case arithmetic differential test, and remaining compiler work.
+
 [![Go Reference](https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg)](https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler)
 
 Code-Transpiler is a matrix-driven many-to-many compiler for 13 programming
@@ -16,9 +72,19 @@ Go package names cannot contain `-`, so the module and repository are named
 `Code-Transpiler`, while the identifier used in Go source is
 `codetranspiler`.
 
-The compiler lowers supported constructs into `SemanticProgram`, a versioned
-JSON representation containing the executable tree, structured types,
-effects, bindings, scopes and sparse semantic relation matrices.
+The compiler lowers supported constructs into `SemanticProgram`, whose
+canonical state is the matrix-derived Universal AST. The old recursive
+statement/expression tree is retained only as a generated compatibility view.
+The semantic runtime, R writer, signature checks, call resolution, typed
+operation checks, generic emitters and function-flow analysis now consume
+universal nodes directly. No legacy function or call tree is reconstructed.
+Canonical JSON contains universal nodes, semantic facets, typed fields,
+language projection, source positions and graph relations. A backend rejects
+UAST semantics that its direct or compatibility lowering cannot preserve.
+
+See [Universal AST migration status](UAST_MIGRATION_STATUS.md) for measured
+direct coverage, target capability matrices and the remaining compatibility
+adapters.
 
 > Route availability means that the supported common subset can be parsed and
 > emitted. It does not claim complete equivalence for every feature of every
@@ -255,11 +321,27 @@ CodeTranspiler.exe transpile -source python -target cpp input.py -o output.cpp
 CodeTranspiler.exe transpile -source r -target julia input.R -o output.jl
 ```
 
-Defaults are `-source r` and `-target go`. If `-o` is omitted, the output is
+Defaults are `-source auto` (file extension) and `-target go`. If `-o` is omitted, the output is
 written beside the input using the target extension. Value flags may appear
 before or after the input filename.
 
 ### Batch translation
+
+For one input and all registered targets, use:
+
+```powershell
+go run ./cmd/r2many transpile input.py -target all -o translated
+go run ./cmd/r2many transpile -from c -to rust input.c -o output.rs
+```
+
+`-from`/`-to` alias `-source`/`-target`. The all-target mode parses once and
+emits 13 outputs including a copy for the identity route. It writes
+`translation-report.json` with per-target paths or errors and returns nonzero
+if any target fails. Source overwrites are refused; implicit identity output
+uses `.transpiled` in the filename. Unknown extensions require `-source`.
+`-native` opts into the strict native frontend; unsupported languages/features
+are rejected without fallback. Default mode retains the existing common-subset
+frontends for all 13 languages, not complete native-language equivalence.
 
 ```powershell
 CodeTranspiler.exe transpile-batch
@@ -440,5 +522,14 @@ CrossTL source is not bundled. Its possible future role as an external GPU
 adapter is described in [CROSSTL_DESIGN.md](CROSSTL_DESIGN.md).
 
 ## Repository
+
+Local development: run `./run-matrix-workbench.ps1` in PowerShell to calculate
+current implementation gaps, analyze type probes and run project tests. Each run
+writes a fresh report under `outputs/matrix-workbench/`. See
+[Matrix workbench](tools/matrix-audit/WORKBENCH.md) for calculations, options and
+the distinction between declared support and execution evidence.
+
+For the combined Go/Python/R/Rust/C++/Kotlin/Java/C# matrix handoffs, use
+`./run-all-handoffs.ps1`; see [Joint handoff workflow](tools/matrix-audit/ALL_HANDOFFS.md).
 
 https://github.com/tarekwasfy01/Code-Transpiler

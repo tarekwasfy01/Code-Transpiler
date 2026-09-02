@@ -95,6 +95,22 @@ func TestLexicalGraphKeepsCommentMarkersInsideStrings(t *testing.T) {
 	}
 }
 
+func TestCBlockCommentsAreNotDivisionTokens(t *testing.T) {
+	tokens := Tokenize("c", "/* header */\nint x = 4 / 2; /* tail */\n")
+	comments, divisions := 0, 0
+	for _, token := range tokens {
+		if token.Class == TokenComment {
+			comments++
+		}
+		if token.Class == TokenOperator && token.Text == "/" {
+			divisions++
+		}
+	}
+	if comments != 2 || divisions != 1 {
+		t.Fatalf("comments=%d divisions=%d, want 2 and 1", comments, divisions)
+	}
+}
+
 func TestLexicalRuleMatrixAddsStatementSemantics(t *testing.T) {
 	graph, _, err := BuildLexicalGraph("python", "x = 1\nx = 2\nprint(x)\nreturn x\n")
 	if err != nil {
@@ -136,6 +152,89 @@ func TestCanonicalMatrixParserPreservesStringsAndNormalizesStructure(t *testing.
 	}
 	if program.Grammar[GrammarIndent] != 1 || program.Grammar[GrammarOneBasedIndex] != 0 {
 		t.Fatalf("unexpected Python grammar vector: %v", program.Grammar)
+	}
+}
+
+func TestCanonicalPythonIterableForUsesForEachInsteadOfNumericRange(t *testing.T) {
+	program, err := Canonicalize("python", "for item in values:\n    print(item)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(program.R, "for (item in values) {") {
+		t.Fatalf("iterable Python for was not preserved as ForEach: %s", program.R)
+	}
+	if strings.Contains(program.R, "__matrix_range_") {
+		t.Fatalf("iterable Python for incorrectly created numeric range facts: %s", program.R)
+	}
+}
+
+func TestCanonicalPythonSimpleLoopPatternUsesBindingPatternContract(t *testing.T) {
+	program, err := Canonicalize("python", "for key, value in items:\n    print(value)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(program.R, "for ((key,value) in items) {") {
+		t.Fatalf("loop binding pattern not preserved: %s", program.R)
+	}
+	if _, err := Canonicalize("python", "for key, *values in items:\n    print(key)\n"); err == nil {
+		t.Fatal("starred loop pattern was accepted without a cardinality contract")
+	}
+}
+
+func TestCanonicalPythonUnitStepRangeUsesExistingAscendingRangeContract(t *testing.T) {
+	program, err := Canonicalize("python", "for item in range(2, 5, 1):\n    print(item)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{"_start <- 2", "_end <- 4", "for (item in "} {
+		if !strings.Contains(program.R, fragment) {
+			t.Fatalf("unit-step Python range missing %q:\n%s", fragment, program.R)
+		}
+	}
+}
+
+func TestCanonicalPythonLiteralStepRangeUsesExistingSequencePrimitive(t *testing.T) {
+	program, err := Canonicalize("python", "for item in range(5, 0, -2):\n    print(item)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(program.R, "for (item in seq(5, (0) + 1, by = -2)) {") {
+		t.Fatalf("signed Python range did not use the sequence primitive:\n%s", program.R)
+	}
+}
+
+func TestCanonicalPythonSemicolonsAndPassUseStatementMatrix(t *testing.T) {
+	program, err := Canonicalize("python", "x = 1; y = 2\nif x < y:\n    pass\nprint(y)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{"x <- 1", "y <- 2", "print(y)"} {
+		if !strings.Contains(program.R, fragment) {
+			t.Fatalf("Python statement matrix missing %q:\n%s", fragment, program.R)
+		}
+	}
+	if !strings.Contains(program.R, "if (x < y) {") || strings.Contains(program.R, "pass") {
+		t.Fatalf("Python pass was not treated as no-op:\n%s", program.R)
+	}
+}
+
+func TestCanonicalPythonElifUsesNestedElseIfContract(t *testing.T) {
+	program, err := Canonicalize("python", "if x < 0:\n    print(x)\nelif x < 2:\n    print(x)\nelse:\n    print(x)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(program.R, "else if (x < 2) {") {
+		t.Fatalf("Python elif did not use nested else-if contract:\n%s", program.R)
+	}
+}
+
+func TestCanonicalPythonSimpleLambdaUsesClosureContract(t *testing.T) {
+	program, err := Canonicalize("python", "identity = lambda value: value\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(program.R, "identity <- function(value) { return(value) }") {
+		t.Fatalf("Python lambda did not use closure contract:\n%s", program.R)
 	}
 }
 

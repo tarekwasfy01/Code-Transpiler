@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+project(r2cpp_runtime LANGUAGES CXX)
+add_library(r2cpp_runtime INTERFACE)
+target_include_directories(r2cpp_runtime INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_features(r2cpp_runtime INTERFACE cxx_std_17)

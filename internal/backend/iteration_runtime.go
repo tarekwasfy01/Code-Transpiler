@@ -59,6 +59,8 @@ func (g *targetGen) snapshotIteration(value string) (string, error) {
 	default:
 		return "", fmt.Errorf("target %s has no iteration snapshot projection", g.target)
 	}
-	g.helpers = append(g.helpers, code)
+	// Snapshot semantics were established from UAST before this renderer.  The
+	// target fragment is registered by purpose, never used as semantic state.
+	g.requireHelper("helper.iteration.snapshot", code)
 	return call, nil
 }

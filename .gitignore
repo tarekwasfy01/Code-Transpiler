@@ -1,6 +1,10 @@
 .audit-cache/
+.gocache*/
+__pycache__/
+*.pyc
 outputs/
 github-release/
 dist/*.previous-*.exe
 dist/*.new.exe
+tools/**/*.exe
 *.tmp

@@ -1,0 +1,728 @@
+﻿feature,category,file,line,snippet
+abi_calling_convention,memory,HISTORY.md,667,"* `tput` is no longer called to check terminal capabilities, it has been replaced with a pure-Julia terminfo parser ([#50797])."
+abi_calling_convention,memory,HISTORY.md,1007,"* Sorting is now always stable by default, as `QuickSort` was stabilized ([#45222])."
+abi_calling_convention,memory,HISTORY.md,1170,providing for greater clarity and optimization ability of these objects ([#43305]).
+abi_calling_convention,memory,HISTORY.md,1191,"to mitigate the [""trojan source""](https://www.trojansource.codes) vulnerability ([#42918])."
+abi_calling_convention,memory,HISTORY.md,1739,* `readdlm` now defaults to `use_mmap=false` on all OSes for consistent reliability in abnormal
+abi_calling_convention,memory,HISTORY.md,2256,interoperability with C or other languages) might need to be updated; for
+abi_calling_convention,memory,HISTORY.md,2296,"* The `@ccall` macro has been added to Base. It is a near drop-in replacement for `ccall` with more Julia-like syntax. It also wraps the new `foreigncall` API for varargs of different types, though it lacks the capability to specify an LLVM calling convention "
+abi_calling_convention,memory,HISTORY.md,4364,* The ability of `reinterpret` to yield `Array`s of different type than the underlying storage
+allocation,effect,HISTORY.md,475,* Code coverage and malloc tracking is no longer generated during the package precompilation stage.
+allocation,effect,HISTORY.md,486,* Updated GC heuristics to count allocated pages instead of individual objects ([#50144]).
+allocation,effect,HISTORY.md,771,* Updated GC heuristics to count allocated pages instead of object sizes ([#50144]). This should help
+allocation,effect,HISTORY.md,985,* New macro `@allocations` which is similar to `@allocated` except reporting the total number of allocations
+allocation,effect,HISTORY.md,986,rather than the total size of memory allocated ([#47367]).
+allocation,effect,HISTORY.md,1313,"* The new `Profile.Allocs` module allows memory allocations to be profiled. The stack trace, type, and size of each"
+allocation,effect,HISTORY.md,1314,"allocation is recorded, and a `sample_rate` argument allows a tunable amount of allocations to be skipped,"
+allocation,effect,HISTORY.md,2252,* Immutable structs (including tuples) that contain references can now be allocated
+array_list,expression,base/docs/basedocs.jl,677,"[array literals](@ref man-array-literals) ([`Base.vect`](@ref)),"
+array_list,expression,base/docs/basedocs.jl,1323,"In array literals, arguments separated by semicolons have their contents"
+array_list,expression,base/docs/basedocs.jl,2438,"For array literals and comprehensions, the element type can be specified before"
+array_list,expression,doc/src/base/punctuation.md,37,"| `;` | semicolons separate statements, begin a list of keyword arguments in function declarations or calls, or are used to separate array literals for vertical concatenation |"
+array_list,expression,doc/src/manual/arrays.md,96,## [Array literals](@id man-array-literals)
+array_list,expression,doc/src/manual/arrays.md,106,where no arguments are given. [Array literals can be typed](@ref man-array-typed-literal) with
+array_list,expression,doc/src/manual/arrays.md,334,### [Typed array literals](@id man-array-typed-literal)
+array_list,expression,doc/src/manual/arrays.md,393,The resulting array type depends on the types of the computed elements just like [array literals](@ref man-array-literals) do. In order to control the
+array_type,type,HISTORY.md,321,Custom array types may specialize this function to return an appropriate result ([#55252]).
+array_type,type,HISTORY.md,1945,* The `nextprod` function now accepts tuples and other array types for its first argument ([#35791]).
+array_type,type,HISTORY.md,2980,"or a higher-dimensional array, for consistency with other array types."
+array_type,type,HISTORY.md,3563,to control the array type ([#22723]).
+array_type,type,HISTORY.md,5622,"The array types are expected to be defined in packages, but now"
+array_type,type,HISTORY.md,6203,"`1:end`. Instead, the `:` identifier is passed directly. Custom array types"
+array_type,type,HISTORY.md,6614,* Expanded array type hierarchy to include an abstract `DenseArray` for
+array_type,type,HISTORY.md,6904,* Faster performance on `fill!` and `copy!` for array types not supporting
+assignment,expression,HISTORY.md,97,"* Code introspection macros such as `@code_lowered` and `@code_typed` now have a much better support for broadcasting expressions, including broadcasting assignments of the form `x .+= f(y)` ([#58349])."
+assignment,expression,HISTORY.md,170,"* The `@atomic` macro family now supports reference assignment syntax, e.g. `@atomic :monotonic v[3] += 4`,"
+assignment,expression,HISTORY.md,816,* The `initialized=true` keyword assignment for `sortperm!` and `partialsortperm!`
+assignment,expression,HISTORY.md,917,* Slurping in assignments is now also allowed in non-final position. This is handled via `Base.split_rest` ([#42902]).
+assignment,expression,HISTORY.md,1194,"* Every assignment to a global variable now first goes through a call to `convert(Any, x)` (or `convert(T, x)`"
+assignment,expression,HISTORY.md,1850,* It is now possible to use `...` on the left-hand side of assignments for taking any
+assignment,expression,HISTORY.md,2216,"* The interactive REPL now uses ""soft scope"" for top-level expressions: an assignment inside a"
+assignment,expression,HISTORY.md,3212,"as in the assignment `(x, y) = arg` ([#6614])."
+atomic,concurrency,HISTORY.md,170,"* The `@atomic` macro family now supports reference assignment syntax, e.g. `@atomic :monotonic v[3] += 4`,"
+atomic,concurrency,HISTORY.md,171,which modifies `v[3]` atomically with monotonic ordering semantics ([#54707]).
+atomic,concurrency,HISTORY.md,173,"* atomic fetch (`x = @atomic v[3]`),"
+atomic,concurrency,HISTORY.md,174,"* atomic set (`@atomic v[3] = 4`),"
+atomic,concurrency,HISTORY.md,175,"* atomic modify (`@atomic v[3] += 2`),"
+atomic,concurrency,HISTORY.md,176,"* atomic set once (`@atomiconce v[3] = 2`),"
+atomic,concurrency,HISTORY.md,177,"* atomic swap (`x = @atomicswap v[3] = 2`), and"
+atomic,concurrency,HISTORY.md,178,* atomic replace (`x = @atomicreplace v[3] 2=>5`).
+attribute_annotation,declaration,HISTORY.md,96,"* Introspection utilities such as `@code_typed`, `@which` and `@edit` now accept type annotations as substitutes for values, recognizing forms such as `f(1, ::Float64, 3)` or even `sum(::Vector{T}; init = ::T) where {T<:Real}`. Type-annotated variables as in `"
+attribute_annotation,declaration,HISTORY.md,563,"* Three new types around the idea of text with ""annotations"" (`Pair{Symbol, Any}`"
+attribute_annotation,declaration,HISTORY.md,564,"entries, e.g. `:lang => ""en""` or `:face => :magenta`). These annotations"
+attribute_annotation,declaration,HISTORY.md,568,string and allows for annotations to be attached to regions of the string.
+attribute_annotation,declaration,HISTORY.md,571,holds a list of annotations that apply to it.
+attribute_annotation,declaration,HISTORY.md,582,`AnnotatedString` with various faces or other attributes applied ([#49586]).
+attribute_annotation,declaration,HISTORY.md,930,rather than `Any` when a type annotation is omitted for an argument `x` so that types passed
+attribute_annotation,declaration,HISTORY.md,1171,* Type annotations can now be added to global variables to make accessing them type stable ([#43671]).
+await,expression,base/stream.jl,1509,"# SAFE cancellation: await the completion callback, so that the"
+await,expression,base/task.jl,786,# cancelled them all; await their teardown per severity.
+await,expression,base/task.jl,838,# token subtree (covering every child) is already cancelled; await the
+await,expression,base/threadingconstructs.jl,203,# cancellation through the tree. Await their unwind rather
+binary_op,expression,base/checked.jl,158,"throw_overflowerr_binaryop(op, x, y) = (@noinline;"
+binary_op,expression,base/checked.jl,175,"b && throw_overflowerr_binaryop(:+, x, y)"
+binary_op,expression,base/checked.jl,231,"b && throw_overflowerr_binaryop(:-, x, y)"
+binary_op,expression,base/checked.jl,295,"b && throw_overflowerr_binaryop(:*, x, y)"
+binary_op,expression,base/meta.jl,13,"isbinaryoperator,"
+binary_op,expression,base/meta.jl,91,isbinaryoperator(s::Symbol)
+binary_op,expression,base/meta.jl,97,"julia> Meta.isbinaryoperator(:-), Meta.isbinaryoperator(:√), Meta.isbinaryoperator(:f)"
+binary_op,expression,base/meta.jl,101,function isbinaryoperator(s::Symbol)
+bytecode_vm,meta,doc/src/devdocs/eval.md,107,Low-Level Virtual Machine (a compiler) The Julia JIT compiler is a program/library called libLLVM.
+bytecode_vm,meta,src/cgutils.cpp,3367,return (CE->getOpcode() == Instruction::IntToPtr &&
+bytecode_vm,meta,src/cgutils.cpp,3782,unsigned OpCode = ce->getOpcode();
+bytecode_vm,meta,src/cgutils.cpp,3783,if (OpCode == Instruction::BitCast || OpCode == Instruction::PtrToInt || OpCode == Instruction::IntToPtr) {
+bytecode_vm,meta,src/disasm.cpp,1115,const MCInstrDesc &opcode = MCII->get(Inst.getOpcode());
+bytecode_vm,meta,src/disasm.cpp,1116,if (opcode.isBranch() || opcode.isCall()) {
+bytecode_vm,meta,src/disasm.cpp,1127,const MCInstrDesc &opinfo = MCII->get(Inst.getOpcode());
+bytecode_vm,meta,src/jitlayers.cpp,1803,"assert(cast<ConstantExpr>(libarg)->getOpcode() == Instruction::IntToPtr && ""libarg should be either a global variable or a integer index!"");"
+call,expression,NEWS.md,249,"* A new `@methods` macro lists all methods applicable to a call expression, using the types of"
+call,expression,base/boot.jl,946,"iscallexpr(ex::Expr) = (isa(ex, Expr) && ex.head === :where) ? iscallexpr(firstarg(ex.args...)) : (isa(ex, Expr) && ex.head === :call)"
+call,expression,base/boot.jl,947,iscallexpr(ex) = false
+call,expression,base/boot.jl,949,"(isbasicdoc(expr) || iscallexpr(expr)) && return Expr(:escape, nothing)"
+call,expression,base/c.jl,275,"# leading `name = value` options, then the call expression"
+call,expression,base/cartesian.jl,93,"Generate a function call expression. `sym` represents any number of function arguments, the"
+call,expression,base/cartesian.jl,115,Generate a function call expression with keyword arguments `kw...`. As
+call,expression,base/deprecated.jl,195,callexpr = old.head === :call ? old : old.args[1]
+capture,binding,HISTORY.md,378,* A wall-time profiler is now available for users who need a sampling profiler that captures tasks regardless
+capture,binding,HISTORY.md,1573,"* `keys(::RegexMatch)` is now defined to return the capture's keys, by name if named, or by index if not ([#37299])."
+capture,binding,HISTORY.md,1575,"* `RegexMatch` is now iterable, giving the captured substrings ([#34355])."
+capture,binding,HISTORY.md,1608,"* A new `Manifest.toml` format is now used that captures extensible metadata fields, including the"
+capture,binding,HISTORY.md,1962,* `RegexMatch` objects can now be probed for whether a named capture group exists within it through `haskey()` ([#36717]).
+capture,binding,HISTORY.md,1963,"* For consistency `haskey(r::RegexMatch, i::Integer)` has also been added and returns if the capture group"
+capture,binding,HISTORY.md,3340,the rule that method type parameters must also be captured has been removed.
+capture,binding,HISTORY.md,5629,* Each function and closure now has its own type. The captured variables of a closure
+cast_conversion,expression,HISTORY.md,219,"`i32` or `i64`, and remove unneeded `ptrtoint`/`inttoptr` conversions. For compatibility,"
+cast_conversion,expression,HISTORY.md,601,"* `bunchkaufman` and `bunchkaufman!` now work for any `AbstractFloat`, `Rational` and their complex variants. `bunchkaufman` now supports `Integer` types, by making an internal conversion to `Rational{BigInt}`. Added new function `inertia` that computes the in"
+cast_conversion,expression,HISTORY.md,3907,linear-to-cartesian conversion ([#24715])
+cast_conversion,expression,HISTORY.md,3925,"`LinearIndices` type, which additionally provides conversion from"
+cast_conversion,expression,HISTORY.md,4181,"conversion ([#22925], [#23035], [#23154]."
+cast_conversion,expression,HISTORY.md,5280,"* The new `to_indices` function provides a uniform interface for index conversions,"
+cast_conversion,expression,HISTORY.md,6143,to C. `unsafe_convert` then handles conversions to `Ptr`.
+cast_conversion,expression,HISTORY.md,6550,* Numeric conversion functions whose names are lower-case versions of type
+channel,concurrency,HISTORY.md,264,"* The new `isfull(c::Channel)` function can be used to check if `put!(c, some_value)` will block ([#53159])."
+channel,concurrency,HISTORY.md,1537,"* Two arguments method `lock(f, lck)` now accepts a `Channel` as the second argument ([#39312])."
+channel,concurrency,HISTORY.md,1899,"* New function `Base.Threads.foreach(f, channel::Channel)` for multithreaded `Channel` consumption ([#34543])."
+channel,concurrency,HISTORY.md,1979,"* `push!(c::Channel, v)` now returns channel `c`. Previously, it returned the pushed value `v` ([#34202])."
+channel,concurrency,HISTORY.md,2642,"* New `Channel(f::Function, spawn=true)` keyword argument to schedule the created Task on"
+channel,concurrency,HISTORY.md,2644,"* Simplified the `Channel` constructor, which is now easier to read and more idiomatic julia."
+channel,concurrency,HISTORY.md,3018,* Channels now convert inserted values (like containers) instead of requiring types to match ([#29092]).
+channel,concurrency,HISTORY.md,5445,using Channels for inter-task communication ([#19841]).
+class,declaration,HISTORY.md,3054,* All compiler-reflection tools (i.e. the `code_` class of functions and macros) now print accurate
+class,declaration,HISTORY.md,6644,"| Precedence class | Operators (with synonyms, if any)"
+class,declaration,Make.inc,991,"# ARCH is the first element of the triple, and gives the CPU class (e.g. x86_64)"
+class,declaration,base/linked_list.jl,153,# Adapter class to use any `T` in a LinkedList
+class,declaration,base/multimedia.jl,240,# We have an abstract AbstractDisplay class that can be subclassed in order to
+class,declaration,base/multimedia.jl,241,# define new rich-display output devices. A typical subclass should
+class,declaration,base/show.jl,323,"In short, it is an immutable dictionary that is a subclass of `IO`. It supports standard"
+class,declaration,base/strings/string.jl,351,Class 6 | 8 8 2 2 2 2 2 2 2 2
+closure_lambda,expression,HISTORY.md,37,"* `Base.@acquire` macro for a non-closure version of `Base.acquire(f, s::Base.Semaphore)`, like `@lock` ([#56845])."
+closure_lambda,expression,HISTORY.md,1002,* Predicate function negation `!f` now returns a composed function `(!) ∘ f` instead of an anonymous function ([#44752]).
+closure_lambda,expression,HISTORY.md,1009,"of an anonymous function, which allows for pretty printing ([#42717])."
+closure_lambda,expression,HISTORY.md,1176,"* `@inline` and `@noinline` can now be placed within a function body, allowing one to annotate anonymous function ([#41312])."
+closure_lambda,expression,HISTORY.md,1980,* The composition operator `∘` now returns a `Base.ComposedFunction` instead of an anonymous function ([#37517]).
+closure_lambda,expression,HISTORY.md,2231,* `@inline` macro can now be applied to short-form anonymous functions ([#34953]).
+closure_lambda,expression,HISTORY.md,2299,provide one-argument method that returns a closure. The old methods of `merge` and
+closure_lambda,expression,HISTORY.md,2511,underlying closure ([#33119]).
+code_generation,meta,AGENTS.md,7,- [`src/`](src/) - C/C++ runtime and LLVM codegen
+code_generation,meta,AGENTS.md,40,"When making changes to LLVM passes or codegen, add `LLVM_ASSERTIONS=1` to `Make.user` to enable"
+code_generation,meta,HISTORY.md,1205,"`libjulia-codegen`. It is loaded by default, so normal usage should see no changes."
+code_generation,meta,HISTORY.md,5814,15 files in /Users/me/.julia/v0.5/Plots/src/backends
+code_generation,meta,Make.inc,521,JULIACODEGEN := LLVM
+code_generation,meta,Make.inc,1314,# statically link the archive we build in deps/lmdb.mk into libjulia-codegen
+code_generation,meta,Make.inc,1925,"LIBJULIACODEGEN_BUILD_DEPLIB := $(call dep_lib_path,$(build_shlibdir),$(build_shlibdir)/libjulia-codegen.$(JL_MAJOR_SHLIB_EXT))"
+code_generation,meta,Make.inc,1926,"LIBJULIACODEGEN_INSTALL_DEPLIB := $(call dep_lib_path,$(shlibdir),$(private_shlibdir)/libjulia-codegen.$(JL_MAJOR_SHLIB_EXT))"
+compile_time_eval,meta,HISTORY.md,5899,"if-statement at compile time, for when a static branch is required ([#16219])."
+compile_time_eval,meta,HISTORY.md,5918,code and debug info. However compile times may be slightly longer ([#14623]).
+compile_time_eval,meta,HISTORY.md,6072,"argument types. At compile time, the function is called with its arguments bound to their"
+compile_time_eval,meta,HISTORY.md,6450,* `@simd` now rejects invalid control flow (`@goto` / break / continue) in the inner loop body at compile time ([#8624]).
+compile_time_eval,meta,base/essentials.jl,1175,directly (at compile time) without having to test the value of the constant at run time.
+compile_time_eval,meta,base/expr.jl,479,this can yield improved inference results at the cost of additional compile time.
+compile_time_eval,meta,base/expr.jl,734,method at compile time. I.e. it is a bad idea to annotate this setting
+compile_time_eval,meta,base/expr.jl,810,"exactly at compile time and the call is eliminated by the optimizer. However, since"
+comprehension,expression,HISTORY.md,5266,"* BitArrays can now be constructed from arbitrary iterables, in particular from generator expressions,"
+comprehension,expression,HISTORY.md,5570,* Generator expressions: `f(i) for i in 1:n` ([#4470]). This returns an iterator
+comprehension,expression,HISTORY.md,5574,* Generators and comprehensions support filtering using `if` ([#550]) and nested
+comprehension,expression,HISTORY.md,5591,"* `x ∈ X` is now a synonym for `x in X` in `for` loops and comprehensions,"
+comprehension,expression,HISTORY.md,5666,* Dictionary comprehension syntax `[ a=>b for x in y ]` is deprecated.
+comprehension,expression,HISTORY.md,5693,"* Array comprehensions preserve the dimensions of the input ranges. For example,"
+comprehension,expression,HISTORY.md,5696,* The result type of an array comprehension depends only on the types of elements
+comprehension,expression,HISTORY.md,7035,* New variable bindings on each for loop and comprehension iteration ([#1571]).
+constant,declaration,HISTORY.md,166,* Redefinition of constants is now well defined and follows world age semantics ([#57253]). Additional redefinitions
+constant,declaration,HISTORY.md,263,"* `logrange(start, stop; length)` makes a range of constant ratio, instead of constant step ([#39071])."
+constant,declaration,HISTORY.md,918,* Character literals now support the same syntax allowed in string literals; i.e. the syntax can
+constant,declaration,HISTORY.md,1212,"`getfield` calls with constant global fields ([#42355]), enabling elimination of mutable structs with"
+constant,declaration,HISTORY.md,1218,Code heavily dependent on constant propagation should see significant compile-time performance improvements and
+constant,declaration,HISTORY.md,1473,* A backslash (`\`) before a newline inside a string literal now removes the newline while also
+constant,declaration,HISTORY.md,1476,"* A backslash before a newline in command literals now always removes the newline, similar to standard string"
+constant,declaration,HISTORY.md,1477,"literals, whereas the result was not well-defined before ([#40753])."
+defer_cleanup,control,HISTORY.md,473,disconnect notifications to heartbeat tasks) and cleanup other resources when the program
+defer_cleanup,control,HISTORY.md,2535,"* The `tempname` function now takes a `cleanup::Bool` keyword argument defaulting to `true`, which causes the process to try to ensure that any file or directory at the path returned by `tempname` is deleted upon process exit ([#33090])."
+defer_cleanup,control,HISTORY.md,3429,* `try` blocks without `catch` or `finally` are no longer allowed. An explicit empty
+defer_cleanup,control,NEWS.md,40,cleanup code that must block under a cancelled scope shields itself with `cancel = nothing`
+defer_cleanup,control,base/accumulate.jl,478,# Finally loop again with the two types promoted together
+defer_cleanup,control,base/asyncevent.jl,219,finally
+defer_cleanup,control,base/asyncevent.jl,270,# close is the cleanup primitive: its (bounded) completion
+defer_cleanup,control,base/asyncevent.jl,281,finally
+dynamic_dispatch,effect,HISTORY.md,756,result previously. This also lets the runtime optimize certain method lookups in a way
+dynamic_dispatch,effect,base/array.jl,1376,# and also to avoid a dynamic dispatch in the common case that
+dynamic_dispatch,effect,base/hamt.jl,97,# dynamic dispatch on every hop — unresolvable under static compilation
+dynamic_dispatch,effect,base/runtime_internals.jl,1750,# low-level method lookup functions used by the compiler
+dynamic_dispatch,effect,base/runtime_internals.jl,1979,"# high-level, more convenient method lookup functions"
+dynamic_dispatch,effect,base/stacktraces.jl,352,"# for `linfo isa CodeInstance`, but saves an extra dynamic dispatch."
+dynamic_dispatch,effect,base/docs/basedocs.jl,2208,"The `argtypes` argument may be a `CodeInstance`, bypassing both method lookup and specialization."
+dynamic_dispatch,effect,Compiler/src/reinfer.jl,116,"## more precise method lookup, but more costly and likely not actually better?"
+enum,declaration,HISTORY.md,601,"* `bunchkaufman` and `bunchkaufman!` now work for any `AbstractFloat`, `Rational` and their complex variants. `bunchkaufman` now supports `Integer` types, by making an internal conversion to `Rational{BigInt}`. Added new function `inertia` that computes the in"
+enum,declaration,HISTORY.md,1196,"to ensure the invariant `convert(Any, x) === x` always holds, as this change could otherwise lead to"
+enum,declaration,HISTORY.md,2745,the clang static analyzer to validate GC invariants in Julia's C code. The analysis
+enum,declaration,HISTORY.md,3900,"a mutating variant, `replace!` ([#22324], [#25697], [#26206], [#27944])."
+enum,declaration,HISTORY.md,4213,"`sin` variants, have been deprecated in favor of dot-syntax ([#22961])."
+enum,declaration,HISTORY.md,6372,* Enums are now supported through the `@enum EnumName EnumValue1
+enum,declaration,HISTORY.md,6373,EnumValue2` syntax. Enum member values also support arbitrary
+enum,declaration,HISTORY.md,6374,value assignment by the `@enum EnumName EnumValue1=1
+exception_try,control,AGENTS.md,41,LLVM assertions. This helps catch IR verification errors early:
+exception_try,control,HISTORY.md,91,* `@test_throws` now supports a three-argument form `@test_throws ExceptionType pattern expr` to test both exception type and message pattern in one call ([#59117]).
+exception_try,control,HISTORY.md,206,* Errors during `getfield` now raise a new `FieldError` exception type instead of the generic
+exception_try,control,HISTORY.md,207,`ErrorException` ([#54504]).
+exception_try,control,HISTORY.md,985,* New macro `@allocations` which is similar to `@allocated` except reporting the total number of allocations
+exception_try,control,HISTORY.md,1236,* `Threads.@threads` now defaults to a new `:dynamic` schedule option which is similar to the previous behavior except
+exception_try,control,HISTORY.md,1328,"* New `err` global variable in `Main` set when an expression throws an exception, akin to `ans`. Typing `err` reprints"
+exception_try,control,HISTORY.md,1329,the exception information ([#40642]).
+ffi,memory,AGENTS.md,86,"- [`doc/src/devdocs/agents/skills/external-deps/`](doc/src/devdocs/agents/skills/external-deps/SKILL.md) — modifying external dependencies (`deps/`, patches) and JLLs."
+ffi,memory,AGENTS.md,101,"When referencing external GitHub PRs or issues, use proper GitHub interlinking format (e.g., `owner/repo#123` for PRs/issues)."
+ffi,memory,CONTRIBUTING.md,64,"* Build the software and libraries (the first time takes a while, but it's fast after that). Detailed build instructions are in the [README](https://github.com/JuliaLang/julia/tree/master/README.md). Julia depends on several external packages; most are automat"
+ffi,memory,HISTORY.md,52,* `chopprefix` and `chopsuffix` can now also accept an `AbstractChar` as the prefix/suffix to remove.
+ffi,memory,HISTORY.md,103,External dependencies
+ffi,memory,HISTORY.md,243,helping efficient utilization of the worker threadpool used by `Threads.@spawn`. Asking for specifically 1 thread
+ffi,memory,HISTORY.md,278,* `tempname` can now take a suffix string to allow the file name to include a suffix and include that suffix in
+ffi,memory,HISTORY.md,318,"* The number of default BLAS threads now respects process affinity, instead of using the total number of logical"
+filesystem,effect,HISTORY.md,1617,"filesystems which do not handle a large number of files well. To turn this feature off, set the"
+filesystem,effect,HISTORY.md,1740,filesystem situations ([#40415]).
+filesystem,effect,HISTORY.md,3556,"* On a cluster, all files are now loaded from the local file system rather than node 1 ([#22588])."
+filesystem,effect,HISTORY.md,5643,* `using` and `import` are now case-sensitive even on case-insensitive filesystems
+filesystem,effect,HISTORY.md,5952,"* The `FS` module has been renamed to `Filesystem`. Calling the functions `isreadable`,"
+filesystem,effect,HISTORY.md,5953,"`iswritable`, and `isexecutable` on filesystem paths has been deprecated ([#12819])."
+filesystem,effect,NEWS.md,104,filesystem root as `@/` tracks every absolute path. `Base.is_file_tracked` now returns `false` when Julia was
+filesystem,effect,base/Base.jl,137,module Filesystem end # Filesystem is populated in stages during bootstrap
+for,control,contrib/generate_precompile.jl,384,for statement in statements
+for,control,src/clangsa/GCChecker.h,202,"GCObjectSet getObjectsForExprValue(const Expr *E, SVal V,"
+for,control,src/clangsa/GCChecker.h,239,"const MemRegion *getStorageRegionForExpr(const Expr *E,"
+for,control,src/clangsa/GCChecker.h,242,"const MemRegion *getBindingRegionForExprResult(const Expr *E,"
+for,control,src/clangsa/GCChecker.h,245,"const MemRegion *getRootingRegionForExpr(const Expr *E,"
+for,control,src/clangsa/GCCheckerPropagation.cpp,83,"GCObjectSet ArgObjects = getObjectsForExprValue(ValueExpr, Arg, State, C);"
+for,control,src/clangsa/GCCheckerPropagation.cpp,86,"getRootingRegionForExpr(ValueExpr, State, C)) {"
+for,control,src/clangsa/GCCheckerPropagation.cpp,622,"getObjectsForExprValue(Call.getArgExpr(RooterIdx), RootingSVal, State,"
+foreach_iteration,control,AGENTS.md,59,"For instance testing Base changes without rebuilding, using failfast, you can run:"
+foreach_iteration,control,HISTORY.md,38,* `Iterators.nth` function to access the `n`-th element of a generic iterable ([#56580]).
+foreach_iteration,control,HISTORY.md,43,* `Iterators.findeach` is a lazy version of `findall` ([#54124]).
+foreach_iteration,control,HISTORY.md,77,* The REPL now provides syntax highlighting for input as you type. See the REPL docs for more info about customization.
+foreach_iteration,control,HISTORY.md,499,"in the compiler and execution of `Main.main` may happen in the resulting executable. For interactive use, there is no semantic"
+foreach_iteration,control,HISTORY.md,549,"* `Iterators.cycle(iter, n)` runs over `iter` a fixed number of times, instead of forever ([#47354])"
+foreach_iteration,control,HISTORY.md,555,* It's not possible to define `length` for stateful iterators in a generally consistent manner. The
+foreach_iteration,control,HISTORY.md,556,potential for silently incorrect results for `Stateful` iterators is addressed by deleting the
+function,declaration,AGENTS.md,66,"After writing code, look up the docstring for each function you used. If there"
+function,declaration,AGENTS.md,67,"are recommendations or additional considerations that apply to these functions,"
+function,declaration,AGENTS.md,70,- Do not `ccall` runtime C functions directly if there are existing wrappers for the function.
+function,declaration,HISTORY.md,7,* New `@__FUNCTION__` macro to refer to the innermost enclosing function ([#58940]).
+function,declaration,HISTORY.md,17,"* The `hash(::AbstractString)` function is now a zero-copy / zero-cost function, based upon providing a correct implementation of the `codeunit` and `iterate` functions. Third-party string packages should migrate to the new algorithm by deleting their existing"
+function,declaration,HISTORY.md,34,New library functions
+function,declaration,HISTORY.md,38,* `Iterators.nth` function to access the `n`-th element of a generic iterable ([#56580]).
+function,declaration,HISTORY.md,40,* The `fieldindex` function (to get the index of a struct's field) is now exported ([#58119]).
+function_type,type,HISTORY.md,96,"* Introspection utilities such as `@code_typed`, `@which` and `@edit` now accept type annotations as substitutes for values, recognizing forms such as `f(1, ::Float64, 3)` or even `sum(::Vector{T}; init = ::T) where {T<:Real}`. Type-annotated variables as in `"
+function_type,type,HISTORY.md,208,"* Macros in function-signature-position no longer require parentheses. E.g. `function @main(args) ... end` is now permitted, whereas `function (@main)(args) ... end` was required in prior Julia versions."
+function_type,type,HISTORY.md,286,* `invoke` now supports passing a `Method` instead of a type signature ([#56692]).
+function_type,type,HISTORY.md,602,"* Packages that specialize matrix-matrix `mul!` with a method signature of the form `mul!(::AbstractMatrix, ::MyMatrix, ::AbstractMatrix, ::Number, ::Number)` no longer encounter method ambiguities when interacting with `LinearAlgebra`. Previously, ambiguities"
+function_type,type,HISTORY.md,855,"* When stack traces are printed, the printed depth of types in function signatures will be limited"
+function_type,type,HISTORY.md,2019,"`UpperTriangular{<:Any,<:Adjoint{<:Any,<:OwnMatrixType}}` in the method signature ([#38168])."
+function_type,type,HISTORY.md,2318,"* `Ref{NTuple{N,T}}` can be passed to `Ptr{T}`/`Ref{T}` `ccall` signatures ([#34199])."
+function_type,type,HISTORY.md,2983,* Method signatures such as
+gc,memory,HISTORY.md,187,"* The `@ccall` macro can now take a `gc_safe` argument, that if set to true allows the runtime to run garbage collection concurrently to the `ccall` ([#49933])."
+gc,memory,HISTORY.md,486,* Updated GC heuristics to count allocated pages instead of individual objects ([#50144]).
+gc,memory,HISTORY.md,525,* `GC.logging_enabled()` can be used to test whether GC logging has been enabled via `GC.enable_logging` ([#51647]).
+gc,memory,HISTORY.md,771,* Updated GC heuristics to count allocated pages instead of object sizes ([#50144]). This should help
+gc,memory,HISTORY.md,773,* The mark phase of the garbage collector is now multi-threaded ([#48600]).
+gc,memory,HISTORY.md,783,* New option `--gcthreads` to set how many threads will be used by the garbage collector ([#48600]).
+gc,memory,HISTORY.md,959,* New option `--heap-size-hint=<size>` suggests a size limit to invoke garbage collection more eagerly.
+gc,memory,HISTORY.md,1382,"* `GC.enable_logging(true)` can be used to log each garbage collection, with the"
+generic,declaration,HISTORY.md,38,* `Iterators.nth` function to access the `n`-th element of a generic iterable ([#56580]).
+generic,declaration,HISTORY.md,206,* Errors during `getfield` now raise a new `FieldError` exception type instead of the generic
+generic,declaration,HISTORY.md,316,* Added a generic version of the (unblocked) pivoted Cholesky decomposition (callable via
+generic,declaration,HISTORY.md,557,"`length(::Stateful)` method. The last type parameter of `Stateful` is gone, too. Issue: ([#47790]),"
+generic,declaration,HISTORY.md,921,* Nested combinations of tuples and named tuples of symbols are now allowed as type parameters ([#46300]).
+generic,declaration,HISTORY.md,1192,"* `Base.ifelse` is now defined as a generic function rather than a builtin one, allowing packages to"
+generic,declaration,HISTORY.md,1198,"* Builtin functions are now a bit more like generic functions, and can be enumerated with `methods` ([#43865])."
+generic,declaration,HISTORY.md,1923,"iteration state, in a generic way ([#37410])."
+generic_constraint,type,HISTORY.md,1208,* Conditional type constraints are now be forwarded interprocedurally (i.e. propagated from caller to callee).
+generic_constraint,type,HISTORY.md,1887,"* There is no longer a concept of ""home project"": starting `julia --project=dir`"
+generic_constraint,type,HISTORY.md,4951,"+ Type parameter constraints can refer to previous parameters, e.g."
+generic_constraint,type,HISTORY.md,5390,has been deprecated as a stricter constraint during bounds checking.
+generic_constraint,type,base/binaryplatforms.jl,974,# by the constraints of libgfortran compiler ABIs upon our precious programming
+generic_constraint,type,base/binaryplatforms.jl,1119,"bounded version constraints, where an artifact can specify that it was built using APIs"
+generic_constraint,type,base/coreir.jl,109,"Similar to `Conditional`, but conveys inter-procedural constraints imposed on call arguments."
+generic_constraint,type,base/deprecated.jl,582,"This function is deprecated. The concept of binding ""resolvedness"" was removed in Julia 1.12."
+global_state,effect,HISTORY.md,1171,* Type annotations can now be added to global variables to make accessing them type stable ([#43671]).
+global_state,effect,HISTORY.md,1194,"* Every assignment to a global variable now first goes through a call to `convert(Any, x)` (or `convert(T, x)`"
+global_state,effect,HISTORY.md,1328,"* New `err` global variable in `Main` set when an expression throws an exception, akin to `ans`. Typing `err` reprints"
+global_state,effect,HISTORY.md,1836,global variables and function calls. The expression will be evaluated the first
+global_state,effect,HISTORY.md,2217,scope block such as a `for` loop automatically assigns to a global variable if one has been
+global_state,effect,HISTORY.md,2223,block is considered ambiguous if a global variable with the same name exists.
+global_state,effect,HISTORY.md,5178,"* When a macro is called in the module in which that macro is defined, global variables"
+global_state,effect,HISTORY.md,5201,"on ""Global variables"" under the ""Parallel computing"" chapter in the manual ([#19594])."
+goto_label,control,HISTORY.md,6658,* Local goto statements using the `@goto` and `@label` macros ([#101]).
+goto_label,control,base/essentials.jl,976,of an unconditional jump with [`@goto name`](@ref).
+goto_label,control,base/essentials.jl,1044,@goto name
+goto_label,control,base/essentials.jl,1046,`@goto name` unconditionally jumps to the statement at the location [`@label name`](@ref).
+goto_label,control,base/loading.jl,2981,@goto load_from_cache
+goto_label,control,base/loading.jl,3040,@goto load_from_cache # the new cachefile will have the newest mtime so will come first in the search
+goto_label,control,base/osutils.jl,36,@goto loop
+goto_label,control,base/show.jl,1874,"show_unquoted(io::IO, ex::GotoNode, ::Int, ::Int) = print(io, ""goto %"", ex.label)"
+identifier,expression,HISTORY.md,1179,"* `∀`, `∃`, and `∄` are now allowed as identifier characters ([#42314])."
+identifier,expression,HISTORY.md,1353,function is provided to reproduce the mapping used in identifier normalization
+identifier,expression,HISTORY.md,1847,can now be used to rename imported modules and identifiers ([#1255]).
+identifier,expression,HISTORY.md,1872,respectively. Previously they were parsed as identifier characters ([#37973]).
+identifier,expression,HISTORY.md,2204,* Passing an identifier `x` by itself as a keyword argument or named tuple element
+identifier,expression,HISTORY.md,2277,This includes all documented identifiers from `Base.Threads` except the
+identifier,expression,HISTORY.md,2626,* Support for unicode bold digits and double-struck digits 0 through 9 as valid identifiers ([#32838]).
+identifier,expression,HISTORY.md,3405,by a character that will never be an allowed identifier character (currently
+if,control,base/cartesian.jl,254,# Make the nested if statements
+if,control,doc/src/devdocs/ast.md,149,If statement:
+if,control,JuliaLowering/test/closures_ir.jl,788,# Assignment after if statement doesn't need Box (flisp-compatible save/restore)
+import,declaration,AGENTS.md,14,You may use this julia executable for validation.
+import,declaration,AGENTS.md,18,"will not be reflected, unless you use `Revise`."
+import,declaration,AGENTS.md,25,"use `Co-authored-by:` for tools, and do not list a tool as an author; this trailer replaces any"
+import,declaration,AGENTS.md,52,## Using Revise
+import,declaration,AGENTS.md,54,"If you have made changes to files included in the system image (base/ or stdlib/),"
+import,declaration,AGENTS.md,55,"and need to run code with these changes included, you can use `Revise`."
+import,declaration,AGENTS.md,56,"To do so, run `using Revise; Revise.track(Base)` (or Revise.track with the stdlib you modified)."
+import,declaration,AGENTS.md,59,"For instance testing Base changes without rebuilding, using failfast, you can run:"
+index,expression,base/abstractarray.jl,1288,"J = _to_subscript_indices(x, I...)"
+index,expression,base/abstractarray.jl,1406,"@boundscheck checkbounds(A, I...) # generally _to_subscript_indices requires bounds checking"
+index,expression,base/abstractarray.jl,1407,"@inbounds r = getindex(A, _to_subscript_indices(A, I...)...)"
+index,expression,base/abstractarray.jl,1414,"_to_subscript_indices(A::AbstractArray, i::Integer) = (@inline; _unsafe_ind2sub(A, i))"
+index,expression,base/abstractarray.jl,1415,"_to_subscript_indices(A::AbstractArray{T,N}) where {T,N} = (@inline; fill_to_length((), 1, Val(N)))"
+index,expression,base/abstractarray.jl,1416,"_to_subscript_indices(A::AbstractArray{T,0}) where {T} = ()"
+index,expression,base/abstractarray.jl,1417,"_to_subscript_indices(A::AbstractArray{T,0}, i::Integer) where {T} = ()"
+index,expression,base/abstractarray.jl,1418,"_to_subscript_indices(A::AbstractArray{T,0}, I::Integer...) where {T} = ()"
+interface_trait,declaration,AGENTS.md,8,- [`cli/`](cli/) - Command-line interface and loader
+interface_trait,declaration,HISTORY.md,758,dispatch on Types (such as traits and constructors).
+interface_trait,declaration,HISTORY.md,1620,for the downloads that happen via the Git protocol by setting the environment variable
+interface_trait,declaration,HISTORY.md,1971,"`Downloads.download`, providing cross-platform, multi-protocol, in-process download functionality implemented"
+interface_trait,declaration,HISTORY.md,2040,* The `AbstractMenu` extension interface of `REPL.TerminalMenus` has been extensively
+interface_trait,declaration,HISTORY.md,2041,"overhauled. The new interface does not rely on global configuration variables, is more"
+interface_trait,declaration,HISTORY.md,2044,"(deprecated) interface, so are non-breaking."
+interface_trait,declaration,HISTORY.md,2885,* `getipaddr` prefers to return the first `IPv4` interface address provided by libuv ([#32260]).
+io,effect,HISTORY.md,539,* Passing an `IOBuffer` as a stdout argument for `Process` spawn now works as
+io,effect,HISTORY.md,1541,"* New function `redirect_stdio` for redirecting `stdin`, `stdout` and `stderr` ([#37978])."
+io,effect,HISTORY.md,2266,* Color now defaults to on when stdout and stderr are TTYs ([#34347]).
+io,effect,HISTORY.md,4201,"input stream are deprecated. Use e.g. `read(pipeline(stdin, cmd))` instead ([#22762])."
+io,effect,HISTORY.md,4523,"* `DevNull`, `STDIN`, `STDOUT`, and `STDERR` have been renamed to `devnull`, `stdin`, `stdout`,"
+io,effect,HISTORY.md,5417,"* The single-argument form of `write` (`write(x)`, with implicit `STDOUT` output stream),"
+io,effect,HISTORY.md,5418,"has been deprecated in favor of the explicit equivalent `write(STDOUT, x)` ([#17654])."
+io,effect,Make.inc,694,CPP_STDOUT := $(CPP) -P
+ir,meta,AGENTS.md,92,## Commit messages and pull requests
+ir,meta,AGENTS.md,94,"When writing commit messages, follow the format ""component: Brief summary"" for"
+ir,meta,AGENTS.md,95,"the title. In the body of the commit message, provide a brief prose summary"
+ir,meta,AGENTS.md,99,"If your change fixes one or more issues, use the syntax ""Fixes #"" at the end of the commit message, but do not include it in the title."
+ir,meta,AGENTS.md,102,"When fixing CI failures, include the link to the specific CI failure in the commit message."
+ir,meta,AGENTS.md,103,"Always quote macro names in backticks in commit messages and PR titles/bodies (e.g. `` `@inbounds` ``, not @inbounds), so GitHub does not notify the unrelated user with that handle."
+ir,meta,CONTRIBUTING.md,18,"- Reporting a potential bug? Please read the ""[How to file a bug report](https://github.com/JuliaLang/julia/blob/master/CONTRIBUTING.md#how-to-file-a-bug-report)"" section to make sure that all necessary information is included."
+ir,meta,CONTRIBUTING.md,38,"- The full error message, including the backtrace."
+layout_alignment,memory,HISTORY.md,257,* There are new `Makefile`s to build Julia and LLVM using the Binary Optimization and Layout Tool (BOLT).
+layout_alignment,memory,HISTORY.md,1935,inserting or consuming the first dimension depending on the ratio of `sizeof(T)` and `sizeof(S)`.
+layout_alignment,memory,HISTORY.md,2067,and display small sparse matrices by an `Matrix`-like 2d layout of their contents ([#33821]).
+layout_alignment,memory,HISTORY.md,2255,Code that requires assumptions about object layout and addresses (usually for
+layout_alignment,memory,HISTORY.md,3398,"* `reprmime(mime, x)` has been renamed to `repr(mime, x)`, and along with `repr(x)`"
+layout_alignment,memory,HISTORY.md,3874,arrays with different alignment requirements (removed in 0.6) is once again allowed ([#23750]).
+layout_alignment,memory,HISTORY.md,5046,"Use `sizeof(str)` instead of `length(str.data)`, and `pointer(str)` instead of"
+layout_alignment,memory,Make.inc,345,"# This used for debian packaging, to conform to library layout guidelines"
+lifetime,binding,base/asyncevent.jl,50,# handle's lifetime and must survive a cancelled constructing scope.
+lifetime,binding,base/asyncevent.jl,422,# The callback task carries the timer's lifetime (its preserve is
+lifetime,binding,base/Base_compiler.jl,286,"and stored for later use within the lifetime of the current Julia session, or"
+lifetime,binding,base/cancellation.jl,142,"lifetimes at once (say, a request scope and the connection it arrived on)."
+lifetime,binding,base/cancellation.jl,558,"# that never gets cancelled. Sources are mostly scope-lifetime, so in"
+lifetime,binding,base/channels.jl,280,Associate the lifetime of `chnl` with a task.
+lifetime,binding,base/expr.jl,691,- Heap mutations of objects whose lifetime does not exceed the method (i.e.
+lifetime,binding,base/gcutils.jl,200,"cases where it briefly extends object lifetime. In implementation, `@preserve`"
+literal_boolean,expression,CONTRIBUTING.md,40,"- The version of Julia as provided by the `versioninfo()` command. Occasionally, the longer output produced by `versioninfo(verbose = true)` may be useful also, especially if the issue is related to a specific package."
+literal_boolean,expression,HISTORY.md,32,* A new `PaddedSpinLock <: AbstractSpinLock` is defined. It has extra padding to avoid false sharing ([#55944]).
+literal_boolean,expression,HISTORY.md,53,* The `macroexpand` (with default true) and the new `macroexpand!` (with default false)
+literal_boolean,expression,HISTORY.md,57,migrate now by calling `legacyscope=false` or using `macroexpand!`. This may often require
+literal_boolean,expression,HISTORY.md,86,"* `Test` now supports the `JULIA_TEST_VERBOSE` environment variable. When set to `true`,"
+literal_boolean,expression,HISTORY.md,87,it enables verbose testset entry/exit messages with timing information and sets the default `verbose=true`
+literal_boolean,expression,HISTORY.md,187,"* The `@ccall` macro can now take a `gc_safe` argument, that if set to true allows the runtime to run garbage collection concurrently to the `ccall` ([#49933])."
+literal_boolean,expression,HISTORY.md,203,* Trivial infinite loops (like `while true; end`) are no longer undefined behavior. Infinite loops that
+literal_null,expression,HISTORY.md,1534,`NaN` or `missing` ([#35316]).
+literal_null,expression,HISTORY.md,1928,"* The `redirect_*` functions now accept `devnull` to discard all output redirected to it, and as an empty"
+literal_null,expression,HISTORY.md,2661,"* The function `nonmissingtype`, which removes `Missing` from type unions, is now exported ([#31562])."
+literal_null,expression,HISTORY.md,2683,* `clamp` can now handle missing values ([#31066]).
+literal_null,expression,HISTORY.md,2849,* A no-argument constructor for `Ptr{T}` has been added which constructs a null pointer ([#30919]).
+literal_null,expression,HISTORY.md,2858,* `filter` now supports `SkipMissing`-wrapped arrays ([#31235]).
+literal_null,expression,HISTORY.md,2859,* Objects created by calling `skipmissing` on an array can now be indexed using indices
+literal_null,expression,HISTORY.md,2860,from the parent at non-missing positions. This allows functions such as
+literal_numeric,expression,HISTORY.md,3275,"* Numeric literal juxtaposition now has slightly lower precedence than unary operators,"
+literal_numeric,expression,HISTORY.md,5654,* Juxtaposition of numeric literals ending in `.` (e.g. `1.x`) is no longer
+literal_numeric,expression,base/docs/Docs.jl,781,"# Any ""basic"" expression such as a bare function or module name or numeric literal."
+literal_numeric,expression,doc/src/manual/complex-and-rational-numbers.md,11,square root of -1. (Using mathematicians' `i` or engineers' `j` for this global constant was rejected since they are such popular index variable names.) Since Julia allows numeric literals to be [juxtaposed with identifiers as coefficients](@ref man-numeric-li
+literal_numeric,expression,doc/src/manual/integers-and-floating-point-numbers.md,5,integers and floating-point numbers as immediate values in code are known as numeric literals.
+literal_numeric,expression,doc/src/manual/integers-and-floating-point-numbers.md,662,## [Numeric Literal Coefficients](@id man-numeric-literal-coefficients)
+literal_numeric,expression,doc/src/manual/integers-and-floating-point-numbers.md,665,"preceded by a numeric literal, implying multiplication. This makes writing polynomial expressions"
+literal_numeric,expression,doc/src/manual/integers-and-floating-point-numbers.md,686,The [precedence](@ref Operator-Precedence-and-Associativity) of numeric literal
+literal_string,expression,HISTORY.md,918,* Character literals now support the same syntax allowed in string literals; i.e. the syntax can
+literal_string,expression,HISTORY.md,1473,* A backslash (`\`) before a newline inside a string literal now removes the newline while also
+literal_string,expression,HISTORY.md,2232,"* In triple-quoted string literals, whitespace stripping is now done before processing"
+literal_string,expression,HISTORY.md,3392,* Raw string literal escaping rules have been changed to make it possible to write all strings.
+literal_string,expression,HISTORY.md,3484,"* Juxtaposing string literals (e.g. `""x""y`) is now a syntax error ([#20575])."
+literal_string,expression,HISTORY.md,4998,"nonstandard command literal is like a nonstandard string literal, but the"
+literal_string,expression,HISTORY.md,5325,"* A new nonstandard string literal `raw""...""` was added,"
+literal_string,expression,HISTORY.md,7030,* Triple-quoted string literals ([#70]).
+lock_mutex,concurrency,HISTORY.md,2735,* `Threads.Mutex` and `Threads.RecursiveSpinLock` have been removed; use `ReentrantLock` (preferred) or
+lock_mutex,concurrency,base/Base.jl,386,t = errormonitor(Threads.@spawn(profile_printing_listener(cond)))
+lock_mutex,concurrency,base/Base.jl,392,"# error-propagation is not needed, since the errormonitor will handle printing that better"
+lock_mutex,concurrency,base/Base.jl,565,"push!(listeners, errormonitor(Threads.@spawn :interactive sigint_listener(cond)))"
+lock_mutex,concurrency,base/Base.jl,566,"push!(listeners, errormonitor(Threads.@spawn :default sigint_listener(cond)))"
+lock_mutex,concurrency,base/Base.jl,572,"# error-propagation is not needed, since the errormonitor will handle printing that better"
+lock_mutex,concurrency,base/condition.jl,202,"# errormonitor, REPL teardown) are constructed under"
+lock_mutex,concurrency,base/experimental.jl,538,"Base.errormonitor(current_task()) # this may not go particularly well if the IO loop is dead, but try anyways"
+macro,meta,AGENTS.md,103,"Always quote macro names in backticks in commit messages and PR titles/bodies (e.g. `` `@inbounds` ``, not @inbounds), so GitHub does not notify the unrelated user with that handle."
+macro,meta,CONTRIBUTING.md,42,"4. When pasting code blocks or output, put triple backquotes (\`\`\`) around the text so GitHub will format it nicely. Code statements should be surrounded by single backquotes (\`). Be aware that the `@` sign tags users on GitHub, so references to macros shou"
+macro,meta,HISTORY.md,7,* New `@__FUNCTION__` macro to refer to the innermost enclosing function ([#58940]).
+macro,meta,HISTORY.md,37,"* `Base.@acquire` macro for a non-closure version of `Base.acquire(f, s::Base.Semaphore)`, like `@lock` ([#56845])."
+macro,meta,HISTORY.md,53,* The `macroexpand` (with default true) and the new `macroexpand!` (with default false)
+macro,meta,HISTORY.md,57,migrate now by calling `legacyscope=false` or using `macroexpand!`. This may often require
+macro,meta,HISTORY.md,58,fixes to the code calling `macroexpand` with `Meta.unescape` and `Meta.reescape` or by
+macro,meta,HISTORY.md,89,"* Test failures when using the `@test` macro now show evaluated arguments for all function calls ([#57825], [#57839])."
+manual_memory,memory,HISTORY.md,475,* Code coverage and malloc tracking is no longer generated during the package precompilation stage.
+manual_memory,memory,HISTORY.md,3031,* The process id is appended to malloc log files in order to track memory allocations of
+manual_memory,memory,HISTORY.md,6479,"* New garbage collector tracked memory allocator functions: `jl_malloc`, `jl_calloc`,"
+manual_memory,memory,base/asyncevent.jl,24,"this = new(Libc.malloc(_sizeof_uv_async), ThreadSynchronizer(), true, false)"
+manual_memory,memory,base/asyncevent.jl,31,Libc.free(this.handle)
+manual_memory,memory,base/asyncevent.jl,135,"this = new(Libc.malloc(_sizeof_uv_timer), ThreadSynchronizer(), true, false, timeoutms, intervalms)"
+manual_memory,memory,base/asyncevent.jl,318,Libc.free(handle)
+manual_memory,memory,base/deepcopy.jl,188,# the runtime allocator instead. The slots are transient registration
+map_dict,expression,HISTORY.md,1000,now be called on a dictionary or set shared by arbitrary tasks provided that there are no
+map_dict,expression,HISTORY.md,1001,tasks mutating the dictionary or set ([#44534]).
+map_dict,expression,HISTORY.md,2303,* `include` now accepts an optional `mapexpr` first argument to transform the parsed
+map_dict,expression,HISTORY.md,2834,"* The new `map!(f, values(::AbstractDict))` method allows to modify in-place values of a dictionary ([#31223])."
+map_dict,expression,HISTORY.md,2959,* The experimental macro `Base.@locals` returns a dictionary of current local variable names
+map_dict,expression,HISTORY.md,3217,* Keyword argument containers (`kw` in `f(; kw...)`) are now based on named tuples. Dictionary
+map_dict,expression,HISTORY.md,5666,* Dictionary comprehension syntax `[ a=>b for x in y ]` is deprecated.
+map_dict,expression,HISTORY.md,5723,* `map` on a dictionary now expects a function that expects and returns a `Pair`.
+map_type,type,base/abstractarray.jl,227,"For dictionary types, this will be a `Pair{KeyType,ValType}`. The definition"
+map_type,type,base/abstractdict.jl,190,Custom `AbstractDict` subtypes may choose which specific dictionary type is best suited to
+map_type,type,base/abstractdict.jl,302,Get the key type of a dictionary type. Behaves similarly to [`eltype`](@ref).
+map_type,type,base/abstractdict.jl,316,Get the value type of a dictionary type. Behaves similarly to [`eltype`](@ref).
+map_type,type,base/abstractdict.jl,442,"# don't delete!(d, k) here, since dictionary types"
+map_type,type,src/julia-syntax.scm,3988,(define (fix-function-arg-type te typ iskw namemap type-sp)
+map_type,type,src/llvm-remove-addrspaces.cpp,30,class AddrspaceRemoveTypeRemapper : public ValueMapTypeRemapper {
+map_type,type,src/llvm-remove-addrspaces.cpp,39,Type *remapType(Type *SrcTy)
+member_access,expression,src/clangsa/GCChecker.h,69,"check::PostStmt<MemberExpr>,"
+member_access,expression,src/clangsa/GCChecker.h,336,"void checkPostStmt(const MemberExpr *ME, CheckerContext &C) const;"
+member_access,expression,src/clangsa/GCCheckerPropagation.cpp,1383,"void GCChecker::checkPostStmt(const MemberExpr *ME, CheckerContext &C) const {"
+member_access,expression,src/clangsa/GCCheckerReporting.cpp,132,const clang::MemberExpr *ME = dyn_cast<MemberExpr>(TheS);
+member_access,expression,src/clangsa/GCCheckerState.cpp,690,if (const auto *ME = dyn_cast<MemberExpr>(Inner)) {
+member_access,expression,src/clangsa/GCCheckerState.cpp,766,if (const auto *ME = dyn_cast<MemberExpr>(Inner)) {
+memory_model,concurrency,doc/src/devdocs/ub.md,42,"- Violations of the memory model using `unsafe_` operations (e.g. `unsafe_load` of an invalid pointer, pointer provenance violations, etc)"
+memory_model,concurrency,doc/src/devdocs/ub.md,45,"- Data races, although some limits are still placed upon the allowable behavior, per the memory model."
+memory_model,concurrency,doc/src/manual/multi-threading.md,534,Specific details of the memory model and other details of the design are written
+memory_model,concurrency,src/gf.c,3786,uint8_t flags = jl_atomic_load_acquire(&ci->flags); // happens-before for subsequent read of fptr
+memory_model,concurrency,src/gf.c,3788,jl_callptr_t initial_invoke = jl_atomic_load_acquire(&ci->invoke); // happens-before for subsequent read of fptr
+memory_model,concurrency,src/gf.c,3797,initial_invoke = jl_atomic_load_acquire(&ci->invoke); // happens-before for subsequent read of fptr
+memory_model,concurrency,src/julia.h,562,"_Atomic(jl_debuginfo_t *) debuginfo; // stored information about edges from this object (set once, with a happens-before both source and invoke)"
+memory_model,concurrency,src/julia_atomics.h,71,* These roughly follow the c11/c++11 memory model and act as memory
+module,declaration,AGENTS.md,3,## Module Organization
+module,declaration,AGENTS.md,5,- [`stdlib/`](stdlib/) - Standard library packages (can be loaded independently)
+module,declaration,AGENTS.md,6,- [`Compiler/`](Compiler/) - Julia compiler as a separate module (can be swapped)
+module,declaration,AGENTS.md,71,- Do not explicitly add a module prefix if the code you're adding is in the same module. E.g. do not use `Base.` for code in Base unless required.
+module,declaration,CONTRIBUTING.md,22,- Library feature requests are generally not accepted on this issue tracker. New libraries should be developed as [packages](https://julialang.github.io/Pkg.jl/v1/creating-packages/). Discuss ideas for libraries at the [Julia Discourse forum](https://discourse
+module,declaration,CONTRIBUTING.md,35,"2. If the problem is caused by a Julia package rather than core Julia, file a bug report with the relevant package author rather than here."
+module,declaration,CONTRIBUTING.md,40,"- The version of Julia as provided by the `versioninfo()` command. Occasionally, the longer output produced by `versioninfo(verbose = true)` may be useful also, especially if the issue is related to a specific package."
+module,declaration,CONTRIBUTING.md,64,"* Build the software and libraries (the first time takes a while, but it's fast after that). Detailed build instructions are in the [README](https://github.com/JuliaLang/julia/tree/master/README.md). Julia depends on several external packages; most are automat"
+mutation,effect,HISTORY.md,71,"* `randperm!` and `randcycle!` now support non-`Array` `AbstractArray` inputs, assuming they are mutable and their indices are one-based ([#58596])."
+mutation,effect,HISTORY.md,196,"Pluto, and Mocking, among others), as they do not need to explicitly restore the old method."
+mutation,effect,HISTORY.md,294,"* `map!(f, A)` now stores the results in `A`, like `map!(f, A, A)` or `A .= f.(A)` ([#40632])."
+mutation,effect,HISTORY.md,1046,"* A ""numbered prompt"" mode which prints numbers for each input and output and stores evaluated results in `Out` can be"
+mutation,effect,HISTORY.md,1098,The old behavior of loading the bundled libstdc++ regardless of the system version can be restored by setting the
+mutation,effect,HISTORY.md,1169,"* Mutable struct fields may now be annotated as `const` to prevent changing them after construction,"
+mutation,effect,HISTORY.md,1212,"`getfield` calls with constant global fields ([#42355]), enabling elimination of mutable structs with"
+mutation,effect,HISTORY.md,1513,* Support for declaring and using individual fields of a mutable struct as atomic has been
+name_resolution,binding,Compiler/src/ssair/inlining.jl,854,# the general resolver for usual and const-prop'ed calls
+name_resolution,binding,Compiler/src/ssair/inlining.jl,1633,# the special resolver for :invoke-d call
+name_resolution,binding,doc/src/manual/environment-variables.md,288,"The accuracy of the package resolver. This should be a positive integer, the default is `1`."
+name_resolution,binding,JuliaLowering/src/desugaring.jl,4445,# but does change the name resolution module
+name_resolution,binding,JuliaLowering/test/macros.jl,131,"@testset ""basic hygiene: check that name resolution fails where it should (flisp)"" for run in ["
+name_resolution,binding,JuliaLowering/test/macros.jl,145,"@testset ""basic hygiene: check that name resolution fails where it should (new)"" for run in ["
+name_resolution,binding,src/ccall.cpp,60,// Static name resolution (compile-time known)
+name_resolution,binding,src/ccall.cpp,64,// Dynamic name resolution (simple runtime expressions)
+network,effect,HISTORY.md,1262,* TCP socket objects now expose `closewrite` functionality and support half-open mode usage ([#40783]).
+network,effect,HISTORY.md,1693,"all TLS connections, even when the server's identity is not verified (see [NetworkOptions](https://github.com/JuliaLang/NetworkOptions.jl); <https://github.com/JuliaLang/Downloads.jl/pull/114>)."
+network,effect,HISTORY.md,1704,#### Sockets
+network,effect,HISTORY.md,2081,#### Sockets
+network,effect,HISTORY.md,2401,#### Sockets
+network,effect,HISTORY.md,2403,* Joining and leaving UDP multicast groups on a `UDPSocket` is now supported
+network,effect,HISTORY.md,2637,* All system-level I/O operations (e.g. files and sockets) are now thread-safe.
+network,effect,HISTORY.md,2721,#### Sockets
+optimizer,meta,HISTORY.md,41,* `Base.donotdelete` is now public. It prevents dead code elimination of its arguments ([#55774]).
+optimizer,meta,HISTORY.md,257,* There are new `Makefile`s to build Julia and LLVM using the Binary Optimization and Layout Tool (BOLT).
+optimizer,meta,HISTORY.md,515,"* There is a new `Makefile` to build Julia and LLVM using the profile-guided and link-time optimizations (PGO and LTO) strategies, see `contrib/pgo-lto/Makefile` ([#45641])."
+optimizer,meta,HISTORY.md,761,"of floating-point operations, instead of turning on all ""fastmath"" optimizations."
+optimizer,meta,HISTORY.md,763,if you are OK with all the optimizations enabled by the `@fastmath` macro ([#49405]).
+optimizer,meta,HISTORY.md,1170,providing for greater clarity and optimization ability of these objects ([#43305]).
+optimizer,meta,HISTORY.md,2209,* The compiler optimization level can now be set per-module using the experimental macro
+optimizer,meta,HISTORY.md,3979,* The LLVM SLP Vectorizer optimization pass is now enabled at the default
+optional_nullable,type,HISTORY.md,533,"* `replace(string, pattern...)` now supports an optional `IO` argument to"
+optional_nullable,type,HISTORY.md,536,"* `sizehint!(s, n)` now supports an optional `shrink` argument to disable shrinking ([#51929])."
+optional_nullable,type,HISTORY.md,809,"* `replace(string, pattern...)` now supports an optional `IO` argument to"
+optional_nullable,type,HISTORY.md,965,* `Threads.@spawn` now accepts an optional first argument: `:default` or `:interactive`.
+optional_nullable,type,HISTORY.md,1174,* `try`-blocks can now optionally have an `else`-block which is executed right after the main body only if
+optional_nullable,type,HISTORY.md,1258,"* `@time` and `@timev` now take an optional description to allow annotating the source of time reports,"
+optional_nullable,type,HISTORY.md,1287,"as its optional `pivot` argument: the default is `cholesky(A, NoPivot())` (vs."
+optional_nullable,type,HISTORY.md,1322,* `RadioMenu` now supports optional `keybindings` to directly select options ([#41576]).
+overload_resolution,type,HISTORY.md,757,that significantly improves load and inference times for heavily overloaded methods that
+overload_resolution,type,HISTORY.md,1853,which can be overloaded to customize its behavior for different collection types
+overload_resolution,type,HISTORY.md,1912,* New function `Base.kron!` and corresponding overloads for various matrix types for performing Kronecker
+overload_resolution,type,HISTORY.md,3240,* Field access via dot-syntax can now be overloaded by adding methods to
+overload_resolution,type,HISTORY.md,4440,in favor of dot overloading (`getproperty`) so factors should now be accessed as e.g.
+overload_resolution,type,HISTORY.md,5603,"users are discouraged from overloading these, since they are mainly parsed"
+overload_resolution,type,HISTORY.md,5980,"`dump` should not be overloaded, since it is for examining concrete structure ([#4163])."
+overload_resolution,type,HISTORY.md,6058,* Function call overloading: for arbitrary objects `x` (not of type
+ownership,memory,HISTORY.md,5818,* A new function `chown()` changes the ownership of files ([#15007]).
+ownership,memory,base/cancellation.jl,597,# registration in place). `w` must be unarmed and owned by the caller.
+ownership,memory,base/experimental.jl,547,# n.b. this does not wait for the thread to start or to take ownership of the event loop
+ownership,memory,base/file.jl,398,"The timestamps, permissions, and ownership (if possible) of the destination file(s) are copied"
+ownership,memory,base/gcutils.jl,191,*implicitly uses* memory or other resources owned by one of the `x`s.
+ownership,memory,base/gcutils.jl,193,*Implicit use* of `x` covers any indirect use of resources logically owned by
+ownership,memory,base/initdefs.jl,95,"The first entry is the ""user depot"" and should be writable by and owned by the"
+ownership,memory,base/iobuffer.jl,27,"# * The IOBuffer has full control (ownership) of the underlying array, only when"
+parameter,declaration,HISTORY.md,41,* `Base.donotdelete` is now public. It prevents dead code elimination of its arguments ([#55774]).
+parameter,declaration,HISTORY.md,54,functions now support a `legacyscope` boolean keyword argument to control whether to run
+parameter,declaration,HISTORY.md,72,* `shuffle` now accepts `NTuple` arguments ([#56906]).
+parameter,declaration,HISTORY.md,89,"* Test failures when using the `@test` macro now show evaluated arguments for all function calls ([#57825], [#57839])."
+parameter,declaration,HISTORY.md,91,* `@test_throws` now supports a three-argument form `@test_throws ExceptionType pattern expr` to test both exception type and message pattern in one call ([#59117]).
+parameter,declaration,HISTORY.md,168,"* A new keyword argument `usings::Bool` has been added to `names`, returning all names visible"
+parameter,declaration,HISTORY.md,185,* `Threads.@spawn` now takes a `:samepool` argument to specify the same threadpool as the caller.
+parameter,declaration,HISTORY.md,187,"* The `@ccall` macro can now take a `gc_safe` argument, that if set to true allows the runtime to run garbage collection concurrently to the `ccall` ([#49933])."
+pattern,expression,HISTORY.md,91,* `@test_throws` now supports a three-argument form `@test_throws ExceptionType pattern expr` to test both exception type and message pattern in one call ([#59117]).
+pattern,expression,HISTORY.md,248,"* New types are defined to handle the pattern of code that must run once per process, called"
+pattern,expression,HISTORY.md,523,"* `eachrsplit(string, pattern)` iterates split substrings right to left."
+pattern,expression,HISTORY.md,533,"* `replace(string, pattern...)` now supports an optional `IO` argument to"
+pattern,expression,HISTORY.md,809,"* `replace(string, pattern...)` now supports an optional `IO` argument to"
+pattern,expression,HISTORY.md,1461,"* `(; a, b) = x` can now be used to destructure properties `a` and `b` of `x`."
+pattern,expression,HISTORY.md,1597,"* `replace(::String)` now accepts multiple patterns, which will be applied left-to-right simultaneously,"
+pattern,expression,HISTORY.md,1598,"so only one pattern will be applied to any character, and the patterns will only be applied to the input"
+pointer,type,HISTORY.md,217,* Generated LLVM IR now uses pointer types instead of passing pointers as integers.
+pointer,type,HISTORY.md,6155,"`unsafe_convert`. You can still `convert` between pointer types,"
+pointer,type,HISTORY.md,6958,one pointer type into another if needed.)
+pointer,type,base/abstractarray.jl,1277,# a data Ref. they just map the array element type to the pointer type for
+pointer,type,base/array.jl,3239,of [`unsafe_wrap`](@ref) utilizing `Memory` or `MemoryRef` instead of raw pointers.
+pointer,type,base/Base.jl,405,# reused); this Ref roots it while the C side mirrors a raw pointer for the
+pointer,type,base/refpointer.jl,201,A pointer type that more closely resembles LLVM semantics: It includes the pointer address
+pointer,type,Compiler/test/AbstractInterpreter.jl,662,# The JIT retains raw pointers to the emitted `winner` for the lifetime of
+primitive_bool,type,base/docs/basedocs.jl,2369,"Boolean type, containing the values `true` and `false`."
+primitive_float,type,HISTORY.md,96,"* Introspection utilities such as `@code_typed`, `@which` and `@edit` now accept type annotations as substitutes for values, recognizing forms such as `f(1, ::Float64, 3)` or even `sum(::Vector{T}; init = ::T) where {T<:Real}`. Type-annotated variables as in `"
+primitive_float,type,HISTORY.md,1581,if T == Float64
+primitive_float,type,HISTORY.md,1589,"@test isequal(complex(one(T)) / complex(T(Inf), T(-Inf)), complex(zero(T), zero(T))) broken=(T == Float64)"
+primitive_float,type,HISTORY.md,2029,"by converting their type to `Float16`, `Float32`, `Float64`, or `BigFloat`."
+primitive_float,type,HISTORY.md,2372,"* `randn!(::MersenneTwister, ::Array{Float64})` is faster, and as a result, for a given state of the RNG,"
+primitive_float,type,HISTORY.md,2626,* Support for unicode bold digits and double-struck digits 0 through 9 as valid identifiers ([#32838]).
+primitive_float,type,HISTORY.md,3823,requested array size is more than double of its current size ([#22038]).
+primitive_float,type,HISTORY.md,3862,"integers, `Float64` and ranges; as a result, given a seed, the produced stream of numbers"
+primitive_integer,type,HISTORY.md,531,"* `invmod(n, T)` where `T` is a native integer type now computes the modular inverse of `n` in the modular integer ring that `T` defines ([#52180])."
+primitive_integer,type,HISTORY.md,532,"* `invmod(n)` is an abbreviation for `invmod(n, typeof(n))` for native integer types ([#52180])."
+primitive_integer,type,HISTORY.md,1552,"* `bytes2hex` and `hex2bytes` are no longer limited to arguments of type `Union{String,AbstractVector{UInt8}}`"
+primitive_integer,type,HISTORY.md,1931,"* `findfirst`, `findnext`, `findlast`, and `findall` now support `AbstractVector{<:Union{Int8,UInt8}}`"
+primitive_integer,type,HISTORY.md,3606,* The rules for mixed-signedness integer arithmetic (e.g. `Int32(1) + UInt64(1)`) have been
+primitive_integer,type,HISTORY.md,3613,* `I` now yields `UniformScaling{Bool}(true)` rather than `UniformScaling{Int64}(1)`
+primitive_integer,type,HISTORY.md,3710,"* `widen` on 8- and 16-bit integer types now widens to 16- and 32-bit types, respectively. ([#28045])."
+primitive_integer,type,HISTORY.md,3757,* `String(array)` now accepts an arbitrary `AbstractVector{UInt8}`. For `Vector`
+primitive_string,type,HISTORY.md,3641,points in reverse order; any string type overrides `reverse` to return a different
+primitive_string,type,HISTORY.md,3881,Therefore custom string types may want to define direct `ncodeunits` methods.
+primitive_string,type,HISTORY.md,3884,custom string types do not need to provide their own efficient definitions. The generic
+primitive_string,type,HISTORY.md,6785,"* New string type, `UTF16String` ([#4930]), constructed by"
+primitive_string,type,base/boot.jl,235,# string types
+primitive_string,type,base/exports.jl,17,# string types
+primitive_string,type,base/regex.jl,514,"""regex search is only available for the String type; use String(s) to convert"""
+primitive_string,type,base/strings/annotated.jl,475,string type of `str`).
+random,effect,HISTORY.md,353,"* A failing `DefaultTestSet` now prints to screen the random number generator (RNG) of the failed test, to help"
+random,effect,HISTORY.md,354,reproducing a stochastic failure which only depends on the state of the RNG.
+random,effect,HISTORY.md,355,It is also possible seed a test set by passing the `rng` keyword argument to `@testset`:
+random,effect,HISTORY.md,357,"using Test, Random"
+random,effect,HISTORY.md,358,"@testset rng=Xoshiro(0x2e026445595ed28e, 0x07bb81ac4c54926d, 0x83d7d70843e8bad6, 0xdbef927d150af80b, 0xdbf91ddf2534f850) begin"
+random,effect,HISTORY.md,611,#### Random
+random,effect,HISTORY.md,614,"* When seeding RNGs provided by `Random`, negative integer seeds can now be used ([#51416])."
+random,effect,HISTORY.md,615,"* Seedable random number generators from `Random` can now be seeded by a string, e.g."
+reference,type,HISTORY.md,1879,"platforms, not just MacOS, which the syntax is borrowed from ([#35627])."
+reference,type,HISTORY.md,6129,"* As a safer alternative to creating pointers (`Ptr`), the managed reference type"
+reference,type,base/range.jl,665,# This function borrows from print_matrix() in show.jl
+reference,type,cli/loader.h,36,// Borrow definition from `support/dtypes.h`
+reference,type,cli/README.md,23,"To this end, we write everything in low-overhead assembly, borrowing inspiration from the PLT trampolines that the linker already generates when using dynamic libraries."
+reference,type,doc/src/index.md,60,"upon the lineage of mathematical programming languages, but also borrows much from popular dynamic"
+reference,type,doc/src/manual/running-external-programs.md,3,"Julia borrows backtick notation for commands from the shell, Perl, and Ruby. However, in Julia,"
+reference,type,src/ccalltest_common.h,11,// Borrow definition from `support/dtypes.h`
+reflection,effect,AGENTS.md,18,"will not be reflected, unless you use `Revise`."
+reflection,effect,HISTORY.md,2361,"* New generic `rotate!(x, y, c, s)` and `reflect!(x, y, c, s)` functions ([#35124])."
+reflection,effect,HISTORY.md,3054,* All compiler-reflection tools (i.e. the `code_` class of functions and macros) now print accurate
+reflection,effect,HISTORY.md,3242,a corresponding `Base.propertynames` method for reflection ([#25311]).
+reflection,effect,HISTORY.md,4119,This caused the deprecation of some reflection methods (such as `macroexpand` and
+reflection,effect,HISTORY.md,5893,* System reflection is now more consistently exposed from `Sys` and not `Base`
+reflection,effect,HISTORY.md,6112,* `@__LINE__` special macro now available to reflect invocation source line number ([#12727]).
+reflection,effect,Make.inc,583,JCXXFLAGS_COMMON = -pipe $(fPIC) -fno-rtti -std=c++17 -Wformat -Wformat-security -fno-strict-aliasing
+return,control,Compiler/src/optimize.jl,1491,"return statement_cost(ex.args[2], -1, src, sptypes, params)"
+return,control,Compiler/src/reflection_interface.jl,46,"return statement_costs!(cost, body, src, sptypes, params)"
+return,control,Compiler/test/EscapeAnalysis.jl,317,"rts = findall(isreturn, result.ir.stmts.stmt) # return statement"
+return,control,src/codegen.cpp,9205,// common pattern: see if all return statements are an argument in that
+return,control,src/clangsa/FirstDeclAnnotations.cpp,548,if (P.get<ReturnStmt>())
+return,control,src/clangsa/GCChecker.h,330,"void checkEndFunction(const clang::ReturnStmt *RS, CheckerContext &Ctx) const;"
+return,control,src/clangsa/GCCheckerPropagation.cpp,215,"void GCChecker::checkEndFunction(const clang::ReturnStmt *RS,"
+return,control,stdlib/Unicode/src/Unicode.jl,325,# split return statement to help type inference:
+scope,binding,HISTORY.md,54,functions now support a `legacyscope` boolean keyword argument to control whether to run
+scope,binding,HISTORY.md,55,the legacy scope resolution pass over the result. The legacy scope resolution code has
+scope,binding,HISTORY.md,57,migrate now by calling `legacyscope=false` or using `macroexpand!`. This may often require
+scope,binding,HISTORY.md,59,updating tests to expect `hygienic-scope` or `escape` markers might appear in the result.
+scope,binding,HISTORY.md,60,* `Base.ScopedValues.LazyScopedValue{T}` is introduced for scoped values that compute their default using a
+scope,binding,HISTORY.md,61,"`OncePerProcess{T}` callback, allowing for lazy initialization of the default value. `AbstractScopedValue` is"
+scope,binding,HISTORY.md,62,now the abstract base type for both `ScopedValue` and `LazyScopedValue` ([#59372]).
+scope,binding,HISTORY.md,92,* The testset stack was changed to use `ScopedValue` rather than task local storage ([#53462]).
+shadowing,binding,HISTORY.md,2245,"allows for shadowing this function in local scopes, although this is generally discouraged."
+shadowing,binding,NEWS.md,237,"all shadowed by more specific methods (such as a `f(::Type{Union{}})` fallback), or"
+shadowing,binding,base/dict.jl,869,"Any existing values with the same key remain in `d`, but they are shadowed by"
+shadowing,binding,base/errorshow.jl,400,"show_shadowed_type_hint(io, f, san_arg_types_param)"
+shadowing,binding,base/errorshow.jl,601,"function show_shadowed_type_hint(io::IO, @nospecialize(f), san_arg_types_param::Vector{Any})"
+shadowing,binding,base/errorshow.jl,625,# actual shadowing heuristics
+shadowing,binding,base/docs/basedocs.jl,547,the left-hand side locally shadowing the `x` from the outer scope. This can even
+shadowing,binding,doc/src/base/scopedvalues.md,27,a new lexical scope within which the outer definition of `x` is shadowed by
+slice,expression,HISTORY.md,5786,Slicing and reshaping sparse matrices now return vectors when
+slice,expression,base/arrayshow.jl,208,# Nine-slicing is accomplished using print_matrix_row repeatedly
+slice,expression,base/views.jl,233,"# maybeview is like getindex, but returns a view for slicing operations"
+slice,expression,base/views.jl,299,Convert every array-slicing operation in the given expression
+slice,expression,base/views.jl,309,"that appear explicitly in the given `expression`, not array slicing that"
+slice,expression,doc/src/base/arrays.md,136,Slicing operations like `x[1:10]` create a copy by default in Julia. `@view x[1:10]` changes it to make a view. The
+slice,expression,doc/src/base/arrays.md,138,to change all the slicing operations in that block to use views. Sometimes making a copy of the data is faster and
+slice,expression,doc/src/manual/performance-tips.md,1330,that looping will be faster if the inner-most loop index is the first to appear in a slice expression.
+struct,declaration,HISTORY.md,280,* `RegexMatch` objects can now be used to construct `NamedTuple`s and `Dict`s ([#50988]).
+struct,declaration,HISTORY.md,510,"* A new public (but unexported) struct `Base.Lockable{T, L<:AbstractLock}` makes it easy to bundle a resource and its lock together ([#52898])."
+struct,declaration,HISTORY.md,576,* The new `Faces` struct serves as a container for text styling information
+struct,declaration,HISTORY.md,1169,"* Mutable struct fields may now be annotated as `const` to prevent changing them after construction,"
+struct,declaration,HISTORY.md,1308,* CPU profiling now records sample metadata including thread and task. `Profile.print()` has a new `groupby` kwarg that allows
+struct,declaration,HISTORY.md,1314,"allocation is recorded, and a `sample_rate` argument allows a tunable amount of allocations to be skipped,"
+struct,declaration,HISTORY.md,1363,"definitions, including to other function calls, while recording all intermediate test results ([#42518])."
+struct,declaration,HISTORY.md,1364,* `TestLogger` and `LogRecord` are now exported from the Test stdlib ([#44080]).
+subtyping,type,HISTORY.md,50,"* `Base.AbstractOneTo` is added as a supertype of one-based axes, with `Base.OneTo` as its subtype ([#56902])."
+subtyping,type,HISTORY.md,457,* `ScopedValue` implements dynamic scope with inheritance across tasks ([#50958]).
+subtyping,type,HISTORY.md,826,"* `AbstractQ` no longer subtypes `AbstractMatrix`. Moreover, `adjoint(Q::AbstractQ)`"
+subtyping,type,HISTORY.md,828,subtypes `AbstractQ`. This change accounts for the fact that typically `AbstractQ`
+subtyping,type,HISTORY.md,837,"`AdjointFactorization` and `TransposeFactorization` types, which themselves subtype"
+subtyping,type,HISTORY.md,1570,* Subtypes of `AbstractRange` now correctly follow the general array indexing behavior when indexed by
+subtyping,type,HISTORY.md,2638,"This does not include subtypes of `IO` that are entirely in-memory, such as `IOBuffer`,"
+subtyping,type,HISTORY.md,2681,* `IPAddr` subtypes now behave like scalars when used in broadcasting ([#32133]).
+switch_match,control,doc/src/manual/performance-tips.md,1103,JIT-compilation machinery to basically execute the equivalent of a switch statement or dictionary
+symbol_table,binding,Compiler/src/typeinfer.jl,1975,for (in its symbol table and in the debuginfo address map used for backtraces
+symbol_table,binding,doc/src/devdocs/locks.md,67,* `symtab_lock` (`uv_mutex_t`)
+symbol_table,binding,src/aotcompile.cpp,1715,BCWriter.writeSymtab();
+symbol_table,binding,src/aotcompile.cpp,2518,#define WritingMode SymtabWritingMode::NormalSymtab
+symbol_table,binding,src/codegen.cpp,7491,// try to avoid conflicts in the global symbol table
+symbol_table,binding,src/disasm.cpp,650,class SymbolTable {
+symbol_table,binding,src/disasm.cpp,660,"SymbolTable(MCContext &Ctx, const object::ObjectFile *object, uint64_t slide, const FuncMCView &MemObj) JL_NOTSAFEPOINT"
+symbol_table,binding,src/disasm.cpp,662,~SymbolTable() JL_NOTSAFEPOINT = default;
+task_async,concurrency,AGENTS.md,73,## Task-specific skills
+task_async,concurrency,HISTORY.md,56,known design bugs and will be disabled by default in a future version. Users should
+task_async,concurrency,HISTORY.md,92,* The testset stack was changed to use `ScopedValue` rather than task local storage ([#53462]).
+task_async,concurrency,HISTORY.md,179,"* New option `--task-metrics=yes` to enable the collection of per-task timing information,"
+task_async,concurrency,HISTORY.md,180,which can also be enabled/disabled at runtime with `Base.Experimental.task_metrics(::Bool)` ([#56320]).
+task_async,concurrency,HISTORY.md,182,"* actual running time for the task (`Base.Experimental.task_running_time_ns`), and"
+task_async,concurrency,HISTORY.md,183,* wall-time for the task (`Base.Experimental.task_wall_time_ns`).
+task_async,concurrency,HISTORY.md,241,"This means in default configuration the main task and repl (when in interactive mode), which both run on"
+thread,concurrency,HISTORY.md,28,Multi-threading changes
+thread,concurrency,HISTORY.md,185,* `Threads.@spawn` now takes a `:samepool` argument to specify the same threadpool as the caller.
+thread,concurrency,HISTORY.md,186,`Threads.@spawn :samepool foo()` which is shorthand for `Threads.@spawn Threads.threadpool() foo()` ([#57109]).
+thread,concurrency,HISTORY.md,237,Multi-threading changes
+thread,concurrency,HISTORY.md,240,"* Julia now defaults to 1 ""interactive"" thread, in addition to the 1 default ""worker"" thread. i.e. `-t1,1`."
+thread,concurrency,HISTORY.md,242,"thread 1, now run within the `interactive` threadpool. The libuv IO loop also runs on thread 1,"
+thread,concurrency,HISTORY.md,243,helping efficient utilization of the worker threadpool used by `Threads.@spawn`. Asking for specifically 1 thread
+thread,concurrency,HISTORY.md,244,"(`-t1`/`JULIA_NUM_THREADS=1`) or `0` interactive threads will disable the interactive thread i.e. `-t1,0` or `JULIA_NUM_THREADS=1,0`"
+throw_raise,control,HISTORY.md,70,* Indexless `getindex` and `setindex!` (i.e. `A[]`) on `ReinterpretArray` now correctly throw a `BoundsError` when there is more than one element ([#58814]).
+throw_raise,control,HISTORY.md,206,* Errors during `getfield` now raise a new `FieldError` exception type instead of the generic
+throw_raise,control,HISTORY.md,1072,"* Empty strings are no longer incorrectly parsed as valid `DateTime`s, `Date`s or `Time`s and instead throw an"
+throw_raise,control,HISTORY.md,1317,first and the report will show during execution. On MacOS & FreeBSD press `ctrl-t` or raise a `SIGINFO`.
+throw_raise,control,HISTORY.md,1318,For other platforms raise a `SIGUSR1` i.e. `% kill -USR1 $julia_pid`. Not currently available on windows ([#43179]).
+throw_raise,control,HISTORY.md,1994,* `pkg> precompile` is now parallelized through depth-first precompilation of dependencies. Errors will only throw for
+throw_raise,control,HISTORY.md,2346,any order different from `Forward` or `Reverse` will raise an error about the
+throw_raise,control,HISTORY.md,2348,* `close` on a file (`IOStream`) can now throw an exception if an error occurs when trying
+time,effect,HISTORY.md,2714,"* `DateTime` and `Time` formatting/parsing now supports 12-hour clocks with AM/PM via `I` and `p` codes, similar to `strftime` ([#32308])."
+time,effect,base/arraymath.jl,221,Left-rotate matrix `A` 90 degrees counterclockwise an integer `k` number of times.
+time,effect,base/arraymath.jl,261,Right-rotate matrix `A` 90 degrees clockwise an integer `k` number of times.
+time,effect,base/Base_compiler.jl,208,"be monotonic (mod 2⁶⁴) while the system is running, and is unaffected by clock drift or changes to local calendar time,"
+time,effect,base/gcutils.jl,258,"Note that even though safepoints are fast (typically around 2 clock cycles),"
+time,effect,base/libc.jl,321,"Get the system time in seconds since the epoch, with fairly high (typically, microsecond) resolution."
+time,effect,base/libc.jl,325,"time() = ccall(:jl_clock_now, Float64, ())"
+time,effect,base/loading.jl,2788,# wall-clock time spent loading dependencies from disk. Only outermost (depth==0)
+tuple,expression,HISTORY.md,72,* `shuffle` now accepts `NTuple` arguments ([#56906]).
+tuple,expression,HISTORY.md,280,* `RegexMatch` objects can now be used to construct `NamedTuple`s and `Dict`s ([#50988]).
+tuple,expression,HISTORY.md,293,* `sort` now supports `NTuple`s ([#54494]).
+tuple,expression,HISTORY.md,548,* `filter` can now act on a `NamedTuple` ([#50795]).
+tuple,expression,HISTORY.md,612,"* `rand` now supports sampling over `Tuple` types ([#35856], [#50251])."
+tuple,expression,HISTORY.md,921,* Nested combinations of tuples and named tuples of symbols are now allowed as type parameters ([#46300]).
+tuple,expression,HISTORY.md,1543,"`invoke(f, Tuple{T1,T2}, arg1, arg2; kwargs...)` ([#38438])."
+tuple,expression,HISTORY.md,1550,* The optional keyword argument `context` of `sprint` can now be set to a tuple of `:key => value`
+tuple_type,type,HISTORY.md,4335,"as ""dispatch tuple types"" and ""!has_free_typevars"" (not exported). ([#17086], [#25496])"
+tuple_type,type,HISTORY.md,6117,"* Tuple types are now written as `Tuple{A, B}` instead of as `(A, B)`."
+tuple_type,type,HISTORY.md,6121,variadic tuple type ([#10380]).
+tuple_type,type,HISTORY.md,6122,Variadic tuple types are written as `Tuple{Vararg{T}}`.
+tuple_type,type,base/cancellation.jl,744,# concrete tuple type per list depth); the caller wakes them after
+tuple_type,type,base/errorshow.jl,262,# ex.args is a tuple type if it was thrown from `invoke` and is
+tuple_type,type,base/essentials.jl,670,# converting to tuple types of fixed length
+tuple_type,type,base/essentials.jl,676,# converting to tuple types of indefinite length
+type_inference,type,HISTORY.md,940,* The known quadratic behavior of type inference is now fixed and inference uses less memory in general.
+type_inference,type,HISTORY.md,1833,* Compilation and type inference can now be enabled or disabled at the module level
+type_inference,type,HISTORY.md,5697,"computed, instead of using type inference ([#7258]). If the result is empty, then"
+type_inference,type,HISTORY.md,5698,type inference is still used to determine the element type.
+type_inference,type,NEWS.md,71,* Type inference now refines field types through conditional checks and call signatures.
+type_inference,type,base/abstractarray.jl,2170,# `@constprop :aggressive` allows `catdims` to be propagated as constant improving return type inference
+type_inference,type,base/array.jl,731,iterator is empty then the element type of the returned (empty) array is determined by type inference.
+type_inference,type,base/array.jl,755,Collecting an empty iterator where the result type depends on type inference:
+unary_op,expression,base/meta.jl,12,"isunaryoperator,"
+unary_op,expression,base/meta.jl,76,isunaryoperator(s::Symbol)
+unary_op,expression,base/meta.jl,82,"julia> Meta.isunaryoperator(:-), Meta.isunaryoperator(:√), Meta.isunaryoperator(:f)"
+unary_op,expression,base/meta.jl,86,"isunaryoperator(s::Symbol) = ccall(:jl_is_unary_operator, Cint, (Cstring,), s) != 0"
+unary_op,expression,base/meta.jl,102,return _isoperator(s) && (!isunaryoperator(s) || is_unary_and_binary_operator(s)) &&
+unary_op,expression,base/public.jl,87,"isunaryoperator,"
+unary_op,expression,base/show.jl,1719,(isunaryoperator(s) && !is_unary_and_binary_operator(s)) ||
+unary_op,expression,doc/src/base/base.md,563,Meta.isunaryoperator
+union_sum,type,base/array.jl,36,Union type of [`AbstractVector{T}`](@ref) and [`AbstractMatrix{T}`](@ref).
+union_sum,type,base/array.jl,76,Union type of [`Vector{T}`](@ref) and [`Matrix{T}`](@ref) which allows functions to accept either a Matrix or a Vector.
+union_sum,type,base/array.jl,117,Union type of [`DenseVector{T}`](@ref) and [`DenseMatrix{T}`](@ref).
+union_sum,type,base/array.jl,195,"Return whether a type is an ""is-bits"" Union type, meaning each type included in a Union is [`isbitstype`](@ref)."
+union_sum,type,base/reducedim.jl,187,"Any[AbstractArray{t} for t in uniontypes(BitIntFloat)]...,"
+union_sum,type,base/reducedim.jl,188,Any[AbstractArray{Complex{t}} for t in uniontypes(BitIntFloat)]...}
+union_sum,type,base/reinterpretarray.jl,831,"T isa Union && return any(has_bit_padding, uniontypes(T))"
+union_sum,type,base/runtime_internals.jl,641,function uniontype_layout(@nospecialize T::Type)
+unsafe,memory,HISTORY.md,817,is now a no-op ([#47979]). It previously exposed unsafe behavior ([#47977]).
+unsafe,memory,HISTORY.md,4376,* `copy!` (resp. `unsafe_copy!`) is deprecated for `AbstractArray` and is renamed `copyto!`
+unsafe,memory,HISTORY.md,4377,(resp. `unsafe_copyto!`); it will be re-introduced with a different meaning in a future
+unsafe,memory,HISTORY.md,4428,`unsafe_get`/`get` can be dropped or replaced with `coalesce`.
+unsafe,memory,HISTORY.md,5474,"* `unsafe_wrap(String, ...)` has been deprecated in favor of `unsafe_string` ([#19449])."
+unsafe,memory,HISTORY.md,5758,"`String(s)`, `unsafe_string(ptr)` (formerly `bytestring(ptr)`), and"
+unsafe,memory,HISTORY.md,5759,"`unsafe_wrap(String, ptr)` (formerly `pointer_to_string`) ([#16731])."
+unsafe,memory,HISTORY.md,5998,"* `pointer_to_string` has been renamed to `unsafe_wrap(String, ...)`, and"
+variable,declaration,AGENTS.md,35,"After modifying any C/C++ file under `src/`, also run the Clang static analysis"
+variable,declaration,AGENTS.md,85,- [`doc/src/devdocs/agents/skills/c-static-analysis/`](doc/src/devdocs/agents/skills/c-static-analysis/SKILL.md) — Clang static analysis and GC-rooting for C/C++ changes under `src/`.
+variable,declaration,HISTORY.md,23,* The `JULIA_CPU_TARGET` environment variable now supports a `sysimage` keyword to match (or extend) the CPU target used to build the current system image ([#58970]).
+variable,declaration,HISTORY.md,86,"* `Test` now supports the `JULIA_TEST_VERBOSE` environment variable. When set to `true`,"
+variable,declaration,HISTORY.md,96,"* Introspection utilities such as `@code_typed`, `@which` and `@edit` now accept type annotations as substitutes for values, recognizing forms such as `f(1, ::Float64, 3)` or even `sum(::Vector{T}; init = ::T) where {T<:Real}`. Type-annotated variables as in `"
+variable,declaration,HISTORY.md,229,"variables. These variables are also honored by Julia's build system ([#53742], [#56346])."
+variable,declaration,HISTORY.md,744,parsing. Set environment variable `JULIA_USE_FLISP_PARSER` to `1` to switch back to the old
+variable,declaration,HISTORY.md,1079,* `addprocs` for local workers now accepts the `env` keyword argument for passing environment variables to worker
+visibility,declaration,CONTRIBUTING.md,99,- [All Julia Publications](https://julialang.org/research)
+visibility,declaration,HISTORY.md,40,* The `fieldindex` function (to get the index of a struct's field) is now exported ([#58119]).
+visibility,declaration,HISTORY.md,41,* `Base.donotdelete` is now public. It prevents dead code elimination of its arguments ([#55774]).
+visibility,declaration,HISTORY.md,101,"* `isoweekdate`, `isoyear`, `weeksinyear` are now implemented and exported for week based calendars, following [ISO week date](https://en.wikipedia.org/wiki/ISO_week_date) ([#48507])."
+visibility,declaration,HISTORY.md,205,* It is now an error to mark a binding as both `public` and `export`ed ([#53664]).
+visibility,declaration,HISTORY.md,281,* `Lockable` is now exported ([#54595]).
+visibility,declaration,HISTORY.md,282,* `Base.require_one_based_indexing` and `Base.has_offset_axes` are now public ([#56196]).
+visibility,declaration,HISTORY.md,323,This function is now public ([#55537]).
+yield,expression,HISTORY.md,353,"* A failing `DefaultTestSet` now prints to screen the random number generator (RNG) of the failed test, to help"
+yield,expression,HISTORY.md,615,"* Seedable random number generators from `Random` can now be seeded by a string, e.g."
+yield,expression,HISTORY.md,752,"* When a task forks a child, the parent task's task-local RNG (random number generator) is no longer affected. The seeding of child based on the parent task also takes a more disciplined approach to collision resistance, using a design based on the SplitMix an"
+yield,expression,HISTORY.md,966,An interactive task desires low latency and implicitly agrees to be short duration or to yield frequently.
+yield,expression,HISTORY.md,1491,"* The default random number generator has changed, so all random numbers will be different (even with the"
+yield,expression,HISTORY.md,1517,"* Every `Task` object has a local random number generator state, providing"
+yield,expression,HISTORY.md,1519,default. The default generator is also significantly faster in parallel than
+yield,expression,HISTORY.md,1574,* `keys(::Generator)` is now defined to return the iterator's keys ([#34678]).

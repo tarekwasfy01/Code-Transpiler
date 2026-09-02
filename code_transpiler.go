@@ -5,6 +5,7 @@ package codetranspiler
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
@@ -58,3 +59,43 @@ func BackendCapability(feature, target string) Capability {
 }
 
 func LanguagesJSON() ([]byte, error) { return json.Marshal(Languages()) }
+
+// CapabilityMatrixJSON returns status matrices for semantic requirements
+// across all registered targets. Unknown requested features are unsupported.
+func CapabilityMatrixJSON(features []string) ([]byte, error) {
+	return json.Marshal(backend.SemanticCapabilityMatrix(features))
+}
+
+// ImplementationMatrixJSON returns typed operations by frontend, JSON, runtime
+// and target implementation stages. Declarations are not execution test results.
+func ImplementationMatrixJSON() ([]byte, error) {
+	return json.Marshal(backend.TypedImplementationMatrix())
+}
+
+// NativeAnalysisJSON extracts native types, source spans and symbol relations.
+// Currently supports import-free Go files. This is an analysis artifact, not
+// an executable SemanticProgram; TranspileSemanticJSON intentionally rejects it.
+func NativeAnalysisJSON(source, filename, code string) ([]byte, error) {
+	if source != "go" {
+		return nil, fmt.Errorf("native analysis for %q is not implemented", source)
+	}
+	analysis, err := (backend.GoNativeFrontend{}).Analyze(filename, code)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(analysis)
+}
+
+// NativeSemanticJSON converts a supported native source subset directly to an
+// executable SemanticProgram. It never retries the legacy textual frontend.
+// Accepts a bounded Go scalar/function subset, including fixed-width integers.
+func NativeSemanticJSON(source, filename, code string) ([]byte, error) {
+	if source != "go" {
+		return nil, fmt.Errorf("native semantic frontend for %q is not implemented", source)
+	}
+	program, err := backend.LowerNativeGo(filename, code)
+	if err != nil {
+		return nil, err
+	}
+	return program.MarshalSemanticJSON()
+}

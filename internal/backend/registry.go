@@ -115,11 +115,20 @@ func SupportsCapability(caps []string, capability string) bool {
 
 func BackendCapability(feature, backend string) CapabilityResult {
 	backend = NormalizeLanguage(backend)
+	if exactIntegerCapability(feature) && (backend == "go" || backend == "python" || backend == "c" || backend == "rust" || backend == "cpp" || backend == "java" || backend == "csharp") {
+		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityLowering, Reason: "fixed-width integer operations with exact values and explicit wrap semantics"}
+	}
 	if !HasBackend(backend) {
 		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityUnsupported, Reason: "unknown backend"}
 	}
+	if feature == "native.go.functions" && (backend == "go" || backend == "python" || backend == "rust" || backend == "c" || backend == "cpp" || backend == "java" || backend == "csharp") {
+		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityLowering, Reason: "native scalar helper functions"}
+	}
 	if feature == "core" {
 		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityLowering, Reason: "shared semantic core lowering"}
+	}
+	if feature == "native.go.scalar" && (backend == "go" || backend == "python" || backend == "rust" || backend == "c" || backend == "cpp" || backend == "java" || backend == "csharp") {
+		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityLowering, Reason: "verified native Go bool/string/control subset"}
 	}
 	if SupportsCapability(BackendCapabilities(backend), feature) {
 		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityNative}

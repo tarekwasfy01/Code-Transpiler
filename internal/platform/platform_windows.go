@@ -73,8 +73,7 @@ func OpenCMD(exe string) error {
 		"echo.\r\n" +
 		"echo Code Transpiler CLI ready.\r\n" +
 		"echo Current directory: %CD%\r\n" +
-		"echo Type CodeTranspiler.exe help to show the commands again.\r\n" +
-		"del \"%~f0\" >nul 2>nul\r\n"
+		"echo Type CodeTranspiler.exe help to show the commands again.\r\n"
 	if _, err := f.WriteString(script); err != nil {
 		_ = f.Close()
 		_ = os.Remove(scriptPath)

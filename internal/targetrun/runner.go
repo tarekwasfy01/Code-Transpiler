@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/runtimeassets"
 )
 
@@ -24,13 +25,24 @@ type Result struct {
 }
 
 func RunRSource(target, rsrc string) (Result, error) {
+	return RunSource(target, "r", rsrc)
+}
+
+// RunSource executes a source program through the canonical all-to-all
+// frontend/UAST/backend route. Corpus packages are deliberately not passed
+// here: the miner treats them as observations only.
+func RunSource(target, sourceLanguage, sourceText string) (Result, error) {
 	target = strings.ToLower(strings.TrimSpace(target))
 	if target == "" || target == "r" || target == "embedded" {
-		out, err := backend.Run(rsrc)
+		program, err := manytomany.Parse(sourceLanguage, sourceText)
+		if err != nil {
+			return Result{}, fmt.Errorf("parse %s source: %w", sourceLanguage, err)
+		}
+		out, err := backend.RunSemantic(program.Semantic)
 		return Result{
-			Target:  "r",
+			Target:  "embedded",
 			Stdout:  out,
-			Command: "embedded R2Many R runtime",
+			Command: "embedded UniversalAST runtime",
 		}, err
 	}
 
@@ -39,9 +51,13 @@ func RunRSource(target, rsrc string) (Result, error) {
 		return Result{}, fmt.Errorf("unknown target %q", target)
 	}
 
-	code, err := backend.Transpile(target, rsrc)
+	program, err := manytomany.Parse(sourceLanguage, sourceText)
 	if err != nil {
-		return Result{}, fmt.Errorf("transpile to %s: %w", lang.Name, err)
+		return Result{}, fmt.Errorf("parse %s source: %w", sourceLanguage, err)
+	}
+	code, err := manytomany.Emit(target, program)
+	if err != nil {
+		return Result{}, fmt.Errorf("transpile %s to %s: %w", sourceLanguage, lang.Name, err)
 	}
 
 	tmp, err := os.MkdirTemp("", "r2many-run-"+target+"-")

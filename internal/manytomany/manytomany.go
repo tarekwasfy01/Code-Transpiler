@@ -60,15 +60,9 @@ func ParseDocument(data []byte) (Program, error) {
 	if err != nil {
 		return Program{}, err
 	}
-	view, err := semantic.RSource(false)
-	if err != nil {
-		return Program{}, err
-	}
-	graph, _, err := matrixir.BuildLexicalGraph("r", view)
-	if err != nil {
-		return Program{}, err
-	}
-	return Program{Source: "semantic", Semantic: semantic, Graph: graph, Requirements: graph.Requirements(), CanonicalR: view}, nil
+	// The verified semantic relation matrices already describe the program.
+	// Importing JSON must not require an R serialization or reparsed R graph.
+	return Program{Source: "semantic", Semantic: semantic}, nil
 }
 
 // Parse lowers a conservative common subset of each supported source language
@@ -104,6 +98,15 @@ func Parse(source, code string) (Program, error) {
 		view, err := semantic.RSource(false)
 		if err != nil {
 			return Program{}, err
+		}
+		// The CLI's source-to-target route opts into the native projection
+		// contract. Compatibility APIs that call backend.ParseSemantic directly
+		// remain on their established reference encoding.
+		if semantic.UniversalAST != nil {
+			if semantic.UniversalAST.Metadata == nil {
+				semantic.UniversalAST.Metadata = map[string]string{}
+			}
+			semantic.UniversalAST.Metadata["projection_mode"] = "native-direct"
 		}
 		return Program{Source: source, Semantic: semantic, Graph: graph, Requirements: graph.Requirements(), CanonicalR: view}, nil
 	}

@@ -1,0 +1,783 @@
+﻿feature,category,file,line,snippet
+abi_calling_convention,memory,CHANGELOG.md,113,Introduced the ability to define protocols with associated types that are `~Copyable` and/or
+abi_calling_convention,memory,CHANGELOG.md,227,"new APIs, availability on macOS, iOS, tvOS, watchOS, and visionOS can now be"
+abi_calling_convention,memory,CHANGELOG.md,243,If availability for a specific platform is specified simultaneously with
+abi_calling_convention,memory,CHANGELOG.md,244,"`anyAppleOS`, availability for the specific platform takes precedence when"
+abi_calling_convention,memory,CHANGELOG.md,701,Distributed actors now have the ability to support complete split server /
+abi_calling_convention,memory,CHANGELOG.md,787,This capability has been adopted by the task-creation APIs in the
+abi_calling_convention,memory,CHANGELOG.md,932,disconnected at the function boundary and thus possesses the capability of
+abi_calling_convention,memory,CHANGELOG.md,1145,Tasks now gain the ability to respect Task Executor preference.
+allocation,effect,CHANGELOG.md,64,"instance will still dynamically allocated, Such cases can be detected"
+allocation,effect,CHANGELOG.md,65,by enabling the KeyPathAllocation diagnostic group.
+allocation,effect,CHANGELOG.md,570,func evilMalloc(size: Int) -> Int {
+allocation,effect,CHANGELOG.md,571,// use of global function 'malloc' involves unsafe type 'UnsafeMutableRawPointer'
+allocation,effect,CHANGELOG.md,572,return Int(bitPattern: malloc(size))
+allocation,effect,CHANGELOG.md,581,func evilMalloc(size: Int) -> Int {
+allocation,effect,CHANGELOG.md,582,return unsafe Int(bitPattern: malloc(size)) // no warning
+allocation,effect,CHANGELOG.md,2492,`withUnsafeTemporaryAllocation` which provides an efficient temporarily
+array_list,expression,CHANGELOG.md,254,Trailing closures syntax is now supported following array literals. This enables support for
+array_list,expression,docs/Literals.md,153,"The default array literal type is always Array, and the default dictionary"
+array_list,expression,docs/archive/PatternMatching.rst,499,"that, for example, if we add array literal expressions, we should also"
+array_list,expression,docs/archive/PatternMatching.rst,500,add a corresponding array literal pattern. I think that principle is
+array_list,expression,docs/CppInteroperability/UserGuide-CallingSwiftFromC++.md,335,"Similarly, any type that conforms to `ExpressibleByArrayLiteral` will receive a C++ constructor that takes in a C++ initializer list so that it can be initialized from a C++ array literal."
+array_list,expression,docs/proposals/CPointerInteropLanguageModel.rst,177,A type checker limitation prevents array literals from being passed directly
+array_list,expression,docs/proposals/CPointerInteropLanguageModel.rst,179,"workaround, you can bind the array literal to a constant, as above, or"
+array_list,expression,include/swift/AST/ASTBridging.h,1888,"SWIFT_NAME(""BridgedArrayExpr.createParsed(_:lSquareLoc:elements:commaLocs:"""
+array_type,type,CHANGELOG.md,4606,raw buffers to fully conform to generic `Collection`. Changing the slice type
+array_type,type,CHANGELOG.md,4627,`UnsafeRawBufferPointer`'s slice type no longer has a nonmutating subscript
+array_type,type,CHANGELOG.md,5209,Slice types add a `base` property that allows public readonly access to their base collections.
+array_type,type,CHANGELOG.md,5616,* All slice types now have `removeFirst()` and `removeLast()` methods.
+array_type,type,CHANGELOG.md,10366,"and means that square brackets are only used for array types, collection"
+array_type,type,benchmark/single-source/SimpleArraySpecialization.swift,13,// This benchmark tests prespecialization of a simplified array type
+array_type,type,docs/Arrays.md,29,"Swift provides three generic array types, all of which have amortized"
+array_type,type,docs/Arrays.md,30,"O(1) growth. In this document, statements about **ArrayType** apply to"
+assignment,expression,CHANGELOG.md,1562,"`consume` operator, forwarding ownership to the surrounding call, assignment,"
+assignment,expression,CHANGELOG.md,4619,Subscript assignment directly from a buffer no longer compiles:
+assignment,expression,CHANGELOG.md,7444,"`NS_OPTIONS` now support the bitwise assignment operators `|=`, `&=`,"
+assignment,expression,CHANGELOG.md,7449,"the bitwise assignment operators `|=`, `&=`, and `^=`."
+assignment,expression,CHANGELOG.md,7465,The assignment and the evaluation of the right-hand side of the operator
+assignment,expression,CHANGELOG.md,7747,* Arrays now have full value semantics: both assignment and
+assignment,expression,CHANGELOG.md,10491,"* `_` can now be used not only in `var` bindings, but in assignments as well,"
+assignment,expression,CHANGELOG.md,10492,"to ignore elements of a tuple assignment, or to explicitly ignore values."
+atomic,concurrency,benchmark/single-source/ObjectiveCBridging.swift,773,"atomically: true,"
+atomic,concurrency,benchmark/single-source/StringTests.swift,637,"<article id=""/blog/swift-atomics"" class=""summary"">"
+atomic,concurrency,benchmark/single-source/StringTests.swift,639,"<h1 class=""title""><a href=""/blog/swift-atomics/"">Introducing Swift Atomics</a></h1>"
+atomic,concurrency,benchmark/single-source/StringTests.swift,643,"<p>I’m delighted to announce Swift Atomics, a new open source package that enables direct use of low-level atomic operations in Swift code. The goal of this library is to enable intrepid systems programmers to start building synchronization constructs (such as"
+atomic,concurrency,benchmark/single-source/StringTests.swift,646,"<a href=""/blog/swift-atomics/"">Read more...</a>"
+atomic,concurrency,cmake/modules/AddSwift.cmake,265,_ENABLE_ATOMIC_ALIGNMENT_FIX
+atomic,concurrency,cmake/modules/AddSwift.cmake,272,"$<$<COMPILE_LANGUAGE:C,CXX,OBJC,OBJCXX>:-D_STD_ATOMIC_USE_ARM64_LDAR_STLR=0>)"
+atomic,concurrency,cmake/modules/AddSwift.cmake,335,# necessary to avoid a dependency to libatomic
+attribute_annotation,declaration,CHANGELOG.md,9,"attributes. To support this, actors will no longer infer invalid global actor"
+attribute_annotation,declaration,CHANGELOG.md,10,"annotations from isolated property wrappers, or from protocols with inferred"
+attribute_annotation,declaration,CHANGELOG.md,24,"// ^ nonisolated after this change, cannot call mainActorFn without @MainActor annotation"
+attribute_annotation,declaration,CHANGELOG.md,42,"// ^ nonisolated after this change, cannot call mainActorFn without @MainActor annotation"
+attribute_annotation,declaration,CHANGELOG.md,69,* [SE-0522][]: Introduced the `@diagnose` declaration attribute for source-level
+attribute_annotation,declaration,CHANGELOG.md,301,These `@unsafe` annotations are required because of a permissible compiler
+attribute_annotation,declaration,CHANGELOG.md,598,names other than `init`. The compiler now diagnoses these attributes and
+attribute_annotation,declaration,CHANGELOG.md,797,You can now use `@preconcurrency` attribute to replace static actor isolation
+await,expression,CHANGELOG.md,107,defer { await resource.cleanup() }
+await,expression,CHANGELOG.md,383,await noSuspension() // potential suspension point #1 // (2)
+await,expression,CHANGELOG.md,386,"await suspend() // potential suspension point #2 // (3), suspend, (5)"
+await,expression,CHANGELOG.md,431,let m1 = await Maria()
+await,expression,CHANGELOG.md,432,let m2 = await Maria(sharingFriendOf: m1)
+await,expression,CHANGELOG.md,443,await users.get(accountID)
+await,expression,CHANGELOG.md,453,await withTaskPriorityEscalationHandler {
+await,expression,CHANGELOG.md,454,await work()
+binary_op,expression,cmake/modules/SwiftUtils.cmake,33,PRECONDITIONBINOP # prefix
+binary_op,expression,cmake/modules/SwiftUtils.cmake,39,if (PRECONDITIONBINOP_NEGATE)
+binary_op,expression,cmake/modules/SwiftUtils.cmake,41,if (PRECONDITIONBINOP_MESSAGE)
+binary_op,expression,cmake/modules/SwiftUtils.cmake,42,"message(FATAL_ERROR ""Error! ${PRECONDITIONBINOP_MESSAGE}"")"
+binary_op,expression,cmake/modules/SwiftUtils.cmake,49,if (PRECONDITIONBINOP_MESSAGE)
+binary_op,expression,cmake/modules/SwiftUtils.cmake,50,"message(FATAL_ERROR ""Error! ${PRECONDITIONBINOP_MESSAGE}"")"
+binary_op,expression,include/swift/AST/ASTBridging.h,2352,"BridgedDeclRefKindBinaryOperator,"
+binary_op,expression,include/swift/AST/Decl.h,8998,/// isBinaryOperator - Determine whether this is a binary operator
+break,control,CHANGELOG.md,5932,"* if statements can be labeled, and labeled break statements can be used as a"
+break,control,include/swift/AST/ASTBridging.h,2459,"SWIFT_NAME(""BridgedBreakStmt.createParsed(_:loc:targetName:targetLoc:)"")"
+break,control,include/swift/AST/ASTBridging.h,2460,"BridgedBreakStmt BridgedBreakStmt_createParsed(BridgedDeclContext cDeclContext,"
+break,control,include/swift/AST/Stmt.h,1632,"/// BreakStmt - The ""break"" and ""break label"" statement."
+break,control,include/swift/AST/Stmt.h,1633,class BreakStmt : public Stmt {
+break,control,include/swift/AST/Stmt.h,1640,"BreakStmt(SourceLoc Loc, Identifier TargetName, SourceLoc TargetLoc,"
+break,control,include/swift/AST/TypeCheckerTypeIDZone.def,523,"LabeledStmt *(const BreakStmt *),"
+break,control,include/swift/AST/TypeCheckRequests.h,52,class BreakStmt;
+bytecode_vm,meta,docs/CompactBacktraceFormat.md,48,| `opcode` | Mnemonic | Meaning |
+bytecode_vm,meta,docs/CompactImageMapFormat.md,115,| `opcode` | Mnemonic | Meaning |
+bytecode_vm,meta,docs/CompactImageMapFormat.md,194,"If `e` is `1`, this opcode is followed by `code + 1` bytes that give"
+bytecode_vm,meta,docs/CompilerPerformance.md,224,- **LLVM IR** (Low Level Virtual Machine Intermediate Representation): this is
+bytecode_vm,meta,docs/CompilerPerformance.md,467,it in most virtual machines (unless they virtualize access to performance
+bytecode_vm,meta,docs/HighLevelSILOptimizations.rst,42,bytecode instructions that allow them to perform high-level optimizations.
+bytecode_vm,meta,docs/WebAssembly.md,4,"While it's a virtual machine, there are considerations to be taken into account when targeting it:"
+bytecode_vm,meta,docs/HowToGuides/GettingStarted.md,59,for development. When building for development on a virtual machine or
+call,expression,docs/archive/PatternMatching.rst,90,CallExpr instead of each of its N syntactic forms
+call,expression,docs/proposals/rejected/KeywordArguments.rst,163,in the call expression may be followed by multiple arguments. All arguments
+call,expression,docs/SIL/Types.md,612,"list of a call expression. Formally, substitution flattens these pack"
+call,expression,include/swift/AST/ActorIsolation.h,490,"// within an ApplyExpr. In particular, it stores the isolation of the caller"
+call,expression,include/swift/AST/ActorIsolation.h,491,"// and the callee of the ApplyExpr, to be used for inserting implicit actor"
+call,expression,include/swift/AST/ASTBridging.h,1929,"SWIFT_NAME(""BridgedCallExpr.createParsed(_:fn:args:)"")"
+call,expression,include/swift/AST/ASTBridging.h,1930,"BridgedCallExpr BridgedCallExpr_createParsed(BridgedASTContext cContext,"
+call,expression,include/swift/AST/ASTTypeIDs.h,28,class ApplyExpr;
+capture,binding,CHANGELOG.md,48,static immortal objects when there are no captures. For example:
+capture,binding,CHANGELOG.md,63,"When there are captures, such as `\Array<Double>.[i]`, a key path"
+capture,binding,CHANGELOG.md,552,let backtrace = try! Backtrace.capture()
+capture,binding,CHANGELOG.md,755,construct a parameter pack of closures where each closure captures the
+capture,binding,CHANGELOG.md,854,and key path literal expressions that cannot capture non-Sendable values.
+capture,binding,CHANGELOG.md,871,because it doesn't capture any non-Sendable values.
+capture,binding,CHANGELOG.md,1657,"Implicit `self` is now permitted for `weak self` captures, after `self` is unwrapped."
+capture,binding,CHANGELOG.md,1676,"In Swift 5 language modes, implicit `self` is permitted for `weak self` captures in _non-escaping_ closures even before `self` is unwrapped. For example, this code compiles successfully in Swift 5 language mode:"
+cast_conversion,expression,CHANGELOG.md,873,The same applies to keypath-as-function conversions:
+cast_conversion,expression,CHANGELOG.md,1514,Swift 5.9 introduces warnings that catch conversions from an inout
+cast_conversion,expression,CHANGELOG.md,2013,"conversions with the `==`, `!=`, `<`,`<=`,`>`, and `>=` operators."
+cast_conversion,expression,CHANGELOG.md,3642,Conversions between tuple types are now fully implemented.
+cast_conversion,expression,CHANGELOG.md,4715,Adds a new family of conversion initializers to all numeric types that
+cast_conversion,expression,CHANGELOG.md,4926,`Unsafe[Mutable]Pointer<Void>`. Conversion from `UnsafePointer<T>`
+cast_conversion,expression,CHANGELOG.md,4929,to a type. Binding memory allows for safe conversion between pointer types.
+cast_conversion,expression,CHANGELOG.md,5031,"Swift eliminates implicit bridging conversions. Use `as` to force the conversion from a Swift value type to its corresponding object. For example, use `string as NSString`. Use `as AnyObject` to convert a Swift value to its boxed `id` representation."
+channel,concurrency,benchmark/CMakeLists.txt,136,single-source/NIOChannelPipeline
+channel,concurrency,benchmark/single-source/NIOChannelPipeline.swift,1,//===--- NIOChannelPipeline.swift -----------------------------------------===//
+channel,concurrency,benchmark/single-source/NIOChannelPipeline.swift,15,// Mini benchmark implementing the gist of SwiftNIO's ChannelPipeline as
+channel,concurrency,benchmark/single-source/NIOChannelPipeline.swift,22,"name: ""NIOChannelPipeline"","
+channel,concurrency,benchmark/utils/main.swift,132,import NIOChannelPipeline
+channel,concurrency,benchmark/utils/main.swift,355,register(NIOChannelPipeline.benchmarks)
+channel,concurrency,docs/DebuggingTheCompiler.md,1370,"log channels that are useful for debugging Swift issues are the ""types"" and"
+channel,concurrency,docs/DebuggingTheCompiler.md,1371,"""expression"" log channels."
+class,declaration,CHANGELOG.md,145,public class Base: ~Sendable {
+class,declaration,CHANGELOG.md,402,class NonSendableAhmed {
+class,declaration,CHANGELOG.md,407,class Maria {
+class,declaration,CHANGELOG.md,469,class NotSendable {
+class,declaration,CHANGELOG.md,523,class MyType: @MainActor P {
+class,declaration,CHANGELOG.md,814,class MyViewController: @preconcurrency ViewDelegateProtocol {
+class,declaration,CHANGELOG.md,1275,class MyModel {
+class,declaration,CHANGELOG.md,1351,class MutableData { ... }
+closure_lambda,expression,CHANGELOG.md,165,whether the reference appears in a closure. Previously the type-checker could incorrectly permit
+closure_lambda,expression,CHANGELOG.md,166,"forward references within a closure that it would reject outside of the closure, however this"
+closure_lambda,expression,CHANGELOG.md,174,"- `lazy` local variables with initializers that forward reference a local variable in a closure,"
+closure_lambda,expression,CHANGELOG.md,191,"- Forward references to local computed variables from a closure, e.g:"
+closure_lambda,expression,CHANGELOG.md,200,Both cases were already invalid if there was no closure involved. These are now consistently
+closure_lambda,expression,CHANGELOG.md,203,"This then allows for consistent shadowing behavior inside and outside of closures, allowing the"
+closure_lambda,expression,CHANGELOG.md,254,Trailing closures syntax is now supported following array literals. This enables support for
+closure_lambda,expression,CHANGELOG.md,255,calling `Array` and `Dictionary` trailing closure initializers using sugared type syntax:
+code_generation,meta,CHANGELOG.md,6141,* Code generation for large `struct` and `enum` types has been improved to reduce
+code_generation,meta,CHANGELOG.md,6577,Code generation for vector types in the simd module has been improved to
+code_generation,meta,CMakeLists.txt,367,option(SWIFT_TOOLS_LD64_LTO_CODEGEN_ONLY_FOR_SUPPORTING_TARGETS
+code_generation,meta,CONTRIBUTING.md,265,"Swift uses the LLVM Core for code generation and optimization (among other things), [Clang](http://clang.llvm.org/) for interoperability with C and Objective-C, and [LLDB](http://lldb.llvm.org/) for debugging and the REPL."
+code_generation,meta,benchmark/single-source/StringTests.swift,617,"<p>It is my pleasure to announce a new open source project for the Swift Server ecosystem, <a href=""https://github.com/apple/swift-service-discovery"">Swift Service Discovery</a>. Service Discovery is a Swift package designed to establish a standard API that ca"
+code_generation,meta,cmake/modules/AddPureSwift.cmake,51,"""$<$<COMPILE_LANGUAGE:Swift>:SHELL:-Xfrontend -cas-backend>"""
+code_generation,meta,cmake/modules/AddSwift.cmake,340,"# The LLVM backend is built with these defines on most 32-bit platforms,"
+code_generation,meta,cmake/modules/AddSwift.cmake,903,# [THINLTO_LD64_ADD_FLTO_CODEGEN_ONLY]
+compile_time_eval,meta,CHANGELOG.md,47,are not entirely folded away at compile time will be emitted as
+compile_time_eval,meta,CHANGELOG.md,685,at compile time. This guarantee is accomplished through _data isolation_; the
+compile_time_eval,meta,CHANGELOG.md,1265,diagnose all potential for data races at compile time unless an explicit
+compile_time_eval,meta,CHANGELOG.md,3881,and could sometimes crash at compile time or run time.
+compile_time_eval,meta,CHANGELOG.md,5880,* **Availability checking**. Swift reports an error at compile time if you call an
+compile_time_eval,meta,CHANGELOG.md,6343,impacting compile time. **(20486658)**
+compile_time_eval,meta,CHANGELOG.md,7229,and enables better performance (at the cost of increased compile time). The
+compile_time_eval,meta,CHANGELOG.md,8252,"In order to avoid breaking existing code, we're making this a compile time"
+comprehension,expression,CHANGELOG.md,5988,list comprehensions in other languages.
+comprehension,expression,docs/ErrorHandlingRationale.md,219,"highly problematic. They undermine the easy comprehension of code, and"
+comprehension,expression,Runtimes/cmake/modules/ResourceEmbedding.cmake,181,# Evaluate generator expression
+comprehension,expression,stdlib/cmake/modules/AddSwiftStdlib.cmake,1394,# TODO(compnerd) switch to the generator expression when cmake is upgraded
+comprehension,expression,stdlib/cmake/modules/AddSwiftStdlib.cmake,1798,# Please note that using a generator expression to fit
+comprehension,expression,stdlib/public/runtime/CMakeLists.txt,224,# TODO(compnerd) switch to the generator expression when cmake is upgraded
+constant,declaration,CHANGELOG.md,73,An optional `reason:` parameter accepts a string literal for documentation.
+constant,declaration,CHANGELOG.md,144,// constant and thus may be marked as `Sendable`.
+constant,declaration,CHANGELOG.md,254,Trailing closures syntax is now supported following array literals. This enables support for
+constant,declaration,CHANGELOG.md,854,and key path literal expressions that cannot capture non-Sendable values.
+constant,declaration,CHANGELOG.md,1700,* `BareSlashRegexLiterals` enables the regex literal syntax of [SE-0354][].
+constant,declaration,CHANGELOG.md,1806,Or via a [regex literal][SE-0354]:
+constant,declaration,CHANGELOG.md,1812,"In Swift 6, `/` will also be supported as a delimiter for `Regex` literals."
+constant,declaration,CHANGELOG.md,2070,Use of closures becomes less cumbersome by removing the need to constantly specify explicit
+continue,control,include/swift/AST/ASTBridging.h,2478,"SWIFT_NAME(""BridgedContinueStmt.createParsed(_:loc:targetName:targetLoc:)"")"
+continue,control,include/swift/AST/ASTBridging.h,2479,BridgedContinueStmt BridgedContinueStmt_createParsed(
+continue,control,include/swift/AST/Stmt.h,1668,"/// ContinueStmt - The ""continue"" and ""continue label"" statement."
+continue,control,include/swift/AST/Stmt.h,1669,class ContinueStmt : public Stmt {
+continue,control,include/swift/AST/Stmt.h,1676,"ContinueStmt(SourceLoc Loc, Identifier TargetName, SourceLoc TargetLoc,"
+continue,control,include/swift/AST/TypeCheckerTypeIDZone.def,526,"LabeledStmt *(const ContinueStmt *),"
+continue,control,include/swift/AST/TypeCheckRequests.h,54,class ContinueStmt;
+continue,control,include/swift/AST/TypeCheckRequests.h,4535,/// Lookup the target of a continue statement.
+defer_cleanup,control,CHANGELOG.md,102,* [SE-0493][]: `defer` statements now support `async` calls. The isolation of the body of the `defer` statement is always the same as the isolation of its enclosing scope.
+defer_cleanup,control,CHANGELOG.md,107,defer { await resource.cleanup() }
+defer_cleanup,control,CHANGELOG.md,269,cancellation in a given scope. This functionality is intended for use with cleanup actions which
+defer_cleanup,control,CHANGELOG.md,271,cancellation and returning early). It may also be used within `defer` blocks to conveniently
+defer_cleanup,control,CHANGELOG.md,272,express such guaranteed-to-run-to-completion cleanups.
+defer_cleanup,control,CHANGELOG.md,278,cleanup()
+defer_cleanup,control,CHANGELOG.md,1724,defer {
+defer_cleanup,control,CHANGELOG.md,1739,"This is a control-flow sensitive check, meaning an illegal access does not necessarily appear on a source line after an escape of `self` (in the example above, consider _when_ the `defer` is executed). The compiler will always point out one of the escapes of `"
+dynamic_dispatch,effect,CHANGELOG.md,7564,vtable lookup or direct access to access (non-dynamic) `@objc` declarations.
+dynamic_dispatch,effect,CHANGELOG.md,7571,// Accessed by objc_msgSend from ObjC; may be accessed by vtable
+dynamic_dispatch,effect,CHANGELOG.md,8543,"subclass, and provides better performance (since dynamic dispatch is avoided"
+dynamic_dispatch,effect,benchmark/single-source/PolymorphicCalls.swift,15,"Essentially, it checks how good a compiler can optimize virtual calls of class"
+dynamic_dispatch,effect,docs/ABIStabilityManifesto.md,259,"Following that are superclass members, parent type metadata, generic parameter metadata, class members, and *vtables*, described below. Library evolution may present many changes to what exactly is present and will likely make many of the contents opaque to ac"
+dynamic_dispatch,effect,docs/ABIStabilityManifesto.md,263,"Invoking a non-final instance method involves calling a function that is not known at compile time: it must be resolved at run time. This is solved through the use of a *vtable*, or virtual method table (so called because overridable methods are also known as "
+dynamic_dispatch,effect,docs/ABIStabilityManifesto.md,265,"Alternatively, we may decide to perform inter-module calls through opaque *thunks*, or compiler-created intermediary functions, which then perform either direct or vtable dispatch as needed [[#46513](https://github.com/swiftlang/swift/issues/46513)]. This enab"
+dynamic_dispatch,effect,docs/FailableInitializers.md,137,is dispatched through the vtable and invoked using a standard
+enum,declaration,CHANGELOG.md,894,enum Lunch: ~Copyable {
+enum,declaration,CHANGELOG.md,2585,The compiler now correctly rejects `@available` annotations on enum cases with
+enum,declaration,CHANGELOG.md,2592,public enum Pen {
+enum,declaration,CHANGELOG.md,3243,Enum cases can now satisfy static protocol requirements. A static get-only property of type `Self` can be witnessed by an enum case with no associated values and a static function with arguments and returning `Self` can be witnessed by an enum case with associ
+enum,declaration,CHANGELOG.md,3251,enum E: P {
+enum,declaration,CHANGELOG.md,3297,enum Foo: Comparable {
+enum,declaration,CHANGELOG.md,3536,"enum Foo { case bar(x: Int, x: Int) }"
+enum,declaration,CHANGELOG.md,3668,"type inside struct, enum and class declarations. For example, the"
+exception_try,control,CHANGELOG.md,1069,"available to a `Sequence`-driven `for`-`in` loop, except for the `where`"
+exception_try,control,CHANGELOG.md,1178,"an error of type `ParseError`. For example, a `do..catch` block will infer"
+exception_try,control,CHANGELOG.md,1184,} catch {
+exception_try,control,CHANGELOG.md,1449,} catch {
+exception_try,control,CHANGELOG.md,1514,Swift 5.9 introduces warnings that catch conversions from an inout
+exception_try,control,CHANGELOG.md,1743,"Finally, the diagnostic about non-isolated default-value expressions introduced for Swift 5.6 in the Xcode 13.3 release has been removed. The proposed rule was not precise enough to avoid flagging an innocuous yet common pattern in SwiftUI code involving `@Sta"
+exception_try,control,CHANGELOG.md,3230,Catch clauses in a `do`-`catch` statement can now include multiple patterns in a comma-separated list. The body of a `catch` clause will be executed if a thrown error matches any of its patterns.
+exception_try,control,CHANGELOG.md,3235,"} catch TaskError.someFailure(let msg),"
+ffi,memory,CHANGELOG.md,602,an argument exactly matches a parameter with an external property wrapper.
+ffi,memory,CHANGELOG.md,1409,"macro Codable() = #externalMacro(module: ""MyMacros"", type: ""CodableMacro"")"
+ffi,memory,CHANGELOG.md,1422,"macro assert(_ condition: Bool) = #externalMacro(module: ""PowerAssertMacros"", type: ""AssertMacro"")"
+ffi,memory,CHANGELOG.md,1435,macro AddCompletionHandler() = #externalMacro(
+ffi,memory,CHANGELOG.md,2492,`withUnsafeTemporaryAllocation` which provides an efficient temporarily
+ffi,memory,CHANGELOG.md,3792,"clarity, and efficiency."
+ffi,memory,CHANGELOG.md,4368,* Use more efficient `SubSequence` types for lazy filter and map
+ffi,memory,CHANGELOG.md,4625,Correct: `buffer[n..<m] = smaller_buffer.suffix(from: 0)`
+filesystem,effect,benchmark/scripts/test_compare_perf_tests.py,347,class FileSystemIntegration(unittest.TestCase):
+filesystem,effect,benchmark/scripts/test_compare_perf_tests.py,899,"class Test_compare_perf_tests_main(OldAndNewLog, FileSystemIntegration):"
+filesystem,effect,cmake/caches/EmscriptenHostLLVM.cmake,30,"""-sALLOW_MEMORY_GROWTH=1;-sSTACK_SIZE=8388608;-sINITIAL_MEMORY=134217728;-sMODULARIZE=1;-sEXPORT_NAME=createLLVMDriver;-sFORCE_FILESYSTEM=1;-sEXIT_RUNTIME=0;-sENVIRONMENT=node,web;-sEXPORTED_RUNTIME_METHODS=FS,callMain;-gseparate-dwarf"""
+filesystem,effect,cmake/caches/EmscriptenHostSwift.cmake,45,"# filesystem directly (NODERAWFS), and emit DWARF into a sidecar so the main"
+filesystem,effect,cmake/modules/AddSwift.cmake,242,# to use the ANSI codepaths by default as any filesystem access can cause
+filesystem,effect,cmake/modules/AddSwift.cmake,383,# the Windows SDK on case sensitive file systems.
+filesystem,effect,cmake/modules/SwiftConfigureSDK.cmake,548,# the Windows SDK on case sensitive file systems.
+filesystem,effect,docs/DebuggingTheCompiler.md,978,- We need to do this because the build needs a case-sensitive file system and your host machine probably has a case-insensitive file system
+for,control,include/swift/AST/DiagnosticsParse.def,1232,"""C-style for statement was removed in Swift 3"", ())"
+for,control,include/swift/AST/Expr.h,6555,std::optional<ForCollectionInit> ForExpressionPreamble;
+for,control,include/swift/AST/Expr.h,6620,std::optional<ForCollectionInit> getForExpressionPreamble() const {
+for,control,include/swift/AST/Expr.h,6621,return this->ForExpressionPreamble;
+for,control,include/swift/AST/Expr.h,6624,void setForExpressionPreamble(ForCollectionInit newPreamble) {
+for,control,include/swift/AST/Expr.h,6625,this->ForExpressionPreamble = newPreamble;
+for,control,include/swift/Basic/Features.def,458,"EXPERIMENTAL_FEATURE(ForExpressions, false)"
+for,control,include/swift/Sema/SyntacticElementTarget.h,265,static SyntacticElementTarget forExprPattern(ExprPattern *pattern);
+foreach_iteration,control,CHANGELOG.md,1746,the following code diagnosed a warning in Swift 5.6 about the `T.Iterator : IteratorProtocol`
+foreach_iteration,control,CHANGELOG.md,1750,func firstElement<T: Sequence>(_: T) -> T.Element where T.Iterator: IteratorProtocol {...}
+foreach_iteration,control,CHANGELOG.md,2507,a type name. For instance:
+foreach_iteration,control,CHANGELOG.md,2941,`AsyncSequence` and its corresponding `AsyncIterator`.
+foreach_iteration,control,CHANGELOG.md,3324,This proposal also introduces new diagnostics for inserting `self` into the
+foreach_iteration,control,CHANGELOG.md,4072,The new CaseIterable protocol describes types which have a static
+foreach_iteration,control,CHANGELOG.md,4078,enum Suit: CaseIterable {
+foreach_iteration,control,CHANGELOG.md,4093,"`Decodable`). For instance, if there is a generic wrapper type that can only"
+function,declaration,CHANGELOG.md,24,"// ^ nonisolated after this change, cannot call mainActorFn without @MainActor annotation"
+function,declaration,CHANGELOG.md,42,"// ^ nonisolated after this change, cannot call mainActorFn without @MainActor annotation"
+function,declaration,CHANGELOG.md,233,func functionAvailableOnVersion26() {
+function,declaration,CHANGELOG.md,239,functionAvailableOnVersion26()
+function,declaration,CHANGELOG.md,269,cancellation in a given scope. This functionality is intended for use with cleanup actions which
+function,declaration,CHANGELOG.md,376,func synchronous() { // synchronous function
+function,declaration,CHANGELOG.md,460,"Nonisolated asynchronous functions may now execute on the calling actor, when the upcoming feature `NonisolatedNonsendingByDefault`"
+function,declaration,CHANGELOG.md,462,"over where nonisolated asynchronous functions execute, and allows for the default behavior of their execution to be changed"
+function_type,type,CHANGELOG.md,1171,function signature. For example:
+function_type,type,CHANGELOG.md,1936,"* References to `optional` methods on a protocol metatype, as well as references to dynamically looked up methods on `AnyObject` are now supported on par with other function references. The type of such a reference (formerly an immediate optional by mistake) h"
+function_type,type,CHANGELOG.md,2442,"* References to `Self` or so-called ""`Self` requirements"" in the type signatures"
+function_type,type,CHANGELOG.md,3492,A method override is no longer allowed to have a generic signature with
+function_type,type,CHANGELOG.md,4981,Argument labels have been removed from Swift function types. They are now
+function_type,type,CHANGELOG.md,4995,Explicitly-written function types can no longer carry argument labels. You can still provide parameter names for documentation purposes using the '_' in the argument label position:
+function_type,type,CHANGELOG.md,4999,"(token: Token, error: Error?) -> Void // error: function types cannot have argument labels"
+function_type,type,CHANGELOG.md,5100,"final`) and they must use the same signature as their global counterparts. As part of this change, protocol-declared operator requirements must be declared `static` explicitly:"
+gc,memory,benchmark/single-source/ToddCoxeter.swift,11,"// 1) There is no garbage collection for nodes in the graph, so when two nodes"
+gc,memory,docs/WeakReferences.md,56,before it formally leaves scope). This is pervasive in GC environments
+gc,memory,docs/WeakReferences.md,79,type map (in a precise-GC environment). We will call this *dangling
+gc,memory,docs/WeakReferences.md,85,"properties. In GC and ARC, accessors just use the normal semantics for"
+gc,memory,docs/WeakReferences.md,91,"In GC and ARC, variables qualified with `__weak` are immediately zeroed"
+gc,memory,docs/proposals/Accessors.rst,789,"* using a garbage collector to manage all accessible memory, which"
+gc,memory,docs/proposals/TypeState.rst,29,Typestate + GC + ARC
+gc,memory,docs/proposals/TypeState.rst,36,of our objects adopt. This was a hard-won lesson dealing with GC where just
+generic,declaration,CHANGELOG.md,296,`mutableBytes`) as well as the two generic `append()` methods of
+generic,declaration,CHANGELOG.md,314,to be initialized. The same constraint applies to the type parameter of
+generic,declaration,CHANGELOG.md,342,"module; this means that certain declarations, such as local variables and generic parameter types, cannot be found"
+generic,declaration,CHANGELOG.md,972,"You can now suppress `Copyable` on protocols, generic parameters,"
+generic,declaration,CHANGELOG.md,999,"By writing `~Copyable` on a generic type, you're suppressing a default"
+generic,declaration,CHANGELOG.md,1002,protocols and be substituted for those generic types. Full functionality of this
+generic,declaration,CHANGELOG.md,1036,"the `any` keyword, but this was not enforced in nested generic argument positions."
+generic,declaration,CHANGELOG.md,1048,If a generic argument of a constrained opaque return type did not
+generic_constraint,type,CHANGELOG.md,314,to be initialized. The same constraint applies to the type parameter of
+generic_constraint,type,CHANGELOG.md,317,"To safely use `MutableSpan`'s `mutableBytes`, an additional safety constraint"
+generic_constraint,type,CHANGELOG.md,343,with a module selector. Constraints in `where` clauses also cannot use a module selector to refer to an associated
+generic_constraint,type,CHANGELOG.md,952,boundary. This is done by introducing the concept of *isolation regions* that
+generic_constraint,type,CHANGELOG.md,1000,`Copyable` constraint that would otherwise appear on that type. This permits
+generic_constraint,type,CHANGELOG.md,1062,"be restored, by removing the erroneous constraint and using the more general"
+generic_constraint,type,CHANGELOG.md,1823,New types representing time and clocks were introduced. This includes a protocol `Clock` defining clocks which allow for defining a concept of now and a way to wake up after a given instant. Additionally a new protocol `InstantProtocol` for defining instants i
+generic_constraint,type,CHANGELOG.md,1848,`any` type having the same constraints as the associated type. For example:
+global_state,effect,CHANGELOG.md,1312,Global and static variables are prone to data races because they provide memory that can be accessed from any program context. Strict concurrency checking in Swift 5.10 prevents data races on global and static variables by requiring them to be either:
+global_state,effect,CHANGELOG.md,1338,A new `nonisolated(unsafe)` modifier can be used to annotate a global or static variable to suppress data isolation violations when manual synchronization is provided:
+global_state,effect,CHANGELOG.md,2647,"of actor isolation outside of a single actor type, so that global state"
+global_state,effect,CHANGELOG.md,2651,"work with global variables in a concurrent program, as well as modeling"
+global_state,effect,CHANGELOG.md,3899,"simultaneous access of class properties, global variables (including"
+global_state,effect,CHANGELOG.md,7095,access (like global variables). Protocols now declare type requirements as
+global_state,effect,CHANGELOG.md,7944,and classes (they aren't allowed as local or global variables yet) and cannot
+global_state,effect,CHANGELOG.md,9779,* Global variables and static properties are now lazily initialized on first
+goto_label,control,docs/ErrorHandlingRationale.md,1015,(hence `goto fail`); this is because there's no inherent language
+goto_label,control,lib/AST/ASTVerifier.cpp,3726,goto fail;
+goto_label,control,lib/AST/RequirementMachine/RequirementMachineRequests.cpp,887,goto next;
+goto_label,control,lib/AST/RequirementMachine/RequirementMachineRequests.cpp,899,goto next;
+goto_label,control,lib/AST/RequirementMachine/RequirementMachineRequests.cpp,903,goto next;
+goto_label,control,lib/AST/RequirementMachine/RequirementMachineRequests.cpp,908,goto next;
+goto_label,control,lib/AST/RequirementMachine/RequirementMachineRequests.cpp,914,goto next;
+goto_label,control,lib/ConstExtract/ConstExtract.cpp,68,goto visitAuxiliaryDecls;
+identifier,expression,CHANGELOG.md,4410,case identifier(String)
+identifier,expression,CHANGELOG.md,4414,"Token.identifier(""x"") == .number(5) // false"
+identifier,expression,CHANGELOG.md,4415,"Token.identifier(""x"") == .identifier(""x"") // true"
+identifier,expression,CHANGELOG.md,4885,Initializers on `Int` and `UInt` that accept an `ObjectIdentifier` must now use an explicit `bitPattern` label.
+identifier,expression,CHANGELOG.md,4888,let x: ObjectIdentifier = ...
+identifier,expression,CHANGELOG.md,5572,* The operator identifier lexer grammar has been revised to simplify the rules
+identifier,expression,CHANGELOG.md,6225,enum AssetIdentifier: String {
+identifier,expression,CHANGELOG.md,6231,convenience init(assetIdentifier: AssetIdentifier) {
+if,control,CHANGELOG.md,5932,"* if statements can be labeled, and labeled break statements can be used as a"
+if,control,CHANGELOG.md,5933,jump out of the matching if statement.
+if,control,CHANGELOG.md,5935,An unlabeled break does not exit the if statement. It exits the enclosing
+if,control,CMakeLists.txt,735,"""A list of [module_regexp1;flags1;module_regexp2;flags2,...] which can be used to apply specific flags to modules that do not match a cmake regexp. It always applies the first regexp that does not match. The reason this is necessary is that cmake does not prov"
+if,control,benchmark/single-source/ToddCoxeter.swift,457,/// The if statements above should be exhaustive.
+if,control,include/swift/AST/ASTBridging.h,2536,"SWIFT_NAME(""BridgedIfStmt.createParsed(_:labelInfo:ifLoc:conditions:then:"""
+if,control,include/swift/AST/ASTBridging.h,2538,BridgedIfStmt BridgedIfStmt_createParsed(
+if,control,include/swift/AST/ASTScope.h,1466,class IfStmtScope final : public LabeledConditionalStmtScope {
+import,declaration,CHANGELOG.md,85,* The compiler API note `SwiftImportAs` now has support for always importing C structs as `OpaquePointer`.
+import,declaration,CHANGELOG.md,86,This can be used to unify the imported C pointer type in situations where the visibility of the struct might differ.
+import,declaration,CHANGELOG.md,87,"For example, the C `FILE` pointer in Android imports differently on API 23 compared to API 24 and above. We can unify that using the new API note:"
+import,declaration,CHANGELOG.md,94,SwiftImportAs: opaque_pointer
+import,declaration,CHANGELOG.md,97,"* When building modules using library evolution, Swift now uses module selectors in module interface files by default,"
+import,declaration,CHANGELOG.md,114,"`~Escapable`, which relaxes the requirement on types conforming to that protocol. In other words, types can"
+import,declaration,CHANGELOG.md,115,now implement those associated-type requirements with types that may be noncopyable or nonescapable:
+import,declaration,CHANGELOG.md,151,now use typed-throws and will warn if an operation is throwing and the result of the task is not
+index,expression,CHANGELOG.md,2220,"Opaque types can now be used in the parameters of functions and subscripts, when they provide a shorthand syntax for the introduction of a generic parameter. For example, the following:"
+index,expression,CHANGELOG.md,2710,* Type names are no longer allowed as an argument to a subscript parameter that expects a metatype type
+index,expression,CHANGELOG.md,2717,subscript(a: MyValue.Type) -> Int { get { ... } }
+index,expression,CHANGELOG.md,2725,Accepting subscripts with `MyValue` as an argument was an oversight because `MyValue` requires explicit `.self`
+index,expression,CHANGELOG.md,2730,"Read-only computed properties and subscripts can now define their `get` accessor to be `async` and/or `throws`, by writing one or both of those keywords between the `get` and `{`. Thus, these members can now make asynchronous calls or throw errors in the proce"
+index,expression,CHANGELOG.md,2742,subscript(_ day: Date) -> [Transaction] {
+index,expression,CHANGELOG.md,2752,subscript(_ day: Date) -> [T] { get async }
+index,expression,CHANGELOG.md,3058,"Functions, subscripts, and initializers may now have more than one variadic parameter, as long as all parameters which follow variadic parameters are labeled. This makes declarations like the following valid:"
+interface_trait,declaration,CHANGELOG.md,8,* Actors are now allowed to conform to protocols annotated with global actor
+interface_trait,declaration,CHANGELOG.md,10,"annotations from isolated property wrappers, or from protocols with inferred"
+interface_trait,declaration,CHANGELOG.md,14,Inferred isolation of protocols under `-default-isolation MainActor`:
+interface_trait,declaration,CHANGELOG.md,19,protocol P {} // inferred @MainActor
+interface_trait,declaration,CHANGELOG.md,97,"* When building modules using library evolution, Swift now uses module selectors in module interface files by default,"
+interface_trait,declaration,CHANGELOG.md,100,adding `-Xfrontend -disable-module-selectors-in-module-interface` to `OTHER_SWIFT_FLAGS`.
+interface_trait,declaration,CHANGELOG.md,113,Introduced the ability to define protocols with associated types that are `~Copyable` and/or
+interface_trait,declaration,CHANGELOG.md,114,"`~Escapable`, which relaxes the requirement on types conforming to that protocol. In other words, types can"
+io,effect,benchmark/scripts/test_Benchmark_Driver.py,171,STDOUT = object()
+io,effect,benchmark/scripts/test_Benchmark_Driver.py,178,"stdin=None,"
+io,effect,benchmark/scripts/test_Benchmark_Driver.py,179,"stdout=None,"
+io,effect,benchmark/scripts/test_Benchmark_Driver.py,185,"return self.record_and_respond(args, stdin, stdout, stderr, shell)"
+io,effect,benchmark/scripts/test_Benchmark_Driver.py,189,"def record_and_respond(self, args, stdin, stdout, stderr, shell):"
+io,effect,benchmark/scripts/test_Benchmark_Driver.py,190,"# _ = stdin, stdout, shell # ignored in mock"
+io,effect,benchmark/scripts/test_Benchmark_Driver.py,191,"assert stderr == self.STDOUT, ""Errors are NOT redirected to STDOUT"""
+io,effect,benchmark/scripts/test_compare_perf_tests.py,948,"""""""Writes Markdown formatted report to stdout"""""""
+ir,meta,CHANGELOG.md,99,"issues are disabled in this configuration and can now be removed. If necessary, you can disable this new behavior by"
+ir,meta,CHANGELOG.md,285,"When you encounter errors while encoding or decoding `Codable` types, the resulting error messages are now more human-readable thanks to improved `debugDescription` output."
+ir,meta,CHANGELOG.md,303,"stores such a value to addressable memory, it is free to skip any padding"
+ir,meta,CHANGELOG.md,1050,argument was silently ignored and type checking would proceed as if it
+ir,meta,CHANGELOG.md,1739,"This is a control-flow sensitive check, meaning an illegal access does not necessarily appear on a source line after an escape of `self` (in the example above, consider _when_ the `defer` is executed). The compiler will always point out one of the escapes of `"
+ir,meta,CHANGELOG.md,1782,"necessary. Now, the non-isolated async function will always hop to the global"
+ir,meta,CHANGELOG.md,3016,"@available(*, unavailable, message: ""Not supported anymore"")"
+ir,meta,CHANGELOG.md,3019,"@available(*, deprecated, message: ""Suggest using something else"")"
+layout_alignment,memory,CHANGELOG.md,1974,$0.copyBytes(from: buffer.prefix(MemoryLayout<UInt32>.size))
+layout_alignment,memory,CHANGELOG.md,1984,"alignment restriction lifted, so that storing to arbitrary offsets of raw"
+layout_alignment,memory,CHANGELOG.md,1991,or previous alignment boundary:
+layout_alignment,memory,CHANGELOG.md,1997,public func alignedUp(toMultipleOf alignment: Int) -> UnsafeRawPointer
+layout_alignment,memory,CHANGELOG.md,1998,public func alignedDown(toMultipleOf alignment: Int) -> UnsafeRawPointer
+layout_alignment,memory,CHANGELOG.md,2601,"perform the requisite dynamic layout needed to support this in general, which"
+layout_alignment,memory,CHANGELOG.md,4843,"The functions `sizeof()`, `strideof()`, and `alignof()` have been removed."
+layout_alignment,memory,CHANGELOG.md,4844,Memory layout properties for a type `T` are now spelled
+lifetime,binding,CHANGELOG.md,1561,The lifetime of a local variable value can be explicitly ended using the
+lifetime,binding,CHANGELOG.md,4778,copy of the closure and delimit its expected lifetime. For example:
+lifetime,binding,CHANGELOG.md,7181,"lifetime of the call. This enables some minor performance optimizations,"
+lifetime,binding,CHANGELOG.md,8113,lifetime of a `CFStringRef` the same way that it manages the lifetime
+lifetime,binding,CHANGELOG.md,8260,"`-[{NS,UI}Color CGColor]`, are now safe to use and follow the same lifetime"
+lifetime,binding,docs/ABIStabilityManifesto.md,31,"ABI stability means locking down the ABI to the point that future compiler versions can produce binaries conforming to the stable ABI. Once an ABI is stable, it tends to persist for the rest of the platform's lifetime due to ever-increasing mutual dependencies"
+lifetime,binding,docs/Arrays.md,59,"backing buffer, a `ArraySlice` may artificially prolong the lifetime"
+lifetime,binding,docs/HighLevelSILOptimizations.rst,323,throughout their lifetime. This enables more aggressive optimizations by the
+literal_boolean,expression,CHANGELOG.md,275,Task.isCancelled // true
+literal_boolean,expression,CHANGELOG.md,277,Task.isCancelled // false
+literal_boolean,expression,CHANGELOG.md,693,"false-positive data-race warnings through better `Sendable` inference,"
+literal_boolean,expression,CHANGELOG.md,902,case .soup: true
+literal_boolean,expression,CHANGELOG.md,903,default: false
+literal_boolean,expression,CHANGELOG.md,1078,guard left == right else { return false }
+literal_boolean,expression,CHANGELOG.md,1080,return true
+literal_boolean,expression,CHANGELOG.md,1428,#assert(x + y == z) // expands to check the result of x + y == z and report failure if it's false
+literal_null,expression,CHANGELOG.md,115,now implement those associated-type requirements with types that may be noncopyable or nonescapable:
+literal_null,expression,CHANGELOG.md,289,"`typeMismatch(Swift.String, Swift.DecodingError.Context(codingPath: [_CodingKey(stringValue: ""Index 0"", intValue: 0), CodingKeys(stringValue: ""address"", intValue: nil), CodingKeys(stringValue: ""city"", intValue: nil), CodingKeys(stringValue: ""birds"", intValue: "
+literal_null,expression,CHANGELOG.md,631,// error: instance method 'parse()' is inaccessible due to missing import of
+literal_null,expression,CHANGELOG.md,1014,"Using an implicit default `nil` value for task local initialization, when combined with a type alias:"
+literal_null,expression,CHANGELOG.md,1025,static var number: MyValue = nil
+literal_null,expression,CHANGELOG.md,1645,"The API of `UnsafeMutableRawPointer`, `UnsafeMutableBufferPointer`, `UnsafeMutableRawBufferPointer` were improved, adding previously missing initialization (and deinitialization) methods, including more performant initialization from `Collection` types."
+literal_null,expression,CHANGELOG.md,2624,"print(""nil"")"
+literal_null,expression,CHANGELOG.md,2629,printTraceID() // prints: nil
+literal_numeric,expression,CHANGELOG.md,7364,"`convertFrom`. For example, `IntegerLiteralConvertible` now has the"
+literal_numeric,expression,CHANGELOG.md,7368,init(integerLiteral value: IntegerLiteralType)
+literal_numeric,expression,CHANGELOG.md,7663,numeric literals.
+literal_numeric,expression,CHANGELOG.md,10813,* Numeric literals can now use underscores as separators. For example:
+literal_numeric,expression,benchmark/single-source/BinaryFloatingPointConversionFromBinaryInteger.swift,44,extension MockBinaryInteger : ExpressibleByIntegerLiteral {
+literal_numeric,expression,benchmark/single-source/BinaryFloatingPointConversionFromBinaryInteger.swift,45,init(integerLiteral value: T.IntegerLiteralType) {
+literal_numeric,expression,benchmark/single-source/BinaryFloatingPointConversionFromBinaryInteger.swift,46,_value = T(integerLiteral: value)
+literal_numeric,expression,benchmark/single-source/FloatingPointConversion.swift,72,init(integerLiteral value: _Value.IntegerLiteralType) {
+literal_string,expression,CHANGELOG.md,73,An optional `reason:` parameter accepts a string literal for documentation.
+literal_string,expression,CHANGELOG.md,5713,"Along with this change, the use of string literals as selectors has"
+literal_string,expression,CHANGELOG.md,5720,"Generally, such string literals should be replaced with uses of"
+literal_string,expression,CHANGELOG.md,5730,Note that the compiler is now checking the string literals used to
+literal_string,expression,CHANGELOG.md,5788,* Expressions interpolated in strings may now contain string literals.
+literal_string,expression,CHANGELOG.md,5941,"* Concatenation of Swift string literals, including across multiple lines, is"
+literal_string,expression,CHANGELOG.md,7732,"* The `\x`, `\u` and `\U` escape sequences in string literals have been"
+literal_string,expression,CHANGELOG.md,8881,constants. Normal string literals are imported as `CString`; `NSString` literals
+lock_mutex,concurrency,benchmark/single-source/StringEnum.swift,163,"case c228 = ""monitor"""
+lock_mutex,concurrency,benchmark/single-source/StringSwitch.swift,164,"case ""monitor"": return 139"
+lock_mutex,concurrency,docs/ABIStabilityManifesto.md,423,"All progress and issue tracking will be done through JIRA on [bugs.swift.org](https://bugs.swift.org), using the ""AffectsABI"" label. We will make an ABI stability dashboard to more easily monitor specifics and progress. The next step is to start making issues "
+lock_mutex,concurrency,docs/RequestEvaluator.md,11,"way in which one can request information about the AST (e.g., ""what is the superclass of the given class?""). The request-evaluator manages any state in its own caches, and tracks the dependencies among these requests automatically, identifying (and reporting) "
+lock_mutex,concurrency,docs/SynchronizationMutexLinux.md,1,# Synchronization: Linux Mutex
+lock_mutex,concurrency,docs/SynchronizationMutexLinux.md,3,Implementation notes for `Synchronization.Mutex` on Linux
+lock_mutex,concurrency,docs/SynchronizationMutexLinux.md,4,(`stdlib/public/Synchronization/Mutex/LinuxImpl.swift`).
+lock_mutex,concurrency,docs/SynchronizationMutexLinux.md,6,"The lock is a plain-futex mutex with a 3-state lock word, a bounded user-space"
+macro,meta,CHANGELOG.md,175,"or local variables with attached macros that relocate the initializer into an accessor, e.g:"
+macro,meta,CHANGELOG.md,186,@LazyLikeMacro var x = { y } // error: use of local variable 'y' before its declaration
+macro,meta,CHANGELOG.md,702,"client systems, thanks to the new `@Resolvable` macro and runtime changes."
+macro,meta,CHANGELOG.md,1010,task locals are now implemented using a macro. The macro has the same general semantics
+macro,meta,CHANGELOG.md,1118,Non-built-in expression macros can now be used as default arguments that
+macro,meta,CHANGELOG.md,1119,"expand at each call site. For example, a custom `#CurrentFile` macro used as"
+macro,meta,CHANGELOG.md,1124,public macro CurrentFile() -> String = ...
+macro,meta,CHANGELOG.md,1141,"// Prints ""Hi client"" if macro expands to ""Hi \(person)"""
+manual_memory,memory,CHANGELOG.md,570,func evilMalloc(size: Int) -> Int {
+manual_memory,memory,CHANGELOG.md,571,// use of global function 'malloc' involves unsafe type 'UnsafeMutableRawPointer'
+manual_memory,memory,CHANGELOG.md,572,return Int(bitPattern: malloc(size))
+manual_memory,memory,CHANGELOG.md,581,func evilMalloc(size: Int) -> Int {
+manual_memory,memory,CHANGELOG.md,582,return unsafe Int(bitPattern: malloc(size)) // no warning
+manual_memory,memory,benchmark/scripts/CMakeLists.txt,4,${CMAKE_CURRENT_SOURCE_DIR}/Benchmark_GuardMalloc.in
+manual_memory,memory,benchmark/scripts/CMakeLists.txt,5,${CMAKE_CURRENT_BINARY_DIR}/Benchmark_GuardMalloc
+manual_memory,memory,benchmark/scripts/CMakeLists.txt,21,file(COPY ${CMAKE_CURRENT_BINARY_DIR}/Benchmark_GuardMalloc
+map_dict,expression,CHANGELOG.md,255,calling `Array` and `Dictionary` trailing closure initializers using sugared type syntax:
+map_dict,expression,CHANGELOG.md,2289,func getSomeDictionary() -> [some Hashable: some Codable] {
+map_dict,expression,CHANGELOG.md,3172,argument during Dictionary access are now diagnosed.
+map_dict,expression,CHANGELOG.md,3178,var dictionary = [defaultKey:0]
+map_dict,expression,CHANGELOG.md,3181,"dictionary[key, default: dictionary[Container.defaultKey]!] += 1"
+map_dict,expression,CHANGELOG.md,3184,"// error: overlapping accesses to 'self.dictionary', but modification requires exclusive access; consider copying to a local variable"
+map_dict,expression,CHANGELOG.md,3185,"// dictionary[key, default: dictionary[Container.defaultKey]!] += 1"
+map_dict,expression,CHANGELOG.md,3188,"// dictionary[key, default: dictionary[Container.defaultKey]!] += 1"
+map_type,type,docs/DynamicCasting.md,214,"For Array, Set, or Dictionary types, you can use the casting operators to translate to another instance of the same outer container (Array, Set, or Dictionary respectively) with a different component type."
+map_type,type,docs/TypeChecker.md,525,"solver. For example, consider the following generic dictionary type::"
+map_type,type,docs/ABI/Mangling.rst,1004,"type ::= type type 'XSD' // sugared Dictionary type (key, value)"
+map_type,type,docs/archive/Generics.rst,631,"SortedDictionary conforming to Comparable, because the SortedDictionary type"
+map_type,type,docs/CppInteroperability/CppInteroperabilityManifesto.md,133,"map types, they would look weird and foreign in Swift. Idiomatic Swift code that"
+map_type,type,docs/proposals/Accessors.rst,1101,"library dictionary type is implemented with memory, and the two"
+map_type,type,include/swift/APIDigester/ModuleAnalyzerNodes.h,171,NodeMap TypeAliasUpdateMap;
+map_type,type,include/swift/AST/AnyFunctionRef.h,99,return FD->mapTypeIntoEnvironment(FD->getResultInterfaceType());
+member_access,expression,CHANGELOG.md,3072,"Implicit member expressions now support chains of member accesses, making the following valid:"
+member_access,expression,docs/DependencyAnalysis.md,32,"- `dynamic-lookup`: use of a specific member accessed through `AnyObject`,"
+member_access,expression,docs/DependencyAnalysis.md,33,"which has special `id`-like rules for member accesses, and definitions of"
+member_access,expression,docs/TypeChecker.md,318,"application, member access, etc.---generates a specific set of"
+member_access,expression,docs/WeakReferences.md,781,"- A member access thereof, possibly recursively."
+member_access,expression,docs/archive/Generics.rst,945,"member access). If parsing the type parameter list succeeds, and the closing"
+member_access,expression,include/swift/AST/ASTBridging.h,2171,"SWIFT_NAME(""BridgedObjCSelectorExpr.createParsed(_:kind:keywordLoc:lParenLoc:"""
+member_access,expression,include/swift/AST/ASTBridging.h,2173,BridgedObjCSelectorExpr BridgedObjCSelectorExpr_createParsed(
+memory_model,concurrency,docs/proposals/Concurrency.rst,33,Swift Memory Model
+memory_model,concurrency,docs/proposals/Concurrency.rst,94,"The Java memory model ensures that pointers and primitive types, such as ints"
+memory_model,concurrency,include/swift/Threading/ThreadSanitizer.h,78,"/// constraint in TSan's happens-before graph, which TSan uses to determine"
+memory_model,concurrency,stdlib/include/llvm/Support/Compiler.h,462,// This marker is used to define a happens-before arc. The race detector will
+memory_model,concurrency,stdlib/include/llvm/Support/Compiler.h,467,// This marker defines the destination of a happens-before arc.
+memory_model,concurrency,stdlib/public/Concurrency/Task.cpp,1769,// Make sure TSan knows that the resume call happens-before the task
+memory_model,concurrency,stdlib/public/runtime/ErrorObject.mm,522,// initialization of the object happens-before the domain initialization so
+memory_model,concurrency,stdlib/toolchain/Compatibility56/include/Concurrency/TaskPrivate.h,120,/// release() establishes a happens-before relation with a preceding acquire()
+module,declaration,CHANGELOG.md,97,"* When building modules using library evolution, Swift now uses module selectors in module interface files by default,"
+module,declaration,CHANGELOG.md,100,adding `-Xfrontend -disable-module-selectors-in-module-interface` to `OTHER_SWIFT_FLAGS`.
+module,declaration,CHANGELOG.md,323,You can now use a module selector to specify which module Swift should look inside to find a named declaration. A
+module,declaration,CHANGELOG.md,324,module selector is written before the name it qualifies and consists of the module name and two colons (`::`):
+module,declaration,CHANGELOG.md,328,// modules have also declared a type named `View`:
+module,declaration,CHANGELOG.md,332,A module selector can also be applied to the name of a member; this is helpful if extensions in other modules have
+module,declaration,CHANGELOG.md,337,// modules have added identical overloads of `data(using:)`.
+module,declaration,CHANGELOG.md,341,"When a module selector is used, Swift skips past any enclosing scopes and starts its search at the top level of the"
+mutation,effect,CHANGELOG.md,143,// can introduce non-`Sendable` mutable state or protect their state / make everything
+mutation,effect,CHANGELOG.md,152,stored or ignored. This addresses a long standing issue where it was too easy to miss that an
+mutation,effect,CHANGELOG.md,295,* The raw span accessor properties of `Span` and `MutableSpan` (`bytes` and
+mutation,effect,CHANGELOG.md,296,`mutableBytes`) as well as the two generic `append()` methods of
+mutation,effect,CHANGELOG.md,303,"stores such a value to addressable memory, it is free to skip any padding"
+mutation,effect,CHANGELOG.md,306,"stored. However, when reinterpreting the memory as raw bytes, the potentially"
+mutation,effect,CHANGELOG.md,308,`MutableRawSpan` represent fully initialized memory. In the case of
+mutation,effect,CHANGELOG.md,312,It is safe to use `bytes` when the `Element` type of `Span` or `MutableSpan`
+name_resolution,binding,docs/RequestEvaluator.md,7,"* Lazy type checking uses an ad hoc set of callbacks captured in the [lazy resolver](https://github.com/swiftlang/swift/blob/main/include/swift/AST/LazyResolver.h). This ad hoc recursion can lead to cycles in the type-checking problem (e.g., to compute A we ne"
+name_resolution,binding,docs/RequestEvaluator.md,8,"* Because it's not clear which state is set by a given callback in the `LazyResolver`, the callbacks there tend to be very coarse-grained, e.g., ""resolve everything about a declaration that might be used by a client."" This performs too much work in multi-file "
+name_resolution,binding,docs/proposals/DeclarationTypeChecker.rst,33,"**Import resolution**: Resolve the import declarations within a source file to refer to modules. Name lookup can now find module-scope names in the current module or any imported module. This is a file-scoped phase, because one need only resolve the imports wi"
+name_resolution,binding,docs/proposals/DeclarationTypeChecker.rst,45,"**Primary name binding**: Resolve names to refer to declarations. The vast majority of names within declarations can be bound at this point, with the exception of names that are dependent on a type parameter."
+name_resolution,binding,include/swift/AST/Attr.h,1317,LazyMemberLoader *Resolver = nullptr;
+name_resolution,binding,include/swift/AST/Attr.h,1318,uint64_t ResolverContextData;
+name_resolution,binding,include/swift/AST/Attr.h,1331,"Resolver(nullptr), ResolverContextData(0) {"
+name_resolution,binding,include/swift/AST/Attr.h,1335,"DynamicReplacementAttr(DeclNameRef name, LazyMemberLoader *Resolver = nullptr,"
+network,effect,CHANGELOG.md,2170,// to account for the potential networking involved:
+network,effect,CHANGELOG.md,5919,"errors, such as ""file-not-found"" or network timeouts. Swift's error handling"
+network,effect,benchmark/single-source/DictTest.swift,105,"""sabotage"", ""a"", ""network"", ""service"", ""by"", ""submitting"", ""requests"","
+network,effect,benchmark/single-source/StringTests.swift,604,"<p>I am delighted to introduce a new open source project for the Swift Server ecosystem, <a href=""https://github.com/apple/swift-nio-ssh"">SwiftNIO SSH</a>. Distributed as a Swift package, SwiftNIO SSH is designed to enable Swift developers to interact with the"
+network,effect,docs/CompilerPerformance.md,1063,that caused the regression. If you have more network bandwidth than compute
+network,effect,docs/DevelopmentTips.md,94,- `--caching-depscan-socket PATH` — Custom depscan daemon socket (default: `/tmp/clang-scand`).
+network,effect,docs/DevelopmentTips.md,98,- `--caching-remote-service-path PATH` — Path to a remote caching service socket. Implies `--caching-prefix-map` and auto-infers the CAS plugin from the toolchain if not provided.
+network,effect,docs/DifferentiableProgramming.md,98,* [Feed-forward neural networks (FFNN)](#feed-forward-neural-networks-ffnn)
+optimizer,meta,CHANGELOG.md,302,optimization involving values of types that contain padding. When the compiler
+optimizer,meta,CHANGELOG.md,304,bytes. This can potentially leave those bytes uninitialized. This optimization
+optimizer,meta,CHANGELOG.md,3011,"Note that using an unavailable protocol conformance is a warning, not an error, to avoid potential source compatibility issues. This is because it was technically possible to write code in the past that made use of unavailable protocol conformances but worked "
+optimizer,meta,CHANGELOG.md,4220,making their bodies available for optimizations from other modules.
+optimizer,meta,CHANGELOG.md,4226,"any other optimization to be performed, nor does it have any effect on"
+optimizer,meta,CHANGELOG.md,4227,optimizations performed within a single module.
+optimizer,meta,CHANGELOG.md,5108,Note: The type checker performance optimization described by [SE-0091][]
+optimizer,meta,CHANGELOG.md,5929,because it prohibits optimizations that depend on not exporting internal
+optional_nullable,type,CHANGELOG.md,73,An optional `reason:` parameter accepts a string literal for documentation.
+optional_nullable,type,CHANGELOG.md,1018,typealias MyValue = Optional<Int>
+optional_nullable,type,CHANGELOG.md,1029,static var number: Optional<Int>
+optional_nullable,type,CHANGELOG.md,1936,"* References to `optional` methods on a protocol metatype, as well as references to dynamically looked up methods on `AnyObject` are now supported on par with other function references. The type of such a reference (formerly an immediate optional by mistake) h"
+optional_nullable,type,CHANGELOG.md,1946,@objc optional func didUpdateObject(withTag tag: Int)
+optional_nullable,type,CHANGELOG.md,2097,It is now possible to unwrap optional variables with a shorthand syntax that
+optional_nullable,type,CHANGELOG.md,2790,* The determination of whether a call to a `rethrows` function can throw now considers default arguments of `Optional` type.
+optional_nullable,type,CHANGELOG.md,2911,"completionHandler:(void (^)(CKShareParticipant * _Nullable, NSError * _Nullable))completionHandler;"
+overload_resolution,type,CHANGELOG.md,333,added an ambiguous overload:
+overload_resolution,type,CHANGELOG.md,337,// modules have added identical overloads of `data(using:)`.
+overload_resolution,type,CHANGELOG.md,1434,"@attached(peer, names: overloaded)"
+overload_resolution,type,CHANGELOG.md,2138,Note that the transition affects function overload resolution and starts an
+overload_resolution,type,CHANGELOG.md,3044,"Function overloading now works in local contexts, making the following valid:"
+overload_resolution,type,CHANGELOG.md,6846,* Swift now detects discrepancies between overloading and overriding in the
+overload_resolution,type,benchmark/single-source/ExecutorEnqueue.swift,14,// enqueue(_ job: UnownedJob) overload versus the preferred
+overload_resolution,type,benchmark/single-source/ExecutorEnqueue.swift,15,"// enqueue(_ job: consuming ExecutorJob) overload (SE-0392, Swift 5.9)."
+ownership,memory,CHANGELOG.md,1562,"`consume` operator, forwarding ownership to the surrounding call, assignment,"
+ownership,memory,CHANGELOG.md,1584,callee is allowed to take ownership of:
+ownership,memory,CHANGELOG.md,1693,"In Swift 6, the above code will no longer compile. `weak self` captures in non-escaping closures now have the same behavior as captures in escaping closures (as described in [SE-0365][]). Code relying on the previous behavior will need to be updated to either "
+ownership,memory,CHANGELOG.md,3703,`weak` and `unowned` stored properties no longer inhibit the
+ownership,memory,CHANGELOG.md,3986,* `unowned` and `unowned(unsafe)` variables now support Optional types.
+ownership,memory,CHANGELOG.md,4376,It is no longer valid to use the ownership keywords `weak` and `unowned` for property declarations in protocols. These keywords are meaningless and misleading when used in a protocol as they don't have any effect.
+ownership,memory,CHANGELOG.md,4385,unowned var unownedVar: A { get set }
+ownership,memory,CHANGELOG.md,6992,"* Unowned references to Objective-C objects, or Swift objects inheriting from"
+parameter,declaration,CHANGELOG.md,73,An optional `reason:` parameter accepts a string literal for documentation.
+parameter,declaration,CHANGELOG.md,314,to be initialized. The same constraint applies to the type parameter of
+parameter,declaration,CHANGELOG.md,342,"module; this means that certain declarations, such as local variables and generic parameter types, cannot be found"
+parameter,declaration,CHANGELOG.md,602,an argument exactly matches a parameter with an external property wrapper.
+parameter,declaration,CHANGELOG.md,621,initializer injection in the call to `checkValue` because the argument type
+parameter,declaration,CHANGELOG.md,622,matched the parameter type exactly.
+parameter,declaration,CHANGELOG.md,755,construct a parameter pack of closures where each closure captures the
+parameter,declaration,CHANGELOG.md,756,corresponding element of some other parameter pack. For example:
+pattern,expression,CHANGELOG.md,319,the non-padding bytes of `Element` must allow every bit pattern to be
+pattern,expression,CHANGELOG.md,572,return Int(bitPattern: malloc(size))
+pattern,expression,CHANGELOG.md,582,return unsafe Int(bitPattern: malloc(size)) // no warning
+pattern,expression,CHANGELOG.md,890,Noncopyable enums can be pattern-matched with switches without consuming the
+pattern,expression,CHANGELOG.md,1011,"and usage patterns, however there are two source-break situations which the Swift 6"
+pattern,expression,CHANGELOG.md,1068,"supports pattern matching, control transfer statements, and other features"
+pattern,expression,CHANGELOG.md,1631,Сollection downcasts in cast patterns are now supported. For example:
+pattern,expression,CHANGELOG.md,1712,"First, the deinitializer and most kinds of initializers for `actor` types, and types constrained by a global actor like the `@MainActor`, have revised rules about what expressions are permitted in their body. The goal of these revisions has been to improve lan"
+pointer,type,CHANGELOG.md,86,This can be used to unify the imported C pointer type in situations where the visibility of the struct might differ.
+pointer,type,CHANGELOG.md,2438,"The conformance of the unsafe pointer types (e.g., `UnsafePointer`,"
+pointer,type,CHANGELOG.md,2467,compiler now accepts limited pointer type mismatches when directly
+pointer,type,CHANGELOG.md,2469,"those pointer types to alias. Consequently, any Swift"
+pointer,type,CHANGELOG.md,2480,Swift can now directly pass a raw pointer as the function argument:
+pointer,type,CHANGELOG.md,4929,to a type. Binding memory allows for safe conversion between pointer types.
+pointer,type,CHANGELOG.md,7528,"immutability, The following pointer types were renamed:"
+pointer,type,CHANGELOG.md,7695,"* C function pointer types are now imported as `CFunctionPointer<T>`, where `T`"
+primitive_bool,type,docs/CToSwiftNameTranslation-OmitNeedlessWords.md,195,"1. If the parameter is a known boolean type and the last word of the base name is ""Animated"" (case-sensitive in this case), drop that last word and set the first argument label to ""animated""."
+primitive_bool,type,docs/CToSwiftNameTranslation-OmitNeedlessWords.md,243,"1. The typedef ""BOOL"" gets a type name of ""Bool"" and a special note that it's a boolean type."
+primitive_bool,type,docs/CToSwiftNameTranslation-OmitNeedlessWords.md,282,"14. The built-in `bool` (`_Bool`) type is mapped to ""Bool"" with a special note that it's a boolean type."
+primitive_bool,type,docs/CToSwiftNameTranslation.md,389,"Note that the built-in `bool` (`_Bool`) type is *not* considered a boolean type for the purposes of inferring ""throws""."
+primitive_bool,type,include/swift/Basic/StringExtras.h,343,/// Whether this parameter is of some Boolean type.
+primitive_bool,type,include/swift/Basic/StringExtras.h,392,/// Whether this type is a Boolean type.
+primitive_bool,type,lib/AST/ASTContext.cpp,1536,"return param(label, name, getBoolType());"
+primitive_bool,type,lib/AST/ASTVerifier.cpp,1172,"checkSameType(E->getType(), Ctx.getBoolType(), ""condition type"");"
+primitive_float,type,CHANGELOG.md,52,"var x, y: Double"
+primitive_float,type,CHANGELOG.md,63,"When there are captures, such as `\Array<Double>.[i]`, a key path"
+primitive_float,type,CHANGELOG.md,1611,public var degreesCelsius: Double
+primitive_float,type,CHANGELOG.md,1619,public var degreesFahrenheit: Double {
+primitive_float,type,CHANGELOG.md,1683,double(string) // implicitly refers to `self!.double(string)`
+primitive_float,type,CHANGELOG.md,1687,func double(_ string: String) -> String {
+primitive_float,type,CHANGELOG.md,2403,"public var x, y: Double"
+primitive_float,type,CHANGELOG.md,2691,var balance: Double
+primitive_integer,type,CHANGELOG.md,1971,let result = unalignedData.withUnsafeBytes { buffer -> UInt32 in
+primitive_integer,type,CHANGELOG.md,1972,var storage = UInt32.zero
+primitive_integer,type,CHANGELOG.md,1974,$0.copyBytes(from: buffer.prefix(MemoryLayout<UInt32>.size))
+primitive_integer,type,CHANGELOG.md,1981,let result = unalignedData.withUnsafeBytes { $0.loadUnaligned(as: UInt32.self) }
+primitive_integer,type,CHANGELOG.md,2473,function arguments with an integer type that differs from `T` only
+primitive_integer,type,CHANGELOG.md,2478,long long decode_int64(const char *ptr_to_int64);
+primitive_integer,type,CHANGELOG.md,2482,func decodeAsInt64(data: Data) -> Int64 {
+primitive_integer,type,CHANGELOG.md,2484,decode_int64(bytes.baseAddress!)
+primitive_string,type,CHANGELOG.md,9683,literals are emitted as UTF-16 for string types that support it
+primitive_string,type,benchmark/single-source/StringTests.swift,924,"<p>Swift 5 switches the preferred encoding of strings from UTF-16 to UTF-8 while preserving efficient Objective-C-interoperability. Because the String type abstracts away these low-level concerns, no source-code changes from developers should be necessary*, bu"
+primitive_string,type,docs/CToSwiftNameTranslation-OmitNeedlessWords.md,23,"1. If the result type is the same as the context type, do a leading type name match (see below) against the base name. If the next word *after* the match is a preposition, and there's something following the preposition, drop the matching type name."
+primitive_string,type,docs/CToSwiftNameTranslation-OmitNeedlessWords.md,29,"3. If we're matching the name of a property or a method with no arguments, and the result type is the same as the context type, do a trailing type name match with special cases (see below) against the base name, then skip to the last step."
+primitive_string,type,docs/CToSwiftNameTranslation-OmitNeedlessWords.md,31,"4. If the base name starts with ""set"", do a trailing type name match with special cases (see below) against it, using the context type."
+primitive_string,type,docs/CToSwiftNameTranslation-OmitNeedlessWords.md,182,"Objective-C method names often include a reference to the context type, such as `dismissViewControllerAnimated:`. In Swift, that context type reference is considered superfluous and the result (before base name splitting) should be `dismissAnimated(_:)`. To st"
+primitive_string,type,docs/Literals.md,68,"this will be Swift's own native String type, which means users can implement"
+primitive_string,type,docs/StringDesign.rst,502,Why a Built-In String Type?
+random,effect,CHANGELOG.md,4033,The standard library now provides a unified set of randomization functionality.
+random,effect,CHANGELOG.md,4035,method that creates a random value.
+random,effect,CHANGELOG.md,4038,let diceRoll = Int.random(in: 1 ... 6)
+random,effect,CHANGELOG.md,4039,let randomUnit = Double.random(in: 0 ..< 1)
+random,effect,CHANGELOG.md,4040,let randomBool = Bool.random()
+random,effect,CHANGELOG.md,4043,There are also additions to select a random element from a collection or
+random,effect,CHANGELOG.md,4048,let randomGreeting = greetings.randomElement()! // This returns an Optional
+random,effect,CHANGELOG.md,4052,Core to the randomization functionality is a new `RandomNumberGenerator`
+reference,type,CHANGELOG.md,900,func isSoup(_ lunch: borrowing Lunch) -> Bool {
+reference,type,CHANGELOG.md,991,func startSeason(_ flower: borrowing some Flower & ~Copyable) {
+reference,type,CHANGELOG.md,1582,Functions can now declare whether they take value parameters by `borrowing`
+reference,type,CHANGELOG.md,6280,reference types also display the referenced address to more closely mimic
+reference,type,CHANGELOG.md,6284,"indented below the summary by default, while reference types will not. This"
+reference,type,CHANGELOG.md,8111,* Reference types using the CoreFoundation runtime are now imported as
+reference,type,CHANGELOG.md,10715,reference types.
+reference,type,benchmark/Naming.md,56,reference types etc.). Use <strong>numbered suffixes</strong> to denote
+reflection,effect,CHANGELOG.md,6029,qualification by default. `debugPrint` or `String(reflecting:)` can still be
+reflection,effect,CHANGELOG.md,6286,`CustomReflectable`.
+reflection,effect,CHANGELOG.md,6358,* `print()` and reflection via Mirrors is able to report both the current
+reflection,effect,CHANGELOG.md,6360,remaining enum types that do not support reflection are `@objc` enums and
+reflection,effect,CHANGELOG.md,6746,"to reflect the role of the types in the API. For example, `Array<T>` became"
+reflection,effect,CHANGELOG.md,10384,better reflects the semantics of ephemeral sequences like
+reflection,effect,CHANGELOG.md,11029,[SE-0089]: <https://github.com/apple/swift-evolution/blob/main/proposals/0089-rename-string-reflection-init.md>
+reflection,effect,CMakeLists.txt,1639,"# Some tools (e.g. swift-reflection-dump) rely on a host swiftRemoteInspection,"
+return,control,CHANGELOG.md,1061,the return statement. The old broken behavior in this situation can also
+return,control,CHANGELOG.md,7100,- Closures that are comprised of a single return statement are now type
+return,control,CHANGELOG.md,10146,* Missing return statement from a non-`Void` function is diagnosed as an error.
+return,control,include/swift/AST/AnyFunctionRef.h,161,bool bodyHasExplicitReturnStmt() const;
+return,control,include/swift/AST/AnyFunctionRef.h,166,void getExplicitReturnStmts(SmallVectorImpl<ReturnStmt *> &results) const;
+return,control,include/swift/AST/ASTBridging.h,2555,"SWIFT_NAME(""BridgedReturnStmt.createParsed(_:loc:expr:)"")"
+return,control,include/swift/AST/ASTBridging.h,2556,"BridgedReturnStmt BridgedReturnStmt_createParsed(BridgedASTContext cContext,"
+return,control,include/swift/AST/Decl.h,119,class ReturnStmt;
+scope,binding,CHANGELOG.md,72,"lexical scope of the annotated declaration, relative to its enclosing scope."
+scope,binding,CHANGELOG.md,102,* [SE-0493][]: `defer` statements now support `async` calls. The isolation of the body of the `defer` statement is always the same as the isolation of its enclosing scope.
+scope,binding,CHANGELOG.md,269,cancellation in a given scope. This functionality is intended for use with cleanup actions which
+scope,binding,CHANGELOG.md,341,"When a module selector is used, Swift skips past any enclosing scopes and starts its search at the top level of the"
+scope,binding,CHANGELOG.md,2493,"allocation within a limited scope, which will be optimized to use stack"
+scope,binding,CHANGELOG.md,3383,values from outer scopes.
+scope,binding,CHANGELOG.md,3606,references an `inout` parameter from an outer scope:
+scope,binding,CHANGELOG.md,5007,The access level formerly known as `private` is now called `fileprivate`. A Swift 3 declaration marked `private` can no longer be accessed outside its lexical scope (essentially its enclosing curly braces `{}`). A `private` declaration at the top level of a fi
+set,expression,CHANGELOG.md,6467,"Option sets support set literal syntax, and set-like methods such as contains:"
+set,expression,include/swift/AST/ArgumentList.h,90,void setExpr(Expr *newExpr) & { ArgExpr = newExpr; }
+set,expression,include/swift/AST/ArgumentList.h,313,"void setExpr(unsigned idx, Expr *newExpr) { getExprsBuffer()[idx] = newExpr; }"
+set,expression,include/swift/AST/Expr.h,5206,"void setOperand(Expr *E) { getArgs()->setExpr(0, E); }"
+set,expression,include/swift/AST/Expr.h,5232,"void setOperand(Expr *E) { getArgs()->setExpr(0, E); }"
+set,expression,include/swift/AST/Expr.h,5281,"void setBase(Expr *E) { getArgs()->setExpr(0, E); }"
+set,expression,include/swift/Parse/IDEInspectionCallbacks.h,99,void setExprBeginning(ParserPosition PP) {
+set,expression,include/swift/Sema/ConstraintSystem.h,1811,"void setExprPatternFor(Expr *E, ExprPattern *EP) {"
+shadowing,binding,CHANGELOG.md,203,"This then allows for consistent shadowing behavior inside and outside of closures, allowing the"
+shadowing,binding,docs/Testing.md,220,"Avoid purposefully shadowing names from the standard library, this makes the"
+shadowing,binding,docs/Testing.md,222,compiler bug triggered by this shadowing?) When reducing a compiler testcase
+shadowing,binding,docs/WeakReferences.md,931,"usual shadowing rules, whatever they may be, with the exception that"
+shadowing,binding,include/swift/AST/ASTScope.h,355,/// ShadowingGenericParameter<T> { \code typealias T = Int; func foo (t :
+shadowing,binding,include/swift/AST/ASTScope.h,356,"/// T) {} \code } \code ShadowingGenericParameter<String>().foo(t: ""hi"")"
+shadowing,binding,include/swift/AST/DeclContext.h,730,/// Retrieves a list of separately imported overlays which are shadowing
+shadowing,binding,include/swift/AST/DiagnosticsCommon.def,223,"""source target '%0' shadowing a%select{ |n SDK }2Swift module with the same name at: '%1'"", (StringRef, StringRef, bool))"
+slice,expression,CHANGELOG.md,4602,Slicing a raw buffer no longer results in the same raw buffer
+slice,expression,CHANGELOG.md,6587,The following free Swift functions for splitting/slicing sequences have been
+slice,expression,CHANGELOG.md,6651,collection they are slicing and maintain that mapping even after mutations.
+slice,expression,CHANGELOG.md,6679,"standard library provides ""slicing,"" which composes well with algorithms."
+slice,expression,benchmark/utils/TestsUtils.swift,130,/// harness to allow for easy slicing of the set of benchmarks along tag
+slice,expression,docs/ABIStabilityManifesto.md,419,"Another goal of Swift is to improve the applicability of Swift to systems programming. Ownership semantics may make a large impact, including things such as improved `inout` semantics that allow for efficient and safe array slicing. Providing the right abstrac"
+slice,expression,docs/Arrays.md,53,"has contiguous storage and \""C array\"" performance. Slicing an"
+slice,expression,docs/IndexInvalidation.md,39,"accessing using the subscript operator, slicing, swapping elements, removing"
+struct,declaration,CHANGELOG.md,33,@propertyWrapper public struct MainActorWrap<T: Sendable> {
+struct,declaration,CHANGELOG.md,51,struct Point {
+struct,declaration,CHANGELOG.md,55,struct DataPoint {
+struct,declaration,CHANGELOG.md,86,This can be used to unify the imported C pointer type in situations where the visibility of the struct might differ.
+struct,declaration,CHANGELOG.md,122,struct Pencil: WritingInstrument {
+struct,declaration,CHANGELOG.md,123,struct Eraser: ~Copyable {}
+struct,declaration,CHANGELOG.md,126,struct Chalk: WritingInstrument {
+struct,declaration,CHANGELOG.md,127,struct Eraser {}
+subtyping,type,CHANGELOG.md,139,to mark types as non-`Sendable` without inheritance impact.
+subtyping,type,CHANGELOG.md,4547,"- In the evolution proposal, associated type and class inheritance clauses"
+subtyping,type,CHANGELOG.md,4551,"- In the evolution proposal, protocol inheritance clauses are allowed to"
+subtyping,type,CHANGELOG.md,5033,* Collection subtype conversions and dynamic casts now work with protocol types:
+subtyping,type,CHANGELOG.md,5798,"* Conversions between function types are supported, exhibiting covariance in"
+subtyping,type,CHANGELOG.md,5799,function result types and contravariance in function parameter types.
+subtyping,type,CHANGELOG.md,7007,* Subclasses that override base class methods with co- or contravariance in
+subtyping,type,CHANGELOG.md,10290,// Values are also assignable by implicit auto-increment
+switch_match,control,CHANGELOG.md,5740,allows you to use C enum pattern matching in switch statements with no
+switch_match,control,CHANGELOG.md,5936,"loop or switch statement, or it is illegal if none exists. (19150249)"
+switch_match,control,CHANGELOG.md,5953,"- The switch statement ""exhaustiveness checker"" is smarter."
+switch_match,control,CHANGELOG.md,8087,"* `;` can no longer be used to demarcate an empty case in a switch statement,"
+switch_match,control,CHANGELOG.md,8185,* `break` now breaks out of switch statements.
+switch_match,control,CHANGELOG.md,8226,"* Loops and switch statements can now carry labels, and you can"
+switch_match,control,CHANGELOG.md,8248,"breaking out of a switch statement. Previously, break completely ignored"
+switch_match,control,docs/HowSwiftImportsCAPIs.md,876,"Swift compiler performs exhaustiveness checks for switch statements, which"
+symbol_table,binding,docs/DebuggingTheCompiler.md,806,"- Linker information (symbol table, sections, binding):"
+symbol_table,binding,docs/DebuggingTheCompiler.md,807,- `nm`: Display symbol tables.
+symbol_table,binding,docs/proposals/DeclarationTypeChecker.rst,133,"**Global symbol table**: Name lookup within a type or extension context typically requires us to bring that type up to the ""type hierarchies"" phase. If we were to use a global symbol table that also had information about members, name lookup could find declara"
+symbol_table,binding,include/swift/IRGen/Linking.h,1895,// are discarded from the symtab when other object files have a COMDAT
+symbol_table,binding,include/swift/RemoteInspection/RuntimeHeaders/llvm/BinaryFormat/COFF.h,68,uint32_t PointerToSymbolTable;
+symbol_table,binding,include/swift/RemoteInspection/RuntimeHeaders/llvm/BinaryFormat/COFF.h,88,uint32_t PointerToSymbolTable;
+symbol_table,binding,include/swift/RemoteInspection/RuntimeHeaders/llvm/BinaryFormat/COFF.h,148,/// COFF symbol table entries for local symbols have been removed. This is
+symbol_table,binding,include/swift/RemoteInspection/RuntimeHeaders/llvm/BinaryFormat/COFF.h,341,uint32_t SymbolTableIndex;
+task_async,concurrency,CHANGELOG.md,102,* [SE-0493][]: `defer` statements now support `async` calls. The isolation of the body of the `defer` statement is always the same as the isolation of its enclosing scope.
+task_async,concurrency,CHANGELOG.md,105,func example() async {
+task_async,concurrency,CHANGELOG.md,150,"* Throwing unstructured task initializers (`Task.init`, `Task.immediate`, `Task.detached`, etc)"
+task_async,concurrency,CHANGELOG.md,151,now use typed-throws and will warn if an operation is throwing and the result of the task is not
+task_async,concurrency,CHANGELOG.md,156,Task { // Unstructured throwing task created by 'init(priority:operation:)' is unused [#NoUseUnstructuredThrowingTask]
+task_async,concurrency,CHANGELOG.md,159,"Task { // no warning, as previously"
+task_async,concurrency,CHANGELOG.md,268,Introduced Task Cancellation Shields which temporarily prevent the observation of task
+task_async,concurrency,CHANGELOG.md,275,Task.isCancelled // true
+thread,concurrency,CHANGELOG.md,377,"// executor / thread: ""T1"""
+thread,concurrency,CHANGELOG.md,379,"// executor / thread: ""T1"""
+thread,concurrency,CHANGELOG.md,382,"// executor / thread: ""T1"""
+thread,concurrency,CHANGELOG.md,385,"// executor / thread: ""T1"""
+thread,concurrency,CHANGELOG.md,387,"// executor / thread: ""other"""
+thread,concurrency,CHANGELOG.md,391,"// executor / thread: ""T1"""
+thread,concurrency,CHANGELOG.md,1009,"In order for Swift 6 language mode to not flag task-locals as potentially thread-unsafe,"
+thread,concurrency,CHANGELOG.md,1360,"Note that without correct implementation of a synchronization mechanism to achieve data isolation, dynamic run-time analysis from exclusivity enforcement or tools such as the Thread Sanitizer could still identify failures."
+throw_raise,control,CHANGELOG.md,1170,Functions can now specify the type of error that they throw as part of the
+throw_raise,control,CHANGELOG.md,1485,* Throw errors using `throw`
+throw_raise,control,CHANGELOG.md,1714,"For example, a non-async initializer of an `actor` prior to Swift 5.7 would raise a diagnostic any time `self` escapes the initializer before returning. That diagnostic's purpose was to protect against a possible data race when accessing isolated stored proepr"
+throw_raise,control,CHANGELOG.md,2730,"Read-only computed properties and subscripts can now define their `get` accessor to be `async` and/or `throws`, by writing one or both of those keywords between the `get` and `{`. Thus, these members can now make asynchronous calls or throw errors in the proce"
+throw_raise,control,CHANGELOG.md,2737,guard manager != nil else { throw BankError.notInYourFavor }
+throw_raise,control,CHANGELOG.md,2790,* The determination of whether a call to a `rethrows` function can throw now considers default arguments of `Optional` type.
+throw_raise,control,CHANGELOG.md,2799,"However, it also meant that the following was accepted, even though the call to `foo()` can throw and the call site is not marked with `try`:"
+throw_raise,control,CHANGELOG.md,2802,func foo(_: (() throws -> ())? = { throw myError }) rethrows {}
+time,effect,CHANGELOG.md,1823,New types representing time and clocks were introduced. This includes a protocol `Clock` defining clocks which allow for defining a concept of now and a way to wake up after a given instant. Additionally a new protocol `InstantProtocol` for defining instants i
+time,effect,CHANGELOG.md,1827,"try await Task.sleep(until: .now + .milliseconds(123), clock: .continuous)"
+time,effect,CHANGELOG.md,1832,`Clock` also has methods to measure the elapsed duration of the execution of work. In the case of the `SuspendingClock` and `ContinuousClock` this measures with high resolution and is suitable for benchmarks.
+time,effect,CHANGELOG.md,1835,let clock = ContinuousClock()
+time,effect,CHANGELOG.md,1836,let elapsed = clock.measure {
+time,effect,CHANGELOG.md,11212,[SE-0329]: <https://github.com/apple/swift-evolution/blob/main/proposals/0329-clock-instant-duration.md>
+time,effect,benchmark/single-source/Concurrency/TaskDeadlines.swift,44,let clock = ContinuousClock()
+time,effect,benchmark/single-source/Concurrency/TaskDeadlines.swift,46,let deadline = clock.now.advanced(by: .seconds(3600))
+tuple,expression,CHANGELOG.md,1071,tuples of arbitrary length using pack iteration:
+tuple,expression,CHANGELOG.md,2072,or a complex tuple result type.
+tuple,expression,CHANGELOG.md,3530,"Duplicate tuple element labels are no longer allowed, because it leads"
+tuple,expression,CHANGELOG.md,3642,Conversions between tuple types are now fully implemented.
+tuple,expression,CHANGELOG.md,3747,* Key path expressions can now include references to tuple elements.
+tuple,expression,CHANGELOG.md,3841,"Single-element labeled tuple expressions, for example `(label: 123)`, were"
+tuple,expression,CHANGELOG.md,4687,"take one tuple argument, and functions that take multiple arguments."
+tuple,expression,CHANGELOG.md,5550,The implicit tuple splat behavior in function application has been deprecated
+tuple_type,type,CHANGELOG.md,3642,Conversions between tuple types are now fully implemented.
+tuple_type,type,docs/AccessControl.md,155,A tuple type\'s access level is the minimum of the access levels of its
+tuple_type,type,docs/DynamicCasting.md,290,Casting from a tuple type T1 to a tuple type T2 will succeed iff the following hold:
+tuple_type,type,docs/DynamicCasting.md,358,"For non-reference types -- including struct, enum, and tuple types -- the casting logic will first look for an `_ObjectiveCBridgeable` conformance that it can use to convert the source into a tailored reference type. (See ""The _ObjectiveCBridgeable Protocol"" b"
+tuple_type,type,docs/GenericsManifesto.md,426,"Currently, only nominal types (classes, structs, enums, protocols) can be extended. One could imagine extending structural types--particularly tuple types--to allow them to, e.g., conform to protocols. For example, pulling together variadic generics, parameter"
+tuple_type,type,docs/GenericsManifesto.md,429,"extension<...Elements : Equatable> (Elements...) : Equatable { // extending the tuple type ""(Elements...)"" to be Equatable"
+tuple_type,type,docs/Runtime.md,288,0000000000022260 T _swift_getTupleTypeMetadata
+tuple_type,type,docs/Runtime.md,289,00000000000225a0 T _swift_getTupleTypeMetadata2
+type_inference,type,CHANGELOG.md,2506,"type inference rules. Type placeholders are spelled as an underscore (""`_`"") in"
+type_inference,type,CHANGELOG.md,3088,"Members of a ""chain"" can be properties, method calls, subscript accesses, force unwraps, or optional chaining question marks. Furthermore, the type of each member along the chain is permitted to differ (again, as long as the base of the chain matches the resul"
+type_inference,type,CHANGELOG.md,7099,* Type inference for single-expression closures has been improved in several ways:
+type_inference,type,CHANGELOG.md,7671,* Type inference for `for..in` loops has been improved to consider the
+type_inference,type,CHANGELOG.md,8857,"`AnyObject`, `AnyClass`, or `()` type, since type inference can turn a simple"
+type_inference,type,CHANGELOG.md,9115,"Also note that ""active"" code will be parsed, typechecked and emitted, while"
+type_inference,type,CHANGELOG.md,10056,The `enum` cases can then take advantage of type inference from context.
+type_inference,type,CHANGELOG.md,10124,"* Type inference for variables has been improved, allowing any"
+unary_op,expression,include/swift/AST/ArgumentList.h,510,Expr *getUnaryExpr() const { return isUnary() ? getExpr(0) : nullptr; }
+unary_op,expression,include/swift/AST/ArgumentList.h,514,Expr *getUnlabeledUnaryExpr() const {
+unary_op,expression,include/swift/AST/ASTBridging.h,2217,"SWIFT_NAME(""BridgedPostfixUnaryExpr.createParsed(_:operator:operand:)"")"
+unary_op,expression,include/swift/AST/ASTBridging.h,2218,BridgedPostfixUnaryExpr
+unary_op,expression,include/swift/AST/ASTBridging.h,2219,"BridgedPostfixUnaryExpr_createParsed(BridgedASTContext cContext,"
+unary_op,expression,include/swift/AST/ASTBridging.h,2222,"SWIFT_NAME(""BridgedPrefixUnaryExpr.createParsed(_:operator:operand:)"")"
+unary_op,expression,include/swift/AST/ASTBridging.h,2223,BridgedPrefixUnaryExpr
+unary_op,expression,include/swift/AST/ASTBridging.h,2224,"BridgedPrefixUnaryExpr_createParsed(BridgedASTContext cContext,"
+union_sum,type,benchmark/single-source/ExistentialPerformance.swift,253,// these are setup functions that **create array** for each variant type.
+union_sum,type,docs/proposals/OptionSets.rst,26,"strict enumerations of states, or ""sum types"" to use the type-theory-nerd term."
+union_sum,type,docs/proposals/valref.rst,201,"Union types, like structs, have default value semantics. Constructors for the"
+union_sum,type,docs/proposals/valref.rst,230,sugar syntax for a generic union type ``Nullable<T>``. Since both nullable
+union_sum,type,include/swift/AST/DiagnosticArgument.h,101,/// Variant type that holds a single diagnostic argument of a known
+union_sum,type,include/swift/AST/DiagnosticsSema.def,3983,"""cannot override mutable property %0 of type %1 with covariant type %2"","
+union_sum,type,include/swift/AST/DiagnosticsSema.def,3986,"""cannot override mutable subscript of type %0 with covariant type %1"","
+union_sum,type,include/swift/AST/ProtocolConformanceRef.h,74,"using UnionType = llvm::PointerUnion<AbstractConformance *,"
+unsafe,memory,CHANGELOG.md,297,`OutputRawSpan` are newly marked with `@unsafe`. These changes are corrections
+unsafe,memory,CHANGELOG.md,301,These `@unsafe` annotations are required because of a permissible compiler
+unsafe,memory,CHANGELOG.md,566,the Swift compiler will produce warnings for uses of memory-unsafe constructs
+unsafe,memory,CHANGELOG.md,571,// use of global function 'malloc' involves unsafe type 'UnsafeMutableRawPointer'
+unsafe,memory,CHANGELOG.md,577,"be suppressed by ackwnowledging the memory-unsafe behavior, for"
+unsafe,memory,CHANGELOG.md,578,example with an `unsafe` expression:
+unsafe,memory,CHANGELOG.md,582,return unsafe Int(bitPattern: malloc(size)) // no warning
+unsafe,memory,CHANGELOG.md,1007,which was now properly flagged as potential source of concurrency unsafety.
+variable,declaration,CHANGELOG.md,11,MainActor isolation. This will change the isolation of static methods and
+variable,declaration,CHANGELOG.md,22,"// conforming to P used to result in invalid `@MainActor actor A`, propagated to static methods"
+variable,declaration,CHANGELOG.md,23,static func staticMethod() { mainActorFn() }
+variable,declaration,CHANGELOG.md,39,"// wrapper used to result in invalid `@MainActor actor A`, propagated to static methods"
+variable,declaration,CHANGELOG.md,41,static func staticMethod() { mainActorFn() }
+variable,declaration,CHANGELOG.md,48,static immortal objects when there are no captures. For example:
+variable,declaration,CHANGELOG.md,60,let kp: KeyPath = \DataPoint.location.y
+variable,declaration,CHANGELOG.md,106,let resource = getResource()
+visibility,declaration,CHANGELOG.md,33,@propertyWrapper public struct MainActorWrap<T: Sendable> {
+visibility,declaration,CHANGELOG.md,34,@MainActor public var wrappedValue: T
+visibility,declaration,CHANGELOG.md,35,public init(wrappedValue: T) { self.wrappedValue = wrappedValue }
+visibility,declaration,CHANGELOG.md,86,This can be used to unify the imported C pointer type in situations where the visibility of the struct might differ.
+visibility,declaration,CHANGELOG.md,145,public class Base: ~Sendable {
+visibility,declaration,CHANGELOG.md,543,"Introduced the new `Runtime` module, which contains a public API that can"
+visibility,declaration,CHANGELOG.md,625,"When the upcoming feature `MemberImportVisibility` is enabled, Swift will"
+visibility,declaration,CHANGELOG.md,804,public protocol ViewDelegateProtocol {
+while,control,include/swift/AST/ASTBridging.h,2548,"SWIFT_NAME(""BridgedRepeatWhileStmt.createParsed(_:labelInfo:repeatLoc:cond:"""
+while,control,include/swift/AST/ASTBridging.h,2550,BridgedRepeatWhileStmt BridgedRepeatWhileStmt_createParsed(
+while,control,include/swift/AST/ASTBridging.h,2578,"SWIFT_NAME(""BridgedWhileStmt.createParsed(_:labelInfo:whileLoc:cond:body:)"")"
+while,control,include/swift/AST/ASTBridging.h,2579,BridgedWhileStmt BridgedWhileStmt_createParsed(
+while,control,include/swift/AST/ASTScope.h,1487,class WhileStmtScope final : public LabeledConditionalStmtScope {
+while,control,include/swift/AST/ASTScope.h,1489,WhileStmt *const stmt;
+while,control,include/swift/AST/ASTScope.h,1490,WhileStmtScope(WhileStmt *e)
+while,control,include/swift/AST/ASTScope.h,1491,": LabeledConditionalStmtScope(ScopeKind::WhileStmt), stmt(e) {}"
+yield,expression,CHANGELOG.md,463,"from always executing on the global concurrent pool, to the calling actor, which can yield noticeable performance improvements"
+yield,expression,CHANGELOG.md,2305,"func partyGenerator() -> [PartyMember] { fatalError(""todo"") }"
+yield,expression,CHANGELOG.md,2308,@MainActor var members: [PartyMember] = partyGenerator()
+yield,expression,CHANGELOG.md,4052,Core to the randomization functionality is a new `RandomNumberGenerator`
+yield,expression,CHANGELOG.md,4053,protocol. The standard library defines its own random number generator
+yield,expression,CHANGELOG.md,4054,called `SystemRandomNumberGenerator` which is backed by a secure and
+yield,expression,CHANGELOG.md,4055,thread-safe random number generator on each platform. All the randomization
+yield,expression,CHANGELOG.md,4056,functions have a `using:` parameter that take a `RandomNumberGenerator` that

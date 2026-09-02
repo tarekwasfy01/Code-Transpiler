@@ -1,0 +1,16 @@
+symbol,formula,shape,meaning
+Z,[S | R],Feature × (SemanticAxis + RelationAxis),exact feature schema signature
+Q,quotient_equal_rows(Z),Feature × SemanticFacet,one-hot exact equivalence projection
+FSA,bool(Q.T @ S),SemanticFacet × SemanticAxis,facet semantic axes
+FRA,bool(Q.T @ R),SemanticFacet × RelationAxis,facet relation axes
+LF,bool(P @ Q),Language × SemanticFacet,language facet incidence
+NS,U_seed.T @ Q,StructuralNode × SemanticFacet,existing structural seed bridge
+FL,bool(FSA @ AxisLayer),SemanticFacet × Layer,layer membership
+FCR,bool(FRA @ RelationAxisConcreteRelation + FSA @ SemanticAxisConcreteRelation),SemanticFacet × ConcreteRelation,allowed concrete relation kinds
+FF,bool(FSA @ SemanticAxisField + FCR @ ConcreteRelationField),SemanticFacet × Field,applicable field mask
+KC,Q.T @ K_feature @ Q,SemanticFacet × SemanticFacet,quotient-projected feature coupling
+SO,FSA @ FSA.T,SemanticFacet × SemanticFacet,semantic-axis overlap
+RO,FCR @ FCR.T,SemanticFacet × SemanticFacet,relation overlap
+LO,LF.T @ LF,SemanticFacet × SemanticFacet,language overlap
+CloFacet,((P*Clo) @ Q) / (P @ Q),Language × SemanticFacet,coverage lower bound
+ChiFacet,((P*Chi) @ Q) / (P @ Q),Language × SemanticFacet,coverage upper bound

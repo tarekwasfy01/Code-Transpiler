@@ -1,0 +1,106 @@
+﻿matrix_cluster,weighted_evidence,features,coverage_summary,codex_action
+NODE::IntegerType,239751,primitive_integer,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::LiteralExpr,167917,literal_boolean;literal_null;literal_numeric;literal_string,supported=4,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::VariableDecl,156994,variable,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::IRFact,128502,ir,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ForeignDeclCall,86449,ffi,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ImportDecl,54813,import,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ModuleDecl,40549,module,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::Effect,36853,allocation;filesystem;global_state;io;mutation;network;random;time,supported=8,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::FloatType,25735,primitive_float,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::RecordTypeDecl,20892,struct,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::SafetyRegion,16349,unsafe,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::RaisePanicStmt,15171,throw_raise,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::InterfaceTypeDecl,14392,interface_trait,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ConcurrencyOp,13540,task_async;thread,missing=2,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::FunctionDecl,12203,function,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::GenericParamDecl,10221,generic,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ABIContract,10204,abi_calling_convention,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::DeferCleanupStmt,9941,defer_cleanup,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::Visibility,9124,visibility,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ParameterDecl,8518,parameter,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ConstantDecl,8325,constant,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ReflectionOp,7690,reflection,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::LayoutContract,7336,layout_alignment,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ChannelTypeOp,6167,channel,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::AtomicOp,5721,atomic,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::MemoryManagement,4315,gc;manual_memory,missing=2,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::FunctionType,3294,function_type,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::BindingPattern,3091,pattern,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::Scope,2887,scope,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::SynchronizationOp,2445,lock_mutex,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::TypeConstraint,2025,generic_constraint,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::Annotation,2009,attribute_annotation,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ConvertExpr,1967,cast_conversion,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::TypeInferenceFact,1754,type_inference,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ClosureExpr,1503,closure_lambda,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::AssignStmt,1450,assignment,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::TryStmt,1449,exception_try,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::GotoLabelStmt,1421,goto_label,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::SymbolRef,1402,identifier,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::CallExpr,1381,call,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ForEachStmt,1355,foreach_iteration,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::NominalTypeDecl,1260,class,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::YieldExpr,1118,yield,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::VariantTypeDecl,1097,enum,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::TupleExpr,924,tuple,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::OptionalType,902,optional_nullable,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::Binding,856,symbol_table,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::LoweringFact,766,code_generation,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::OperationExpr,680,binary_op;unary_op,supported=2,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::BindingResolution,642,name_resolution,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::MacroCompileTime,569,macro,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::OptimizationFact,544,optimizer,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ExecutionModel,462,bytecode_vm,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::PointerType,443,pointer,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::AggregateExpr,415,array_list;map_dict;set,missing=3,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::CaptureRelation,409,capture,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::MapType,392,map_type,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ArraySliceType,367,array_type,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::TypeRelation,351,subtyping,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::SwitchMatchStmt,349,switch_match,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::IndexExpr,342,index,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::MemberAccessExpr,308,member_access,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::SliceExpr,257,slice,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ReferenceType,250,reference,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::OwnershipSemantics,223,ownership,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::IfStmt,207,if,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ReturnStmt,202,return,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::LoopStmt,163,for;while,supported=2,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::LifetimeRegion,151,lifetime,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::DispatchSemantics,91,dynamic_dispatch,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::StringType,73,primitive_string,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::BoolType,69,primitive_bool,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ShadowingRelation,60,shadowing,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::CompileTimeEval,54,compile_time_eval,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::UnionVariantType,49,union_sum,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::MemoryModelContract,40,memory_model,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::DispatchResolution,36,overload_resolution,partial=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::BreakStmt,10,break,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ContinueStmt,9,continue,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::TupleType,9,tuple_type,supported=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::AwaitExpr,3,await,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+NODE::ComprehensionExpr,0,comprehension,missing=1,"Implement/strengthen the universal node once, then remap all listed Go features through it."
+REL::effect.graph,384619,allocation;assignment;atomic;await;binary_op;call;channel;closure_lambda;defer_cleanup;exception_try;ffi;filesystem;for;foreach_iteration;function;function_type;gc;global_state;if;index;io;lock_mutex;manual_memory;map_dict;map_type;mutation;network;random;reflection;slice;thread;throw_raise;time;unary_op;unsafe;variable;while;yield,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::data.flow,382281,array_list;assignment;binary_op;call;cast_conversion;channel;compile_time_eval;comprehension;constant;for;foreach_iteration;function;identifier;if;index;literal_boolean;literal_null;literal_numeric;literal_string;map_dict;member_access;mutation;pattern;return;set;slice;switch_match;tuple;unary_op;variable;while,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::types.graph,350650,abi_calling_convention;array_type;cast_conversion;class;dynamic_dispatch;enum;function_type;generic;generic_constraint;interface_trait;layout_alignment;map_type;optional_nullable;overload_resolution;pointer;primitive_bool;primitive_float;primitive_integer;primitive_string;reference;reflection;struct;subtyping;tuple_type;type_inference;union_sum,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::binding.graph,290964,assignment;capture;closure_lambda;comprehension;constant;foreach_iteration;generic;global_state;identifier;import;member_access;module;name_resolution;parameter;pattern;shadowing;switch_match;symbol_table;variable,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::scope.binding,161751,class;function;import;interface_trait;module;parameter;struct;visibility,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::lowering.graph,129812,code_generation;ir;optimizer,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::abi.graph,96653,abi_calling_convention;ffi,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::control.flow,46663,await;break;comprehension;continue;defer_cleanup;exception_try;for;foreach_iteration;function;goto_label;if;return;switch_match;task_async;throw_raise;while;yield,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::memory.graph,32664,allocation;atomic;gc;lifetime;manual_memory;memory_model;ownership;pointer;reference;unsafe,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::layout.graph,29374,enum;layout_alignment;struct;union_sum,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::concurrency.graph,27916,atomic;await;channel;lock_mutex;memory_model;task_async;thread,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::dispatch.graph,14519,dynamic_dispatch;interface_trait;overload_resolution,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::scope.graph,3803,scope;shadowing;symbol_table,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::constraint.graph,3779,generic_constraint;type_inference,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::annotation.graph,2009,attribute_annotation,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::capture.graph,1912,capture;closure_lambda,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::call.graph,1381,call,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::dialect.extension,1031,bytecode_vm;macro,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::compiletime.graph,623,compile_time_eval;macro,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::contract.graph,544,optimizer,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::runtime.graph,462,bytecode_vm,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::ownership.graph,223,ownership,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.
+REL::lifetime.graph,151,lifetime,relation,Represent this relation explicitly in SemanticEvidence/SemanticDocument and derive it from frontends.

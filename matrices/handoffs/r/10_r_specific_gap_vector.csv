@@ -1,0 +1,43 @@
+﻿r_semantic_feature,family,source_importance,current_sp_coverage,base_gap,codex_matrix_instruction
+r.promise_lazy_argument,evaluation_promises_nse,0.376044,0.292500,0.266051,"Model promises as first-class semantic values/argument thunks with creation, environment, forced/unforced state and memoized forcing."
+r.promise_forcing,evaluation_promises_nse,0.276969,0.269000,0.202465,Represent promise forcing as an explicit semantic operation/effect with exact evaluation-once and error propagation.
+r.missing_argument,evaluation_promises_nse,0.182361,0.599500,0.073036,Keep missing argument distinct from NULL/NA and preserve missingness through calls/default evaluation.
+r.dots_ellipsis,evaluation_promises_nse,0.328985,0.236500,0.251180,Add variadic `...` binding/call semantics including missing/named promises and forwarding without eager materialization.
+r.default_argument_lazy,evaluation_promises_nse,0.182361,0.498500,0.091454,"Tie parameter default expressions to lazy promise creation in the callee environment, not eager source-order evaluation."
+r.quote_substitute_eval,evaluation_promises_nse,0.427293,0.121000,0.375590,Represent code-as-data / quoted language objects and eval/substitute environments explicitly; never lower them as ordinary calls when semantics are unknown.
+r.language_object_pairlist,evaluation_promises_nse,0.413419,0.114000,0.366289,Add language/pairlist/call object representation distinct from ordinary runtime list/tuple.
+r.environment,bindings_environments,0.276969,0.139000,0.238471,Model environments as first-class identity-bearing mutable mappings with parent links.
+r.lexical_lookup,bindings_environments,0.276969,0.212000,0.218252,Upgrade lexical-candidate evidence to exact R symbol lookup/definition/use across environment chains.
+r.superassignment,bindings_environments,0.328985,0.262000,0.242791,"Model `<<-`/`->>` as environment-chain mutation, distinct from local assignment."
+r.active_binding,bindings_environments,0.146624,0.031500,0.142005,Represent active bindings as read/write hooks with observable effects and environment identity.
+r.delayed_assignment,bindings_environments,0.276969,0.068500,0.257997,Model delayedAssign-style promise installation in an environment.
+r.closure_environment_capture,bindings_environments,0.276969,0.356000,0.178368,Make closure environment capture exact with stable environment/binding identity and declaration timing.
+r.atomic_vector,vectors_types_indexing,0.467909,0.284500,0.334789,Represent typed atomic vectors (logical/integer/double/complex/character/raw) separately from generic dynamic vectors.
+r.list_pairlist,vectors_types_indexing,0.264063,0.135000,0.228415,"Separate list and pairlist semantics, preserving names/attributes and missing elements."
+r.vectorized_operation,vectors_types_indexing,0.455272,0.437500,0.256091,Mark operations as scalar/vector dispatch explicitly; preserve elementwise vector semantics.
+r.vector_recycling,vectors_types_indexing,0.414479,0.051500,0.393133,Model R recycling length rules and warning conditions; never silently map to scalar broadcasting.
+r.coercion_lattice,vectors_types_indexing,0.336596,0.173000,0.278365,Encode R coercion lattice logical->integer->double->complex->character plus raw/list-specific rules.
+r.na_value,vectors_types_indexing,0.581063,0.558500,0.256539,Keep typed NA values distinct from NULL/NaN/missing and preserve typed NA literal/data representation.
+r.na_propagation,vectors_types_indexing,0.408957,0.309000,0.282589,Make NA propagation operation-specific including three-valued logical behavior and na.rm-style exceptions.
+r.nan_inf_semantics,vectors_types_indexing,0.455272,0.420000,0.264058,Represent NaN/Inf/-Inf separately and preserve comparison/arithmetic semantics.
+r.complex_type,vectors_types_indexing,0.425476,0.017500,0.418030,Add complex scalar/vector type and arithmetic as first-class structured semantics.
+r.raw_type,vectors_types_indexing,0.255334,0.017500,0.250865,Add raw-byte vector type and conversion/indexing semantics.
+r.one_based_index,vectors_types_indexing,0.181218,0.608000,0.071038,"Retain one-based index locally on every index operation, not only global document defaults."
+r.negative_index_exclusion,vectors_types_indexing,0.129203,0.157000,0.108918,"Encode negative numeric indices as exclusion semantics, not Python-style wraparound."
+r.logical_index,vectors_types_indexing,0.247879,0.176000,0.204252,Model logical-vector indexing including recycling and NA index results.
+r.double_bracket_index,vectors_types_indexing,0.181218,0.484500,0.093418,Preserve `[[` as element extraction distinct from `[` subset semantics.
+r.dollar_member_partial_match,vectors_types_indexing,0.275827,0.146000,0.235556,Model `$` member lookup and partial-matching policy explicitly.
+r.attributes,objects_dispatch,0.220500,0.109500,0.196355,"Separate runtime R attributes (names, class, dim, dimnames, etc.) from compiler metadata Attributes maps."
+r.s3_dispatch,objects_dispatch,0.294716,0.049500,0.280128,"Model S3 UseMethod/NextMethod dispatch, class vectors, method lookup and promise behavior explicitly."
+r.s4_dispatch,objects_dispatch,1.000000,0.033500,0.966500,"Model S4 classes, slots, signatures, generics and method dispatch as an R object-system dialect."
+r.condition_system,conditions_cleanup,0.271789,0.074500,0.251541,Represent conditions separately from generic exceptions: errors/warnings/messages and handlers.
+r.restarts_unwind,conditions_cleanup,0.229098,0.031500,0.221881,Add restart/unwind semantics and handler stack as explicit control/effect structures.
+r.on_exit_cleanup,conditions_cleanup,0.218001,0.043500,0.208518,Model on.exit cleanup ordering and function-exit unwinding.
+r.copy_on_modify_named,runtime_memory,0.396602,0.031500,0.384109,Represent observable copy-on-modify/share state conservatively; do not expose NAMED internals as universal syntax.
+r.gc_protect,runtime_memory,0.307705,0.025500,0.299858,Keep PROTECT/UNPROTECT/GC primarily as R-runtime/FFI contract; model only observable lifetime constraints.
+r.altrep,runtime_memory,0.264729,0.023500,0.258508,"Model ALTREP as an R runtime representation dialect, preserving laziness/materialization capabilities without polluting universal core."
+r.ffi_C_Call_External,packages_ffi,0.246816,0.082500,0.226454,"Add explicit FFI call node/contracts for .C/.Call/.External with ABI, ownership and protection requirements."
+r.native_registration,packages_ffi,0.117323,0.025500,0.114331,Represent native routine registration and symbol lookup as package/FFI metadata.
+r.namespace_package,packages_ffi,0.263588,0.070000,0.245137,Model package namespaces/import/export bindings explicitly; SemanticOrigin.Modules alone is not executable namespace semantics.
+r.bytecode_compiler,compiler_metaprogramming,0.229421,0.017500,0.225406,"Treat R bytecode as an adapter/lowering validation source, not the canonical SemanticProgram representation."
+r.rng_state,effects_runtime,0.077151,0.143000,0.066118,Extend random effect semantics with RNG state/seed/stream dependencies for reproducibility.

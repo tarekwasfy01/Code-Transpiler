@@ -1,0 +1,17 @@
+entity,field,domain,representation,cardinality
+UniversalASTDocument,schema_version,1,scalar,required
+UniversalASTDocument,language_projection,Language×Feature / Language×Facet matrices,matrix refs,required
+UniversalASTDocument,nodes,NodeInstance[],table,required
+UniversalASTDocument,relations,RelationInstance[],table,required
+UniversalASTDocument,semantic_facets,UASF vector space,matrix,required
+UniversalASTDocument,evidence,source/compiler evidence refs,matrix/table,required
+NodeInstance,id,integer/string stable id,scalar,required
+NodeInstance,structural_kind,one of 109 structural node kinds,one-hot/index,required
+NodeInstance,semantic_facets,334-dimensional UASF membership,sparse vector,required
+NodeInstance,field_mask,calculated field applicability,bit vector,required
+NodeInstance,source_span,source location,record,optional
+NodeInstance,attributes,extensible metadata,map,optional
+RelationInstance,kind,universal concrete relation kind,index,required
+RelationInstance,from,NodeInstance id,reference,required
+RelationInstance,to,NodeInstance/contract/type/value id,reference,required
+RelationInstance,attributes,relation-specific data,map,optional

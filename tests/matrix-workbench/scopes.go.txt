@@ -1,0 +1,7 @@
+package probe
+
+func first() { type Local int32; var x Local; _ = x }
+func second() { type Local string; var x Local; _ = x }
+
+type Values = map[string][]int64
+var Data Values

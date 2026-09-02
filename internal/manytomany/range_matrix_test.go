@@ -31,9 +31,16 @@ func TestRangeMatrixPreservesBoundsAndControl(t *testing.T) {
 	}
 }
 
-func TestRangeMatrixRejectsUnmodeledSteps(t *testing.T) {
-	_, err := Parse("python", "for i in range(1, 5, 2):\n    print(i)")
-	if err == nil {
-		t.Fatal("unmodeled nonunit step must not silently become unit step")
+func TestRangeMatrixPreservesLiteralNonUnitSteps(t *testing.T) {
+	program, err := Parse("python", "for i in range(1, 5, 2):\n    print(i)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	output, err := backend.Run(program.CanonicalR)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.TrimSpace(output) != "1\n3" {
+		t.Fatalf("literal step changed: %q\n%s", output, program.CanonicalR)
 	}
 }

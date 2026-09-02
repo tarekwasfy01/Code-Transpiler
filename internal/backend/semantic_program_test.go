@@ -65,7 +65,7 @@ func TestSemanticMatricesDistinguishScopeAndUnknowns(t *testing.T) {
 			t.Fatal("type vector not one-hot including unknown")
 		}
 	}
-	p.Evaluation = "unknown"
+	p.UniversalAST.Evaluation = "unknown"
 	if _, e := EmitSemantic("go", p); e == nil {
 		t.Fatal("unknown contract silently chosen")
 	}

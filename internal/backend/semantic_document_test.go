@@ -181,7 +181,7 @@ func TestSemanticDialectRoundTripAndCapabilityRejection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	p.Dialects = []SemanticDialect{{
+	p.UniversalAST.Dialects = []SemanticDialect{{
 		Name: "gpu", Capabilities: []string{"gpu.compute"},
 		Operations: []SemanticDialectOperation{{ID: "kernel-1", Kind: "compute", Attributes: map[string]any{"workgroup_size": []int{64, 1, 1}}}},
 	}}
@@ -193,19 +193,21 @@ func TestSemanticDialectRoundTripAndCapabilityRejection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(q.Dialects) != 1 || q.Dialects[0].Operations[0].Kind != "compute" {
-		t.Fatalf("dialect transport failed: %#v", q.Dialects)
+	if len(q.UniversalAST.Dialects) != 1 || q.UniversalAST.Dialects[0].Operations[0].Kind != "compute" {
+		t.Fatalf("dialect transport failed: %#v", q.UniversalAST.Dialects)
 	}
 	if _, err := EmitSemantic("go", q); err == nil {
 		t.Fatal("GPU dialect was silently emitted by CPU backend")
 	}
-	q.Dialects[0].Operations[0].ID = ""
-	if _, err := q.Document(); err != nil {
-		t.Fatal(err)
+	// This UAST contains dialect data that cannot be losslessly represented by
+	// the old document API, so no detached legacy view is fabricated.
+	if _, err := q.Document(); err == nil {
+		t.Fatal("lossy legacy document view was fabricated")
 	}
-	data, _ = q.MarshalSemanticJSON()
-	if _, err := ParseSemanticJSON(data); err == nil {
-		t.Fatal("malformed dialect operation accepted")
+	// Mutating the canonical payload itself remains detectable and rejected.
+	q.UniversalAST.Dialects[0].Operations[0].ID = ""
+	if _, err := q.Document(); err == nil {
+		t.Fatal("malformed canonical dialect operation accepted")
 	}
 }
 

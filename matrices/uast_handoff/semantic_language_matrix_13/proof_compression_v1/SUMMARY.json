@@ -1,0 +1,25 @@
+{
+  "source_features_total": 808,
+  "source_features_original": 553,
+  "source_features_missing_languages": 255,
+  "uasf_capabilities": 334,
+  "semantic_basis_dimensions": 67,
+  "semantic_axes": 44,
+  "relation_axes": 23,
+  "exact_crosswalk_rows": 808,
+  "unique_uasf_signatures": 334,
+  "quotient_classes": 334,
+  "multi_feature_classes": 119,
+  "largest_class": [
+    35,
+    "UASF_0208"
+  ],
+  "language_uasf_present_cells": 1017,
+  "union_uasf_covered_by_13_languages": 334,
+  "kjava_formal_rules": 14,
+  "important": [
+    "Exact signature equality proves consistency inside the current matrix ontology; it is not by itself an independent proof that the ontology captures all real-world semantics.",
+    "External semantic atoms and K-Java rules are retained as independent corroboration, never silently promoted to canonical UASF.",
+    "Empirical corpora should be used mainly for residual/falsification after this compression pass."
+  ]
+}

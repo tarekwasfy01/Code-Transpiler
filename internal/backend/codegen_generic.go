@@ -6,20 +6,46 @@ import (
 )
 
 type targetGen struct {
-	source       string
-	target       string
-	indent       int
-	b            strings.Builder
-	declared     []map[string]bool
-	funcs        map[string]bool
-	inline       map[string]*FunctionExpr
-	bindings     []map[string]string
-	temp         int
-	activeInline map[*FunctionExpr]bool
-	helpers      []string
-	usedNames    map[string]bool
-	cValues      map[string]bool
-	generatedAt  map[string]int
+	source string
+	// evaluation belongs to canonical UAST. Direct UAST generation never reads
+	// source provenance; source remains only for the legacy compatibility path.
+	evaluation         string
+	target             string
+	indent             int
+	b                  strings.Builder
+	declared           []map[string]bool
+	funcs              map[string]bool
+	inline             map[string]*FunctionExpr
+	bindings           []map[string]string
+	temp               int
+	activeInline       map[*FunctionExpr]bool
+	helpers            []string
+	helperRequirements []string
+	helperSources      map[string]string
+	usedNames          map[string]bool
+	cValues            map[string]bool
+	directVectors      map[string]bool
+	// nativeDirect is enabled for native source frontends (R and Go).  The
+	// compatibility API also accepts R-shaped snippets tagged as another
+	// language; those retain the established runtime encoding and decoder
+	// contract.
+	nativeDirect     bool
+	generatedAt      map[string]int
+	uastFunctions    map[string]int
+	uastInline       map[string]bool
+	uastActiveInline map[int]bool
+}
+
+// requireHelper records a semantic support requirement before retaining the
+// proven target renderer output as a syntax-only fragment.
+func (g *targetGen) requireHelper(id, source string) {
+	if g.helperSources == nil {
+		g.helperSources = map[string]string{}
+	}
+	if _, exists := g.helperSources[id]; !exists {
+		g.helperRequirements = append(g.helperRequirements, id)
+		g.helperSources[id] = source
+	}
 }
 
 func generateTarget(target string, ast *BlockStmt) (string, error) {
@@ -82,9 +108,9 @@ func mainOpen(t string) string {
 	case "rust":
 		return "fn main() {"
 	case "cpp":
-		return "int main() {"
+		return "int main() { r_output_init();"
 	case "c":
-		return "int main(void) {"
+		return "int main(void) { r_output_init();"
 	case "zig":
 		return "pub fn main() !void {"
 	case "csharp":
@@ -302,7 +328,7 @@ func (g *targetGen) stmt(s Stmt) error {
 			g.line("}")
 			return err
 		case "csharp":
-			g.line("foreach (var " + n + " in RIter(" + seq + ")) {")
+			g.line("foreach (var " + n + " in R2.Iter(" + seq + ")) {")
 			g.indent++
 			err = g.stmtBody(x.Body)
 			g.indent--
@@ -581,7 +607,17 @@ func (g *targetGen) expr(e Expr) (string, error) {
 		if x.Op == "&&" || x.Op == "||" {
 			return g.lowerLogical(x.Op, a, b), nil
 		}
+		// Preserve ordered operand effects even on targets whose argument or
+		// initializer evaluation order is unspecified. Keep bindings inside the
+		// expression so an enclosing branch or short circuit still gates them.
+		if !g.effectFree(x.L, map[*FunctionExpr]bool{}) || !g.effectFree(x.R, map[*FunctionExpr]bool{}) {
+			left, right := g.freshName("left"), g.freshName("right")
+			g.cValues[left], g.cValues[right] = true, true
+			return g.letExpression([]valueBinding{{left, a}, {right, b}}, emitDispatch(g.target, "__binary_"+x.Op, []string{left, right})), nil
+		}
 		return emitDispatch(g.target, "__binary_"+x.Op, []string{a, b}), nil
+	case *OperationExpr:
+		return g.lowerTypedOperation(x)
 	case *IndexExpr:
 		a, err := g.expr(x.X)
 		if err != nil {
@@ -657,10 +693,11 @@ func (g *targetGen) name(s string) string {
 	if strings.HasPrefix(s, "\x00") {
 		return s
 	}
-	if g.target == "nim" {
-		return fmt.Sprintf("r2ms%x", s)
+	spec, ok := targetSpec(g.target)
+	if !ok {
+		return safeName(s)
 	}
-	return safeName(s)
+	return (UniversalTargetNameResolver{}).Resolve(s, spec)
 }
 
 func inlineFunction(fn *FunctionExpr) bool {
@@ -678,14 +715,31 @@ func (g *targetGen) assignment(name, expression string) string {
 	return assignSyntax(g.target, name, expression)
 }
 func stmtEnd(t string) string {
-	if t == "python" || t == "julia" || t == "nim" || t == "kotlin" || t == "swift" {
-		return ""
+	if spec, ok := targetSpec(t); ok {
+		return spec.StatementTerminator
 	}
 	return ";"
 }
 func exprStmt(t, e string) string {
+	if t == "go" {
+		if strings.HasPrefix(e, "fmt.Println(") {
+			return e + ";"
+		}
+		// Lowered calls can become literals (including untyped nil). Keep their
+		// effects and explicitly discard the value in a legal Go statement.
+		return "_ = any(" + e + ");"
+	}
 	if t == "nim" {
 		return "discard " + e
+	}
+	if t == "zig" {
+		return "_ = " + e + ";"
+	}
+	if t == "java" {
+		return "R2.discard(" + e + ");"
+	}
+	if t == "csharp" {
+		return "R2.Discard(" + e + ");"
 	}
 	return e + stmtEnd(t)
 }
@@ -735,7 +789,7 @@ func truthCall(t, e string) string {
 	case "zig":
 		return "rTruth(" + e + ")"
 	case "csharp":
-		return "RTruth(" + e + ")"
+		return "R2.Truth(" + e + ")"
 	case "java":
 		return "R2.rTruth(" + e + ")"
 	case "kotlin":

@@ -18,15 +18,16 @@ type CanonicalNode struct {
 }
 
 type CanonicalProgram struct {
-	Source  string
-	R       string
-	Nodes   []CanonicalNode
-	Graph   *Graph
-	Actions Matrix
-	Grammar Vector
-	Roles   Matrix
-	Lexemes []Lexeme
-	Events  []CanonicalEvent
+	Source         string
+	R              string
+	Nodes          []CanonicalNode
+	Graph          *Graph
+	Actions        Matrix
+	Grammar        Vector
+	Roles          Matrix
+	Lexemes        []Lexeme
+	Events         []CanonicalEvent
+	SemanticEvents []CanonicalSemanticEvent
 }
 
 // CanonicalEvent preserves structural action order for direct lowerers. It is
@@ -35,6 +36,58 @@ type CanonicalProgram struct {
 type CanonicalEvent struct {
 	Text   string
 	Source int
+}
+
+// CanonicalSemanticEvent is the typed, transient frontend contract emitted by
+// MatrixIR. It contains only grammar- and matrix-proven facts and is discarded
+// after a frontend has materialized its UAST facts.
+type CanonicalSemanticEvent struct {
+	ID            int
+	Action        string
+	Semantic      Vector
+	StructureKind string
+	Text          string
+	SourceOffset  int
+	Fields        map[string]string
+	ParentID      int
+	ChildIDs      []int
+	Roles         []CanonicalRoleFact
+	Operands      []CanonicalOperandFact
+	Symbols       []CanonicalSymbolFact
+	Bindings      []CanonicalBindingFact
+	Relations     []CanonicalRelationFact
+	Evidence      []string
+	LanguageFacts map[string]string
+}
+
+// The following records are intentionally language-neutral and optional.
+// Empty entries mean the matrix/token analysis did not prove that fact.
+type CanonicalOperandFact struct {
+	ID, OwnerNodeID, ReferencedNodeID, ReferencedSymbolID, ReferencedTypeID int
+	Role                                                                    string
+	Ordinal                                                                 int
+	Field                                                                   string
+	SourceOffset                                                            int
+}
+type CanonicalRoleFact struct {
+	OwnerNodeID, ChildNodeID, Ordinal int
+	Role                              string
+}
+type CanonicalSymbolFact struct {
+	ID, NodeID   int
+	Name, Kind   string
+	ScopeID      int
+	SourceOffset int
+}
+type CanonicalBindingFact struct {
+	ID, DeclarationNodeID, ReferenceNodeID, SymbolID, ScopeID, Ordinal, EvidenceRef int
+	Kind                                                                            string
+	SourceOffset                                                                    int
+}
+type CanonicalRelationFact struct {
+	Kind                          string
+	FromNodeID, ToNodeID, Ordinal int
+	Role                          string
 }
 
 type blockFrame struct {
@@ -144,6 +197,11 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		if trim == "" {
 			continue
 		}
+		// Python's pass has no observable payload.  Keep it out of the semantic
+		// graph rather than inventing a symbol reference for a no-op.
+		if source == "python" && trim == "pass" {
+			continue
+		}
 		lower = strings.ToLower(trim)
 		if isModuleScaffold(line.tokens, trim) {
 			_, _ = appendAction(ActionModule, "", line.start)
@@ -154,6 +212,25 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			if opensBlock(trim, profile) {
 				stack = append(stack, blockFrame{indent: line.indent, semantic: false})
 			}
+			continue
+		}
+		if source == "python" && startsKeyword(line.tokens, "elif") {
+			// `elif` is the same control contract as an else branch whose body
+			// is another if.  Keep that nesting in the canonical text so the
+			// shared UAST fact parser creates one IfStmt in the prior else role,
+			// rather than treating `elif` as an unknown expression.
+			if profile[GrammarIndent] != 0 {
+				closeIndent(line.indent + 1)
+			}
+			if !hadLeadingClose && len(stack) > 0 {
+				frame := stack[len(stack)-1]
+				stack = stack[:len(stack)-1]
+				closeFrame(frame)
+			}
+			condition := strings.TrimSpace(strings.TrimPrefix(trim, "elif"))
+			condition = strings.TrimSpace(strings.TrimSuffix(condition, ":"))
+			id, _ := appendAction(ActionElse, "else if ("+normalizeExpression(source, condition, profile)+") {", line.start)
+			stack = append(stack, blockFrame{indent: line.indent, semantic: true, node: id})
 			continue
 		}
 		if strings.HasPrefix(lower, "else") {
@@ -172,7 +249,10 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			stack = append(stack, blockFrame{indent: line.indent, semantic: true, node: id})
 			continue
 		}
-		if isFunctionHeader(line.tokens, trim) {
+		// Python lambda is an expression with a ClosureExpr contract, not a
+		// declaration header. Its lexical function axis must not route an
+		// assignment through functionSignature.
+		if !(source == "python" && strings.Contains(trim, "lambda")) && isFunctionHeader(line.tokens, trim) {
 			name, params := functionSignature(source, line.tokens, trim, profile)
 			if strings.EqualFold(name, "main") {
 				_, _ = appendAction(ActionSkip, "", line.start)
@@ -214,6 +294,9 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 				_, _ = appendAction(ActionAssign, plan.Name+" <- "+plan.Begin, line.start)
 				id, _ := appendAction(ActionWhile, "while ("+plan.Condition+") {", line.start)
 				stack = append(stack, blockFrame{indent: line.indent, semantic: true, loop: true, post: plan.Advance, node: id})
+			} else if plan.Iterable {
+				id, _ := appendAction(ActionFor, fmt.Sprintf("for (%s in %s) {", plan.Name, plan.Sequence), line.start)
+				stack = append(stack, blockFrame{indent: line.indent, semantic: true, loop: true, node: id})
 			} else {
 				// Snapshot range endpoints once, then guard empty ascending ranges.
 				begin := fmt.Sprintf("%s%d_start", rangePrefix, line.start)
@@ -301,8 +384,57 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		previous = id
 	}
 	roles := tokenRoleMatrix(lexemes)
+	semanticEvents := make([]CanonicalSemanticEvent, 0, len(nodes))
+	for id, node := range nodes {
+		action := canonicalActionName(node.Action)
+		semantic, err := ActionSemantic(node.Action)
+		if err != nil {
+			return CanonicalProgram{}, err
+		}
+		fields := map[string]string{}
+		if node.Text != "" {
+			fields["normalized_text"] = node.Text
+		}
+		semanticEvents = append(semanticEvents, CanonicalSemanticEvent{ID: id, Action: action, Semantic: semantic, StructureKind: canonicalActionStructure(action), Text: node.Text, SourceOffset: node.Source, Fields: fields})
+	}
 	_ = lexicalGraph
-	return CanonicalProgram{Source: source, R: strings.Join(output, "\n") + "\n", Nodes: nodes, Graph: graph, Actions: actions, Grammar: profile, Roles: roles, Lexemes: lexemes, Events: events}, nil
+	return CanonicalProgram{Source: source, R: strings.Join(output, "\n") + "\n", Nodes: nodes, Graph: graph, Actions: actions, Grammar: profile, Roles: roles, Lexemes: lexemes, Events: events, SemanticEvents: semanticEvents}, nil
+}
+
+func canonicalActionName(action Vector) string {
+	for i, value := range action {
+		if value != 0 && i < len(ActionNames) {
+			return ActionNames[i]
+		}
+	}
+	return "skip"
+}
+
+func canonicalActionStructure(action string) string {
+	switch action {
+	case "block":
+		return "block"
+	case "assign":
+		return "assign"
+	case "print", "expression", "call":
+		return "expression"
+	case "return":
+		return "return"
+	case "if", "else":
+		return "if"
+	case "while":
+		return "while"
+	case "for":
+		return "for"
+	case "function":
+		return "function"
+	case "index":
+		return "index"
+	case "module":
+		return "module"
+	default:
+		return "unknown"
+	}
 }
 
 func significant(tokens []Lexeme) []Lexeme {
@@ -619,7 +751,47 @@ func normalizeExpression(source, expression string, profile Vector) string {
 	}
 	e = normalizeCollection(e)
 	e = normalizeIndexes(source, e, profile)
+	if source == "python" {
+		e = normalizePythonLambda(e)
+	}
 	return restore(strings.TrimSpace(e))
+}
+
+// normalizePythonLambda lowers the matrix-proven simple lambda subset to the
+// existing ClosureExpr contract. Defaults, annotations and parameter patterns
+// deliberately remain outside this subset because they carry independent
+// binding/type semantics.
+func normalizePythonLambda(expression string) string {
+	e := strings.TrimSpace(expression)
+	if !strings.HasPrefix(e, "lambda") || (len(e) > len("lambda") && e[len("lambda")] != ' ' && e[len("lambda")] != ':') {
+		return expression
+	}
+	rest := strings.TrimSpace(strings.TrimPrefix(e, "lambda"))
+	parts := splitTopLevel(rest, ':')
+	if len(parts) != 2 {
+		return expression
+	}
+	params, body := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+	if body == "" {
+		return expression
+	}
+	tokens := significant(Tokenize("python", params))
+	if params == "" {
+		return "function() { return(" + body + ") }"
+	}
+	for i, token := range tokens {
+		if i%2 == 0 {
+			if token.Class != TokenIdentifier {
+				return expression
+			}
+		} else if token.Class != TokenDelimiter || token.Text != "," {
+			return expression
+		}
+	}
+	if len(tokens)%2 == 0 {
+		return expression
+	}
+	return "function(" + params + ") { return(" + body + ") }"
 }
 
 func stripZigCasts(expression string) string {

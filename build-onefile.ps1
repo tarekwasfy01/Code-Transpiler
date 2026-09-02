@@ -9,9 +9,11 @@ Write-Host 'Testing source packages...'
 & go test . ./cmd/... ./internal/... ./tools/matrix-audit
 if ($LASTEXITCODE -ne 0) { throw 'Package tests failed' }
 
-Write-Host 'Generating the Windows icon resource with pinned rsrc v0.10.2...'
-& go run github.com/akavel/rsrc@v0.10.2 -ico assets/code-transpiler.ico -o cmd/r2many/r2many_windows.syso
-if ($LASTEXITCODE -ne 0) { throw 'Icon resource generation failed' }
+$iconResource = Join-Path $PSScriptRoot 'cmd\r2many\r2many_windows.syso'
+if (-not (Test-Path -LiteralPath $iconResource)) {
+    throw 'Local icon resource is missing; refusing to fetch build inputs from GitHub.'
+}
+Write-Host 'Using local icon resource and local project sources only.'
 
 $candidate = Join-Path $releaseDir 'CodeTranspiler.new.exe'
 Write-Host 'Building the standalone Windows executable...'

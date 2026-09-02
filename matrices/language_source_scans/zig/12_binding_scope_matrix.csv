@@ -1,0 +1,13 @@
+﻿component,capture,lifetime,name_resolution,scope,shadowing,symbol_table
+ast,9,0,0,10,19,0
+binding,0,0,6,265,0,2
+codegen,7,8,13,326,0,20
+docs,0,0,0,153,0,0
+grammar,9,1,0,31,1,0
+ir,179,0,0,18,1,0
+lexer,3,1,0,2,0,0
+optimizer,1,0,0,0,0,0
+other,3473,693,1019,7339,36,1048
+runtime,28,7,86,247,1,640
+tests,123,0,0,43,1,152
+types,361,2,16,163,0,17

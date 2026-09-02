@@ -14,11 +14,14 @@ import (
 )
 
 type runEnv struct {
-	parent *runEnv
-	vars   map[string]any
+	parent    *runEnv
+	vars      map[string]any
+	immutable map[string]bool
 }
 
-func newRunEnv(parent *runEnv) *runEnv { return &runEnv{parent: parent, vars: map[string]any{}} }
+func newRunEnv(parent *runEnv) *runEnv {
+	return &runEnv{parent: parent, vars: map[string]any{}, immutable: map[string]bool{}}
+}
 func (e *runEnv) get(name string) (any, bool) {
 	for p := e; p != nil; p = p.parent {
 		if v, ok := p.vars[name]; ok {
@@ -28,11 +31,32 @@ func (e *runEnv) get(name string) (any, bool) {
 	return nil, false
 }
 func (e *runEnv) set(name string, v any) { e.vars[name] = v }
+func (e *runEnv) declare(name string, v any, mutable bool) {
+	e.vars[name] = v
+	e.immutable[name] = !mutable
+}
+func (e *runEnv) assign(name string, v any) error {
+	for scope := e; scope != nil; scope = scope.parent {
+		if _, ok := scope.vars[name]; !ok {
+			continue
+		}
+		if scope.immutable[name] {
+			return fmt.Errorf("cannot assign to constant %q", name)
+		}
+		scope.vars[name] = v
+		return nil
+	}
+	e.vars[name] = v
+	return nil
+}
 
 type runFunction struct {
-	params []Param
-	body   *BlockStmt
-	env    *runEnv
+	binding           string
+	defaultEvaluation string
+	defaults          []any
+	params            []Param
+	body              *BlockStmt
+	env               *runEnv
 }
 
 type runSignal int
@@ -45,10 +69,14 @@ const (
 )
 
 type runState struct {
-	out      strings.Builder
-	rng      *rand.Rand
-	steps    int
-	maxSteps int
+	exactCalls       bool
+	out              strings.Builder
+	rng              *rand.Rand
+	steps            int
+	maxSteps         int
+	jumpTarget       int
+	currentException any
+	deferred         []runUASTDeferred
 }
 
 func Run(src string) (string, error) {
@@ -71,17 +99,52 @@ func Run(src string) (string, error) {
 // RunSemantic executes the semantic tree directly. It is used for IR
 // round-trip equivalence checks and never reconstructs source text.
 func RunSemantic(program *SemanticProgram) (string, error) {
-	if program == nil || program.Body == nil {
-		return "", fmt.Errorf("missing semantic program body")
+	if err := ValidateSemanticProgram(program); err != nil {
+		return "", err
 	}
-	st := &runState{rng: rand.New(rand.NewSource(1)), maxSteps: 1_000_000}
+	if err := validateExecutableDialects(program); err != nil {
+		return "", err
+	}
+	u, err := canonicalUniversalAST(program)
+	if err != nil {
+		return "", err
+	}
+	graph, err := newUASTExecutionGraph(u)
+	if err != nil {
+		return "", err
+	}
+	for _, requirement := range u.Contracts.Requires {
+		if requirement != "core" && requirement != "native.go.scalar" && requirement != "native.go.functions" && requirement != ExactSignatureCapability && !exactIntegerCapability(requirement) {
+			return "", fmt.Errorf("semantic runtime does not support required capability %q", requirement)
+		}
+	}
+	st := &runState{rng: rand.New(rand.NewSource(1)), maxSteps: 1_000_000, jumpTarget: -1}
+	st.exactCalls, err = validateDirectSignatureContracts(graph)
+	if err != nil {
+		return "", err
+	}
+	_, err = validateDirectCallResolutions(graph)
+	if err != nil {
+		return "", err
+	}
+	if _, err = directTypedRequirements(graph); err != nil {
+		return "", err
+	}
 	env := newRunEnv(nil)
-	_, sig, err := st.block(env, program.Body)
+	_, sig, err := st.uastStmt(env, graph, graph.root)
 	if err != nil {
 		return st.out.String(), err
 	}
 	if sig == runBreak || sig == runNext {
 		return st.out.String(), fmt.Errorf("loop control used outside loop")
+	}
+	// Body is a public compatibility view. Execution above is entirely UAST
+	// based; rematerializing the view afterwards prevents a caller's legacy
+	// mutation from appearing to become a second semantic truth.
+	if u.Metadata["frontend"] != "native-go-uast-v1" {
+		if err := refreshLegacyExecutableBodyView(program, u); err != nil {
+			return st.out.String(), err
+		}
 	}
 	return st.out.String(), nil
 }
@@ -259,6 +322,16 @@ func (st *runState) expr(env *runEnv, e Expr) (any, error) {
 			return nil, err
 		}
 		return v, nil
+	case *OperationExpr:
+		values := make([]any, len(x.Operands))
+		for i, operand := range x.Operands {
+			v, err := st.expr(env, operand)
+			if err != nil {
+				return nil, err
+			}
+			values[i] = v
+		}
+		return evaluateInteger(x.Operation, values)
 	case *UnaryExpr:
 		v, err := st.expr(env, x.X)
 		if err != nil {
@@ -279,6 +352,16 @@ func (st *runState) expr(env *runEnv, e Expr) (any, error) {
 		if err != nil {
 			return nil, err
 		}
+		// Scalar boolean operands have an exact conditional-evaluation contract.
+		// Non-boolean/NA coercion remains on the existing runtime path.
+		if b, ok := a.(bool); ok {
+			if x.Op == "&&" && !b {
+				return false, nil
+			}
+			if x.Op == "||" && b {
+				return true, nil
+			}
+		}
 		b, err := st.expr(env, x.R)
 		if err != nil {
 			return nil, err
@@ -298,8 +381,34 @@ func (st *runState) expr(env *runEnv, e Expr) (any, error) {
 		}
 		return runSubset(v, idx, x.Double), nil
 	case *FunctionExpr:
-		return &runFunction{params: x.Params, body: x.Body, env: env}, nil
+		fn := &runFunction{params: x.Params, body: x.Body, env: env, binding: x.Binding, defaultEvaluation: x.DefaultEvaluation, defaults: make([]any, len(x.Params))}
+		if x.Binding == "exact_v1" && x.DefaultEvaluation == "definition" {
+			for i, p := range x.Params {
+				if p.Default != nil {
+					value, err := st.expr(env, p.Default)
+					if err != nil {
+						return nil, err
+					}
+					fn.defaults[i] = value
+				}
+			}
+		}
+		return fn, nil
 	case *CallExpr:
+		if x.Resolution != nil {
+			selected := *x.Resolution.Selected
+			name := x.Resolution.Candidates[selected].Declaration
+			if name == "" {
+				name = x.Resolution.Candidates[selected].Name
+			}
+			copy := *x
+			copy.Fun = &IdentExpr{Name: name}
+			copy.Resolution = nil
+			x = &copy
+		}
+		if st.exactCalls {
+			return st.exactCall(env, x)
+		}
 		args := make([]any, 0, len(x.Args))
 		names := make([]string, 0, len(x.Args))
 		for _, a := range x.Args {
@@ -335,6 +444,9 @@ func (st *runState) expr(env *runEnv, e Expr) (any, error) {
 }
 
 func (st *runState) callFunction(fn *runFunction, args []any, names []string) (any, error) {
+	if fn.binding == "exact_v1" {
+		return st.callExactFunction(fn, args, names)
+	}
 	env := newRunEnv(fn.env)
 	used := make([]bool, len(args))
 	for i, p := range fn.params {
@@ -363,6 +475,11 @@ func (st *runState) callFunction(fn *runFunction, args []any, names []string) (a
 		}
 		if !found {
 			val = nil
+		}
+		if p.Type != nil {
+			if _, err := evaluateInteger(SemanticOperation{Name: "integer.value", Type: *p.Type}, []any{val}); err != nil {
+				return nil, fmt.Errorf("parameter %s: %w", p.Name, err)
+			}
 		}
 		env.set(p.Name, val)
 	}

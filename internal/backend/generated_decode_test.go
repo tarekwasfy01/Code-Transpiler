@@ -75,7 +75,11 @@ func TestGeneratedDecoderRejectsChangedIndentation(t *testing.T) {
 		t.Fatal("inconsistent indentation lost in token comparison")
 	}
 	code, _ = Transpile("python", "print(1)")
-	changed = strings.Replace(code, pythonPrelude+"\n\n", pythonPrelude+"\n\n ", 1)
+	prelude := targetPrelude("python")
+	changed = strings.Replace(code, prelude+"\n\n", prelude+"\n\n ", 1)
+	if changed == code {
+		t.Fatal("indentation mutation did not modify the generated program")
+	}
 	if _, ok, e := DecodeGenerated("python", changed); !ok || e == nil {
 		t.Fatal("unexpected top-level indentation ignored")
 	}

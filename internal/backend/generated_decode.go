@@ -504,6 +504,11 @@ func (d *generatedDecoder) block(level int) (*BlockStmt, error) {
 		}
 		for _, pattern := range []string{assignSyntax(d.source, holePrefix+"name", holePrefix+"value"), reassignSyntax(d.source, holePrefix+"name", holePrefix+"value")} {
 			if m, ok := matchTemplate(d.source, pattern, codeTokens(d.source, text)); ok {
+				// A Go blank assignment is the emitter's discard-expression
+				// template, not a variable binding. Decode it below as such.
+				if (d.source == "go" || d.source == "zig") && tokenText(m[holePrefix+"name"]) == "_" {
+					continue
+				}
 				id, e := d.identifier(m[holePrefix+"name"])
 				if e != nil {
 					continue
