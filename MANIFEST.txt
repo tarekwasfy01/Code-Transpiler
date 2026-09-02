@@ -754,4 +754,4 @@ tools/uast-direct-report/main.go
 tools/uast-matrix-engine/go.mod
 tools/uast-matrix-engine/main.go
 UAST_MIGRATION_STATUS.md
-Universal Code Transpiler – Canonical Architecture.md
+Universal-Code-Transpiler-Canonical-Architecture.md
