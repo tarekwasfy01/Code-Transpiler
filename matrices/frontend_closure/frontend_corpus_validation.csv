@@ -1,0 +1,1745 @@
+language,case_name,source_valid,parse_pass,source_to_uast_pass,uast_valid_pass,semantic_mapping_pass,classification,diagnostic
+r,Function No Body With Assignment,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Function No Body Inside Another Function,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Not A Call, Subset, Or Subset2",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Not A Call, Subset, Or Subset2 Due To Sequential Arguments",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Not A Parenthesized Expression 1,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Not A Parenthesized Expression 2,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Not A Parenthesized Expression 3,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Dollar, At, Namespace, Namespace Internal With `if` RHS",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Dollar, At, Namespace, Namespace Internal With Newline Before Operator",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Closing Brace,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Closing Parenthesis,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Closing Bracket,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Opening Brace, Closing Parenthesis",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Opening Parenthesis, Closing Brace",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Opening Parenthesis, Closing Bracket",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Opening Bracket2, Unmatched Closing Bracket",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Opening Bracket and Bracket2, Unmatched Closing Bracket",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Opening Bracket2 and Bracket, Matched Closing Bracket",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,"Opening Bracket2 and Bracket, Unmatched Closing Bracket",0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Calls With NA As Argument Name,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Unsupported Subset2 With `]]` Over Multiple Lines (#177),0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Functions,1,0,0,0,0,PARSER_LIMITATION,function body must be a block
+r,Functions With `return` As Parameter Name,1,0,0,0,0,PARSER_LIMITATION,function body must be a block
+r,Function Dots And Dot Dot I,1,0,0,0,0,PARSER_LIMITATION,function body must be a block
+r,Function No Body,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Lambda Function,1,0,0,0,0,PARSER_LIMITATION,unexpected character '\\' at 5
+r,Relational,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+r,Arithmetic Operator,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+r,Not An Arithmetic Operator,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Unary Operators,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+r,Operator precedence,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""<-"""
+r,Specials,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""%"""
+r,Pipe,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+r,Pipe Placeholder,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+r,Subset,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""]"""
+r,Subset2,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""]"""
+r,Subset and Subset2 Precedence,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,If,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,If-else,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Complex If Expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Identifiers starting with `else` that are not the `else` keyword (#200),1,0,0,0,0,PARSER_LIMITATION,unexpected character '·' at 643
+r,Identifiers starting with `else` that are not the `else` keyword - 2 (#200),1,1,1,1,1,SUPPORTED_COMPLETE,
+r,For,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,For No Body,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,While,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,While No Body,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Repeat,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Repeat No Body,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Switch,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""="""
+r,Dollar,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Dollar No RHS,1,0,0,0,0,PARSER_LIMITATION,"expected expression near """""
+r,Slot,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Slot No RHS,1,0,0,0,0,PARSER_LIMITATION,"expected expression near """""
+r,Namespace get,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+r,Namespace get internal,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+r,Namespace With Missing RHS,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+r,"Dollar, At, Namespace, Namespace Internal With Expression RHS",1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""{"""
+r,Assignment,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""="""
+r,Calls,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+r,Calls With NULL As Argument Name,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+r,Calls With `return` As Argument Name,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+r,`return` Is Just An Identifier,1,0,0,0,0,PARSER_LIMITATION,function body must be a block
+r,Braced Expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Parenthesized Expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Colon,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Formulas,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Help Operator,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+r,Complex Expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""<-"""
+r,Precedence Tests,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+r,Newlines,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Unclosed Double Quote,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Unclosed Single Quote,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Unclosed Backtick,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Unclosed Raw String,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+r,Identifiers,1,0,0,0,0,PARSER_LIMITATION,unexpected character '`' at 62
+r,Unicode Identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Invalid Identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Strings,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Strings Without Content,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Strings With Escape Sequences,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Raw Strings,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+r,Comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Constants,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Integers,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Floats,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Hexadecimal,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Scientific Notation Floats,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Complex,1,1,1,1,1,SUPPORTED_COMPLETE,
+r,Dot Dot I,1,1,1,1,1,SUPPORTED_COMPLETE,
+go,Single const declarations without types,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Single const declarations with types,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Grouped const declarations,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Const declarations with implicit values,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Var declarations without types,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Var declarations with types,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Var declarations with no expressions,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Grouped var declarations,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Function declarations,1,0,0,0,0,PARSER_LIMITATION,corpus.go:7:10: can only use ... with final parameter
+go,Single-line function declarations,1,0,0,0,0,PARSER_LIMITATION,corpus.go:3:13: undefined: a
+go,Variadic function declarations,1,0,0,0,0,PARSER_LIMITATION,corpus.go: missing main body
+go,Method declarations,1,0,0,0,0,PARSER_LIMITATION,corpus.go:3:12: undefined: Person
+go,Type declarations,1,0,0,0,0,PARSER_LIMITATION,corpus.go:5:3: a redeclared in this block
+go,Error detected at globally reserved keyword,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+go,Call expressions,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: undefined: a
+go,Nested call expressions,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: undefined: a
+go,Generic call expressions,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: undefined: a
+go,Calls to 'make' and 'new',1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: make(chan<- int) (value of type chan<- int) is not used
+go,Selector expressions,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: undefined: a
+go,Indexing expressions,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:7: undefined: a
+go,Type assertion expressions,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:7: undefined: a
+go,Type conversion expressions,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:9: undefined: a
+go,Unary expressions,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:10: undefined: a
+go,Int literals,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Float literals,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Rune literals,1,0,0,0,0,PARSER_LIMITATION,corpus.go:9:9: escape sequence is invalid Unicode code point
+go,Imaginary literals,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,String literals,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+go,Slice literals,1,0,0,0,0,PARSER_LIMITATION,corpus.go:3:12: []string{} (value of type []string) is not constant
+go,Array literals with implicit length,1,0,0,0,0,PARSER_LIMITATION,corpus.go:3:12: [...]int{…} (value of type [3]int) is not constant
+go,Map literals,1,0,0,0,0,PARSER_LIMITATION,corpus.go:3:11: map[string]string{…} (value of type map[string]string) is not constant
+go,Struct literals,1,0,0,0,0,PARSER_LIMITATION,corpus.go:3:12: undefined: Person
+go,Function literals,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:12: (func(s string) (int, int) literal) (value of type func(s string) (int, int)) is not constant"
+go,Package clauses,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: expected declaration, found '--'"
+go,Single import declarations,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:8:1: expected declaration, found '--'"
+go,Grouped import declarations,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:12:1: expected declaration, found '--'"
+go,Block comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+go,Comments with asterisks,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:7: missing init expr for a
+go,Non-ascii variable names,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: missing init expr for α
+go,Declaration statements,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:11: undefined: y
+go,Expression statements,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: undefined: foo
+go,Send statements,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: undefined: foo
+go,Increment/Decrement statements,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: undefined: i
+go,Assignment statements,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: undefined: a
+go,Short var declarations,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:3: declared and not used: a
+go,If statements,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:6: undefined: a
+go,For statements,1,0,0,0,0,PARSER_LIMITATION,corpus.go:5:5: undefined: a
+go,Switch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+go,Type switch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+go,Select statements,1,0,0,0,0,PARSER_LIMITATION,corpus.go:5:17: undefined: c
+go,Go and defer statements,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:9: undefined: x
+go,Nested statement blocks,1,1,1,1,1,SUPPORTED_COMPLETE,
+go,Labels at the ends of statement blocks,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+go,Empty statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+go,Nested control statements,1,0,0,0,0,PARSER_LIMITATION,corpus.go:4:21: undefined: vectors
+go,Top-level statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+go,Qualified type names,1,1,1,1,1,SUPPORTED_COMPLETE,
+go,Array types,1,1,1,1,1,SUPPORTED_COMPLETE,
+go,Slice types,1,0,0,0,0,PARSER_LIMITATION,corpus.go:3:10: undefined: c
+go,Struct types,1,0,0,0,0,PARSER_LIMITATION,corpus.go:7:6: s2 redeclared in this block
+go,Interface types,1,0,0,0,0,PARSER_LIMITATION,corpus.go:5:6: i1 redeclared in this block
+go,Interface embedded struct types,1,0,0,0,0,PARSER_LIMITATION,corpus.go:7:27: overlapping terms ~struct{f int} and struct{f int}
+go,Map types,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Pointer types,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Channel types,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Function types,1,0,0,0,0,PARSER_LIMITATION,"corpus.go:3:1: unsupported native declaration (global, method, init or generic)"
+go,Type Aliases,1,0,0,0,0,PARSER_LIMITATION,corpus.go:3:11: undefined: G1
+rust,Async function,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Await expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Async Block,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+rust,Async closure,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+rust,Async move async move closure,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Try Block,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Gen Block,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Modules,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""greetings"""
+rust,Extern crate declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Function declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Const function declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Functions with abstract return types,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Impl with lifetimes first,1,0,0,0,0,PARSER_LIMITATION,"unmatched delimiter "")"" at 29"
+rust,Functions with precise capture syntax,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 58
+rust,Functions with empty precise capture syntax,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Diverging functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Extern function declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Use declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Variable bindings,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Let-else Statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Let declarations with if expressions as the value,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""}"""
+rust,Let declarations with contextual keywords as names,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Structs,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""name"""
+rust,Unions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""__u6_addr8"""
+rust,Generic structs,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 44
+rust,Enums,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Enums with values specified,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Generic functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Functions with mutable parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Functions with destructured parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Functions with custom types for self,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Constant items,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""X"""
+rust,Static items,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+rust,Static 'ref' items using lazy_static,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Type aliases,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+rust,Type alias where clauses,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+rust,Empty statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Attributes,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Inner attributes,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Key-Value Attribute Expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Attribute macros,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 99
+rust,Derive macro helper attributes,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Attributes and Expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Inherent Impls,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 126
+rust,Trait impls,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Unsafe impls,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Disable automatically derived trait impls,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Impl dyn with parentheses,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Trait impl signature,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""OccupiedError"""
+rust,Impls with default functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Trait declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Trait declarations with optional type parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Unsized types in trait bounds,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Trait bounds in type arguments in trait,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Macro invocations inside trait declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Associated Types,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""N"""
+rust,Associated Type Definitions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""Associated"""
+rust,Generic Associated Types,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Higher-ranked types,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 106
+rust,Visibility modifiers,1,0,0,0,0,PARSER_LIMITATION,"rust matrix parser: function name missing near ""pub(super) fn b() {"""
+rust,Function parameter names that match built-in type names,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Where clauses,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 366
+rust,External Modules,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Crate visibility,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Reserved keywords in path,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Array Constraint in Where Clause,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Const generics with default,1,0,0,0,0,PARSER_LIMITATION,"expected """" near "";"""
+rust,Unexpected string literal prefixes,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+rust,Json macro contents,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+rust,Longer json macro contents,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+rust,Identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Raw identifiers,1,0,0,0,0,PARSER_LIMITATION,"rust matrix parser: function name missing near ""(r#abc as r#Def).r#ghi"""
+rust,Unary operator expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+rust,Reference expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""&"""
+rust,Try expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+rust,Binary operator expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""%"""
+rust,Grouped expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Range expressions,1,0,0,0,0,PARSER_LIMITATION,rust range matrix: range endpoint is missing
+rust,Assignment expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Compound assignment expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""="""
+rust,Type cast expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Call expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""32"""
+rust,Array expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Tuple expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Struct expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Struct expressions with update initializers,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,If expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""}"""
+rust,Basic if let expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,If let expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""="""
+rust,While let expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""="""
+rust,Match expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,While expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Loop expressions,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 42
+rust,For expressions,1,0,0,0,0,PARSER_LIMITATION,"unmatched delimiter ""}"" at 203"
+rust,Field expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Method call expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Index expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Scoped functions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""<"""
+rust,Scoped functions with fully qualified syntax,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""<"""
+rust,Scoped functions with macros as types,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""<"""
+rust,Scoped identifier with nested super,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Generic functions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""<"""
+rust,Closures,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Closures with typed parameteres,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""|"""
+rust,Generators,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""i"""
+rust,Unsafe blocks,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Inline const or Const blocks as expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Raw reference expression conflicts,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""&"""
+rust,Integer literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Floating-point literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,String literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Raw string literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Raw byte string literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Raw C string literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Character literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Boolean literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Macro invocation - no arguments,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+rust,Macro invocation - arbitrary tokens,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 89
+rust,Macro invocation with comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Macro definition,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Tuple struct patterns,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Reference patterns,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Struct patterns,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Ignored patterns,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Captured patterns,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Or patterns,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Inline const or Const blocks as pattern,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Pattern with turbofish,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Block comments,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""outer"""
+rust,Nested block comments,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+rust,Line comments,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""outer"""
+rust,Line doc comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Block doc comments,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""inner"""
+rust,Nested doc block comments,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+rust,Comments degenerate cases,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Line doc comment with no EOL,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Greek letters in identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Shebang line containing spaces,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Empty shebang with code after,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Immediate inner attribute,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,The unit type,1,0,0,0,0,PARSER_LIMITATION,"expected expression near """""
+rust,Tuple types,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Reference types,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""&"""
+rust,Raw pointer types,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+rust,Generic types,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 46
+rust,Scoped types,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+rust,Array types,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Function types,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Unsafe and extern function types,1,1,1,1,1,SUPPORTED_COMPLETE,
+rust,Trait objects,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 25
+rust,Type cast expressions with generics,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+cpp,template functions vs relational expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""break"""
+cpp,function declarations vs variable initializations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,template classes vs relational expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Concept definition,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+cpp,Concept definition with requires expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Requires clauses and expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Compound requirements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Nested requirements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Constraints,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+cpp,Namespace definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Namespace alias definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Using declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Reference declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+cpp,R-value reference declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+cpp,Inline method definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Inline method definitions with overrides,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Virtual method declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Constructor and destructor declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Classes with inheritance,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Classes with final virt specifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Nested classes,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""B"""
+cpp,Friend declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Default member initializers,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""a"""
+cpp,Function parameters with default values,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Attributes,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Operator overload declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""<"""
+cpp,Template declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Template template declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Template specializations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+cpp,Template methods,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Templates with optional type parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Templates with optional anonymous parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Declarations with braced initializer lists,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Empty function bodies,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Explicit template instantiations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+cpp,Structured binding declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Constexpr/constinit/consteval declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Variadic templates,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Enums,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""Bar"""
+cpp,static_assert declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Cast operator overload declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Class scope cast operator overload declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Function declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Variable storage classes,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+cpp,Ref-qualifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Default comparison declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Pointers in qualified identifiers and field expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Unnamed default parameter,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Alignas specifier and alignof expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Attribute specifier after noexcept,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Scoped function definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Constructor definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Explicit constructor definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Explicit constructor declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,"Default, delete, and pure virtual methods",1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Destructor definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Function-try-block definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Conversion operator definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Scoped function calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Compound literals without parentheses,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Explicit destructor calls,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""~"""
+cpp,New and Delete expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""&"""
+cpp,Initializer lists as arguments,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Initializer list as assignment expression RHS,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Lambda expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Nested template calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Comma expressions at the start of blocks,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+cpp,Nullptr,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Raw string literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Template calls,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+cpp,Parameter pack expansions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Concatenated string literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,User-defined literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Primitive types ctor,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Array assignment expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Coroutines,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Three-way comparison,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+cpp,Fold Expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+cpp,Alternative tokens (digraphs),1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Subscript expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Dependent operator templates,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+cpp,Numeric literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,While with assignment expression,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""="""
+cpp,Parenthesized Expressions that are not Fold Expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""="""
+cpp,Complex fold expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,declaration specs,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Module Definition,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Module Definition with Export,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Module Definition with Export and Partition,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,"Module Definition with Export, Partition and Attribute",1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,import Declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,import Declaration with export,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,import Declaration partition with export,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,import Declaration headerunit with export,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,global module fragment,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,private module fragment,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,export declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Modules in preprocessor sections,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""}"""
+cpp,Reflection operator,1,0,0,0,0,PARSER_LIMITATION,"cpp matrix parser: function name missing near ""constexpr std::meta::info a = ^^fn<char>"""
+cpp,Splice type specifiers and requirements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "":"""
+cpp,Splice expressions,1,0,0,0,0,PARSER_LIMITATION,"cpp matrix parser: function name missing near ""void fn() {"""
+cpp,Consteval blocks,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Annotations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""="""
+cpp,Expansion statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Returning braced initializer lists,1,0,0,0,0,PARSER_LIMITATION,entry-point early return requires explicit exit semantics
+cpp,Range-based for loops,1,0,0,0,0,PARSER_LIMITATION,cpp range matrix: range binding is not a single identifier
+cpp,Constexpr if statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,If statements with declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Try/catch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Throw statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Noexcept specifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Throw specifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Assignment,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Attributes,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Coroutines,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Switch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Explicit calls to overloaded operators,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,The auto type,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Namespaced types,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""::"""
+cpp,Dependent type names,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+cpp,Template types with empty argument lists,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+cpp,Function types as template arguments,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Decltype,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+cpp,Trailing return type,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,pointer declarations vs expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,casts vs multiplications,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+cpp,function calls vs parenthesized declarators vs macro types,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Call expressions vs empty declarations w/ macros as types,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Comments after for loops with ambiguities,1,0,0,0,0,PARSER_LIMITATION,"cpp range matrix: counting-loop step "" e"" requires explicit lowering"
+cpp,Top-level macro invocations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Line comments with escaped CRLF line endings,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Struct declarations,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+cpp,Union declarations,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+cpp,Enum declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Struct declarations containing preprocessor directives,1,0,0,0,0,PARSER_LIMITATION,"expected expression near """""
+cpp,Primitive-typed variable declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+cpp,Variable storage classes,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+cpp,Composite-typed variable declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+cpp,Pointer variable declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Typedefs,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+cpp,Function declarations,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""argc"""
+cpp,Function definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Function specifiers after types,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Linkage specifications,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Type qualifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Local array declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+cpp,Attributes,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Number literals,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 83
+cpp,Identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Unicode Identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Common constants,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Function calls,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""__func__"""
+cpp,GNU inline assembly,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""\""mov r1, %[y]\\n\"""""
+cpp,Function call with compound statement,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,String literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Character literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Field access,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Boolean operators,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Math operators,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,The comma operator,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Assignments,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Pointer operations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""&"""
+cpp,Type-casts,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""SomeType"""
+cpp,Sizeof expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""char"""
+cpp,Alignof expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Offsetof expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+cpp,Compound literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Compound literals with trailing commas,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Comments with escaped newlines,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Comments with escaped chars and newlines,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Generic Expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "":"""
+cpp,Noreturn Type Qualifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Restrict Type Qualifier,1,0,0,0,0,PARSER_LIMITATION,"cpp matrix parser: function name missing near ""void fn (int *__restrict__ rptr) {"""
+cpp,declaration specs,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,pointers,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,call modifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Include directives,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Object-like macro definitions,1,0,0,0,0,PARSER_LIMITATION,"cpp matrix parser: function name missing near ""#define EIGHT(x) do {"""
+cpp,Function-like macro definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Ifdefs,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Elifdefs,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,General if blocks,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""}"""
+cpp,Preprocessor conditionals in functions,1,0,0,0,0,PARSER_LIMITATION,entry-point early return requires explicit exit semantics
+cpp,Preprocessor conditionals in struct/union bodies,1,0,0,0,0,PARSER_LIMITATION,"expected expression near """""
+cpp,Unknown preprocessor directives,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Preprocessor expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""uint32_t"""
+cpp,If statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,For loops,1,0,0,0,0,PARSER_LIMITATION,cpp range matrix: counting-loop initialization is not supported
+cpp,While loops,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Labeled statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Switch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Case statements separate from switch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Return statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Comments with asterisks,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Comment with multiple backslashes,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Attributes,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Primitive types,1,1,1,1,1,SUPPORTED_COMPLETE,
+cpp,Type modifiers,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""int"""
+c,pointer declarations vs expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,casts vs multiplications,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+c,function-like type macros vs function calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,function calls vs parenthesized declarators vs macro types,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Call expressions vs empty declarations w/ macros as types,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+c,Comments after for loops with ambiguities,1,0,0,0,0,PARSER_LIMITATION,"c range matrix: counting-loop step "" e"" requires explicit lowering"
+c,Top-level macro invocations,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Line comments with escaped CRLF line endings,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Struct declarations,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+c,Union declarations,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+c,Enum declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near """""
+c,Struct declarations containing preprocessor directives,1,0,0,0,0,PARSER_LIMITATION,"expected expression near """""
+c,Primitive-typed variable declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+c,Variable storage classes,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+c,Composite-typed variable declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+c,Pointer variable declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Typedefs,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+c,Function declarations,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""argc"""
+c,Function definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Function specifiers after types,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Function definitions with macro attributes,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""arg1"""
+c,Linkage specifications,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Type qualifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Local array declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+c,Attributes,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,More Assembly,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""\""=r\"""""
+c,Static in Array Declarations,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""a"""
+c,Number literals,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 83
+c,Identifiers,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+c,Unicode Identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Common constants,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Function calls,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""__func__"""
+c,GNU inline assembly,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""\""mov r1, %[y]\\n\"""""
+c,Function call with compound statement,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,String literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Character literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Field access,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Boolean operators,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Math operators,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,The comma operator,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Assignments,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Pointer operations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""&"""
+c,Type-casts,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""SomeType"""
+c,Sizeof expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""char"""
+c,Alignof expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Offsetof expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+c,Compound literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Compound literals with trailing commas,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Comments with escaped newlines,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Comments with escaped chars and newlines,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Generic Expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "":"""
+c,Noreturn Type Qualifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Restrict Type Qualifier,1,0,0,0,0,PARSER_LIMITATION,"c matrix parser: function name missing near ""void fn (int *__restrict__ rptr) {"""
+c,Ternary,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Concatenated strings,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""PRI"""
+c,Nonnull Type Qualifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Top Level Empty Expression Statement,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Sized Type Specifier With Type Qualifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,declaration specs,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,pointers,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,call modifiers,1,0,0,0,0,PARSER_LIMITATION,"c matrix parser: function name missing near ""void (__stdcall g)() {"""
+c,SEH exception handling,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Include directives,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Object-like macro definitions,1,0,0,0,0,PARSER_LIMITATION,"c matrix parser: function name missing near ""#define EIGHT(x) do {"""
+c,Function-like macro definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Ifdefs,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Elifdefs,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Mixing #elif and #elifdef,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""a"""
+c,General if blocks,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""}"""
+c,Preprocessor conditionals in functions,1,0,0,0,0,PARSER_LIMITATION,entry-point early return requires explicit exit semantics
+c,Preprocessor conditionals in struct/union bodies,1,0,0,0,0,PARSER_LIMITATION,"expected expression near """""
+c,Unknown preprocessor directives,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Preprocessor expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""uint32_t"""
+c,If statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,For loops,1,0,0,0,0,PARSER_LIMITATION,c range matrix: counting-loop initialization is not supported
+c,While loops,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Labeled statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Switch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Case statements separate from switch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Return statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Comments with asterisks,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Comment with multiple backslashes,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Attributes,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Primitive types,1,1,1,1,1,SUPPORTED_COMPLETE,
+c,Type modifiers,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""int"""
+python,Error detected at globally reserved keyword,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+python,Identifiers with Greek letters,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Subscript expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Subscript slice expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Attribute references,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Await expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Call expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Print used as an identifier,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+python,Print used as a parameter,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Exec used as an identifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Async / await used as identifiers,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+python,Calls with splats,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Math operators,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""/"""
+python,Binary Addition / Subtraction With Floats,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Power Operator Precedence,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Operator precedence,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Bitwise operators,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""<"""
+python,Boolean operators,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Comparison operators,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+python,Assignments,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Assignments with type annotations,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Augmented assignments,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""="""
+python,Named expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Yield expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,lambdas,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Tuples with splats,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Tuples with yield,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+python,Default Tuple Arguments,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Conditional if expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""c"""
+python,Async context managers and iterators,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Arbitrary indentation between brackets,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Splat Inside of Expression List,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,A function called match,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Type expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Integers,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Floats,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Scientific Notation Floats,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Strings,1,0,0,0,0,PARSER_LIMITATION,unexpected character '`' at 77
+python,Raw strings,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Raw strings with escaped quotes,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""r__matrix_literal_5"""
+python,Format strings,1,0,0,0,0,PARSER_LIMITATION,"unmatched delimiter ""}"" at 81"
+python,Format strings with format specifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Template Strings,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Unicode escape sequences,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Other primitives,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Concatenated strings,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Multi-line strings,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Lists,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,List comprehensions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Dictionaries,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Dictionary comprehensions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""for"""
+python,Sets,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Set comprehensions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""for"""
+python,Simple Tuples,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Generator expression,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""a"""
+python,Matching specific values,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Matching multiple values,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Adding a wild card,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Or patterns,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,As patterns,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Actually not match,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Match is match but not pattern matching,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Match kwargs,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Match kwargs 2,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Case used as identifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,If guards,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Literals,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Comma separated cases,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Case terminating in comma,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+python,Multiple match patterns,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+python,"Match match, case case",1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""="""
+python,Walrus match (Issue #150),1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""="""
+python,Matching objects,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Positional arguments,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Constants and enums,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Dict mappings,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Builtin classes,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Complex case patterns on classes,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Complex case patterns on complex numbers,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Maybe sequence pattern right hand side precedence validation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Import statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Import-from statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Future import statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Print statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+python,Print statements with redirection,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+python,Assert statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+python,Expression statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+python,Delete statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+python,Control-flow statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Return statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+python,If statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,If else statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Nested if statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,While statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,For statements,1,0,0,0,0,PARSER_LIMITATION,python range matrix: range binding is not a single identifier
+python,Try statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,With statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+python,Async Function definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Function definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Empty blocks,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Class definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Class definitions with superclasses,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Decorated definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Raise statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Comments at different indentation levels,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Comments after dedents,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Comments at the ends of indented blocks,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Newline tokens followed by comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Global statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+python,Exec statements,1,0,0,0,0,PARSER_LIMITATION,"python matrix parser: function name missing near ""func = \""print\"""""
+python,Extra newlines,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Escaped newline,1,0,0,0,0,PARSER_LIMITATION,unexpected character '\\' at 9
+python,Statements with semicolons,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Type Alias Statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+python,Generic Function Definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,tuple collections,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,named tuple collections,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+julia,vector array collections,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,matrix array collections,1,0,0,0,0,PARSER_LIMITATION,"expected """" near "";"""
+julia,comprehension array collections,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,generators,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""for"""
+julia,module definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,abstract type definitions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "":"""
+julia,primitive type definitions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "":"""
+julia,struct definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,parametric struct definitions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "":"""
+julia,struct definitions - const fields,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,function definitions,1,0,0,0,0,PARSER_LIMITATION,"julia matrix parser: function name missing near ""function f end"""
+julia,short function definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,function definition parameters,1,0,0,0,0,PARSER_LIMITATION,"julia matrix parser: function name missing near ""function (::Type{Int}, x::Int = 1, y::Int...) end"""
+julia,function definition return types,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,function definition tuple parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,type parametric function definition parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,macro definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,identifiers,1,0,0,0,0,PARSER_LIMITATION,unexpected character '′' at 26
+julia,field expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near "".b"""
+julia,index expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,type parametrized expressions,1,0,0,0,0,PARSER_LIMITATION,"julia matrix parser: function name missing near ""$(usertype){"""
+julia,function call expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,function call expressions with do blocks,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+julia,macro call expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+julia,Qualified macro identifiers,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+julia,closed macro call expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+julia,quote expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "":"""
+julia,interpolation expressions,1,0,0,0,0,PARSER_LIMITATION,"julia matrix parser: function name missing near ""function $(name)($(parameters_expr))"""
+julia,adjoint expressions,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 30
+julia,juxtaposition expressions,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 29
+julia,arrow function expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,boolean literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,integer number literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,float number literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,character literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,string literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,command string literals,1,0,0,0,0,PARSER_LIMITATION,unexpected character '`' at 0
+julia,non-standard string literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,comments,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""="""
+julia,assignment operators,1,0,0,0,0,PARSER_LIMITATION,unexpected character '÷' at 55
+julia,binary arithmetic operators,1,0,0,0,0,PARSER_LIMITATION,unexpected character '\\' at 15
+julia,other binary operators,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,binary comparison operators,1,0,0,0,0,PARSER_LIMITATION,unexpected character '⊆' at 18
+julia,unary operators,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 2
+julia,operator broadcasting,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,ternary operator,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+julia,operators as values,1,0,0,0,0,PARSER_LIMITATION,unexpected character '⪯' at 7
+julia,compound statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,quote statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,let statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+julia,if statements,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""1"""
+julia,try statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,for statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,for outer statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,while statements,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""end"""
+julia,return statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+julia,export statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+julia,import statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,const statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+julia,local statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+julia,global statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Using declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Constant declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Let declarations,1,0,0,0,0,PARSER_LIMITATION,"nim matrix parser: function name missing near ""let 😂 = fun"""
+nim,Var declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Type aliases,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Object declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Tuple declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Concept declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+nim,Routine declarations,1,0,0,0,0,PARSER_LIMITATION,"nim matrix parser: function name missing near ""proc bar"""
+nim,Enum declarations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+nim,Empty type declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Literal deviations,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Generalized string deviations,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Except deviations,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Error within variant object declaration,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+nim,Error incomplete field within object variant,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+nim,Error within statements with body,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+nim,Hanging dot error,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+nim,Continuing keyword at wrong places,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Incomplete try statements,1,0,0,0,0,INVALID_OR_TRUNCATED,"expected expression near "";"""
+nim,Incomplete let statement with unclosed parenthesis,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+nim,Quoted identifiers,1,0,0,0,0,PARSER_LIMITATION,unexpected character '`' at 0
+nim,Prefix expressions,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+nim,Infix expressions,1,0,0,0,0,PARSER_LIMITATION,"nim matrix parser: function name missing near ""z ==> xyz + def => cd"""
+nim,Dot expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+nim,Bracket expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Curly expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Parenthesized calls,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 486
+nim,Command calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Dot generic calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Block statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+nim,If statements,1,0,0,0,0,PARSER_LIMITATION,"nim matrix parser: function name missing near ""proc foo ="""
+nim,When statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+nim,Case statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+nim,Try statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+nim,Pragma statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Type expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Routine expressions,1,0,0,0,0,PARSER_LIMITATION,"nim matrix parser: function name missing near ""proc(x: int, y: string)"""
+nim,Array construction,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Set/Table construction,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Tuple construction,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Parenthesized expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Cast expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Generalized strings,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Old typeof expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Empty file,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+nim,Single-line comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Block comments,1,0,0,0,0,PARSER_LIMITATION,"unmatched delimiter ""]"" at 15"
+nim,Integer literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Float literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,String literals,1,0,0,0,0,PARSER_LIMITATION,unexpected character '\\' at 187
+nim,Character literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Nil literal,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Custom numeric literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,For statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,While statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Import statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Export statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+nim,Import from statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Include statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+nim,Discard statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Assembly statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Break statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Continue statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Raise statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Return statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+nim,Bind statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+nim,Mixin statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+nim,Yield statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+nim,Static statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+nim,Assignment,1,0,0,0,0,PARSER_LIMITATION,"nim matrix parser: function name missing near ""x = foo.add proc ="""
+nim,Defer statements,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+csharp,Attribute targets,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Attributes,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Attribute targets (non-global),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Attribute quirks,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Lambda with attribute,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Attribute named arguments with colon,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Class Definitions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Partial constructor declarations (C# 14),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Extension declarations (C# 14),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,From keyword can be a variable,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,File keyword in invocation,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,File contextual keyword,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Scoped contextual keyword,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Set contextual keyword,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Var contextual keyword,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Nameof contextual keyword,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,global enum with one option,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Assignment to Prefix Unary Expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+csharp,Assignment to Binary Expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""%"""
+csharp,Assignment to Binary Equality Expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Assignment Binary Expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""="""
+csharp,Assignment LValue types,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Ternary Expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Binary Expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Ternary expressions is type,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Ternary expressions is nullable type,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Prefix-Unary Expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Cast expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Cast expression of array access,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Cast with parenthesized expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Precedence of unary prefix operator and element access,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Precedence of switch_expression and binary_expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Anonymous object creation with empty body,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Target-type object creation,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Anonymous object creation with single unnamed,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Anonymous object creation with single named,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Checked expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Object creation expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Named parameters in constructors,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Named parameters in method calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Named parameters using contextually reserved words,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Anonymous method expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Anonymous method expression with discard parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Anonymous method expression with modifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Lambda expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Async Lambda,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Lambda expression with modifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Lambda expression with discard parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Lambda expression with ref modifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Invocation expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Tuple expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Implicit array creation,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Implicit multi array creation,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Stackalloc implicit array,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Stackalloc explicit array,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Explicit array creation,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Explicit multi array creation,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Array of named tuple,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Makeref,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Postfix unary,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,__reftype,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,__refvalue,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,sizeof,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,typeof,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,switch expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,switch expression with trailing comma,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,switch expression return,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,switch expression with patterns,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,await Expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,throw expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Pecedence with OR and XOR,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,range expressions full,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,range expressions partial,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,cast expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Generic type name no type args,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+csharp,default expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Ref local declaration and ref expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Element binding expression,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""="""
+csharp,Member access expression (methods),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Member access expression (properties),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,is expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,is pattern,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Precedence between is operator and conditional_expression,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Precedence between is operator and as operator,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Discard pattern,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Null-forgiving operator,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Negated pattern,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+csharp,Parenthesized pattern,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""a"""
+csharp,Pattern Combinators and relational pattern,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">="""
+csharp,Precedence of prefix_unary_expression and invocation_expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Property patterns,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""{"""
+csharp,Positional patterns,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Recursive patterns with variable designation (issue #282),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Type patterns,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,List patterns,1,0,0,0,0,PARSER_LIMITATION,"expected """" near "","""
+csharp,List pattern with slice subpatterns (C# 11),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Conditional expression with member accesses,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Conditional access expression,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Conditional access to element (should be implicit_element_access),1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Conditional access expression with member binding,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""?"""
+csharp,Null-conditional assignment (C# 14),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Conditional access expression with simple member access,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""as"""
+csharp,Null-coalescing operator is right-associative,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Precedence between null-coalescing operator and conditional OR,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Precedence between null-coalescing operator and conditional operator,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Precedence between range and switch,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Precedence between unary and switch,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Precedence between range and as operator,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Precedence between is and comparison operators,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Nameof expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+csharp,Nameof with unbound generic types (C# 14),1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+csharp,Generic invocation expression,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+csharp,Logical AND vs cast disambiguation with parenthesized LHS (#413),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,With expression typical basic form,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,With expression using expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Precedence between with and cast,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Precedence between with and switch,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Precedence between with and equals,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""}"""
+csharp,Associativity of with expression,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""}"""
+csharp,Array with trailing comma,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Empty collection expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Collection expression with elements,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Collection expression with spreads,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Mixed elements with trailing comma,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Nested collection expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Collection expression in argument,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Empty collection expression in argument,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Collection expression in coalescing expression,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+csharp,Collection expression - nested,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Collection expression - cast with qualified member access,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Simple lambda parameters with modifiers (C# 14),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Modifier-prefixed parens that are NOT lambda parameter lists (C# 14),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Identifiers,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+csharp,Interfaces,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Literals,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 2382
+csharp,"If, elif and else directives",1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""<-"""
+csharp,If conditions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""}"""
+csharp,Define and undefine directives,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Line directives,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Directives not in strings or comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Shebang directive,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Query from select,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Basic record declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,"Using directives, extern alias, and namespace declarations",1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,File scoped namespaces,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Delegates,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Common statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Switch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Try catch finally statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,"Checked, unchecked, locked, & yield statements",1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Initializers,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Using statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Loops,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Unsafe & fixed statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Deconstruction,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Function with contextually reserved identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Function conditional ref expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Struct with a type parameter struct constraint,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Class event declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Partial event declarations (C# 14),1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""partial"""
+csharp,Class field declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Class method with single parameter,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,C# 13 params collections,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Operator declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,boolean operator declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,conversion operator declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,conversion operator with expression body,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,extern operators,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Class conversion operators with expression body,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Unary operator overloads,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Binary unpaired operator overloads,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Binary paired operator overloads,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Explicit operator overloads,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Checked operators,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Explicit conversion operator overloads,1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,User-defined compound assignment operators (C# 14),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Instance increment and decrement operators (C# 14),1,1,1,1,1,SUPPORTED_COMPLETE,
+csharp,Class with bodyless properties,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""Get"""
+csharp,Field-backed properties with `field` contextual keyword (C# 14),1,1,1,1,1,SUPPORTED_COMPLETE,
+java,comment,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,comments and literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,local variable,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,local array variable,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,module,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,module with normal annotation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+java,module with marker annotation,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,module with single element annotation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+java,package_declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,module directive,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,"module directive with requires, exports, opens, uses and provides",1,1,1,1,1,SUPPORTED_COMPLETE,
+java,single type import declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,type_import_on_declaraction,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,single static import declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,static import on demand declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,class declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,"class declaration involving public, private, abstract and superclass",1,1,1,1,1,SUPPORTED_COMPLETE,
+java,class declaration with implements,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,class declaration with body,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,interface declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,interface declaration with extends,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,interface with annotation type declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,method declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,constructor declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Nested field expression in receiver parameter,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Receiver parameter with additional parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,throws,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,object instantiation,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,variable declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,enum declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,enum declaration inside an interface,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""HandSign"""
+java,record declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,record declaration with generics,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,record declaration inside a class,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,record declaration inside an interface,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,record declaration with compact constructor,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,record declaration that implements interface,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,class declaration with dollar-sign identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Sealed classes,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Reserved identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Annontations,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,unnamed class,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Annotation following type arguments,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,standalone assignment expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,standalone binary expression,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""%"""
+java,instanceof expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+java,if statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,if statements with nested parenthesized expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,if statements with braces,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,if statements with assignment without braces,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""="""
+java,if then else statement,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""="""
+java,nested if then else statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,ternary expressions,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+java,for statement,1,0,0,0,0,PARSER_LIMITATION,java range matrix: counting-loop initialization is not supported
+java,Enhanced for statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,while statement,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,try-with-resources statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,return statement,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,annotation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+java,marker annotation,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,single element annotation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+java,annotation in array creation,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,lambda expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,traditional switch statement,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,functional switch statement,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,traditional-style switch expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,functional switch expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,switch expression with block,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,switch expressions added,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,switch statement and pre-increment,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Pattern matching,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Switch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,type arguments,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,wildcard,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+java,type arguments with generic types,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,empty type arguments,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+java,method references,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Non-ascii identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Local variable declaration with scoped type identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,binary expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,string interpolation,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,switch with qualified enum constant,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,switch with guarded case,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,switch with complex type,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,switch with unnamed pattern,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,switch with unnamed pattern variable,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,underscore pattern,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,for loops and underscore pattern,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+java,Annotations before a spread parameter's ellipsis,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,decimal integer literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,hex integer literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,octal integer literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,binary integer literal,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,floating point literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,boolean literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,character literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,string literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,text block,1,0,0,0,0,PARSER_LIMITATION,unexpected character '\\' at 547
+java,escape sequences,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,null literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,char escapes,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,octal escapes,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,unicode escapes,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,ascii escapes,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,class literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,Precedence,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,integral types,1,1,1,1,1,SUPPORTED_COMPLETE,
+java,floating point types,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Isolated internal open class control,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Adjacent internal classes preserve class declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Modifier-led class followed by unmodified class,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Comment and annotation between modifier-led classes,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Several adjacent modifier-led classes,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Annotations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,Annotations with use-site-target,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,Multi-annotations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,Multiple annotations on a variable,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,Multiple annotations on a function,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Annotated functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Functions with multiple annotations,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Functions with multiple annotations and type params,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Comma in annotation property,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Annotation with args before parenthesized expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Annotation with args before parenthesized expression in if block,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Annotation with args before parenthesized expression on same line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,No-arg annotation before non-paren expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Annotation on declaration still uses modifiers,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,This Assignment,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Index Assignment,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Call assignment,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Classes,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with methods,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Generic class,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with methods and expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with modifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with modifier and delegation specifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Objects,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Primary constructors,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+kotlin,Class with constructor on new line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with constructor and modifier on new line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with fully qualified annotation on constructor,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with annotation with parens in string arg on constructor,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Generic class with constructor on new line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with private constructor on new line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Inheritance,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with explicit interface delegation,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Object declaration with explicit delegation,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Object declaration with explicit delegation on next line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,"Object declaration with explicit delegation, generic type, by on next line",1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+kotlin,"Object declaration with explicit delegation, line comment before by",1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,"Object declaration with explicit delegation, block comment before by",1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with multiple delegation specifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Property delegation,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,"Class with explicit delegation, by on next line",1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Property delegation with by on next line,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""lazyValue"""
+kotlin,"Property delegation, line comment before by",1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""lazyValue"""
+kotlin,"Property delegation, block comment before by",1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""lazyValue"""
+kotlin,Properties,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Constructor delegation calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Enum classes,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Data class with hanging comma,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""audience"""
+kotlin,Value class: https://kotlinlang.org/docs/inline-classes.html,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,Interface,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Functional Interface,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""fun interface Foo {"""
+kotlin,Interface with function type delegation specifier,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+kotlin,Class with several modifiers followed by another declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Class with several annotations followed by another declaration,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,Comments,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+kotlin,Line comment between chain calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Block comment between chain calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Multiple line comments between chain calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Comment before safe navigation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+kotlin,Comments in middle of long chain,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Mixed line and block comments between chain calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Nested block comment before chain call,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""/"""
+kotlin,Comment between unrelated statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Comment before prefix plus,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Line comment before else,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""1"""
+kotlin,Block comment before else,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""1"""
+kotlin,Line comment before as,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Block comment before as,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Line comment before where,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Block comment before where,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Empty block comment in method chain,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Multiline block comment in method chain,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Block comment between unrelated statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Block comment before prefix plus,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Division after line comment,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Division after block comment,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Consecutive block comments in method chain,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Block comment then line comment before dot,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Builder pattern with mixed comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Comment before lambda brace,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Comment before call parentheses,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Try-catch with second catch on new line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Try-catch-finally with finally on new line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Try-catch-finally with line comment before finally,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Try-catch with line comment before second catch,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Short name-based destructuring (existing),1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Short name-based destructuring with types,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Short name-based destructuring in for loop,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Short name-based destructuring in lambda,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Full name-based destructuring with val,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Full name-based destructuring with mixed val/var,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Full name-based destructuring with types,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Name-based destructuring with renaming (short form),1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+kotlin,Name-based destructuring with renaming (full form),1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+kotlin,Name-based destructuring with mixed renaming,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+kotlin,Name-based destructuring with type and renaming,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+kotlin,Short positional destructuring,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Short positional destructuring with types,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Full positional destructuring with val,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Full positional destructuring with mixed val/var,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Full positional destructuring with types,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,For loop with positional destructuring,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,For loop with full name-based destructuring,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,For loop with full positional destructuring,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Lambda with positional destructuring,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Lambda with full name-based destructuring,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Trailing comma in name-based destructuring,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Trailing comma in positional destructuring,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Single entry destructuring with trailing comma,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Underscore in destructuring,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Multiplication expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Prefix expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Prefix expression with disjunction,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Safe Navigation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+kotlin,Function calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Check expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Range-until expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When expression with prefix unary expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""->"""
+kotlin,When expression with type arguments,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When expression with dangling if-else,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When with if-else and else branch,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When with multiple if-no-else before else branch,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Expressions with Soft Keywords,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""->"""
+kotlin,Value declaration with receiver type,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Expect as an expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Expect as a top-level expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Expect as a platform modifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Less than for generics,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Less than for comparison,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Type arguments before navigation suffix,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+kotlin,Lambda Expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Lambda literals with multi variable declaration with types,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""{ (foo, bar): Pair<Foo, List<Bar>?> -> (bar ?: listOf()) }"""
+kotlin,Lambda Expression with suspend,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Function call with trailing lambda,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Multiple Statements on a Single Line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Statements with Line Breaks,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Comments in Strings,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Qualified this/super expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,If else-if else expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,If-else without braces or semicolons or newlines,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""a"""
+kotlin,Infix syntax for function application,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,"Infix syntax, edge case 1",1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,"Infix syntax, edge case 2",1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Object literal with explicit delegation,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Object literal with delegation and call expression delegate,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Object literal with nested object literal delegate,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Object literal with navigation expression delegate,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Object literal with constructor invocation and class body,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Object literal with user type and class body (no parens),1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Bare object literal with class body (no supertype),1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Multi dimensional indexing with trailing comma,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Indexing with trailing comma,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When expression with guard condition on type test,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When expression with guard condition on negated type test,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When expression with guard condition on range test,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When expression with guard condition on simple expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When expression with guard condition using conjunction,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,When expression with mixed guarded and unguarded entries,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Top-level functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Generic functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Generic functions with parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Functions with parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Functions with return types,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Functions with return calls,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Override functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Set function call,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Anonymous function,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""fun()"""
+kotlin,Anonymous function with parameters,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""fun(x: Int)"""
+kotlin,Anonymous function with return type,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""fun(): Int"""
+kotlin,Anonymous function with body,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""fun() = true"""
+kotlin,Anonymous suspend function with body,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Function with backticked name,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""fun `this is a test function`() = true"""
+kotlin,Function with null literal as expression body,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Function block with trailing comma,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""->"""
+kotlin,Simple identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Unicode identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Boolean literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,String literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,String literal with lots of repeated quotes,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+kotlin,String interpolation,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,More string interpolation,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Empty interpolation is an error,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+kotlin,Multiline string interpolation with prefix,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+kotlin,Single-line string interpolation with prefix,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+kotlin,Expression interpolation with prefix,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+kotlin,Triple-dollar prefix interpolation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+kotlin,Excess dollars before interpolation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+kotlin,Excess dollars before expression interpolation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+kotlin,Literal dollar in multi-dollar string,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+kotlin,Multiple interpolations in multi-dollar string,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+kotlin,Nested multi-dollar strings,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+kotlin,Underscore identifier interpolation,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Integer literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Real literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Unicode literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Binary literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Unsigned literal,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Unsigned Long literal,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Null,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Regex with triple-quoted string,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Regex built from triple-quoted parts ending with backslash,1,0,0,0,0,PARSER_LIMITATION,unterminated string at 55
+kotlin,Dot after newline,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Eq after newline,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Binary operator after newline,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Open brace after newline,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Colon after newline,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Question mark after newline,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,get after newline,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Newline in function call,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Else after newline,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""3"""
+kotlin,Else on the same line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Line comment before dot in method chain,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Block comment before dot in method chain,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Multiple comments before dot in method chain,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Comment before safe navigation,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+kotlin,Mixed line and block comments before dot,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Nested block comment before dot,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""/"""
+kotlin,Comment between unrelated statements (ASI should still work),1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,NUL byte in unterminated multiline comment (regression: scanner must make progress),1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Objects,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Objects which extend base classes,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Objects extending base classes with no members,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Objects extending interface,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Objects extending interface as assignment,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Object with several modifiers followed by another declaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Actual as an identifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,by as a standalone identifier expression statement,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,by as receiver of a navigation expression after a newline,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,by as a function call after a newline (silent misparse on branch),1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,by as a function call with arg after a newline (silent misparse on branch),1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,by as left operand of an additive expression after a newline (silent misparse on branch),1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,File annotations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,Multiple file annotations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,Imports,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Multiple Imports On A Single Line,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Import followed by multiline comment,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,For statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Statements separated by semicolon,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Getters,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Type references,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Nested types,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Deeply nested types,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Generic wildcard types,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+kotlin,Generic parameterized types,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+kotlin,Function types,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Function types with multiple parameters,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""*"""
+kotlin,Function types with named parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Function types with receiver,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Type constructor,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Type constructor with trailing comma,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Type alias with type parameters,1,0,0,0,0,PARSER_LIMITATION,"expected expression near """""
+kotlin,Type alias with type parameters and trailing comma,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+kotlin,Ampersand type,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Ampersand type with modifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,functionType Foo.Bar.() -> Unit,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,functionType Foo.Bar.(foo: Int) -> Unit,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,functionType Foo.() -> Unit,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,bad: fun foo(fn: Foo.Bar.() -> Unit) {},1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Function type with parameters and trailing comma,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,annotatedParameterInEnumConstructor,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,annotatedParameterInInnerClassConstructor,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,annotationClass,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""i"""
+kotlin,annotations,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,AnonymousInitializer,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,anonymousReturnWithGenericType,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,BabySteps,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,BlockCommentAtBeginningOfFile1,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,BlockCommentAtBeginningOfFile2,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,BlockCommentAtBeginningOfFile3,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,BlockCommentAtBeginningOfFile4,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,CallWithManyClosures,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,classMembers,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,classObject,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,const,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""private"""
+kotlin,dataClass,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,dataObject,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,defaultImplsInInterface,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,delegatedWithInitializer,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""object"""
+kotlin,delegation,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,destructuringInLambdas,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,DocCommentAfterFileAnnotations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,DocCommentForFirstDeclaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,DocCommentOnPackageDirectiveLine,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,DocCommentsBinding,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,DynamicReceiver,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""fun dynamic"""
+kotlin,emptyEnum,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,EmptyFile,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,enum,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,EnumCommas,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+kotlin,enumEntryContent,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,EnumEntrySemicolonInlineMember,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,EnumEntrySemicolonMember,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,EnumIn,1,0,0,0,0,PARSER_LIMITATION,unexpected character '`' at 4
+kotlin,EnumInline,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,EnumMissingName,0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+kotlin,Enums,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,EnumShortCommas,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,EnumShortWithOverload,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,EOLsInComments,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,EOLsOnRollback,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,ExtensionsWithQNReceiver,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,FloatingPointLiteral,1,0,0,0,0,PARSER_LIMITATION,"expected """" near "","""
+kotlin,funInterfaceDeclaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,HangOnLonelyModifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,IfWithPropery,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Imports,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,ImportSoftKW,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Inner,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""class"""
+kotlin,innerClassEnumEntry,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""{"""
+kotlin,innerTypes,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,Interface,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,internalConst,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,LineCommentAfterFileAnnotations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,LineCommentForFirstDeclaration,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,LineCommentsInBlock,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,localClass,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,LongPackageName,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,ModifierAsSelector,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,modifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,mustUseReturnValueAndOverrides,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,NamedClassObject,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""object"""
+kotlin,namedCompanionObject,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,nestedClasses,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,NestedComments,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,NewlinesInParentheses,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,NotIsAndNotIn,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,objects,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,parameterizedSuspendFunctionType,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""->"""
+kotlin,parameterizedSuspendFunctionTypeComplex,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""->"""
+kotlin,privateConstField,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,privateToThis,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,propertyAccessors,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,PropertyInvokes,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,propertyWithConstraints,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,QuotedIdentifiers,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""@`return` fun `package`() {"""
+kotlin,repeatableAnnotation,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,repeatableAnnotationClass,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+kotlin,Reserved,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,sealed,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,sealedInterface,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""Nested"""
+kotlin,SemicolonAfterIf,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,SimpleClassMembers,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,specialNames,1,0,0,0,0,PARSER_LIMITATION,unexpected character '`' at 8
+kotlin,topJvmPackageName,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,topJvmPackageNameMultifile,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,topLevelMembers,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,TraitConstructor,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""a"""
+kotlin,TypeAlias,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,typeBoundsAndDelegationSpecifiers,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+kotlin,TypeConstraints,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,TypeModifiers,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""fun (@a a.(a) -> a).f2() {"""
+kotlin,typeModifiers2,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,typeParams,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,types,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,UnderscoredTypeArgumentsOfCall,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+kotlin,UnderscoredTypeArgumentsOfCallIllegal,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,UnderscoredTypeArgumentsOfType,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "">"""
+kotlin,UnderscoredTypeParameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,underscoreParameterName,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,validKotlinFunInterface,1,0,0,0,0,PARSER_LIMITATION,"kotlin matrix parser: function name missing near ""fun interface Foo"""
+kotlin,varargArgumentWithFunctionalType,1,1,1,1,1,SUPPORTED_COMPLETE,
+kotlin,WhenWithSubjectVariable_SoftModifierName,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Annotations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+swift,Multiple annotations on a variable,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+swift,Multiple annotations on a function,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Classes,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Class with methods,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Generic class,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Class with methods and expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Class with modifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Class with annotations,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Class with subscript,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Subscript with multiple arguments,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Inheritance,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Properties,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Effectful getters,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""a"""
+swift,Class declaration without any newlines,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""noise"""
+swift,Protocol composition types,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""transformProperties"""
+swift,Structs,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Protocols,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Protocol with subscript,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Typealias,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""ProtocolComposition"""
+swift,Special constructors,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Deinit,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Enum classes,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Extensions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Deprecation,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Protocol composition - generic type specifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Protocol composition - where clauses,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Protocol composition - enum declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Protocol composition in as expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Modify declarations,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""var"""
+swift,Attributes on computed property declarations,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Annotations on inheritance,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Actors,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,#if directive inside enum body,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,#if directive inside class body,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,#if directive as first member of struct body,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,#if directive as first member of enum body,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,#if directive as first member of protocol body,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,#if directive as first member of extension body,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,nonisolated(unsafe) property,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,nonisolated(nonsending) function,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Lazy is usable as a computed property,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,willSet block,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Both willSet and didSet together,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""}"""
+swift,Distributed actors and functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Noncopyable struct,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""bar"""
+swift,Comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Nested Comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Almost nested comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Single line comment at the end of a non-empty file,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Emojis in variable names,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Multi-codepoint emojis,1,0,0,0,0,PARSER_LIMITATION,"swift matrix parser: function name missing near ""func 🏃🏼\u200d♂️() {"""
+swift,Emojis with numbers in them,1,0,0,0,0,PARSER_LIMITATION,unexpected character '️' at 19
+swift,Multiplication expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Subtraction expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Nil-coalescing expression,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Comparison,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Conjunction,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""&&"""
+swift,Conjunction with call sites,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""&&"""
+swift,Bitwise operations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""<"""
+swift,Tuple access operator,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Ternary expression,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Ternary within another expression,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""?"""
+swift,Ternary with a function at the end,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Ternary expression with nil arms,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Multiple expressions on one line using semicolons,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Indexing,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Assigning to self,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Assignment,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Destructuring assignment,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Optional assignment,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Implicit member expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Tuple expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Function calls,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Constructor calls,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+swift,Inout functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Selectors,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+swift,Function references,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Complex ternary expression,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Range expression in indexing,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Range expression in loop,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Range with force unwrapped contents,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""!"""
+swift,Split nullable navigation expression,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Property wrapper projections,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""$"""
+swift,Key-path expressions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Tuple expression in function,1,0,0,0,0,PARSER_LIMITATION,"expected """" near "","""
+swift,Navigation expressions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""!"""
+swift,Check expression,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""is"""
+swift,Navigation expression involving explicit type parameters,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "")"""
+swift,Suppressing the syntactic significance of a newline,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""/"""
+swift,Simple try,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Try and ternary,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Simple await,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,try await,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Await and ternary,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,for try await,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,"Prefix operator binds to navigation chain, not just the base (#272)",1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Negation at the start of a line,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Calling `async` in positions where it could be a keyword,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Assigning to the result of a force unwrap,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Tricky operators,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Three dot operator after newline,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,If/else expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Complex if/else expression,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+swift,Switch expression,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""0.."""
+swift,If and switch can still be used as a value argument labels,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,If and switch can still be used as enum identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Navigation expressions can have parenthesized types before them,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""WithModifiersSyntax"""
+swift,Try with prefix operation after it,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Assignment split over multiple lines,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""="""
+swift,Optional type in array constructor,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""Value"""
+swift,Anonymous lambda parameter,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Wildcard assignment as first line of lambda,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Consume expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Consume expression in assignment,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Consume as identifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Consume call expression,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Consume with try and await,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Consume member access,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Top-level functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Generic functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Static functions,1,0,0,0,0,PARSER_LIMITATION,"swift matrix parser: function name missing near ""static func === (lhs: MyType, rhs: MyType) {"""
+swift,Functions with parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Functions with renamed parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Functions with return types,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Variadic functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Operator overrides,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Custom operators,1,0,0,0,0,PARSER_LIMITATION,unexpected character '•' at 125
+swift,Custom operator with another operator as a prefix,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Functions that throw,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Typed throws,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Typed throws on generic function,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Async functions,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Higher-order functions - pt 1,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Higher-order functions - pt 2,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""in"""
+swift,Higher-order functions - pt 3,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Higher-order functions - pt 4,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Higher-order functions - pt 5,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Higher-order functions - pt 6,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Higher-order functions - pt 7,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""=="""
+swift,Higher-order functions - pt 8,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Higher-order functions - pt 9,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Higher-order functions - pt 10,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Higher-order functions - pt 11,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Function type with wildcard,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Multiple trailing lambdas,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""}"""
+swift,Return type fun,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Lambdas with annotations,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+swift,Operator override named ampersand,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Macros,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""@"""
+swift,Parameter ownership modifiers in `func`,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Parameter ownership modifiers in a closure,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Parameter ownership modifiers in a function type,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Ownership modifiers for `self`,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Parameter pack in generic parameters,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Parameter pack in type constraints,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Parameter pack soup,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Parameter lists with trailing commas,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Generic parameter lists with trailing commas,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+swift,Closure capture lists with trailing commas,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""x"""
+swift,Simple identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Boolean literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,String literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,String interpolation,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Custom interpolation,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Strings with newline escaping,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Integer literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Real literals,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Collections,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Trailing commas,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Nil,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Raw strings,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+swift,Doesn't hang for incomplete raw strings (issue #146),0,0,0,0,0,INVALID_OR_TRUNCATED,corpus fixture is explicitly invalid
+swift,Raw strings with interpolation,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Raw strings interpolation edge cases,1,0,0,0,0,PARSER_LIMITATION,"unmatched delimiter "")"" at 48"
+swift,Unicode escape sequences,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Playground literals,1,0,0,0,0,PARSER_LIMITATION,"expected expression near """""
+swift,Single line regex literals,1,0,0,0,0,PARSER_LIMITATION,unexpected character '\\' at 40
+swift,Multiline regex literals,1,0,0,0,0,PARSER_LIMITATION,unexpected character '\\' at 73
+swift,Parse ambiguity in regex liteal and comment,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Regex-like custom operator not in expression position,1,0,0,0,0,PARSER_LIMITATION,"swift matrix parser: function name missing near ""func /^/ (lhs: Int, rhs: Int) -> Int {"""
+swift,Unapplied `/` that is not a regex literal,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""/"""
+swift,Unapplied custom operators,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""/"""
+swift,More operator not-regex edge cases,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""/"""
+swift,Ambiguous parse cases that now are regexes,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""/"""
+swift,Unapplied division operator,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Single-line regex on multiple lines,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""/"""
+swift,List with trailing comma,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Tuples with trailing commas,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,String interpolation with trailing commas,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Basic macro invocation,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,SwiftUI Preview,1,0,0,0,0,PARSER_LIMITATION,"swift matrix parser: function name missing near ""#Preview {  VStack {  Text(\""Hello, world!\"")  }  .padding()  }"""
+swift,Named SwiftUI Preview,1,0,0,0,0,PARSER_LIMITATION,"swift matrix parser: function name missing near ""#Preview(\""other\"") {"""
+swift,Predicate macro,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""in"""
+swift,Let statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Raw identifiers with spaces (SE-0451),1,0,0,0,0,PARSER_LIMITATION,"swift matrix parser: function name missing near ""func `my function`() {"""
+swift,C-style compound declaration,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+swift,For statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Weird for statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,For await in await,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,While and friends,1,0,0,0,0,PARSER_LIMITATION,"expected """" near "","""
+swift,Switch statements,1,0,0,0,0,PARSER_LIMITATION,"expected """" near "".pattern"""
+swift,Weird switch statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Switch patterns with individual where clauses,1,0,0,0,0,PARSER_LIMITATION,"expected """" near "".a"""
+swift,Switch with extra parentheses,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Imports,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Do-catch,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Discard self,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Discard self in deinit,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""{"""
+swift,Discard as identifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Typed throws on do-catch,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Untyped throws on do-catch,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,If let statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,If let on multiple lines,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,If let with function call,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,If let with try await function call,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Compound if let,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""something"""
+swift,Else if...,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""aPrime"""
+swift,Else interacts with comments,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,If try,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""limit"""
+swift,Guard statements,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Compound guard,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Type annotation on `guard case let`,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""NULL"""
+swift,Availability conditions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""}"""
+swift,Unicode identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Contextual keywords are usable as identifiers,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Compiler diagnostics,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""}"""
+swift,Platform compilation conditions,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""print"""
+swift,Async let,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Actor is a legal identifier,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,`repeat` as an enum case name,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Type references,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Optional casts followed by nil-coalescing,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""?"""
+swift,Nested types,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Deeply nested types,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Generic parameterized types,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "";"""
+swift,Function types,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""Config"""
+swift,Function types with multiple parameters,1,0,0,0,0,PARSER_LIMITATION,"expected expression near "","""
+swift,Types with named parameters (function or tuple),1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""->"""
+swift,Nested optional types,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""?"""
+swift,Double optional in lambda parameter,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Double optional array element in lambda parameter (ReactKit regression),1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Implicitly unwrapped optional types,1,0,0,0,0,PARSER_LIMITATION,"expected """" near ""?"""
+swift,Type aliases,1,0,0,0,0,PARSER_LIMITATION,"expected expression near ""->"""
+swift,Metatypes,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Existential types,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Typed throws in function type,1,1,1,1,1,SUPPORTED_COMPLETE,
+swift,Bracket-qualified nested type in generic argument,1,1,1,1,1,SUPPORTED_COMPLETE,

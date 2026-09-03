@@ -1,0 +1,14 @@
+language,corpus_cases,frontend_parse_pass,uast_valid_pass,ts_node_classes_observed,ts_node_classes_mapped,ts_node_classes_unresolved,structure_coverage,uasf_coverage,relation_coverage,field_coverage
+r,89,29,29,40,33,7,14,12,16,19
+go,67,8,8,99,23,76,9,7,7,16
+rust,151,92,92,162,106,56,18,13,12,19
+cpp,198,139,139,214,118,96,18,14,14,20
+c,85,49,49,121,75,46,15,11,14,20
+python,116,74,74,120,55,65,19,14,14,20
+zig,0,0,0,0,0,0,0,0,0,0
+julia,63,30,30,85,30,55,14,11,12,17
+nim,72,40,40,119,49,70,18,13,12,19
+csharp,179,144,144,208,147,61,13,10,11,17
+java,108,93,93,128,97,31,13,12,14,20
+kotlin,368,284,284,133,62,71,17,14,14,19
+swift,248,162,162,179,77,102,18,13,14,19

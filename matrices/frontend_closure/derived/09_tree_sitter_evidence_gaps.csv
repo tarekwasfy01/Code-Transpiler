@@ -1,0 +1,10 @@
+﻿language,evidence_gap,meaning
+r,NO_SUBTYPE_EDGES,Tree-sitter source package does not provide this evidence category; not automatically a UAST/frontend defect.
+go,NO_EXTERNAL_SCANNER,Tree-sitter source package does not provide this evidence category; not automatically a UAST/frontend defect.
+c,NO_EXTERNAL_SCANNER,Tree-sitter source package does not provide this evidence category; not automatically a UAST/frontend defect.
+zig,NO_CORPUS,Tree-sitter source package does not provide this evidence category; not automatically a UAST/frontend defect.
+zig,NO_EXTERNAL_SCANNER,Tree-sitter source package does not provide this evidence category; not automatically a UAST/frontend defect.
+nim,NO_SUBTYPE_EDGES,Tree-sitter source package does not provide this evidence category; not automatically a UAST/frontend defect.
+java,NO_EXTERNAL_SCANNER,Tree-sitter source package does not provide this evidence category; not automatically a UAST/frontend defect.
+kotlin,NO_SUBTYPE_EDGES,Tree-sitter source package does not provide this evidence category; not automatically a UAST/frontend defect.
+swift,NO_SUBTYPE_EDGES,Tree-sitter source package does not provide this evidence category; not automatically a UAST/frontend defect.

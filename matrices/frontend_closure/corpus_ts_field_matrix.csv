@@ -1,0 +1,2145 @@
+case_id,language,case_name,axis,feature,value
+0,r,Function No Body With Assignment,tree_sitter_field,body,1
+0,r,Function No Body With Assignment,tree_sitter_field,lhs,1
+0,r,Function No Body With Assignment,tree_sitter_field,name,1
+0,r,Function No Body With Assignment,tree_sitter_field,parameter,1
+0,r,Function No Body With Assignment,tree_sitter_field,parameters,1
+0,r,Function No Body With Assignment,tree_sitter_field,rhs,1
+2,r,"Not A Call, Subset, Or Subset2",tree_sitter_field,body,1
+3,r,"Not A Call, Subset, Or Subset2 Due To Sequential Arguments",tree_sitter_field,argument,1
+3,r,"Not A Call, Subset, Or Subset2 Due To Sequential Arguments",tree_sitter_field,arguments,1
+3,r,"Not A Call, Subset, Or Subset2 Due To Sequential Arguments",tree_sitter_field,function,1
+3,r,"Not A Call, Subset, Or Subset2 Due To Sequential Arguments",tree_sitter_field,value,1
+17,r,"Opening Bracket2 and Bracket, Matched Closing Bracket",tree_sitter_field,argument,1
+17,r,"Opening Bracket2 and Bracket, Matched Closing Bracket",tree_sitter_field,arguments,1
+17,r,"Opening Bracket2 and Bracket, Matched Closing Bracket",tree_sitter_field,close,1
+17,r,"Opening Bracket2 and Bracket, Matched Closing Bracket",tree_sitter_field,function,1
+17,r,"Opening Bracket2 and Bracket, Matched Closing Bracket",tree_sitter_field,value,1
+18,r,"Opening Bracket2 and Bracket, Unmatched Closing Bracket",tree_sitter_field,argument,1
+18,r,"Opening Bracket2 and Bracket, Unmatched Closing Bracket",tree_sitter_field,arguments,1
+18,r,"Opening Bracket2 and Bracket, Unmatched Closing Bracket",tree_sitter_field,function,1
+18,r,"Opening Bracket2 and Bracket, Unmatched Closing Bracket",tree_sitter_field,value,1
+21,r,Functions,tree_sitter_field,body,1
+21,r,Functions,tree_sitter_field,default,1
+21,r,Functions,tree_sitter_field,lhs,1
+21,r,Functions,tree_sitter_field,name,1
+21,r,Functions,tree_sitter_field,parameter,1
+21,r,Functions,tree_sitter_field,parameters,1
+21,r,Functions,tree_sitter_field,rhs,1
+21,r,Functions,tree_sitter_field,sequence,1
+21,r,Functions,tree_sitter_field,variable,1
+22,r,Functions With `return` As Parameter Name,tree_sitter_field,body,1
+22,r,Functions With `return` As Parameter Name,tree_sitter_field,default,1
+22,r,Functions With `return` As Parameter Name,tree_sitter_field,name,1
+22,r,Functions With `return` As Parameter Name,tree_sitter_field,parameter,1
+22,r,Functions With `return` As Parameter Name,tree_sitter_field,parameters,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,argument,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,arguments,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,body,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,close,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,content,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,default,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,function,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,lhs,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,name,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,open,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,parameter,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,parameters,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,rhs,1
+23,r,Function Dots And Dot Dot I,tree_sitter_field,value,1
+24,r,Function No Body,tree_sitter_field,body,1
+24,r,Function No Body,tree_sitter_field,name,1
+24,r,Function No Body,tree_sitter_field,parameter,1
+24,r,Function No Body,tree_sitter_field,parameters,1
+37,r,If,tree_sitter_field,argument,1
+37,r,If,tree_sitter_field,arguments,1
+37,r,If,tree_sitter_field,body,1
+37,r,If,tree_sitter_field,condition,1
+37,r,If,tree_sitter_field,consequence,1
+37,r,If,tree_sitter_field,function,1
+37,r,If,tree_sitter_field,lhs,1
+37,r,If,tree_sitter_field,rhs,1
+37,r,If,tree_sitter_field,value,1
+38,r,If-else,tree_sitter_field,alternative,1
+38,r,If-else,tree_sitter_field,body,1
+38,r,If-else,tree_sitter_field,condition,1
+38,r,If-else,tree_sitter_field,consequence,1
+40,r,Identifiers starting with `else` that are not the `else` keyword (#200),tree_sitter_field,body,1
+40,r,Identifiers starting with `else` that are not the `else` keyword (#200),tree_sitter_field,condition,1
+40,r,Identifiers starting with `else` that are not the `else` keyword (#200),tree_sitter_field,consequence,1
+40,r,Identifiers starting with `else` that are not the `else` keyword (#200),tree_sitter_field,lhs,1
+40,r,Identifiers starting with `else` that are not the `else` keyword (#200),tree_sitter_field,rhs,1
+42,r,For,tree_sitter_field,argument,1
+42,r,For,tree_sitter_field,arguments,1
+42,r,For,tree_sitter_field,body,1
+42,r,For,tree_sitter_field,close,1
+42,r,For,tree_sitter_field,content,1
+42,r,For,tree_sitter_field,function,1
+42,r,For,tree_sitter_field,lhs,1
+42,r,For,tree_sitter_field,open,1
+42,r,For,tree_sitter_field,rhs,1
+42,r,For,tree_sitter_field,sequence,1
+42,r,For,tree_sitter_field,value,1
+42,r,For,tree_sitter_field,variable,1
+43,r,For No Body,tree_sitter_field,body,1
+43,r,For No Body,tree_sitter_field,lhs,1
+43,r,For No Body,tree_sitter_field,rhs,1
+43,r,For No Body,tree_sitter_field,sequence,1
+43,r,For No Body,tree_sitter_field,variable,1
+44,r,While,tree_sitter_field,body,1
+44,r,While,tree_sitter_field,condition,1
+44,r,While,tree_sitter_field,lhs,1
+44,r,While,tree_sitter_field,rhs,1
+45,r,While No Body,tree_sitter_field,body,1
+45,r,While No Body,tree_sitter_field,condition,1
+45,r,While No Body,tree_sitter_field,lhs,1
+45,r,While No Body,tree_sitter_field,rhs,1
+47,r,Repeat No Body,tree_sitter_field,body,1
+48,r,Switch,tree_sitter_field,argument,1
+48,r,Switch,tree_sitter_field,arguments,1
+48,r,Switch,tree_sitter_field,close,1
+48,r,Switch,tree_sitter_field,content,1
+48,r,Switch,tree_sitter_field,function,1
+48,r,Switch,tree_sitter_field,name,1
+48,r,Switch,tree_sitter_field,open,1
+48,r,Switch,tree_sitter_field,value,1
+49,r,Dollar,tree_sitter_field,argument,1
+49,r,Dollar,tree_sitter_field,arguments,1
+49,r,Dollar,tree_sitter_field,close,1
+49,r,Dollar,tree_sitter_field,content,1
+49,r,Dollar,tree_sitter_field,function,1
+49,r,Dollar,tree_sitter_field,lhs,1
+49,r,Dollar,tree_sitter_field,open,1
+49,r,Dollar,tree_sitter_field,rhs,1
+49,r,Dollar,tree_sitter_field,value,1
+50,r,Dollar No RHS,tree_sitter_field,lhs,1
+52,r,Slot No RHS,tree_sitter_field,lhs,1
+53,r,Namespace get,tree_sitter_field,argument,1
+53,r,Namespace get,tree_sitter_field,arguments,1
+53,r,Namespace get,tree_sitter_field,function,1
+53,r,Namespace get,tree_sitter_field,lhs,1
+53,r,Namespace get,tree_sitter_field,rhs,1
+53,r,Namespace get,tree_sitter_field,value,1
+54,r,Namespace get internal,tree_sitter_field,argument,1
+54,r,Namespace get internal,tree_sitter_field,arguments,1
+54,r,Namespace get internal,tree_sitter_field,function,1
+54,r,Namespace get internal,tree_sitter_field,lhs,1
+54,r,Namespace get internal,tree_sitter_field,rhs,1
+54,r,Namespace get internal,tree_sitter_field,value,1
+55,r,Namespace With Missing RHS,tree_sitter_field,argument,1
+55,r,Namespace With Missing RHS,tree_sitter_field,arguments,1
+55,r,Namespace With Missing RHS,tree_sitter_field,function,1
+55,r,Namespace With Missing RHS,tree_sitter_field,lhs,1
+55,r,Namespace With Missing RHS,tree_sitter_field,value,1
+56,r,"Dollar, At, Namespace, Namespace Internal With Expression RHS",tree_sitter_field,body,1
+56,r,"Dollar, At, Namespace, Namespace Internal With Expression RHS",tree_sitter_field,lhs,1
+57,r,Assignment,tree_sitter_field,argument,1
+57,r,Assignment,tree_sitter_field,arguments,1
+57,r,Assignment,tree_sitter_field,function,1
+57,r,Assignment,tree_sitter_field,lhs,1
+57,r,Assignment,tree_sitter_field,rhs,1
+57,r,Assignment,tree_sitter_field,value,1
+58,r,Calls,tree_sitter_field,argument,1
+58,r,Calls,tree_sitter_field,arguments,1
+58,r,Calls,tree_sitter_field,close,1
+58,r,Calls,tree_sitter_field,content,1
+58,r,Calls,tree_sitter_field,function,1
+58,r,Calls,tree_sitter_field,lhs,1
+58,r,Calls,tree_sitter_field,name,1
+58,r,Calls,tree_sitter_field,open,1
+58,r,Calls,tree_sitter_field,rhs,1
+58,r,Calls,tree_sitter_field,value,1
+59,r,Calls With NULL As Argument Name,tree_sitter_field,argument,1
+59,r,Calls With NULL As Argument Name,tree_sitter_field,arguments,1
+59,r,Calls With NULL As Argument Name,tree_sitter_field,function,1
+59,r,Calls With NULL As Argument Name,tree_sitter_field,name,1
+59,r,Calls With NULL As Argument Name,tree_sitter_field,value,1
+60,r,Calls With `return` As Argument Name,tree_sitter_field,argument,1
+60,r,Calls With `return` As Argument Name,tree_sitter_field,arguments,1
+60,r,Calls With `return` As Argument Name,tree_sitter_field,function,1
+60,r,Calls With `return` As Argument Name,tree_sitter_field,name,1
+60,r,Calls With `return` As Argument Name,tree_sitter_field,value,1
+61,r,`return` Is Just An Identifier,tree_sitter_field,argument,1
+61,r,`return` Is Just An Identifier,tree_sitter_field,arguments,1
+61,r,`return` Is Just An Identifier,tree_sitter_field,body,1
+61,r,`return` Is Just An Identifier,tree_sitter_field,function,1
+61,r,`return` Is Just An Identifier,tree_sitter_field,name,1
+61,r,`return` Is Just An Identifier,tree_sitter_field,parameter,1
+61,r,`return` Is Just An Identifier,tree_sitter_field,parameters,1
+61,r,`return` Is Just An Identifier,tree_sitter_field,value,1
+62,r,Braced Expression,tree_sitter_field,body,1
+64,r,Colon,tree_sitter_field,body,1
+64,r,Colon,tree_sitter_field,lhs,1
+64,r,Colon,tree_sitter_field,rhs,1
+65,r,Formulas,tree_sitter_field,lhs,1
+65,r,Formulas,tree_sitter_field,rhs,1
+66,r,Help Operator,tree_sitter_field,lhs,1
+66,r,Help Operator,tree_sitter_field,rhs,1
+67,r,Complex Expressions,tree_sitter_field,alternative,1
+67,r,Complex Expressions,tree_sitter_field,argument,1
+67,r,Complex Expressions,tree_sitter_field,arguments,1
+67,r,Complex Expressions,tree_sitter_field,body,1
+67,r,Complex Expressions,tree_sitter_field,condition,1
+67,r,Complex Expressions,tree_sitter_field,consequence,1
+67,r,Complex Expressions,tree_sitter_field,function,1
+67,r,Complex Expressions,tree_sitter_field,lhs,1
+67,r,Complex Expressions,tree_sitter_field,rhs,1
+67,r,Complex Expressions,tree_sitter_field,value,1
+68,r,Precedence Tests,tree_sitter_field,close,1
+68,r,Precedence Tests,tree_sitter_field,content,1
+68,r,Precedence Tests,tree_sitter_field,lhs,1
+68,r,Precedence Tests,tree_sitter_field,open,1
+68,r,Precedence Tests,tree_sitter_field,rhs,1
+69,r,Newlines,tree_sitter_field,argument,1
+69,r,Newlines,tree_sitter_field,arguments,1
+69,r,Newlines,tree_sitter_field,body,1
+69,r,Newlines,tree_sitter_field,function,1
+69,r,Newlines,tree_sitter_field,value,1
+134,go,If statements,tree_sitter_field,alternative,1
+134,go,If statements,tree_sitter_field,arguments,1
+134,go,If statements,tree_sitter_field,body,1
+134,go,If statements,tree_sitter_field,condition,1
+134,go,If statements,tree_sitter_field,consequence,1
+134,go,If statements,tree_sitter_field,function,1
+134,go,If statements,tree_sitter_field,initializer,1
+134,go,If statements,tree_sitter_field,left,1
+134,go,If statements,tree_sitter_field,name,1
+134,go,If statements,tree_sitter_field,parameters,1
+134,go,If statements,tree_sitter_field,right,1
+136,go,Switch statements,tree_sitter_field,arguments,1
+136,go,Switch statements,tree_sitter_field,body,1
+136,go,Switch statements,tree_sitter_field,function,1
+136,go,Switch statements,tree_sitter_field,initializer,1
+136,go,Switch statements,tree_sitter_field,left,1
+136,go,Switch statements,tree_sitter_field,name,1
+136,go,Switch statements,tree_sitter_field,parameters,1
+136,go,Switch statements,tree_sitter_field,right,1
+136,go,Switch statements,tree_sitter_field,value,1
+137,go,Type switch statements,tree_sitter_field,alias,1
+137,go,Type switch statements,tree_sitter_field,arguments,1
+137,go,Type switch statements,tree_sitter_field,body,1
+137,go,Type switch statements,tree_sitter_field,element,1
+137,go,Type switch statements,tree_sitter_field,function,1
+137,go,Type switch statements,tree_sitter_field,name,1
+137,go,Type switch statements,tree_sitter_field,parameters,1
+137,go,Type switch statements,tree_sitter_field,result,1
+137,go,Type switch statements,tree_sitter_field,type,1
+137,go,Type switch statements,tree_sitter_field,value,1
+138,go,Select statements,tree_sitter_field,arguments,1
+138,go,Select statements,tree_sitter_field,body,1
+138,go,Select statements,tree_sitter_field,channel,1
+138,go,Select statements,tree_sitter_field,communication,1
+138,go,Select statements,tree_sitter_field,field,1
+138,go,Select statements,tree_sitter_field,function,1
+138,go,Select statements,tree_sitter_field,left,1
+138,go,Select statements,tree_sitter_field,name,1
+138,go,Select statements,tree_sitter_field,operand,1
+138,go,Select statements,tree_sitter_field,parameters,1
+138,go,Select statements,tree_sitter_field,right,1
+138,go,Select statements,tree_sitter_field,value,1
+141,go,Labels at the ends of statement blocks,tree_sitter_field,body,1
+141,go,Labels at the ends of statement blocks,tree_sitter_field,label,1
+141,go,Labels at the ends of statement blocks,tree_sitter_field,name,1
+141,go,Labels at the ends of statement blocks,tree_sitter_field,parameters,1
+145,go,Qualified type names,tree_sitter_field,name,1
+145,go,Qualified type names,tree_sitter_field,package,1
+145,go,Qualified type names,tree_sitter_field,type,1
+146,go,Array types,tree_sitter_field,element,1
+146,go,Array types,tree_sitter_field,left,1
+146,go,Array types,tree_sitter_field,length,1
+146,go,Array types,tree_sitter_field,name,1
+146,go,Array types,tree_sitter_field,right,1
+146,go,Array types,tree_sitter_field,type,1
+165,rust,Function declarations,tree_sitter_field,body,1
+165,rust,Function declarations,tree_sitter_field,element,1
+165,rust,Function declarations,tree_sitter_field,left,1
+165,rust,Function declarations,tree_sitter_field,length,1
+165,rust,Function declarations,tree_sitter_field,macro,1
+165,rust,Function declarations,tree_sitter_field,name,1
+165,rust,Function declarations,tree_sitter_field,parameters,1
+165,rust,Function declarations,tree_sitter_field,path,1
+165,rust,Function declarations,tree_sitter_field,pattern,1
+165,rust,Function declarations,tree_sitter_field,return_type,1
+165,rust,Function declarations,tree_sitter_field,right,1
+165,rust,Function declarations,tree_sitter_field,trait,1
+165,rust,Function declarations,tree_sitter_field,type,1
+165,rust,Function declarations,tree_sitter_field,type_arguments,1
+173,rust,Use declarations,tree_sitter_field,alias,1
+173,rust,Use declarations,tree_sitter_field,argument,1
+173,rust,Use declarations,tree_sitter_field,list,1
+173,rust,Use declarations,tree_sitter_field,name,1
+173,rust,Use declarations,tree_sitter_field,path,1
+175,rust,Let-else Statements,tree_sitter_field,alternative,1
+175,rust,Let-else Statements,tree_sitter_field,arguments,1
+175,rust,Let-else Statements,tree_sitter_field,field,1
+175,rust,Let-else Statements,tree_sitter_field,function,1
+175,rust,Let-else Statements,tree_sitter_field,name,1
+175,rust,Let-else Statements,tree_sitter_field,path,1
+175,rust,Let-else Statements,tree_sitter_field,pattern,1
+175,rust,Let-else Statements,tree_sitter_field,type,1
+175,rust,Let-else Statements,tree_sitter_field,value,1
+180,rust,Generic structs,tree_sitter_field,body,1
+180,rust,Generic structs,tree_sitter_field,name,1
+180,rust,Generic structs,tree_sitter_field,type,1
+180,rust,Generic structs,tree_sitter_field,type_parameters,1
+183,rust,Generic functions,tree_sitter_field,body,1
+183,rust,Generic functions,tree_sitter_field,bounds,1
+183,rust,Generic functions,tree_sitter_field,element,1
+183,rust,Generic functions,tree_sitter_field,length,1
+183,rust,Generic functions,tree_sitter_field,name,1
+183,rust,Generic functions,tree_sitter_field,parameters,1
+183,rust,Generic functions,tree_sitter_field,pattern,1
+183,rust,Generic functions,tree_sitter_field,return_type,1
+183,rust,Generic functions,tree_sitter_field,type,1
+183,rust,Generic functions,tree_sitter_field,type_arguments,1
+183,rust,Generic functions,tree_sitter_field,type_parameters,1
+193,rust,Attributes,tree_sitter_field,arguments,1
+193,rust,Attributes,tree_sitter_field,body,1
+193,rust,Attributes,tree_sitter_field,name,1
+193,rust,Attributes,tree_sitter_field,parameters,1
+193,rust,Attributes,tree_sitter_field,path,1
+193,rust,Attributes,tree_sitter_field,value,1
+194,rust,Inner attributes,tree_sitter_field,arguments,1
+194,rust,Inner attributes,tree_sitter_field,body,1
+194,rust,Inner attributes,tree_sitter_field,field,1
+194,rust,Inner attributes,tree_sitter_field,function,1
+194,rust,Inner attributes,tree_sitter_field,name,1
+194,rust,Inner attributes,tree_sitter_field,path,1
+194,rust,Inner attributes,tree_sitter_field,pattern,1
+194,rust,Inner attributes,tree_sitter_field,type,1
+194,rust,Inner attributes,tree_sitter_field,value,1
+196,rust,Attribute macros,tree_sitter_field,arguments,1
+196,rust,Attribute macros,tree_sitter_field,function,1
+198,rust,Attributes and Expressions,tree_sitter_field,arguments,1
+198,rust,Attributes and Expressions,tree_sitter_field,body,1
+198,rust,Attributes and Expressions,tree_sitter_field,function,1
+198,rust,Attributes and Expressions,tree_sitter_field,name,1
+198,rust,Attributes and Expressions,tree_sitter_field,parameters,1
+198,rust,Attributes and Expressions,tree_sitter_field,pattern,1
+198,rust,Attributes and Expressions,tree_sitter_field,value,1
+199,rust,Inherent Impls,tree_sitter_field,body,1
+199,rust,Inherent Impls,tree_sitter_field,name,1
+199,rust,Inherent Impls,tree_sitter_field,parameters,1
+199,rust,Inherent Impls,tree_sitter_field,path,1
+199,rust,Inherent Impls,tree_sitter_field,type,1
+199,rust,Inherent Impls,tree_sitter_field,type_arguments,1
+199,rust,Inherent Impls,tree_sitter_field,value,1
+200,rust,Trait impls,tree_sitter_field,body,1
+200,rust,Trait impls,tree_sitter_field,name,1
+200,rust,Trait impls,tree_sitter_field,parameters,1
+200,rust,Trait impls,tree_sitter_field,path,1
+200,rust,Trait impls,tree_sitter_field,return_type,1
+200,rust,Trait impls,tree_sitter_field,trait,1
+200,rust,Trait impls,tree_sitter_field,type,1
+200,rust,Trait impls,tree_sitter_field,type_arguments,1
+200,rust,Trait impls,tree_sitter_field,type_parameters,1
+200,rust,Trait impls,tree_sitter_field,value,1
+217,rust,Where clauses,tree_sitter_field,body,1
+217,rust,Where clauses,tree_sitter_field,bounds,1
+217,rust,Where clauses,tree_sitter_field,left,1
+217,rust,Where clauses,tree_sitter_field,name,1
+217,rust,Where clauses,tree_sitter_field,parameters,1
+217,rust,Where clauses,tree_sitter_field,pattern,1
+217,rust,Where clauses,tree_sitter_field,return_type,1
+217,rust,Where clauses,tree_sitter_field,trait,1
+217,rust,Where clauses,tree_sitter_field,type,1
+217,rust,Where clauses,tree_sitter_field,type_arguments,1
+217,rust,Where clauses,tree_sitter_field,type_parameters,1
+223,rust,Unexpected string literal prefixes,tree_sitter_field,element,1
+223,rust,Unexpected string literal prefixes,tree_sitter_field,name,1
+223,rust,Unexpected string literal prefixes,tree_sitter_field,type,1
+223,rust,Unexpected string literal prefixes,tree_sitter_field,value,1
+234,rust,Assignment expressions,tree_sitter_field,left,1
+234,rust,Assignment expressions,tree_sitter_field,right,1
+235,rust,Compound assignment expressions,tree_sitter_field,left,1
+235,rust,Compound assignment expressions,tree_sitter_field,right,1
+236,rust,Type cast expressions,tree_sitter_field,arguments,1
+236,rust,Type cast expressions,tree_sitter_field,function,1
+236,rust,Type cast expressions,tree_sitter_field,left,1
+236,rust,Type cast expressions,tree_sitter_field,pattern,1
+236,rust,Type cast expressions,tree_sitter_field,right,1
+236,rust,Type cast expressions,tree_sitter_field,type,1
+236,rust,Type cast expressions,tree_sitter_field,value,1
+237,rust,Call expressions,tree_sitter_field,arguments,1
+237,rust,Call expressions,tree_sitter_field,function,1
+238,rust,Array expressions,tree_sitter_field,arguments,1
+238,rust,Array expressions,tree_sitter_field,length,1
+242,rust,If expressions,tree_sitter_field,alternative,1
+242,rust,If expressions,tree_sitter_field,body,1
+242,rust,If expressions,tree_sitter_field,condition,1
+242,rust,If expressions,tree_sitter_field,consequence,1
+242,rust,If expressions,tree_sitter_field,left,1
+242,rust,If expressions,tree_sitter_field,name,1
+242,rust,If expressions,tree_sitter_field,parameters,1
+242,rust,If expressions,tree_sitter_field,pattern,1
+242,rust,If expressions,tree_sitter_field,right,1
+242,rust,If expressions,tree_sitter_field,value,1
+243,rust,Basic if let expressions,tree_sitter_field,condition,1
+243,rust,Basic if let expressions,tree_sitter_field,consequence,1
+243,rust,Basic if let expressions,tree_sitter_field,pattern,1
+243,rust,Basic if let expressions,tree_sitter_field,type,1
+243,rust,Basic if let expressions,tree_sitter_field,value,1
+244,rust,If let expressions,tree_sitter_field,body,1
+244,rust,If let expressions,tree_sitter_field,condition,1
+244,rust,If let expressions,tree_sitter_field,consequence,1
+244,rust,If let expressions,tree_sitter_field,left,1
+244,rust,If let expressions,tree_sitter_field,parameters,1
+244,rust,If let expressions,tree_sitter_field,pattern,1
+244,rust,If let expressions,tree_sitter_field,right,1
+244,rust,If let expressions,tree_sitter_field,type,1
+244,rust,If let expressions,tree_sitter_field,value,1
+246,rust,Match expressions,tree_sitter_field,body,1
+246,rust,Match expressions,tree_sitter_field,condition,1
+246,rust,Match expressions,tree_sitter_field,consequence,1
+246,rust,Match expressions,tree_sitter_field,left,1
+246,rust,Match expressions,tree_sitter_field,macro,1
+246,rust,Match expressions,tree_sitter_field,pattern,1
+246,rust,Match expressions,tree_sitter_field,right,1
+246,rust,Match expressions,tree_sitter_field,type,1
+246,rust,Match expressions,tree_sitter_field,value,1
+247,rust,While expressions,tree_sitter_field,body,1
+247,rust,While expressions,tree_sitter_field,condition,1
+247,rust,While expressions,tree_sitter_field,left,1
+247,rust,While expressions,tree_sitter_field,right,1
+257,rust,Generic functions,tree_sitter_field,arguments,1
+257,rust,Generic functions,tree_sitter_field,function,1
+257,rust,Generic functions,tree_sitter_field,name,1
+257,rust,Generic functions,tree_sitter_field,path,1
+257,rust,Generic functions,tree_sitter_field,type_arguments,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,alternative,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,arguments,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,body,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,condition,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,consequence,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,field,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,function,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,left,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,length,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,pattern,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,right,1
+262,rust,Inline const or Const blocks as expression,tree_sitter_field,value,1
+275,rust,Macro definition,tree_sitter_field,left,1
+275,rust,Macro definition,tree_sitter_field,name,1
+275,rust,Macro definition,tree_sitter_field,right,1
+275,rust,Macro definition,tree_sitter_field,type,1
+280,rust,Captured patterns,tree_sitter_field,body,1
+280,rust,Captured patterns,tree_sitter_field,left,1
+280,rust,Captured patterns,tree_sitter_field,pattern,1
+280,rust,Captured patterns,tree_sitter_field,right,1
+280,rust,Captured patterns,tree_sitter_field,type,1
+280,rust,Captured patterns,tree_sitter_field,value,1
+281,rust,Or patterns,tree_sitter_field,arguments,1
+281,rust,Or patterns,tree_sitter_field,body,1
+281,rust,Or patterns,tree_sitter_field,condition,1
+281,rust,Or patterns,tree_sitter_field,consequence,1
+281,rust,Or patterns,tree_sitter_field,field,1
+281,rust,Or patterns,tree_sitter_field,function,1
+281,rust,Or patterns,tree_sitter_field,macro,1
+281,rust,Or patterns,tree_sitter_field,name,1
+281,rust,Or patterns,tree_sitter_field,parameters,1
+281,rust,Or patterns,tree_sitter_field,pattern,1
+281,rust,Or patterns,tree_sitter_field,type,1
+281,rust,Or patterns,tree_sitter_field,value,1
+282,rust,Inline const or Const blocks as pattern,tree_sitter_field,arguments,1
+282,rust,Inline const or Const blocks as pattern,tree_sitter_field,body,1
+282,rust,Inline const or Const blocks as pattern,tree_sitter_field,field,1
+282,rust,Inline const or Const blocks as pattern,tree_sitter_field,function,1
+282,rust,Inline const or Const blocks as pattern,tree_sitter_field,macro,1
+282,rust,Inline const or Const blocks as pattern,tree_sitter_field,name,1
+282,rust,Inline const or Const blocks as pattern,tree_sitter_field,parameters,1
+282,rust,Inline const or Const blocks as pattern,tree_sitter_field,pattern,1
+282,rust,Inline const or Const blocks as pattern,tree_sitter_field,type,1
+282,rust,Inline const or Const blocks as pattern,tree_sitter_field,value,1
+287,rust,Line doc comments,tree_sitter_field,doc,1
+287,rust,Line doc comments,tree_sitter_field,inner,1
+287,rust,Line doc comments,tree_sitter_field,outer,1
+316,cpp,Namespace definitions,tree_sitter_field,body,1
+316,cpp,Namespace definitions,tree_sitter_field,declarator,1
+316,cpp,Namespace definitions,tree_sitter_field,name,1
+316,cpp,Namespace definitions,tree_sitter_field,type,1
+317,cpp,Namespace alias definitions,tree_sitter_field,name,1
+337,cpp,Templates with optional type parameters,tree_sitter_field,arguments,1
+337,cpp,Templates with optional type parameters,tree_sitter_field,body,1
+337,cpp,Templates with optional type parameters,tree_sitter_field,default_type,1
+337,cpp,Templates with optional type parameters,tree_sitter_field,name,1
+337,cpp,Templates with optional type parameters,tree_sitter_field,parameters,1
+337,cpp,Templates with optional type parameters,tree_sitter_field,scope,1
+337,cpp,Templates with optional type parameters,tree_sitter_field,type,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,argument,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,arguments,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,body,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,default_value,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,left,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,name,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,parameters,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,right,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,scope,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,type,1
+338,cpp,Templates with optional anonymous parameters,tree_sitter_field,value,1
+342,cpp,Structured binding declarations,tree_sitter_field,arguments,1
+342,cpp,Structured binding declarations,tree_sitter_field,body,1
+342,cpp,Structured binding declarations,tree_sitter_field,declarator,1
+342,cpp,Structured binding declarations,tree_sitter_field,function,1
+342,cpp,Structured binding declarations,tree_sitter_field,name,1
+342,cpp,Structured binding declarations,tree_sitter_field,parameters,1
+342,cpp,Structured binding declarations,tree_sitter_field,right,1
+342,cpp,Structured binding declarations,tree_sitter_field,scope,1
+342,cpp,Structured binding declarations,tree_sitter_field,type,1
+342,cpp,Structured binding declarations,tree_sitter_field,value,1
+346,cpp,static_assert declarations,tree_sitter_field,arguments,1
+346,cpp,static_assert declarations,tree_sitter_field,body,1
+346,cpp,static_assert declarations,tree_sitter_field,condition,1
+346,cpp,static_assert declarations,tree_sitter_field,declarator,1
+346,cpp,static_assert declarations,tree_sitter_field,delimiter,1
+346,cpp,static_assert declarations,tree_sitter_field,message,1
+346,cpp,static_assert declarations,tree_sitter_field,name,1
+346,cpp,static_assert declarations,tree_sitter_field,parameters,1
+346,cpp,static_assert declarations,tree_sitter_field,scope,1
+346,cpp,static_assert declarations,tree_sitter_field,type,1
+349,cpp,Function declarations,tree_sitter_field,body,1
+349,cpp,Function declarations,tree_sitter_field,declarator,1
+349,cpp,Function declarations,tree_sitter_field,parameters,1
+349,cpp,Function declarations,tree_sitter_field,type,1
+377,cpp,Parameter pack expansions,tree_sitter_field,argument,1
+377,cpp,Parameter pack expansions,tree_sitter_field,arguments,1
+377,cpp,Parameter pack expansions,tree_sitter_field,body,1
+377,cpp,Parameter pack expansions,tree_sitter_field,captures,1
+377,cpp,Parameter pack expansions,tree_sitter_field,declarator,1
+377,cpp,Parameter pack expansions,tree_sitter_field,function,1
+377,cpp,Parameter pack expansions,tree_sitter_field,left,1
+377,cpp,Parameter pack expansions,tree_sitter_field,name,1
+377,cpp,Parameter pack expansions,tree_sitter_field,parameters,1
+377,cpp,Parameter pack expansions,tree_sitter_field,pattern,1
+377,cpp,Parameter pack expansions,tree_sitter_field,right,1
+377,cpp,Parameter pack expansions,tree_sitter_field,scope,1
+377,cpp,Parameter pack expansions,tree_sitter_field,size,1
+377,cpp,Parameter pack expansions,tree_sitter_field,type,1
+377,cpp,Parameter pack expansions,tree_sitter_field,value,1
+392,cpp,declaration specs,tree_sitter_field,body,1
+392,cpp,declaration specs,tree_sitter_field,declarator,1
+392,cpp,declaration specs,tree_sitter_field,name,1
+392,cpp,declaration specs,tree_sitter_field,parameters,1
+392,cpp,declaration specs,tree_sitter_field,type,1
+396,cpp,"Module Definition with Export, Partition and Attribute",tree_sitter_field,name,1
+396,cpp,"Module Definition with Export, Partition and Attribute",tree_sitter_field,partition,1
+397,cpp,import Declaration,tree_sitter_field,name,1
+398,cpp,import Declaration with export,tree_sitter_field,name,1
+399,cpp,import Declaration partition with export,tree_sitter_field,partition,1
+400,cpp,import Declaration headerunit with export,tree_sitter_field,header,1
+403,cpp,export declaration,tree_sitter_field,body,1
+403,cpp,export declaration,tree_sitter_field,declarator,1
+403,cpp,export declaration,tree_sitter_field,name,1
+403,cpp,export declaration,tree_sitter_field,parameters,1
+403,cpp,export declaration,tree_sitter_field,type,1
+412,cpp,Range-based for loops,tree_sitter_field,argument,1
+412,cpp,Range-based for loops,tree_sitter_field,arguments,1
+412,cpp,Range-based for loops,tree_sitter_field,body,1
+412,cpp,Range-based for loops,tree_sitter_field,declarator,1
+412,cpp,Range-based for loops,tree_sitter_field,field,1
+412,cpp,Range-based for loops,tree_sitter_field,function,1
+412,cpp,Range-based for loops,tree_sitter_field,initializer,1
+412,cpp,Range-based for loops,tree_sitter_field,left,1
+412,cpp,Range-based for loops,tree_sitter_field,name,1
+412,cpp,Range-based for loops,tree_sitter_field,parameters,1
+412,cpp,Range-based for loops,tree_sitter_field,right,1
+412,cpp,Range-based for loops,tree_sitter_field,scope,1
+412,cpp,Range-based for loops,tree_sitter_field,type,1
+412,cpp,Range-based for loops,tree_sitter_field,value,1
+413,cpp,Constexpr if statements,tree_sitter_field,alternative,1
+413,cpp,Constexpr if statements,tree_sitter_field,argument,1
+413,cpp,Constexpr if statements,tree_sitter_field,arguments,1
+413,cpp,Constexpr if statements,tree_sitter_field,body,1
+413,cpp,Constexpr if statements,tree_sitter_field,condition,1
+413,cpp,Constexpr if statements,tree_sitter_field,consequence,1
+413,cpp,Constexpr if statements,tree_sitter_field,declarator,1
+413,cpp,Constexpr if statements,tree_sitter_field,name,1
+413,cpp,Constexpr if statements,tree_sitter_field,parameters,1
+413,cpp,Constexpr if statements,tree_sitter_field,scope,1
+413,cpp,Constexpr if statements,tree_sitter_field,type,1
+413,cpp,Constexpr if statements,tree_sitter_field,value,1
+414,cpp,If statements with declarations,tree_sitter_field,arguments,1
+414,cpp,If statements with declarations,tree_sitter_field,body,1
+414,cpp,If statements with declarations,tree_sitter_field,condition,1
+414,cpp,If statements with declarations,tree_sitter_field,consequence,1
+414,cpp,If statements with declarations,tree_sitter_field,declarator,1
+414,cpp,If statements with declarations,tree_sitter_field,function,1
+414,cpp,If statements with declarations,tree_sitter_field,initializer,1
+414,cpp,If statements with declarations,tree_sitter_field,left,1
+414,cpp,If statements with declarations,tree_sitter_field,parameters,1
+414,cpp,If statements with declarations,tree_sitter_field,right,1
+414,cpp,If statements with declarations,tree_sitter_field,type,1
+414,cpp,If statements with declarations,tree_sitter_field,value,1
+438,cpp,Struct declarations,tree_sitter_field,body,1
+438,cpp,Struct declarations,tree_sitter_field,declarator,1
+438,cpp,Struct declarations,tree_sitter_field,name,1
+438,cpp,Struct declarations,tree_sitter_field,type,1
+439,cpp,Union declarations,tree_sitter_field,body,1
+439,cpp,Union declarations,tree_sitter_field,declarator,1
+439,cpp,Union declarations,tree_sitter_field,name,1
+439,cpp,Union declarations,tree_sitter_field,type,1
+440,cpp,Enum declarations,tree_sitter_field,base,1
+440,cpp,Enum declarations,tree_sitter_field,body,1
+440,cpp,Enum declarations,tree_sitter_field,name,1
+440,cpp,Enum declarations,tree_sitter_field,value,1
+442,cpp,Primitive-typed variable declarations,tree_sitter_field,declarator,1
+442,cpp,Primitive-typed variable declarations,tree_sitter_field,type,1
+442,cpp,Primitive-typed variable declarations,tree_sitter_field,value,1
+444,cpp,Composite-typed variable declarations,tree_sitter_field,body,1
+444,cpp,Composite-typed variable declarations,tree_sitter_field,declarator,1
+444,cpp,Composite-typed variable declarations,tree_sitter_field,name,1
+444,cpp,Composite-typed variable declarations,tree_sitter_field,type,1
+445,cpp,Pointer variable declarations,tree_sitter_field,declarator,1
+445,cpp,Pointer variable declarations,tree_sitter_field,type,1
+446,cpp,Typedefs,tree_sitter_field,arguments,1
+446,cpp,Typedefs,tree_sitter_field,body,1
+446,cpp,Typedefs,tree_sitter_field,declarator,1
+446,cpp,Typedefs,tree_sitter_field,function,1
+446,cpp,Typedefs,tree_sitter_field,name,1
+446,cpp,Typedefs,tree_sitter_field,parameters,1
+446,cpp,Typedefs,tree_sitter_field,type,1
+448,cpp,Function definitions,tree_sitter_field,body,1
+448,cpp,Function definitions,tree_sitter_field,declarator,1
+448,cpp,Function definitions,tree_sitter_field,parameters,1
+448,cpp,Function definitions,tree_sitter_field,type,1
+467,cpp,Assignments,tree_sitter_field,alternative,1
+467,cpp,Assignments,tree_sitter_field,argument,1
+467,cpp,Assignments,tree_sitter_field,body,1
+467,cpp,Assignments,tree_sitter_field,condition,1
+467,cpp,Assignments,tree_sitter_field,consequence,1
+467,cpp,Assignments,tree_sitter_field,declarator,1
+467,cpp,Assignments,tree_sitter_field,field,1
+467,cpp,Assignments,tree_sitter_field,indices,1
+467,cpp,Assignments,tree_sitter_field,left,1
+467,cpp,Assignments,tree_sitter_field,parameters,1
+467,cpp,Assignments,tree_sitter_field,right,1
+467,cpp,Assignments,tree_sitter_field,type,1
+467,cpp,Assignments,tree_sitter_field,value,1
+469,cpp,Type-casts,tree_sitter_field,body,1
+469,cpp,Type-casts,tree_sitter_field,declarator,1
+469,cpp,Type-casts,tree_sitter_field,left,1
+469,cpp,Type-casts,tree_sitter_field,parameters,1
+469,cpp,Type-casts,tree_sitter_field,right,1
+469,cpp,Type-casts,tree_sitter_field,type,1
+469,cpp,Type-casts,tree_sitter_field,value,1
+480,cpp,declaration specs,tree_sitter_field,body,1
+480,cpp,declaration specs,tree_sitter_field,name,1
+481,cpp,pointers,tree_sitter_field,argument,1
+481,cpp,pointers,tree_sitter_field,body,1
+481,cpp,pointers,tree_sitter_field,condition,1
+481,cpp,pointers,tree_sitter_field,declarator,1
+481,cpp,pointers,tree_sitter_field,indices,1
+481,cpp,pointers,tree_sitter_field,initializer,1
+481,cpp,pointers,tree_sitter_field,left,1
+481,cpp,pointers,tree_sitter_field,name,1
+481,cpp,pointers,tree_sitter_field,parameters,1
+481,cpp,pointers,tree_sitter_field,right,1
+481,cpp,pointers,tree_sitter_field,type,1
+481,cpp,pointers,tree_sitter_field,update,1
+482,cpp,call modifiers,tree_sitter_field,body,1
+482,cpp,call modifiers,tree_sitter_field,declarator,1
+482,cpp,call modifiers,tree_sitter_field,parameters,1
+482,cpp,call modifiers,tree_sitter_field,type,1
+483,cpp,Include directives,tree_sitter_field,arguments,1
+483,cpp,Include directives,tree_sitter_field,function,1
+483,cpp,Include directives,tree_sitter_field,path,1
+484,cpp,Object-like macro definitions,tree_sitter_field,name,1
+484,cpp,Object-like macro definitions,tree_sitter_field,parameters,1
+484,cpp,Object-like macro definitions,tree_sitter_field,value,1
+485,cpp,Function-like macro definitions,tree_sitter_field,name,1
+485,cpp,Function-like macro definitions,tree_sitter_field,parameters,1
+485,cpp,Function-like macro definitions,tree_sitter_field,value,1
+486,cpp,Ifdefs,tree_sitter_field,alternative,1
+486,cpp,Ifdefs,tree_sitter_field,condition,1
+486,cpp,Ifdefs,tree_sitter_field,declarator,1
+486,cpp,Ifdefs,tree_sitter_field,name,1
+486,cpp,Ifdefs,tree_sitter_field,type,1
+486,cpp,Ifdefs,tree_sitter_field,value,1
+488,cpp,General if blocks,tree_sitter_field,alternative,1
+488,cpp,General if blocks,tree_sitter_field,argument,1
+488,cpp,General if blocks,tree_sitter_field,condition,1
+488,cpp,General if blocks,tree_sitter_field,left,1
+488,cpp,General if blocks,tree_sitter_field,name,1
+488,cpp,General if blocks,tree_sitter_field,path,1
+488,cpp,General if blocks,tree_sitter_field,right,1
+488,cpp,General if blocks,tree_sitter_field,value,1
+491,cpp,Unknown preprocessor directives,tree_sitter_field,argument,1
+491,cpp,Unknown preprocessor directives,tree_sitter_field,directive,1
+513,c,Struct declarations,tree_sitter_field,body,1
+513,c,Struct declarations,tree_sitter_field,declarator,1
+513,c,Struct declarations,tree_sitter_field,name,1
+513,c,Struct declarations,tree_sitter_field,type,1
+514,c,Union declarations,tree_sitter_field,body,1
+514,c,Union declarations,tree_sitter_field,declarator,1
+514,c,Union declarations,tree_sitter_field,name,1
+514,c,Union declarations,tree_sitter_field,type,1
+515,c,Enum declarations,tree_sitter_field,alternative,1
+515,c,Enum declarations,tree_sitter_field,body,1
+515,c,Enum declarations,tree_sitter_field,condition,1
+515,c,Enum declarations,tree_sitter_field,name,1
+515,c,Enum declarations,tree_sitter_field,underlying_type,1
+515,c,Enum declarations,tree_sitter_field,value,1
+517,c,Primitive-typed variable declarations,tree_sitter_field,declarator,1
+517,c,Primitive-typed variable declarations,tree_sitter_field,type,1
+517,c,Primitive-typed variable declarations,tree_sitter_field,value,1
+519,c,Composite-typed variable declarations,tree_sitter_field,body,1
+519,c,Composite-typed variable declarations,tree_sitter_field,declarator,1
+519,c,Composite-typed variable declarations,tree_sitter_field,name,1
+519,c,Composite-typed variable declarations,tree_sitter_field,type,1
+520,c,Pointer variable declarations,tree_sitter_field,declarator,1
+520,c,Pointer variable declarations,tree_sitter_field,type,1
+521,c,Typedefs,tree_sitter_field,arguments,1
+521,c,Typedefs,tree_sitter_field,body,1
+521,c,Typedefs,tree_sitter_field,declarator,1
+521,c,Typedefs,tree_sitter_field,function,1
+521,c,Typedefs,tree_sitter_field,name,1
+521,c,Typedefs,tree_sitter_field,parameters,1
+521,c,Typedefs,tree_sitter_field,type,1
+523,c,Function definitions,tree_sitter_field,body,1
+523,c,Function definitions,tree_sitter_field,declarator,1
+523,c,Function definitions,tree_sitter_field,parameters,1
+523,c,Function definitions,tree_sitter_field,type,1
+525,c,Function definitions with macro attributes,tree_sitter_field,arguments,1
+525,c,Function definitions with macro attributes,tree_sitter_field,body,1
+525,c,Function definitions with macro attributes,tree_sitter_field,declarator,1
+525,c,Function definitions with macro attributes,tree_sitter_field,function,1
+525,c,Function definitions with macro attributes,tree_sitter_field,parameters,1
+525,c,Function definitions with macro attributes,tree_sitter_field,type,1
+545,c,Assignments,tree_sitter_field,alternative,1
+545,c,Assignments,tree_sitter_field,argument,1
+545,c,Assignments,tree_sitter_field,body,1
+545,c,Assignments,tree_sitter_field,condition,1
+545,c,Assignments,tree_sitter_field,consequence,1
+545,c,Assignments,tree_sitter_field,declarator,1
+545,c,Assignments,tree_sitter_field,field,1
+545,c,Assignments,tree_sitter_field,index,1
+545,c,Assignments,tree_sitter_field,left,1
+545,c,Assignments,tree_sitter_field,parameters,1
+545,c,Assignments,tree_sitter_field,right,1
+545,c,Assignments,tree_sitter_field,type,1
+545,c,Assignments,tree_sitter_field,value,1
+547,c,Type-casts,tree_sitter_field,body,1
+547,c,Type-casts,tree_sitter_field,declarator,1
+547,c,Type-casts,tree_sitter_field,left,1
+547,c,Type-casts,tree_sitter_field,parameters,1
+547,c,Type-casts,tree_sitter_field,right,1
+547,c,Type-casts,tree_sitter_field,type,1
+547,c,Type-casts,tree_sitter_field,value,1
+559,c,Concatenated strings,tree_sitter_field,arguments,1
+559,c,Concatenated strings,tree_sitter_field,function,1
+563,c,declaration specs,tree_sitter_field,body,1
+563,c,declaration specs,tree_sitter_field,name,1
+564,c,pointers,tree_sitter_field,argument,1
+564,c,pointers,tree_sitter_field,body,1
+564,c,pointers,tree_sitter_field,condition,1
+564,c,pointers,tree_sitter_field,declarator,1
+564,c,pointers,tree_sitter_field,index,1
+564,c,pointers,tree_sitter_field,initializer,1
+564,c,pointers,tree_sitter_field,left,1
+564,c,pointers,tree_sitter_field,name,1
+564,c,pointers,tree_sitter_field,parameters,1
+564,c,pointers,tree_sitter_field,right,1
+564,c,pointers,tree_sitter_field,type,1
+564,c,pointers,tree_sitter_field,update,1
+565,c,call modifiers,tree_sitter_field,body,1
+565,c,call modifiers,tree_sitter_field,declarator,1
+565,c,call modifiers,tree_sitter_field,parameters,1
+565,c,call modifiers,tree_sitter_field,type,1
+567,c,Include directives,tree_sitter_field,arguments,1
+567,c,Include directives,tree_sitter_field,function,1
+567,c,Include directives,tree_sitter_field,path,1
+568,c,Object-like macro definitions,tree_sitter_field,name,1
+568,c,Object-like macro definitions,tree_sitter_field,parameters,1
+568,c,Object-like macro definitions,tree_sitter_field,value,1
+569,c,Function-like macro definitions,tree_sitter_field,name,1
+569,c,Function-like macro definitions,tree_sitter_field,parameters,1
+569,c,Function-like macro definitions,tree_sitter_field,value,1
+570,c,Ifdefs,tree_sitter_field,alternative,1
+570,c,Ifdefs,tree_sitter_field,condition,1
+570,c,Ifdefs,tree_sitter_field,declarator,1
+570,c,Ifdefs,tree_sitter_field,name,1
+570,c,Ifdefs,tree_sitter_field,type,1
+570,c,Ifdefs,tree_sitter_field,value,1
+572,c,Mixing #elif and #elifdef,tree_sitter_field,alternative,1
+572,c,Mixing #elif and #elifdef,tree_sitter_field,condition,1
+572,c,Mixing #elif and #elifdef,tree_sitter_field,declarator,1
+572,c,Mixing #elif and #elifdef,tree_sitter_field,name,1
+572,c,Mixing #elif and #elifdef,tree_sitter_field,type,1
+573,c,General if blocks,tree_sitter_field,alternative,1
+573,c,General if blocks,tree_sitter_field,argument,1
+573,c,General if blocks,tree_sitter_field,condition,1
+573,c,General if blocks,tree_sitter_field,left,1
+573,c,General if blocks,tree_sitter_field,name,1
+573,c,General if blocks,tree_sitter_field,path,1
+573,c,General if blocks,tree_sitter_field,right,1
+573,c,General if blocks,tree_sitter_field,value,1
+576,c,Unknown preprocessor directives,tree_sitter_field,argument,1
+576,c,Unknown preprocessor directives,tree_sitter_field,directive,1
+591,python,Identifiers with Greek letters,tree_sitter_field,left,1
+591,python,Identifiers with Greek letters,tree_sitter_field,right,1
+605,python,Operator precedence,tree_sitter_field,arguments,1
+605,python,Operator precedence,tree_sitter_field,attribute,1
+605,python,Operator precedence,tree_sitter_field,function,1
+605,python,Operator precedence,tree_sitter_field,left,1
+605,python,Operator precedence,tree_sitter_field,object,1
+605,python,Operator precedence,tree_sitter_field,right,1
+605,python,Operator precedence,tree_sitter_field,subscript,1
+605,python,Operator precedence,tree_sitter_field,value,1
+619,python,Async context managers and iterators,tree_sitter_field,alias,1
+619,python,Async context managers and iterators,tree_sitter_field,body,1
+619,python,Async context managers and iterators,tree_sitter_field,left,1
+619,python,Async context managers and iterators,tree_sitter_field,right,1
+619,python,Async context managers and iterators,tree_sitter_field,value,1
+678,python,Control-flow statements,tree_sitter_field,body,1
+678,python,Control-flow statements,tree_sitter_field,condition,1
+680,python,If statements,tree_sitter_field,condition,1
+680,python,If statements,tree_sitter_field,consequence,1
+681,python,If else statements,tree_sitter_field,alternative,1
+681,python,If else statements,tree_sitter_field,body,1
+681,python,If else statements,tree_sitter_field,condition,1
+681,python,If else statements,tree_sitter_field,consequence,1
+682,python,Nested if statements,tree_sitter_field,alternative,1
+682,python,Nested if statements,tree_sitter_field,body,1
+682,python,Nested if statements,tree_sitter_field,condition,1
+682,python,Nested if statements,tree_sitter_field,consequence,1
+683,python,While statements,tree_sitter_field,alternative,1
+683,python,While statements,tree_sitter_field,body,1
+683,python,While statements,tree_sitter_field,condition,1
+684,python,For statements,tree_sitter_field,alternative,1
+684,python,For statements,tree_sitter_field,argument,1
+684,python,For statements,tree_sitter_field,body,1
+684,python,For statements,tree_sitter_field,left,1
+684,python,For statements,tree_sitter_field,right,1
+685,python,Try statements,tree_sitter_field,alias,1
+685,python,Try statements,tree_sitter_field,body,1
+685,python,Try statements,tree_sitter_field,value,1
+687,python,Async Function definitions,tree_sitter_field,attribute,1
+687,python,Async Function definitions,tree_sitter_field,body,1
+687,python,Async Function definitions,tree_sitter_field,name,1
+687,python,Async Function definitions,tree_sitter_field,object,1
+687,python,Async Function definitions,tree_sitter_field,parameters,1
+687,python,Async Function definitions,tree_sitter_field,return_type,1
+687,python,Async Function definitions,tree_sitter_field,type,1
+687,python,Async Function definitions,tree_sitter_field,value,1
+688,python,Function definitions,tree_sitter_field,arguments,1
+688,python,Function definitions,tree_sitter_field,body,1
+688,python,Function definitions,tree_sitter_field,function,1
+688,python,Function definitions,tree_sitter_field,name,1
+688,python,Function definitions,tree_sitter_field,parameters,1
+688,python,Function definitions,tree_sitter_field,type,1
+688,python,Function definitions,tree_sitter_field,value,1
+689,python,Empty blocks,tree_sitter_field,argument,1
+689,python,Empty blocks,tree_sitter_field,arguments,1
+689,python,Empty blocks,tree_sitter_field,body,1
+689,python,Empty blocks,tree_sitter_field,condition,1
+689,python,Empty blocks,tree_sitter_field,consequence,1
+689,python,Empty blocks,tree_sitter_field,function,1
+689,python,Empty blocks,tree_sitter_field,name,1
+689,python,Empty blocks,tree_sitter_field,parameters,1
+712,julia,module definitions,tree_sitter_field,name,1
+718,julia,function definitions,tree_sitter_field,value,1
+719,julia,short function definitions,tree_sitter_field,value,1
+723,julia,type parametric function definition parameters,tree_sitter_field,prefix,1
+723,julia,type parametric function definition parameters,tree_sitter_field,value,1
+744,julia,command string literals,tree_sitter_field,prefix,1
+745,julia,non-standard string literals,tree_sitter_field,prefix,1
+769,nim,Using declarations,tree_sitter_field,name,1
+769,nim,Using declarations,tree_sitter_field,type,1
+770,nim,Constant declarations,tree_sitter_field,left,1
+770,nim,Constant declarations,tree_sitter_field,name,1
+770,nim,Constant declarations,tree_sitter_field,right,1
+770,nim,Constant declarations,tree_sitter_field,type,1
+770,nim,Constant declarations,tree_sitter_field,value,1
+771,nim,Let declarations,tree_sitter_field,name,1
+771,nim,Let declarations,tree_sitter_field,type,1
+771,nim,Let declarations,tree_sitter_field,value,1
+772,nim,Var declarations,tree_sitter_field,name,1
+772,nim,Var declarations,tree_sitter_field,type,1
+772,nim,Var declarations,tree_sitter_field,value,1
+773,nim,Type aliases,tree_sitter_field,name,1
+774,nim,Object declarations,tree_sitter_field,alternative,1
+774,nim,Object declarations,tree_sitter_field,condition,1
+774,nim,Object declarations,tree_sitter_field,consequence,1
+774,nim,Object declarations,tree_sitter_field,inherits,1
+774,nim,Object declarations,tree_sitter_field,left,1
+774,nim,Object declarations,tree_sitter_field,name,1
+774,nim,Object declarations,tree_sitter_field,operator,1
+774,nim,Object declarations,tree_sitter_field,pragma,1
+774,nim,Object declarations,tree_sitter_field,right,1
+774,nim,Object declarations,tree_sitter_field,type,1
+774,nim,Object declarations,tree_sitter_field,values,1
+775,nim,Tuple declarations,tree_sitter_field,name,1
+775,nim,Tuple declarations,tree_sitter_field,type,1
+776,nim,Concept declarations,tree_sitter_field,body,1
+776,nim,Concept declarations,tree_sitter_field,function,1
+776,nim,Concept declarations,tree_sitter_field,left,1
+776,nim,Concept declarations,tree_sitter_field,name,1
+776,nim,Concept declarations,tree_sitter_field,operator,1
+776,nim,Concept declarations,tree_sitter_field,parameters,1
+776,nim,Concept declarations,tree_sitter_field,refines,1
+776,nim,Concept declarations,tree_sitter_field,right,1
+776,nim,Concept declarations,tree_sitter_field,type,1
+777,nim,Routine declarations,tree_sitter_field,body,1
+777,nim,Routine declarations,tree_sitter_field,function,1
+777,nim,Routine declarations,tree_sitter_field,generic_parameters,1
+777,nim,Routine declarations,tree_sitter_field,left,1
+777,nim,Routine declarations,tree_sitter_field,name,1
+777,nim,Routine declarations,tree_sitter_field,operator,1
+777,nim,Routine declarations,tree_sitter_field,parameters,1
+777,nim,Routine declarations,tree_sitter_field,pragmas,1
+777,nim,Routine declarations,tree_sitter_field,return_type,1
+777,nim,Routine declarations,tree_sitter_field,rewrite_pattern,1
+777,nim,Routine declarations,tree_sitter_field,right,1
+777,nim,Routine declarations,tree_sitter_field,type,1
+777,nim,Routine declarations,tree_sitter_field,value,1
+778,nim,Enum declarations,tree_sitter_field,alternative,1
+778,nim,Enum declarations,tree_sitter_field,condition,1
+778,nim,Enum declarations,tree_sitter_field,consequence,1
+778,nim,Enum declarations,tree_sitter_field,name,1
+778,nim,Enum declarations,tree_sitter_field,value,1
+791,nim,Prefix expressions,tree_sitter_field,function,1
+791,nim,Prefix expressions,tree_sitter_field,left,1
+791,nim,Prefix expressions,tree_sitter_field,operator,1
+791,nim,Prefix expressions,tree_sitter_field,right,1
+792,nim,Infix expressions,tree_sitter_field,consequence,1
+792,nim,Infix expressions,tree_sitter_field,function,1
+792,nim,Infix expressions,tree_sitter_field,left,1
+792,nim,Infix expressions,tree_sitter_field,operator,1
+792,nim,Infix expressions,tree_sitter_field,right,1
+793,nim,Dot expressions,tree_sitter_field,function,1
+793,nim,Dot expressions,tree_sitter_field,left,1
+793,nim,Dot expressions,tree_sitter_field,operator,1
+793,nim,Dot expressions,tree_sitter_field,right,1
+794,nim,Bracket expressions,tree_sitter_field,left,1
+794,nim,Bracket expressions,tree_sitter_field,operator,1
+794,nim,Bracket expressions,tree_sitter_field,right,1
+795,nim,Curly expressions,tree_sitter_field,left,1
+795,nim,Curly expressions,tree_sitter_field,operator,1
+795,nim,Curly expressions,tree_sitter_field,right,1
+796,nim,Parenthesized calls,tree_sitter_field,body,1
+796,nim,Parenthesized calls,tree_sitter_field,condition,1
+796,nim,Parenthesized calls,tree_sitter_field,consequence,1
+796,nim,Parenthesized calls,tree_sitter_field,function,1
+796,nim,Parenthesized calls,tree_sitter_field,left,1
+796,nim,Parenthesized calls,tree_sitter_field,name,1
+796,nim,Parenthesized calls,tree_sitter_field,operator,1
+796,nim,Parenthesized calls,tree_sitter_field,parameters,1
+796,nim,Parenthesized calls,tree_sitter_field,pragmas,1
+796,nim,Parenthesized calls,tree_sitter_field,return_type,1
+796,nim,Parenthesized calls,tree_sitter_field,right,1
+796,nim,Parenthesized calls,tree_sitter_field,type,1
+796,nim,Parenthesized calls,tree_sitter_field,values,1
+797,nim,Command calls,tree_sitter_field,body,1
+797,nim,Command calls,tree_sitter_field,consequence,1
+797,nim,Command calls,tree_sitter_field,function,1
+797,nim,Command calls,tree_sitter_field,left,1
+797,nim,Command calls,tree_sitter_field,operator,1
+797,nim,Command calls,tree_sitter_field,right,1
+797,nim,Command calls,tree_sitter_field,values,1
+798,nim,Dot generic calls,tree_sitter_field,first_argument,1
+798,nim,Dot generic calls,tree_sitter_field,function,1
+798,nim,Dot generic calls,tree_sitter_field,generic_arguments,1
+799,nim,Block statements,tree_sitter_field,body,1
+799,nim,Block statements,tree_sitter_field,function,1
+799,nim,Block statements,tree_sitter_field,label,1
+799,nim,Block statements,tree_sitter_field,name,1
+799,nim,Block statements,tree_sitter_field,value,1
+800,nim,If statements,tree_sitter_field,alternative,1
+800,nim,If statements,tree_sitter_field,body,1
+800,nim,If statements,tree_sitter_field,condition,1
+800,nim,If statements,tree_sitter_field,consequence,1
+800,nim,If statements,tree_sitter_field,function,1
+800,nim,If statements,tree_sitter_field,name,1
+800,nim,If statements,tree_sitter_field,value,1
+801,nim,When statements,tree_sitter_field,alternative,1
+801,nim,When statements,tree_sitter_field,body,1
+801,nim,When statements,tree_sitter_field,condition,1
+801,nim,When statements,tree_sitter_field,consequence,1
+801,nim,When statements,tree_sitter_field,function,1
+801,nim,When statements,tree_sitter_field,name,1
+801,nim,When statements,tree_sitter_field,value,1
+802,nim,Case statements,tree_sitter_field,alternative,1
+802,nim,Case statements,tree_sitter_field,condition,1
+802,nim,Case statements,tree_sitter_field,consequence,1
+802,nim,Case statements,tree_sitter_field,function,1
+802,nim,Case statements,tree_sitter_field,name,1
+802,nim,Case statements,tree_sitter_field,value,1
+802,nim,Case statements,tree_sitter_field,values,1
+803,nim,Try statements,tree_sitter_field,body,1
+803,nim,Try statements,tree_sitter_field,consequence,1
+803,nim,Try statements,tree_sitter_field,function,1
+803,nim,Try statements,tree_sitter_field,values,1
+804,nim,Pragma statements,tree_sitter_field,body,1
+804,nim,Pragma statements,tree_sitter_field,condition,1
+804,nim,Pragma statements,tree_sitter_field,consequence,1
+804,nim,Pragma statements,tree_sitter_field,function,1
+804,nim,Pragma statements,tree_sitter_field,left,1
+804,nim,Pragma statements,tree_sitter_field,right,1
+804,nim,Pragma statements,tree_sitter_field,value,1
+806,nim,Routine expressions,tree_sitter_field,body,1
+806,nim,Routine expressions,tree_sitter_field,left,1
+806,nim,Routine expressions,tree_sitter_field,name,1
+806,nim,Routine expressions,tree_sitter_field,operator,1
+806,nim,Routine expressions,tree_sitter_field,parameters,1
+806,nim,Routine expressions,tree_sitter_field,pragmas,1
+806,nim,Routine expressions,tree_sitter_field,return_type,1
+806,nim,Routine expressions,tree_sitter_field,right,1
+806,nim,Routine expressions,tree_sitter_field,type,1
+809,nim,Tuple construction,tree_sitter_field,body,1
+809,nim,Tuple construction,tree_sitter_field,left,1
+809,nim,Tuple construction,tree_sitter_field,right,1
+811,nim,Cast expressions,tree_sitter_field,left,1
+811,nim,Cast expressions,tree_sitter_field,right,1
+811,nim,Cast expressions,tree_sitter_field,type,1
+811,nim,Cast expressions,tree_sitter_field,value,1
+812,nim,Generalized strings,tree_sitter_field,function,1
+813,nim,Old typeof expressions,tree_sitter_field,function,1
+813,nim,Old typeof expressions,tree_sitter_field,left,1
+813,nim,Old typeof expressions,tree_sitter_field,name,1
+813,nim,Old typeof expressions,tree_sitter_field,operator,1
+813,nim,Old typeof expressions,tree_sitter_field,parameters,1
+813,nim,Old typeof expressions,tree_sitter_field,right,1
+813,nim,Old typeof expressions,tree_sitter_field,type,1
+819,nim,String literals,tree_sitter_field,body,1
+823,nim,For statements,tree_sitter_field,body,1
+823,nim,For statements,tree_sitter_field,function,1
+823,nim,For statements,tree_sitter_field,left,1
+823,nim,For statements,tree_sitter_field,name,1
+823,nim,For statements,tree_sitter_field,right,1
+824,nim,While statements,tree_sitter_field,body,1
+824,nim,While statements,tree_sitter_field,condition,1
+827,nim,Import from statements,tree_sitter_field,left,1
+827,nim,Import from statements,tree_sitter_field,module,1
+827,nim,Import from statements,tree_sitter_field,operator,1
+827,nim,Import from statements,tree_sitter_field,right,1
+829,nim,Discard statements,tree_sitter_field,function,1
+829,nim,Discard statements,tree_sitter_field,left,1
+829,nim,Discard statements,tree_sitter_field,right,1
+838,nim,Static statements,tree_sitter_field,body,1
+838,nim,Static statements,tree_sitter_field,function,1
+841,csharp,Attribute targets,tree_sitter_field,name,1
+842,csharp,Attributes,tree_sitter_field,accessors,1
+842,csharp,Attributes,tree_sitter_field,body,1
+842,csharp,Attributes,tree_sitter_field,expression,1
+842,csharp,Attributes,tree_sitter_field,name,1
+842,csharp,Attributes,tree_sitter_field,parameters,1
+842,csharp,Attributes,tree_sitter_field,qualifier,1
+842,csharp,Attributes,tree_sitter_field,returns,1
+842,csharp,Attributes,tree_sitter_field,type,1
+842,csharp,Attributes,tree_sitter_field,type_parameters,1
+844,csharp,Attribute quirks,tree_sitter_field,body,1
+844,csharp,Attribute quirks,tree_sitter_field,name,1
+844,csharp,Attribute quirks,tree_sitter_field,parameters,1
+844,csharp,Attribute quirks,tree_sitter_field,type,1
+845,csharp,Lambda with attribute,tree_sitter_field,arguments,1
+845,csharp,Lambda with attribute,tree_sitter_field,body,1
+845,csharp,Lambda with attribute,tree_sitter_field,expression,1
+845,csharp,Lambda with attribute,tree_sitter_field,function,1
+845,csharp,Lambda with attribute,tree_sitter_field,name,1
+845,csharp,Lambda with attribute,tree_sitter_field,parameters,1
+845,csharp,Lambda with attribute,tree_sitter_field,type,1
+846,csharp,Attribute named arguments with colon,tree_sitter_field,body,1
+846,csharp,Attribute named arguments with colon,tree_sitter_field,name,1
+847,csharp,Class Definitions,tree_sitter_field,accessors,1
+847,csharp,Class Definitions,tree_sitter_field,arguments,1
+847,csharp,Class Definitions,tree_sitter_field,body,1
+847,csharp,Class Definitions,tree_sitter_field,expression,1
+847,csharp,Class Definitions,tree_sitter_field,function,1
+847,csharp,Class Definitions,tree_sitter_field,left,1
+847,csharp,Class Definitions,tree_sitter_field,name,1
+847,csharp,Class Definitions,tree_sitter_field,parameters,1
+847,csharp,Class Definitions,tree_sitter_field,qualifier,1
+847,csharp,Class Definitions,tree_sitter_field,rank,1
+847,csharp,Class Definitions,tree_sitter_field,returns,1
+847,csharp,Class Definitions,tree_sitter_field,right,1
+847,csharp,Class Definitions,tree_sitter_field,subscript,1
+847,csharp,Class Definitions,tree_sitter_field,type,1
+847,csharp,Class Definitions,tree_sitter_field,value,1
+848,csharp,Partial constructor declarations (C# 14),tree_sitter_field,body,1
+848,csharp,Partial constructor declarations (C# 14),tree_sitter_field,left,1
+848,csharp,Partial constructor declarations (C# 14),tree_sitter_field,name,1
+848,csharp,Partial constructor declarations (C# 14),tree_sitter_field,parameters,1
+848,csharp,Partial constructor declarations (C# 14),tree_sitter_field,right,1
+848,csharp,Partial constructor declarations (C# 14),tree_sitter_field,type,1
+849,csharp,Extension declarations (C# 14),tree_sitter_field,arguments,1
+849,csharp,Extension declarations (C# 14),tree_sitter_field,body,1
+849,csharp,Extension declarations (C# 14),tree_sitter_field,expression,1
+849,csharp,Extension declarations (C# 14),tree_sitter_field,function,1
+849,csharp,Extension declarations (C# 14),tree_sitter_field,name,1
+849,csharp,Extension declarations (C# 14),tree_sitter_field,parameters,1
+849,csharp,Extension declarations (C# 14),tree_sitter_field,returns,1
+849,csharp,Extension declarations (C# 14),tree_sitter_field,type,1
+849,csharp,Extension declarations (C# 14),tree_sitter_field,value,1
+850,csharp,From keyword can be a variable,tree_sitter_field,arguments,1
+850,csharp,From keyword can be a variable,tree_sitter_field,expression,1
+850,csharp,From keyword can be a variable,tree_sitter_field,function,1
+850,csharp,From keyword can be a variable,tree_sitter_field,name,1
+850,csharp,From keyword can be a variable,tree_sitter_field,type,1
+851,csharp,File keyword in invocation,tree_sitter_field,arguments,1
+851,csharp,File keyword in invocation,tree_sitter_field,expression,1
+851,csharp,File keyword in invocation,tree_sitter_field,function,1
+851,csharp,File keyword in invocation,tree_sitter_field,name,1
+852,csharp,File contextual keyword,tree_sitter_field,arguments,1
+852,csharp,File contextual keyword,tree_sitter_field,body,1
+852,csharp,File contextual keyword,tree_sitter_field,function,1
+852,csharp,File contextual keyword,tree_sitter_field,left,1
+852,csharp,File contextual keyword,tree_sitter_field,name,1
+852,csharp,File contextual keyword,tree_sitter_field,parameters,1
+852,csharp,File contextual keyword,tree_sitter_field,right,1
+852,csharp,File contextual keyword,tree_sitter_field,type,1
+853,csharp,Scoped contextual keyword,tree_sitter_field,arguments,1
+853,csharp,Scoped contextual keyword,tree_sitter_field,body,1
+853,csharp,Scoped contextual keyword,tree_sitter_field,function,1
+853,csharp,Scoped contextual keyword,tree_sitter_field,left,1
+853,csharp,Scoped contextual keyword,tree_sitter_field,name,1
+853,csharp,Scoped contextual keyword,tree_sitter_field,parameters,1
+853,csharp,Scoped contextual keyword,tree_sitter_field,right,1
+853,csharp,Scoped contextual keyword,tree_sitter_field,type,1
+854,csharp,Set contextual keyword,tree_sitter_field,arguments,1
+854,csharp,Set contextual keyword,tree_sitter_field,body,1
+854,csharp,Set contextual keyword,tree_sitter_field,function,1
+854,csharp,Set contextual keyword,tree_sitter_field,left,1
+854,csharp,Set contextual keyword,tree_sitter_field,name,1
+854,csharp,Set contextual keyword,tree_sitter_field,parameters,1
+854,csharp,Set contextual keyword,tree_sitter_field,right,1
+854,csharp,Set contextual keyword,tree_sitter_field,type,1
+855,csharp,Var contextual keyword,tree_sitter_field,arguments,1
+855,csharp,Var contextual keyword,tree_sitter_field,body,1
+855,csharp,Var contextual keyword,tree_sitter_field,function,1
+855,csharp,Var contextual keyword,tree_sitter_field,left,1
+855,csharp,Var contextual keyword,tree_sitter_field,name,1
+855,csharp,Var contextual keyword,tree_sitter_field,parameters,1
+855,csharp,Var contextual keyword,tree_sitter_field,right,1
+855,csharp,Var contextual keyword,tree_sitter_field,type,1
+856,csharp,Nameof contextual keyword,tree_sitter_field,arguments,1
+856,csharp,Nameof contextual keyword,tree_sitter_field,body,1
+856,csharp,Nameof contextual keyword,tree_sitter_field,function,1
+856,csharp,Nameof contextual keyword,tree_sitter_field,left,1
+856,csharp,Nameof contextual keyword,tree_sitter_field,name,1
+856,csharp,Nameof contextual keyword,tree_sitter_field,parameters,1
+856,csharp,Nameof contextual keyword,tree_sitter_field,right,1
+856,csharp,Nameof contextual keyword,tree_sitter_field,type,1
+857,csharp,global enum with one option,tree_sitter_field,body,1
+857,csharp,global enum with one option,tree_sitter_field,name,1
+857,csharp,global enum with one option,tree_sitter_field,value,1
+858,csharp,Assignment to Prefix Unary Expressions,tree_sitter_field,left,1
+858,csharp,Assignment to Prefix Unary Expressions,tree_sitter_field,right,1
+859,csharp,Assignment to Binary Expressions,tree_sitter_field,left,1
+859,csharp,Assignment to Binary Expressions,tree_sitter_field,right,1
+860,csharp,Assignment to Binary Equality Expressions,tree_sitter_field,left,1
+860,csharp,Assignment to Binary Equality Expressions,tree_sitter_field,right,1
+861,csharp,Assignment Binary Expressions,tree_sitter_field,left,1
+861,csharp,Assignment Binary Expressions,tree_sitter_field,right,1
+862,csharp,Assignment LValue types,tree_sitter_field,expression,1
+862,csharp,Assignment LValue types,tree_sitter_field,initializer,1
+862,csharp,Assignment LValue types,tree_sitter_field,left,1
+862,csharp,Assignment LValue types,tree_sitter_field,name,1
+862,csharp,Assignment LValue types,tree_sitter_field,right,1
+862,csharp,Assignment LValue types,tree_sitter_field,subscript,1
+862,csharp,Assignment LValue types,tree_sitter_field,type,1
+863,csharp,Ternary Expression,tree_sitter_field,alternative,1
+863,csharp,Ternary Expression,tree_sitter_field,body,1
+863,csharp,Ternary Expression,tree_sitter_field,condition,1
+863,csharp,Ternary Expression,tree_sitter_field,consequence,1
+863,csharp,Ternary Expression,tree_sitter_field,name,1
+863,csharp,Ternary Expression,tree_sitter_field,parameters,1
+863,csharp,Ternary Expression,tree_sitter_field,returns,1
+863,csharp,Ternary Expression,tree_sitter_field,type,1
+864,csharp,Binary Expressions,tree_sitter_field,body,1
+864,csharp,Binary Expressions,tree_sitter_field,left,1
+864,csharp,Binary Expressions,tree_sitter_field,name,1
+864,csharp,Binary Expressions,tree_sitter_field,parameters,1
+864,csharp,Binary Expressions,tree_sitter_field,returns,1
+864,csharp,Binary Expressions,tree_sitter_field,right,1
+864,csharp,Binary Expressions,tree_sitter_field,type,1
+865,csharp,Ternary expressions is type,tree_sitter_field,alternative,1
+865,csharp,Ternary expressions is type,tree_sitter_field,condition,1
+865,csharp,Ternary expressions is type,tree_sitter_field,consequence,1
+865,csharp,Ternary expressions is type,tree_sitter_field,left,1
+865,csharp,Ternary expressions is type,tree_sitter_field,name,1
+865,csharp,Ternary expressions is type,tree_sitter_field,right,1
+865,csharp,Ternary expressions is type,tree_sitter_field,type,1
+866,csharp,Ternary expressions is nullable type,tree_sitter_field,alternative,1
+866,csharp,Ternary expressions is nullable type,tree_sitter_field,condition,1
+866,csharp,Ternary expressions is nullable type,tree_sitter_field,consequence,1
+866,csharp,Ternary expressions is nullable type,tree_sitter_field,left,1
+866,csharp,Ternary expressions is nullable type,tree_sitter_field,name,1
+866,csharp,Ternary expressions is nullable type,tree_sitter_field,right,1
+866,csharp,Ternary expressions is nullable type,tree_sitter_field,type,1
+867,csharp,Prefix-Unary Expressions,tree_sitter_field,body,1
+867,csharp,Prefix-Unary Expressions,tree_sitter_field,name,1
+867,csharp,Prefix-Unary Expressions,tree_sitter_field,parameters,1
+867,csharp,Prefix-Unary Expressions,tree_sitter_field,returns,1
+868,csharp,Cast expressions,tree_sitter_field,body,1
+868,csharp,Cast expressions,tree_sitter_field,left,1
+868,csharp,Cast expressions,tree_sitter_field,name,1
+868,csharp,Cast expressions,tree_sitter_field,parameters,1
+868,csharp,Cast expressions,tree_sitter_field,right,1
+868,csharp,Cast expressions,tree_sitter_field,type,1
+868,csharp,Cast expressions,tree_sitter_field,value,1
+869,csharp,Cast expression of array access,tree_sitter_field,expression,1
+869,csharp,Cast expression of array access,tree_sitter_field,left,1
+869,csharp,Cast expression of array access,tree_sitter_field,right,1
+869,csharp,Cast expression of array access,tree_sitter_field,subscript,1
+869,csharp,Cast expression of array access,tree_sitter_field,type,1
+869,csharp,Cast expression of array access,tree_sitter_field,value,1
+870,csharp,Cast with parenthesized expression,tree_sitter_field,expression,1
+870,csharp,Cast with parenthesized expression,tree_sitter_field,name,1
+870,csharp,Cast with parenthesized expression,tree_sitter_field,qualifier,1
+870,csharp,Cast with parenthesized expression,tree_sitter_field,type,1
+870,csharp,Cast with parenthesized expression,tree_sitter_field,value,1
+871,csharp,Precedence of unary prefix operator and element access,tree_sitter_field,expression,1
+871,csharp,Precedence of unary prefix operator and element access,tree_sitter_field,left,1
+871,csharp,Precedence of unary prefix operator and element access,tree_sitter_field,right,1
+871,csharp,Precedence of unary prefix operator and element access,tree_sitter_field,subscript,1
+872,csharp,Precedence of switch_expression and binary_expression,tree_sitter_field,left,1
+872,csharp,Precedence of switch_expression and binary_expression,tree_sitter_field,right,1
+873,csharp,Anonymous object creation with empty body,tree_sitter_field,body,1
+873,csharp,Anonymous object creation with empty body,tree_sitter_field,name,1
+873,csharp,Anonymous object creation with empty body,tree_sitter_field,parameters,1
+873,csharp,Anonymous object creation with empty body,tree_sitter_field,type,1
+874,csharp,Target-type object creation,tree_sitter_field,body,1
+874,csharp,Target-type object creation,tree_sitter_field,name,1
+874,csharp,Target-type object creation,tree_sitter_field,parameters,1
+874,csharp,Target-type object creation,tree_sitter_field,type,1
+875,csharp,Anonymous object creation with single unnamed,tree_sitter_field,body,1
+875,csharp,Anonymous object creation with single unnamed,tree_sitter_field,name,1
+875,csharp,Anonymous object creation with single unnamed,tree_sitter_field,parameters,1
+875,csharp,Anonymous object creation with single unnamed,tree_sitter_field,type,1
+876,csharp,Anonymous object creation with single named,tree_sitter_field,body,1
+876,csharp,Anonymous object creation with single named,tree_sitter_field,name,1
+876,csharp,Anonymous object creation with single named,tree_sitter_field,parameters,1
+876,csharp,Anonymous object creation with single named,tree_sitter_field,type,1
+877,csharp,Checked expressions,tree_sitter_field,body,1
+877,csharp,Checked expressions,tree_sitter_field,left,1
+877,csharp,Checked expressions,tree_sitter_field,name,1
+877,csharp,Checked expressions,tree_sitter_field,parameters,1
+877,csharp,Checked expressions,tree_sitter_field,right,1
+877,csharp,Checked expressions,tree_sitter_field,type,1
+878,csharp,Object creation expressions,tree_sitter_field,arguments,1
+878,csharp,Object creation expressions,tree_sitter_field,body,1
+878,csharp,Object creation expressions,tree_sitter_field,initializer,1
+878,csharp,Object creation expressions,tree_sitter_field,left,1
+878,csharp,Object creation expressions,tree_sitter_field,name,1
+878,csharp,Object creation expressions,tree_sitter_field,parameters,1
+878,csharp,Object creation expressions,tree_sitter_field,qualifier,1
+878,csharp,Object creation expressions,tree_sitter_field,right,1
+878,csharp,Object creation expressions,tree_sitter_field,type,1
+879,csharp,Named parameters in constructors,tree_sitter_field,arguments,1
+879,csharp,Named parameters in constructors,tree_sitter_field,body,1
+879,csharp,Named parameters in constructors,tree_sitter_field,name,1
+879,csharp,Named parameters in constructors,tree_sitter_field,parameters,1
+879,csharp,Named parameters in constructors,tree_sitter_field,type,1
+880,csharp,Named parameters in method calls,tree_sitter_field,arguments,1
+880,csharp,Named parameters in method calls,tree_sitter_field,body,1
+880,csharp,Named parameters in method calls,tree_sitter_field,expression,1
+880,csharp,Named parameters in method calls,tree_sitter_field,function,1
+880,csharp,Named parameters in method calls,tree_sitter_field,left,1
+880,csharp,Named parameters in method calls,tree_sitter_field,name,1
+880,csharp,Named parameters in method calls,tree_sitter_field,parameters,1
+880,csharp,Named parameters in method calls,tree_sitter_field,right,1
+880,csharp,Named parameters in method calls,tree_sitter_field,type,1
+881,csharp,Named parameters using contextually reserved words,tree_sitter_field,arguments,1
+881,csharp,Named parameters using contextually reserved words,tree_sitter_field,body,1
+881,csharp,Named parameters using contextually reserved words,tree_sitter_field,function,1
+881,csharp,Named parameters using contextually reserved words,tree_sitter_field,left,1
+881,csharp,Named parameters using contextually reserved words,tree_sitter_field,name,1
+881,csharp,Named parameters using contextually reserved words,tree_sitter_field,parameters,1
+881,csharp,Named parameters using contextually reserved words,tree_sitter_field,right,1
+881,csharp,Named parameters using contextually reserved words,tree_sitter_field,type,1
+882,csharp,Anonymous method expressions,tree_sitter_field,body,1
+882,csharp,Anonymous method expressions,tree_sitter_field,name,1
+882,csharp,Anonymous method expressions,tree_sitter_field,parameters,1
+882,csharp,Anonymous method expressions,tree_sitter_field,type,1
+883,csharp,Anonymous method expression with discard parameters,tree_sitter_field,body,1
+883,csharp,Anonymous method expression with discard parameters,tree_sitter_field,name,1
+883,csharp,Anonymous method expression with discard parameters,tree_sitter_field,parameters,1
+883,csharp,Anonymous method expression with discard parameters,tree_sitter_field,type,1
+884,csharp,Anonymous method expression with modifiers,tree_sitter_field,body,1
+884,csharp,Anonymous method expression with modifiers,tree_sitter_field,name,1
+884,csharp,Anonymous method expression with modifiers,tree_sitter_field,parameters,1
+884,csharp,Anonymous method expression with modifiers,tree_sitter_field,type,1
+885,csharp,Lambda expressions,tree_sitter_field,arguments,1
+885,csharp,Lambda expressions,tree_sitter_field,body,1
+885,csharp,Lambda expressions,tree_sitter_field,expression,1
+885,csharp,Lambda expressions,tree_sitter_field,function,1
+885,csharp,Lambda expressions,tree_sitter_field,left,1
+885,csharp,Lambda expressions,tree_sitter_field,name,1
+885,csharp,Lambda expressions,tree_sitter_field,parameters,1
+885,csharp,Lambda expressions,tree_sitter_field,right,1
+885,csharp,Lambda expressions,tree_sitter_field,type,1
+886,csharp,Async Lambda,tree_sitter_field,arguments,1
+886,csharp,Async Lambda,tree_sitter_field,body,1
+886,csharp,Async Lambda,tree_sitter_field,function,1
+886,csharp,Async Lambda,tree_sitter_field,name,1
+886,csharp,Async Lambda,tree_sitter_field,parameters,1
+886,csharp,Async Lambda,tree_sitter_field,type,1
+887,csharp,Lambda expression with modifiers,tree_sitter_field,body,1
+887,csharp,Lambda expression with modifiers,tree_sitter_field,left,1
+887,csharp,Lambda expression with modifiers,tree_sitter_field,name,1
+887,csharp,Lambda expression with modifiers,tree_sitter_field,parameters,1
+887,csharp,Lambda expression with modifiers,tree_sitter_field,right,1
+887,csharp,Lambda expression with modifiers,tree_sitter_field,type,1
+888,csharp,Lambda expression with discard parameters,tree_sitter_field,body,1
+888,csharp,Lambda expression with discard parameters,tree_sitter_field,name,1
+888,csharp,Lambda expression with discard parameters,tree_sitter_field,parameters,1
+888,csharp,Lambda expression with discard parameters,tree_sitter_field,type,1
+889,csharp,Lambda expression with ref modifier,tree_sitter_field,body,1
+889,csharp,Lambda expression with ref modifier,tree_sitter_field,left,1
+889,csharp,Lambda expression with ref modifier,tree_sitter_field,name,1
+889,csharp,Lambda expression with ref modifier,tree_sitter_field,parameters,1
+889,csharp,Lambda expression with ref modifier,tree_sitter_field,right,1
+889,csharp,Lambda expression with ref modifier,tree_sitter_field,type,1
+890,csharp,Invocation expressions,tree_sitter_field,arguments,1
+890,csharp,Invocation expressions,tree_sitter_field,body,1
+890,csharp,Invocation expressions,tree_sitter_field,function,1
+890,csharp,Invocation expressions,tree_sitter_field,name,1
+890,csharp,Invocation expressions,tree_sitter_field,parameters,1
+890,csharp,Invocation expressions,tree_sitter_field,type,1
+891,csharp,Tuple expressions,tree_sitter_field,body,1
+891,csharp,Tuple expressions,tree_sitter_field,left,1
+891,csharp,Tuple expressions,tree_sitter_field,name,1
+891,csharp,Tuple expressions,tree_sitter_field,parameters,1
+891,csharp,Tuple expressions,tree_sitter_field,right,1
+891,csharp,Tuple expressions,tree_sitter_field,type,1
+892,csharp,Implicit array creation,tree_sitter_field,body,1
+892,csharp,Implicit array creation,tree_sitter_field,name,1
+892,csharp,Implicit array creation,tree_sitter_field,parameters,1
+892,csharp,Implicit array creation,tree_sitter_field,type,1
+893,csharp,Implicit multi array creation,tree_sitter_field,body,1
+893,csharp,Implicit multi array creation,tree_sitter_field,name,1
+893,csharp,Implicit multi array creation,tree_sitter_field,parameters,1
+893,csharp,Implicit multi array creation,tree_sitter_field,type,1
+894,csharp,Stackalloc implicit array,tree_sitter_field,body,1
+894,csharp,Stackalloc implicit array,tree_sitter_field,name,1
+894,csharp,Stackalloc implicit array,tree_sitter_field,parameters,1
+894,csharp,Stackalloc implicit array,tree_sitter_field,type,1
+895,csharp,Stackalloc explicit array,tree_sitter_field,body,1
+895,csharp,Stackalloc explicit array,tree_sitter_field,name,1
+895,csharp,Stackalloc explicit array,tree_sitter_field,parameters,1
+895,csharp,Stackalloc explicit array,tree_sitter_field,rank,1
+895,csharp,Stackalloc explicit array,tree_sitter_field,type,1
+896,csharp,Explicit array creation,tree_sitter_field,body,1
+896,csharp,Explicit array creation,tree_sitter_field,name,1
+896,csharp,Explicit array creation,tree_sitter_field,parameters,1
+896,csharp,Explicit array creation,tree_sitter_field,rank,1
+896,csharp,Explicit array creation,tree_sitter_field,type,1
+897,csharp,Explicit multi array creation,tree_sitter_field,body,1
+897,csharp,Explicit multi array creation,tree_sitter_field,name,1
+897,csharp,Explicit multi array creation,tree_sitter_field,parameters,1
+897,csharp,Explicit multi array creation,tree_sitter_field,rank,1
+897,csharp,Explicit multi array creation,tree_sitter_field,type,1
+898,csharp,Array of named tuple,tree_sitter_field,body,1
+898,csharp,Array of named tuple,tree_sitter_field,name,1
+898,csharp,Array of named tuple,tree_sitter_field,parameters,1
+898,csharp,Array of named tuple,tree_sitter_field,rank,1
+898,csharp,Array of named tuple,tree_sitter_field,type,1
+899,csharp,Makeref,tree_sitter_field,body,1
+899,csharp,Makeref,tree_sitter_field,name,1
+899,csharp,Makeref,tree_sitter_field,parameters,1
+899,csharp,Makeref,tree_sitter_field,type,1
+900,csharp,Postfix unary,tree_sitter_field,body,1
+900,csharp,Postfix unary,tree_sitter_field,name,1
+900,csharp,Postfix unary,tree_sitter_field,parameters,1
+900,csharp,Postfix unary,tree_sitter_field,type,1
+901,csharp,__reftype,tree_sitter_field,body,1
+901,csharp,__reftype,tree_sitter_field,name,1
+901,csharp,__reftype,tree_sitter_field,parameters,1
+901,csharp,__reftype,tree_sitter_field,type,1
+902,csharp,__refvalue,tree_sitter_field,body,1
+902,csharp,__refvalue,tree_sitter_field,name,1
+902,csharp,__refvalue,tree_sitter_field,parameters,1
+902,csharp,__refvalue,tree_sitter_field,type,1
+902,csharp,__refvalue,tree_sitter_field,value,1
+903,csharp,sizeof,tree_sitter_field,body,1
+903,csharp,sizeof,tree_sitter_field,name,1
+903,csharp,sizeof,tree_sitter_field,parameters,1
+903,csharp,sizeof,tree_sitter_field,type,1
+904,csharp,typeof,tree_sitter_field,body,1
+904,csharp,typeof,tree_sitter_field,name,1
+904,csharp,typeof,tree_sitter_field,parameters,1
+904,csharp,typeof,tree_sitter_field,qualifier,1
+904,csharp,typeof,tree_sitter_field,type,1
+905,csharp,switch expression,tree_sitter_field,body,1
+905,csharp,switch expression,tree_sitter_field,expression,1
+905,csharp,switch expression,tree_sitter_field,name,1
+905,csharp,switch expression,tree_sitter_field,parameters,1
+905,csharp,switch expression,tree_sitter_field,type,1
+906,csharp,switch expression with trailing comma,tree_sitter_field,body,1
+906,csharp,switch expression with trailing comma,tree_sitter_field,name,1
+906,csharp,switch expression with trailing comma,tree_sitter_field,parameters,1
+906,csharp,switch expression with trailing comma,tree_sitter_field,type,1
+907,csharp,switch expression return,tree_sitter_field,body,1
+907,csharp,switch expression return,tree_sitter_field,name,1
+907,csharp,switch expression return,tree_sitter_field,parameters,1
+907,csharp,switch expression return,tree_sitter_field,type,1
+908,csharp,switch expression with patterns,tree_sitter_field,body,1
+908,csharp,switch expression with patterns,tree_sitter_field,name,1
+908,csharp,switch expression with patterns,tree_sitter_field,parameters,1
+908,csharp,switch expression with patterns,tree_sitter_field,type,1
+909,csharp,await Expression,tree_sitter_field,body,1
+909,csharp,await Expression,tree_sitter_field,name,1
+909,csharp,await Expression,tree_sitter_field,parameters,1
+909,csharp,await Expression,tree_sitter_field,returns,1
+910,csharp,throw expression,tree_sitter_field,body,1
+910,csharp,throw expression,tree_sitter_field,left,1
+910,csharp,throw expression,tree_sitter_field,name,1
+910,csharp,throw expression,tree_sitter_field,parameters,1
+910,csharp,throw expression,tree_sitter_field,returns,1
+910,csharp,throw expression,tree_sitter_field,right,1
+911,csharp,Pecedence with OR and XOR,tree_sitter_field,left,1
+911,csharp,Pecedence with OR and XOR,tree_sitter_field,right,1
+912,csharp,range expressions full,tree_sitter_field,body,1
+912,csharp,range expressions full,tree_sitter_field,expression,1
+912,csharp,range expressions full,tree_sitter_field,name,1
+912,csharp,range expressions full,tree_sitter_field,parameters,1
+912,csharp,range expressions full,tree_sitter_field,returns,1
+912,csharp,range expressions full,tree_sitter_field,subscript,1
+912,csharp,range expressions full,tree_sitter_field,type,1
+913,csharp,range expressions partial,tree_sitter_field,body,1
+913,csharp,range expressions partial,tree_sitter_field,expression,1
+913,csharp,range expressions partial,tree_sitter_field,name,1
+913,csharp,range expressions partial,tree_sitter_field,parameters,1
+913,csharp,range expressions partial,tree_sitter_field,returns,1
+913,csharp,range expressions partial,tree_sitter_field,subscript,1
+913,csharp,range expressions partial,tree_sitter_field,type,1
+914,csharp,cast expression,tree_sitter_field,body,1
+914,csharp,cast expression,tree_sitter_field,left,1
+914,csharp,cast expression,tree_sitter_field,name,1
+914,csharp,cast expression,tree_sitter_field,parameters,1
+914,csharp,cast expression,tree_sitter_field,returns,1
+914,csharp,cast expression,tree_sitter_field,right,1
+914,csharp,cast expression,tree_sitter_field,type,1
+914,csharp,cast expression,tree_sitter_field,value,1
+915,csharp,Generic type name no type args,tree_sitter_field,name,1
+915,csharp,Generic type name no type args,tree_sitter_field,type,1
+916,csharp,default expression,tree_sitter_field,name,1
+916,csharp,default expression,tree_sitter_field,type,1
+917,csharp,Ref local declaration and ref expression,tree_sitter_field,expression,1
+917,csharp,Ref local declaration and ref expression,tree_sitter_field,name,1
+917,csharp,Ref local declaration and ref expression,tree_sitter_field,subscript,1
+917,csharp,Ref local declaration and ref expression,tree_sitter_field,type,1
+918,csharp,Element binding expression,tree_sitter_field,initializer,1
+918,csharp,Element binding expression,tree_sitter_field,left,1
+918,csharp,Element binding expression,tree_sitter_field,name,1
+918,csharp,Element binding expression,tree_sitter_field,right,1
+918,csharp,Element binding expression,tree_sitter_field,type,1
+919,csharp,Member access expression (methods),tree_sitter_field,arguments,1
+919,csharp,Member access expression (methods),tree_sitter_field,body,1
+919,csharp,Member access expression (methods),tree_sitter_field,expression,1
+919,csharp,Member access expression (methods),tree_sitter_field,function,1
+919,csharp,Member access expression (methods),tree_sitter_field,name,1
+919,csharp,Member access expression (methods),tree_sitter_field,parameters,1
+919,csharp,Member access expression (methods),tree_sitter_field,type,1
+920,csharp,Member access expression (properties),tree_sitter_field,body,1
+920,csharp,Member access expression (properties),tree_sitter_field,expression,1
+920,csharp,Member access expression (properties),tree_sitter_field,name,1
+920,csharp,Member access expression (properties),tree_sitter_field,parameters,1
+920,csharp,Member access expression (properties),tree_sitter_field,type,1
+921,csharp,is expression,tree_sitter_field,left,1
+921,csharp,is expression,tree_sitter_field,name,1
+921,csharp,is expression,tree_sitter_field,right,1
+921,csharp,is expression,tree_sitter_field,type,1
+922,csharp,is pattern,tree_sitter_field,alternative,1
+922,csharp,is pattern,tree_sitter_field,arguments,1
+922,csharp,is pattern,tree_sitter_field,condition,1
+922,csharp,is pattern,tree_sitter_field,consequence,1
+922,csharp,is pattern,tree_sitter_field,expression,1
+922,csharp,is pattern,tree_sitter_field,function,1
+922,csharp,is pattern,tree_sitter_field,name,1
+922,csharp,is pattern,tree_sitter_field,pattern,1
+922,csharp,is pattern,tree_sitter_field,qualifier,1
+922,csharp,is pattern,tree_sitter_field,type,1
+922,csharp,is pattern,tree_sitter_field,value,1
+923,csharp,Precedence between is operator and conditional_expression,tree_sitter_field,alternative,1
+923,csharp,Precedence between is operator and conditional_expression,tree_sitter_field,condition,1
+923,csharp,Precedence between is operator and conditional_expression,tree_sitter_field,consequence,1
+923,csharp,Precedence between is operator and conditional_expression,tree_sitter_field,expression,1
+923,csharp,Precedence between is operator and conditional_expression,tree_sitter_field,name,1
+923,csharp,Precedence between is operator and conditional_expression,tree_sitter_field,pattern,1
+923,csharp,Precedence between is operator and conditional_expression,tree_sitter_field,type,1
+924,csharp,Precedence between is operator and as operator,tree_sitter_field,arguments,1
+924,csharp,Precedence between is operator and as operator,tree_sitter_field,expression,1
+924,csharp,Precedence between is operator and as operator,tree_sitter_field,left,1
+924,csharp,Precedence between is operator and as operator,tree_sitter_field,name,1
+924,csharp,Precedence between is operator and as operator,tree_sitter_field,pattern,1
+924,csharp,Precedence between is operator and as operator,tree_sitter_field,right,1
+924,csharp,Precedence between is operator and as operator,tree_sitter_field,type,1
+925,csharp,Discard pattern,tree_sitter_field,arguments,1
+925,csharp,Discard pattern,tree_sitter_field,body,1
+925,csharp,Discard pattern,tree_sitter_field,expression,1
+925,csharp,Discard pattern,tree_sitter_field,function,1
+925,csharp,Discard pattern,tree_sitter_field,name,1
+925,csharp,Discard pattern,tree_sitter_field,parameters,1
+925,csharp,Discard pattern,tree_sitter_field,type,1
+926,csharp,Null-forgiving operator,tree_sitter_field,expression,1
+926,csharp,Null-forgiving operator,tree_sitter_field,name,1
+926,csharp,Null-forgiving operator,tree_sitter_field,type,1
+927,csharp,Negated pattern,tree_sitter_field,condition,1
+927,csharp,Negated pattern,tree_sitter_field,consequence,1
+927,csharp,Negated pattern,tree_sitter_field,expression,1
+927,csharp,Negated pattern,tree_sitter_field,name,1
+927,csharp,Negated pattern,tree_sitter_field,pattern,1
+927,csharp,Negated pattern,tree_sitter_field,qualifier,1
+927,csharp,Negated pattern,tree_sitter_field,type,1
+928,csharp,Parenthesized pattern,tree_sitter_field,expression,1
+928,csharp,Parenthesized pattern,tree_sitter_field,name,1
+928,csharp,Parenthesized pattern,tree_sitter_field,pattern,1
+928,csharp,Parenthesized pattern,tree_sitter_field,type,1
+929,csharp,Pattern Combinators and relational pattern,tree_sitter_field,expression,1
+929,csharp,Pattern Combinators and relational pattern,tree_sitter_field,left,1
+929,csharp,Pattern Combinators and relational pattern,tree_sitter_field,name,1
+929,csharp,Pattern Combinators and relational pattern,tree_sitter_field,pattern,1
+929,csharp,Pattern Combinators and relational pattern,tree_sitter_field,right,1
+929,csharp,Pattern Combinators and relational pattern,tree_sitter_field,type,1
+930,csharp,Precedence of prefix_unary_expression and invocation_expression,tree_sitter_field,arguments,1
+930,csharp,Precedence of prefix_unary_expression and invocation_expression,tree_sitter_field,function,1
+930,csharp,Precedence of prefix_unary_expression and invocation_expression,tree_sitter_field,name,1
+930,csharp,Precedence of prefix_unary_expression and invocation_expression,tree_sitter_field,type,1
+931,csharp,Property patterns,tree_sitter_field,expression,1
+931,csharp,Property patterns,tree_sitter_field,name,1
+931,csharp,Property patterns,tree_sitter_field,pattern,1
+931,csharp,Property patterns,tree_sitter_field,type,1
+932,csharp,Positional patterns,tree_sitter_field,arguments,1
+932,csharp,Positional patterns,tree_sitter_field,expression,1
+932,csharp,Positional patterns,tree_sitter_field,function,1
+932,csharp,Positional patterns,tree_sitter_field,left,1
+932,csharp,Positional patterns,tree_sitter_field,name,1
+932,csharp,Positional patterns,tree_sitter_field,pattern,1
+932,csharp,Positional patterns,tree_sitter_field,right,1
+932,csharp,Positional patterns,tree_sitter_field,type,1
+933,csharp,Recursive patterns with variable designation (issue #282),tree_sitter_field,expression,1
+933,csharp,Recursive patterns with variable designation (issue #282),tree_sitter_field,left,1
+933,csharp,Recursive patterns with variable designation (issue #282),tree_sitter_field,name,1
+933,csharp,Recursive patterns with variable designation (issue #282),tree_sitter_field,pattern,1
+933,csharp,Recursive patterns with variable designation (issue #282),tree_sitter_field,qualifier,1
+933,csharp,Recursive patterns with variable designation (issue #282),tree_sitter_field,right,1
+933,csharp,Recursive patterns with variable designation (issue #282),tree_sitter_field,type,1
+934,csharp,Type patterns,tree_sitter_field,expression,1
+934,csharp,Type patterns,tree_sitter_field,left,1
+934,csharp,Type patterns,tree_sitter_field,name,1
+934,csharp,Type patterns,tree_sitter_field,pattern,1
+934,csharp,Type patterns,tree_sitter_field,right,1
+934,csharp,Type patterns,tree_sitter_field,type,1
+935,csharp,List patterns,tree_sitter_field,condition,1
+935,csharp,List patterns,tree_sitter_field,consequence,1
+935,csharp,List patterns,tree_sitter_field,expression,1
+935,csharp,List patterns,tree_sitter_field,left,1
+935,csharp,List patterns,tree_sitter_field,name,1
+935,csharp,List patterns,tree_sitter_field,pattern,1
+935,csharp,List patterns,tree_sitter_field,right,1
+935,csharp,List patterns,tree_sitter_field,type,1
+936,csharp,List pattern with slice subpatterns (C# 11),tree_sitter_field,body,1
+936,csharp,List pattern with slice subpatterns (C# 11),tree_sitter_field,name,1
+936,csharp,List pattern with slice subpatterns (C# 11),tree_sitter_field,parameters,1
+936,csharp,List pattern with slice subpatterns (C# 11),tree_sitter_field,returns,1
+936,csharp,List pattern with slice subpatterns (C# 11),tree_sitter_field,type,1
+937,csharp,Conditional expression with member accesses,tree_sitter_field,alternative,1
+937,csharp,Conditional expression with member accesses,tree_sitter_field,condition,1
+937,csharp,Conditional expression with member accesses,tree_sitter_field,consequence,1
+937,csharp,Conditional expression with member accesses,tree_sitter_field,expression,1
+937,csharp,Conditional expression with member accesses,tree_sitter_field,left,1
+937,csharp,Conditional expression with member accesses,tree_sitter_field,name,1
+937,csharp,Conditional expression with member accesses,tree_sitter_field,right,1
+937,csharp,Conditional expression with member accesses,tree_sitter_field,type,1
+938,csharp,Conditional access expression,tree_sitter_field,condition,1
+938,csharp,Conditional access expression,tree_sitter_field,name,1
+938,csharp,Conditional access expression,tree_sitter_field,type,1
+939,csharp,Conditional access to element (should be implicit_element_access),tree_sitter_field,condition,1
+939,csharp,Conditional access to element (should be implicit_element_access),tree_sitter_field,name,1
+939,csharp,Conditional access to element (should be implicit_element_access),tree_sitter_field,type,1
+940,csharp,Conditional access expression with member binding,tree_sitter_field,condition,1
+940,csharp,Conditional access expression with member binding,tree_sitter_field,consequence,1
+940,csharp,Conditional access expression with member binding,tree_sitter_field,left,1
+940,csharp,Conditional access expression with member binding,tree_sitter_field,name,1
+940,csharp,Conditional access expression with member binding,tree_sitter_field,right,1
+941,csharp,Null-conditional assignment (C# 14),tree_sitter_field,body,1
+941,csharp,Null-conditional assignment (C# 14),tree_sitter_field,condition,1
+941,csharp,Null-conditional assignment (C# 14),tree_sitter_field,expression,1
+941,csharp,Null-conditional assignment (C# 14),tree_sitter_field,left,1
+941,csharp,Null-conditional assignment (C# 14),tree_sitter_field,name,1
+941,csharp,Null-conditional assignment (C# 14),tree_sitter_field,parameters,1
+941,csharp,Null-conditional assignment (C# 14),tree_sitter_field,returns,1
+941,csharp,Null-conditional assignment (C# 14),tree_sitter_field,right,1
+941,csharp,Null-conditional assignment (C# 14),tree_sitter_field,subscript,1
+941,csharp,Null-conditional assignment (C# 14),tree_sitter_field,type,1
+942,csharp,Conditional access expression with simple member access,tree_sitter_field,condition,1
+942,csharp,Conditional access expression with simple member access,tree_sitter_field,consequence,1
+942,csharp,Conditional access expression with simple member access,tree_sitter_field,expression,1
+942,csharp,Conditional access expression with simple member access,tree_sitter_field,left,1
+942,csharp,Conditional access expression with simple member access,tree_sitter_field,name,1
+942,csharp,Conditional access expression with simple member access,tree_sitter_field,rank,1
+942,csharp,Conditional access expression with simple member access,tree_sitter_field,right,1
+942,csharp,Conditional access expression with simple member access,tree_sitter_field,type,1
+943,csharp,Null-coalescing operator is right-associative,tree_sitter_field,left,1
+943,csharp,Null-coalescing operator is right-associative,tree_sitter_field,name,1
+943,csharp,Null-coalescing operator is right-associative,tree_sitter_field,right,1
+943,csharp,Null-coalescing operator is right-associative,tree_sitter_field,type,1
+944,csharp,Precedence between null-coalescing operator and conditional OR,tree_sitter_field,left,1
+944,csharp,Precedence between null-coalescing operator and conditional OR,tree_sitter_field,name,1
+944,csharp,Precedence between null-coalescing operator and conditional OR,tree_sitter_field,right,1
+944,csharp,Precedence between null-coalescing operator and conditional OR,tree_sitter_field,type,1
+945,csharp,Precedence between null-coalescing operator and conditional operator,tree_sitter_field,alternative,1
+945,csharp,Precedence between null-coalescing operator and conditional operator,tree_sitter_field,condition,1
+945,csharp,Precedence between null-coalescing operator and conditional operator,tree_sitter_field,consequence,1
+945,csharp,Precedence between null-coalescing operator and conditional operator,tree_sitter_field,left,1
+945,csharp,Precedence between null-coalescing operator and conditional operator,tree_sitter_field,name,1
+945,csharp,Precedence between null-coalescing operator and conditional operator,tree_sitter_field,right,1
+945,csharp,Precedence between null-coalescing operator and conditional operator,tree_sitter_field,type,1
+946,csharp,Precedence between range and switch,tree_sitter_field,name,1
+946,csharp,Precedence between range and switch,tree_sitter_field,type,1
+947,csharp,Precedence between unary and switch,tree_sitter_field,name,1
+947,csharp,Precedence between unary and switch,tree_sitter_field,type,1
+948,csharp,Precedence between range and as operator,tree_sitter_field,left,1
+948,csharp,Precedence between range and as operator,tree_sitter_field,name,1
+948,csharp,Precedence between range and as operator,tree_sitter_field,right,1
+948,csharp,Precedence between range and as operator,tree_sitter_field,type,1
+949,csharp,Precedence between is and comparison operators,tree_sitter_field,alternative,1
+949,csharp,Precedence between is and comparison operators,tree_sitter_field,arguments,1
+949,csharp,Precedence between is and comparison operators,tree_sitter_field,condition,1
+949,csharp,Precedence between is and comparison operators,tree_sitter_field,consequence,1
+949,csharp,Precedence between is and comparison operators,tree_sitter_field,expression,1
+949,csharp,Precedence between is and comparison operators,tree_sitter_field,name,1
+949,csharp,Precedence between is and comparison operators,tree_sitter_field,pattern,1
+949,csharp,Precedence between is and comparison operators,tree_sitter_field,type,1
+950,csharp,Nameof expressions,tree_sitter_field,arguments,1
+950,csharp,Nameof expressions,tree_sitter_field,expression,1
+950,csharp,Nameof expressions,tree_sitter_field,function,1
+950,csharp,Nameof expressions,tree_sitter_field,name,1
+950,csharp,Nameof expressions,tree_sitter_field,type,1
+951,csharp,Nameof with unbound generic types (C# 14),tree_sitter_field,arguments,1
+951,csharp,Nameof with unbound generic types (C# 14),tree_sitter_field,function,1
+951,csharp,Nameof with unbound generic types (C# 14),tree_sitter_field,name,1
+951,csharp,Nameof with unbound generic types (C# 14),tree_sitter_field,type,1
+952,csharp,Generic invocation expression,tree_sitter_field,arguments,1
+952,csharp,Generic invocation expression,tree_sitter_field,function,1
+953,csharp,Logical AND vs cast disambiguation with parenthesized LHS (#413),tree_sitter_field,body,1
+953,csharp,Logical AND vs cast disambiguation with parenthesized LHS (#413),tree_sitter_field,left,1
+953,csharp,Logical AND vs cast disambiguation with parenthesized LHS (#413),tree_sitter_field,name,1
+953,csharp,Logical AND vs cast disambiguation with parenthesized LHS (#413),tree_sitter_field,parameters,1
+953,csharp,Logical AND vs cast disambiguation with parenthesized LHS (#413),tree_sitter_field,returns,1
+953,csharp,Logical AND vs cast disambiguation with parenthesized LHS (#413),tree_sitter_field,right,1
+953,csharp,Logical AND vs cast disambiguation with parenthesized LHS (#413),tree_sitter_field,type,1
+953,csharp,Logical AND vs cast disambiguation with parenthesized LHS (#413),tree_sitter_field,value,1
+954,csharp,With expression typical basic form,tree_sitter_field,body,1
+954,csharp,With expression typical basic form,tree_sitter_field,name,1
+954,csharp,With expression typical basic form,tree_sitter_field,parameters,1
+954,csharp,With expression typical basic form,tree_sitter_field,type,1
+955,csharp,With expression using expressions,tree_sitter_field,arguments,1
+955,csharp,With expression using expressions,tree_sitter_field,body,1
+955,csharp,With expression using expressions,tree_sitter_field,function,1
+955,csharp,With expression using expressions,tree_sitter_field,name,1
+955,csharp,With expression using expressions,tree_sitter_field,parameters,1
+955,csharp,With expression using expressions,tree_sitter_field,type,1
+956,csharp,Precedence between with and cast,tree_sitter_field,name,1
+956,csharp,Precedence between with and cast,tree_sitter_field,type,1
+956,csharp,Precedence between with and cast,tree_sitter_field,value,1
+957,csharp,Precedence between with and switch,tree_sitter_field,name,1
+957,csharp,Precedence between with and switch,tree_sitter_field,type,1
+958,csharp,Precedence between with and equals,tree_sitter_field,left,1
+958,csharp,Precedence between with and equals,tree_sitter_field,name,1
+958,csharp,Precedence between with and equals,tree_sitter_field,right,1
+958,csharp,Precedence between with and equals,tree_sitter_field,type,1
+959,csharp,Associativity of with expression,tree_sitter_field,name,1
+959,csharp,Associativity of with expression,tree_sitter_field,type,1
+961,csharp,Empty collection expression,tree_sitter_field,name,1
+961,csharp,Empty collection expression,tree_sitter_field,type,1
+962,csharp,Collection expression with elements,tree_sitter_field,name,1
+962,csharp,Collection expression with elements,tree_sitter_field,type,1
+963,csharp,Collection expression with spreads,tree_sitter_field,name,1
+963,csharp,Collection expression with spreads,tree_sitter_field,type,1
+964,csharp,Mixed elements with trailing comma,tree_sitter_field,name,1
+964,csharp,Mixed elements with trailing comma,tree_sitter_field,type,1
+965,csharp,Nested collection expressions,tree_sitter_field,name,1
+965,csharp,Nested collection expressions,tree_sitter_field,type,1
+966,csharp,Collection expression in argument,tree_sitter_field,arguments,1
+966,csharp,Collection expression in argument,tree_sitter_field,function,1
+967,csharp,Empty collection expression in argument,tree_sitter_field,arguments,1
+967,csharp,Empty collection expression in argument,tree_sitter_field,function,1
+968,csharp,Collection expression in coalescing expression,tree_sitter_field,left,1
+968,csharp,Collection expression in coalescing expression,tree_sitter_field,name,1
+968,csharp,Collection expression in coalescing expression,tree_sitter_field,right,1
+968,csharp,Collection expression in coalescing expression,tree_sitter_field,type,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,arguments,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,body,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,expression,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,function,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,left,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,name,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,parameters,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,rank,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,returns,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,right,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,type,1
+970,csharp,Collection expression - cast with qualified member access,tree_sitter_field,value,1
+971,csharp,Simple lambda parameters with modifiers (C# 14),tree_sitter_field,arguments,1
+971,csharp,Simple lambda parameters with modifiers (C# 14),tree_sitter_field,body,1
+971,csharp,Simple lambda parameters with modifiers (C# 14),tree_sitter_field,expression,1
+971,csharp,Simple lambda parameters with modifiers (C# 14),tree_sitter_field,function,1
+971,csharp,Simple lambda parameters with modifiers (C# 14),tree_sitter_field,left,1
+971,csharp,Simple lambda parameters with modifiers (C# 14),tree_sitter_field,name,1
+971,csharp,Simple lambda parameters with modifiers (C# 14),tree_sitter_field,parameters,1
+971,csharp,Simple lambda parameters with modifiers (C# 14),tree_sitter_field,returns,1
+971,csharp,Simple lambda parameters with modifiers (C# 14),tree_sitter_field,right,1
+971,csharp,Simple lambda parameters with modifiers (C# 14),tree_sitter_field,type,1
+972,csharp,Modifier-prefixed parens that are NOT lambda parameter lists (C# 14),tree_sitter_field,body,1
+972,csharp,Modifier-prefixed parens that are NOT lambda parameter lists (C# 14),tree_sitter_field,name,1
+972,csharp,Modifier-prefixed parens that are NOT lambda parameter lists (C# 14),tree_sitter_field,parameters,1
+972,csharp,Modifier-prefixed parens that are NOT lambda parameter lists (C# 14),tree_sitter_field,returns,1
+972,csharp,Modifier-prefixed parens that are NOT lambda parameter lists (C# 14),tree_sitter_field,type,1
+972,csharp,Modifier-prefixed parens that are NOT lambda parameter lists (C# 14),tree_sitter_field,value,1
+973,csharp,Identifiers,tree_sitter_field,name,1
+973,csharp,Identifiers,tree_sitter_field,type,1
+974,csharp,Interfaces,tree_sitter_field,accessors,1
+974,csharp,Interfaces,tree_sitter_field,arguments,1
+974,csharp,Interfaces,tree_sitter_field,body,1
+974,csharp,Interfaces,tree_sitter_field,expression,1
+974,csharp,Interfaces,tree_sitter_field,function,1
+974,csharp,Interfaces,tree_sitter_field,name,1
+974,csharp,Interfaces,tree_sitter_field,parameters,1
+974,csharp,Interfaces,tree_sitter_field,returns,1
+974,csharp,Interfaces,tree_sitter_field,type,1
+974,csharp,Interfaces,tree_sitter_field,type_parameters,1
+975,csharp,Literals,tree_sitter_field,arguments,1
+975,csharp,Literals,tree_sitter_field,expression,1
+975,csharp,Literals,tree_sitter_field,function,1
+975,csharp,Literals,tree_sitter_field,left,1
+975,csharp,Literals,tree_sitter_field,name,1
+975,csharp,Literals,tree_sitter_field,right,1
+975,csharp,Literals,tree_sitter_field,type,1
+976,csharp,"If, elif and else directives",tree_sitter_field,alternative,1
+976,csharp,"If, elif and else directives",tree_sitter_field,condition,1
+976,csharp,"If, elif and else directives",tree_sitter_field,name,1
+976,csharp,"If, elif and else directives",tree_sitter_field,type,1
+977,csharp,If conditions,tree_sitter_field,argument,1
+977,csharp,If conditions,tree_sitter_field,condition,1
+977,csharp,If conditions,tree_sitter_field,left,1
+977,csharp,If conditions,tree_sitter_field,right,1
+979,csharp,Line directives,tree_sitter_field,body,1
+979,csharp,Line directives,tree_sitter_field,name,1
+979,csharp,Line directives,tree_sitter_field,parameters,1
+979,csharp,Line directives,tree_sitter_field,returns,1
+980,csharp,Directives not in strings or comments,tree_sitter_field,body,1
+980,csharp,Directives not in strings or comments,tree_sitter_field,name,1
+980,csharp,Directives not in strings or comments,tree_sitter_field,parameters,1
+980,csharp,Directives not in strings or comments,tree_sitter_field,returns,1
+980,csharp,Directives not in strings or comments,tree_sitter_field,type,1
+982,csharp,Query from select,tree_sitter_field,alternative,1
+982,csharp,Query from select,tree_sitter_field,arguments,1
+982,csharp,Query from select,tree_sitter_field,body,1
+982,csharp,Query from select,tree_sitter_field,condition,1
+982,csharp,Query from select,tree_sitter_field,consequence,1
+982,csharp,Query from select,tree_sitter_field,expression,1
+982,csharp,Query from select,tree_sitter_field,function,1
+982,csharp,Query from select,tree_sitter_field,left,1
+982,csharp,Query from select,tree_sitter_field,name,1
+982,csharp,Query from select,tree_sitter_field,parameters,1
+982,csharp,Query from select,tree_sitter_field,right,1
+982,csharp,Query from select,tree_sitter_field,type,1
+983,csharp,Basic record declaration,tree_sitter_field,accessors,1
+983,csharp,Basic record declaration,tree_sitter_field,body,1
+983,csharp,Basic record declaration,tree_sitter_field,name,1
+983,csharp,Basic record declaration,tree_sitter_field,qualifier,1
+983,csharp,Basic record declaration,tree_sitter_field,type,1
+985,csharp,File scoped namespaces,tree_sitter_field,body,1
+985,csharp,File scoped namespaces,tree_sitter_field,name,1
+986,csharp,Delegates,tree_sitter_field,body,1
+986,csharp,Delegates,tree_sitter_field,name,1
+986,csharp,Delegates,tree_sitter_field,parameters,1
+986,csharp,Delegates,tree_sitter_field,rank,1
+986,csharp,Delegates,tree_sitter_field,type,1
+986,csharp,Delegates,tree_sitter_field,type_parameters,1
+987,csharp,Common statements,tree_sitter_field,alternative,1
+987,csharp,Common statements,tree_sitter_field,arguments,1
+987,csharp,Common statements,tree_sitter_field,body,1
+987,csharp,Common statements,tree_sitter_field,condition,1
+987,csharp,Common statements,tree_sitter_field,consequence,1
+987,csharp,Common statements,tree_sitter_field,expression,1
+987,csharp,Common statements,tree_sitter_field,function,1
+987,csharp,Common statements,tree_sitter_field,left,1
+987,csharp,Common statements,tree_sitter_field,name,1
+987,csharp,Common statements,tree_sitter_field,parameters,1
+987,csharp,Common statements,tree_sitter_field,returns,1
+987,csharp,Common statements,tree_sitter_field,right,1
+987,csharp,Common statements,tree_sitter_field,type,1
+987,csharp,Common statements,tree_sitter_field,value,1
+989,csharp,Try catch finally statements,tree_sitter_field,body,1
+989,csharp,Try catch finally statements,tree_sitter_field,left,1
+989,csharp,Try catch finally statements,tree_sitter_field,name,1
+989,csharp,Try catch finally statements,tree_sitter_field,parameters,1
+989,csharp,Try catch finally statements,tree_sitter_field,returns,1
+989,csharp,Try catch finally statements,tree_sitter_field,right,1
+989,csharp,Try catch finally statements,tree_sitter_field,type,1
+990,csharp,"Checked, unchecked, locked, & yield statements",tree_sitter_field,body,1
+990,csharp,"Checked, unchecked, locked, & yield statements",tree_sitter_field,name,1
+990,csharp,"Checked, unchecked, locked, & yield statements",tree_sitter_field,parameters,1
+990,csharp,"Checked, unchecked, locked, & yield statements",tree_sitter_field,returns,1
+991,csharp,Initializers,tree_sitter_field,arguments,1
+991,csharp,Initializers,tree_sitter_field,body,1
+991,csharp,Initializers,tree_sitter_field,expression,1
+991,csharp,Initializers,tree_sitter_field,function,1
+991,csharp,Initializers,tree_sitter_field,left,1
+991,csharp,Initializers,tree_sitter_field,name,1
+991,csharp,Initializers,tree_sitter_field,parameters,1
+991,csharp,Initializers,tree_sitter_field,returns,1
+991,csharp,Initializers,tree_sitter_field,right,1
+991,csharp,Initializers,tree_sitter_field,subscript,1
+991,csharp,Initializers,tree_sitter_field,type,1
+992,csharp,Using statements,tree_sitter_field,arguments,1
+992,csharp,Using statements,tree_sitter_field,body,1
+992,csharp,Using statements,tree_sitter_field,expression,1
+992,csharp,Using statements,tree_sitter_field,function,1
+992,csharp,Using statements,tree_sitter_field,name,1
+992,csharp,Using statements,tree_sitter_field,parameters,1
+992,csharp,Using statements,tree_sitter_field,returns,1
+992,csharp,Using statements,tree_sitter_field,type,1
+993,csharp,Loops,tree_sitter_field,body,1
+993,csharp,Loops,tree_sitter_field,condition,1
+993,csharp,Loops,tree_sitter_field,initializer,1
+993,csharp,Loops,tree_sitter_field,left,1
+993,csharp,Loops,tree_sitter_field,name,1
+993,csharp,Loops,tree_sitter_field,parameters,1
+993,csharp,Loops,tree_sitter_field,returns,1
+993,csharp,Loops,tree_sitter_field,right,1
+993,csharp,Loops,tree_sitter_field,type,1
+993,csharp,Loops,tree_sitter_field,update,1
+994,csharp,Unsafe & fixed statements,tree_sitter_field,body,1
+994,csharp,Unsafe & fixed statements,tree_sitter_field,left,1
+994,csharp,Unsafe & fixed statements,tree_sitter_field,name,1
+994,csharp,Unsafe & fixed statements,tree_sitter_field,parameters,1
+994,csharp,Unsafe & fixed statements,tree_sitter_field,returns,1
+994,csharp,Unsafe & fixed statements,tree_sitter_field,right,1
+994,csharp,Unsafe & fixed statements,tree_sitter_field,type,1
+995,csharp,Deconstruction,tree_sitter_field,body,1
+995,csharp,Deconstruction,tree_sitter_field,left,1
+995,csharp,Deconstruction,tree_sitter_field,name,1
+995,csharp,Deconstruction,tree_sitter_field,parameters,1
+995,csharp,Deconstruction,tree_sitter_field,returns,1
+995,csharp,Deconstruction,tree_sitter_field,right,1
+995,csharp,Deconstruction,tree_sitter_field,type,1
+996,csharp,Function with contextually reserved identifiers,tree_sitter_field,body,1
+996,csharp,Function with contextually reserved identifiers,tree_sitter_field,left,1
+996,csharp,Function with contextually reserved identifiers,tree_sitter_field,name,1
+996,csharp,Function with contextually reserved identifiers,tree_sitter_field,parameters,1
+996,csharp,Function with contextually reserved identifiers,tree_sitter_field,right,1
+996,csharp,Function with contextually reserved identifiers,tree_sitter_field,type,1
+997,csharp,Function conditional ref expression,tree_sitter_field,alternative,1
+997,csharp,Function conditional ref expression,tree_sitter_field,body,1
+997,csharp,Function conditional ref expression,tree_sitter_field,condition,1
+997,csharp,Function conditional ref expression,tree_sitter_field,consequence,1
+997,csharp,Function conditional ref expression,tree_sitter_field,name,1
+997,csharp,Function conditional ref expression,tree_sitter_field,parameters,1
+997,csharp,Function conditional ref expression,tree_sitter_field,type,1
+998,csharp,Struct with a type parameter struct constraint,tree_sitter_field,body,1
+998,csharp,Struct with a type parameter struct constraint,tree_sitter_field,name,1
+998,csharp,Struct with a type parameter struct constraint,tree_sitter_field,type,1
+999,csharp,Class event declarations,tree_sitter_field,accessors,1
+999,csharp,Class event declarations,tree_sitter_field,arguments,1
+999,csharp,Class event declarations,tree_sitter_field,body,1
+999,csharp,Class event declarations,tree_sitter_field,function,1
+999,csharp,Class event declarations,tree_sitter_field,name,1
+999,csharp,Class event declarations,tree_sitter_field,type,1
+1000,csharp,Partial event declarations (C# 14),tree_sitter_field,accessors,1
+1000,csharp,Partial event declarations (C# 14),tree_sitter_field,body,1
+1000,csharp,Partial event declarations (C# 14),tree_sitter_field,name,1
+1000,csharp,Partial event declarations (C# 14),tree_sitter_field,type,1
+1001,csharp,Class field declarations,tree_sitter_field,body,1
+1001,csharp,Class field declarations,tree_sitter_field,name,1
+1001,csharp,Class field declarations,tree_sitter_field,rank,1
+1001,csharp,Class field declarations,tree_sitter_field,returns,1
+1001,csharp,Class field declarations,tree_sitter_field,type,1
+1001,csharp,Class field declarations,tree_sitter_field,value,1
+1002,csharp,Class method with single parameter,tree_sitter_field,body,1
+1002,csharp,Class method with single parameter,tree_sitter_field,left,1
+1002,csharp,Class method with single parameter,tree_sitter_field,name,1
+1002,csharp,Class method with single parameter,tree_sitter_field,parameters,1
+1002,csharp,Class method with single parameter,tree_sitter_field,qualifier,1
+1002,csharp,Class method with single parameter,tree_sitter_field,rank,1
+1002,csharp,Class method with single parameter,tree_sitter_field,returns,1
+1002,csharp,Class method with single parameter,tree_sitter_field,right,1
+1002,csharp,Class method with single parameter,tree_sitter_field,type,1
+1002,csharp,Class method with single parameter,tree_sitter_field,type_parameters,1
+1002,csharp,Class method with single parameter,tree_sitter_field,value,1
+1003,csharp,C# 13 params collections,tree_sitter_field,body,1
+1003,csharp,C# 13 params collections,tree_sitter_field,name,1
+1003,csharp,C# 13 params collections,tree_sitter_field,parameters,1
+1003,csharp,C# 13 params collections,tree_sitter_field,rank,1
+1003,csharp,C# 13 params collections,tree_sitter_field,returns,1
+1003,csharp,C# 13 params collections,tree_sitter_field,type,1
+1004,csharp,Operator declarations,tree_sitter_field,body,1
+1004,csharp,Operator declarations,tree_sitter_field,name,1
+1004,csharp,Operator declarations,tree_sitter_field,parameters,1
+1004,csharp,Operator declarations,tree_sitter_field,type,1
+1005,csharp,boolean operator declarations,tree_sitter_field,body,1
+1005,csharp,boolean operator declarations,tree_sitter_field,name,1
+1005,csharp,boolean operator declarations,tree_sitter_field,parameters,1
+1005,csharp,boolean operator declarations,tree_sitter_field,type,1
+1006,csharp,conversion operator declaration,tree_sitter_field,body,1
+1006,csharp,conversion operator declaration,tree_sitter_field,name,1
+1006,csharp,conversion operator declaration,tree_sitter_field,parameters,1
+1006,csharp,conversion operator declaration,tree_sitter_field,type,1
+1007,csharp,conversion operator with expression body,tree_sitter_field,body,1
+1007,csharp,conversion operator with expression body,tree_sitter_field,name,1
+1007,csharp,conversion operator with expression body,tree_sitter_field,parameters,1
+1007,csharp,conversion operator with expression body,tree_sitter_field,type,1
+1008,csharp,extern operators,tree_sitter_field,body,1
+1008,csharp,extern operators,tree_sitter_field,name,1
+1008,csharp,extern operators,tree_sitter_field,parameters,1
+1008,csharp,extern operators,tree_sitter_field,type,1
+1009,csharp,Class conversion operators with expression body,tree_sitter_field,body,1
+1009,csharp,Class conversion operators with expression body,tree_sitter_field,name,1
+1009,csharp,Class conversion operators with expression body,tree_sitter_field,parameters,1
+1009,csharp,Class conversion operators with expression body,tree_sitter_field,type,1
+1010,csharp,Unary operator overloads,tree_sitter_field,body,1
+1010,csharp,Unary operator overloads,tree_sitter_field,name,1
+1010,csharp,Unary operator overloads,tree_sitter_field,parameters,1
+1010,csharp,Unary operator overloads,tree_sitter_field,type,1
+1011,csharp,Binary unpaired operator overloads,tree_sitter_field,body,1
+1011,csharp,Binary unpaired operator overloads,tree_sitter_field,left,1
+1011,csharp,Binary unpaired operator overloads,tree_sitter_field,name,1
+1011,csharp,Binary unpaired operator overloads,tree_sitter_field,parameters,1
+1011,csharp,Binary unpaired operator overloads,tree_sitter_field,right,1
+1011,csharp,Binary unpaired operator overloads,tree_sitter_field,type,1
+1012,csharp,Binary paired operator overloads,tree_sitter_field,body,1
+1012,csharp,Binary paired operator overloads,tree_sitter_field,left,1
+1012,csharp,Binary paired operator overloads,tree_sitter_field,name,1
+1012,csharp,Binary paired operator overloads,tree_sitter_field,parameters,1
+1012,csharp,Binary paired operator overloads,tree_sitter_field,right,1
+1012,csharp,Binary paired operator overloads,tree_sitter_field,type,1
+1013,csharp,Explicit operator overloads,tree_sitter_field,body,1
+1013,csharp,Explicit operator overloads,tree_sitter_field,name,1
+1013,csharp,Explicit operator overloads,tree_sitter_field,parameters,1
+1013,csharp,Explicit operator overloads,tree_sitter_field,type,1
+1014,csharp,Checked operators,tree_sitter_field,body,1
+1014,csharp,Checked operators,tree_sitter_field,name,1
+1014,csharp,Checked operators,tree_sitter_field,parameters,1
+1014,csharp,Checked operators,tree_sitter_field,type,1
+1015,csharp,Explicit conversion operator overloads,tree_sitter_field,body,1
+1015,csharp,Explicit conversion operator overloads,tree_sitter_field,name,1
+1015,csharp,Explicit conversion operator overloads,tree_sitter_field,parameters,1
+1015,csharp,Explicit conversion operator overloads,tree_sitter_field,type,1
+1015,csharp,Explicit conversion operator overloads,tree_sitter_field,type_parameters,1
+1016,csharp,User-defined compound assignment operators (C# 14),tree_sitter_field,body,1
+1016,csharp,User-defined compound assignment operators (C# 14),tree_sitter_field,left,1
+1016,csharp,User-defined compound assignment operators (C# 14),tree_sitter_field,name,1
+1016,csharp,User-defined compound assignment operators (C# 14),tree_sitter_field,parameters,1
+1016,csharp,User-defined compound assignment operators (C# 14),tree_sitter_field,right,1
+1016,csharp,User-defined compound assignment operators (C# 14),tree_sitter_field,type,1
+1017,csharp,Instance increment and decrement operators (C# 14),tree_sitter_field,body,1
+1017,csharp,Instance increment and decrement operators (C# 14),tree_sitter_field,name,1
+1017,csharp,Instance increment and decrement operators (C# 14),tree_sitter_field,parameters,1
+1017,csharp,Instance increment and decrement operators (C# 14),tree_sitter_field,type,1
+1018,csharp,Class with bodyless properties,tree_sitter_field,accessors,1
+1018,csharp,Class with bodyless properties,tree_sitter_field,body,1
+1018,csharp,Class with bodyless properties,tree_sitter_field,left,1
+1018,csharp,Class with bodyless properties,tree_sitter_field,name,1
+1018,csharp,Class with bodyless properties,tree_sitter_field,right,1
+1018,csharp,Class with bodyless properties,tree_sitter_field,type,1
+1018,csharp,Class with bodyless properties,tree_sitter_field,value,1
+1019,csharp,Field-backed properties with `field` contextual keyword (C# 14),tree_sitter_field,accessors,1
+1019,csharp,Field-backed properties with `field` contextual keyword (C# 14),tree_sitter_field,arguments,1
+1019,csharp,Field-backed properties with `field` contextual keyword (C# 14),tree_sitter_field,body,1
+1019,csharp,Field-backed properties with `field` contextual keyword (C# 14),tree_sitter_field,function,1
+1019,csharp,Field-backed properties with `field` contextual keyword (C# 14),tree_sitter_field,left,1
+1019,csharp,Field-backed properties with `field` contextual keyword (C# 14),tree_sitter_field,name,1
+1019,csharp,Field-backed properties with `field` contextual keyword (C# 14),tree_sitter_field,right,1
+1019,csharp,Field-backed properties with `field` contextual keyword (C# 14),tree_sitter_field,type,1
+1019,csharp,Field-backed properties with `field` contextual keyword (C# 14),tree_sitter_field,value,1
+1022,java,local variable,tree_sitter_field,body,1
+1022,java,local variable,tree_sitter_field,declarator,1
+1022,java,local variable,tree_sitter_field,name,1
+1022,java,local variable,tree_sitter_field,parameters,1
+1022,java,local variable,tree_sitter_field,type,1
+1022,java,local variable,tree_sitter_field,value,1
+1023,java,local array variable,tree_sitter_field,arguments,1
+1023,java,local array variable,tree_sitter_field,declarator,1
+1023,java,local array variable,tree_sitter_field,dimensions,1
+1023,java,local array variable,tree_sitter_field,element,1
+1023,java,local array variable,tree_sitter_field,name,1
+1023,java,local array variable,tree_sitter_field,object,1
+1023,java,local array variable,tree_sitter_field,type,1
+1023,java,local array variable,tree_sitter_field,value,1
+1024,java,module,tree_sitter_field,body,1
+1024,java,module,tree_sitter_field,name,1
+1024,java,module,tree_sitter_field,scope,1
+1029,java,module directive,tree_sitter_field,body,1
+1029,java,module directive,tree_sitter_field,module,1
+1029,java,module directive,tree_sitter_field,name,1
+1029,java,module directive,tree_sitter_field,scope,1
+1043,java,constructor declaration,tree_sitter_field,arguments,1
+1043,java,constructor declaration,tree_sitter_field,body,1
+1043,java,constructor declaration,tree_sitter_field,constructor,1
+1043,java,constructor declaration,tree_sitter_field,declarator,1
+1043,java,constructor declaration,tree_sitter_field,field,1
+1043,java,constructor declaration,tree_sitter_field,left,1
+1043,java,constructor declaration,tree_sitter_field,name,1
+1043,java,constructor declaration,tree_sitter_field,object,1
+1043,java,constructor declaration,tree_sitter_field,parameters,1
+1043,java,constructor declaration,tree_sitter_field,right,1
+1043,java,constructor declaration,tree_sitter_field,type,1
+1049,java,enum declaration,tree_sitter_field,body,1
+1049,java,enum declaration,tree_sitter_field,name,1
+1050,java,enum declaration inside an interface,tree_sitter_field,body,1
+1050,java,enum declaration inside an interface,tree_sitter_field,name,1
+1051,java,record declaration,tree_sitter_field,body,1
+1051,java,record declaration,tree_sitter_field,name,1
+1051,java,record declaration,tree_sitter_field,parameters,1
+1051,java,record declaration,tree_sitter_field,type,1
+1052,java,record declaration with generics,tree_sitter_field,body,1
+1052,java,record declaration with generics,tree_sitter_field,name,1
+1052,java,record declaration with generics,tree_sitter_field,parameters,1
+1052,java,record declaration with generics,tree_sitter_field,type,1
+1052,java,record declaration with generics,tree_sitter_field,type_parameters,1
+1053,java,record declaration inside a class,tree_sitter_field,arguments,1
+1053,java,record declaration inside a class,tree_sitter_field,body,1
+1053,java,record declaration inside a class,tree_sitter_field,name,1
+1053,java,record declaration inside a class,tree_sitter_field,parameters,1
+1053,java,record declaration inside a class,tree_sitter_field,type,1
+1066,java,if statements,tree_sitter_field,condition,1
+1066,java,if statements,tree_sitter_field,consequence,1
+1067,java,if statements with nested parenthesized expression,tree_sitter_field,condition,1
+1067,java,if statements with nested parenthesized expression,tree_sitter_field,consequence,1
+1068,java,if statements with braces,tree_sitter_field,condition,1
+1068,java,if statements with braces,tree_sitter_field,consequence,1
+1069,java,if statements with assignment without braces,tree_sitter_field,condition,1
+1069,java,if statements with assignment without braces,tree_sitter_field,consequence,1
+1069,java,if statements with assignment without braces,tree_sitter_field,left,1
+1069,java,if statements with assignment without braces,tree_sitter_field,right,1
+1070,java,if then else statement,tree_sitter_field,alternative,1
+1070,java,if then else statement,tree_sitter_field,condition,1
+1070,java,if then else statement,tree_sitter_field,consequence,1
+1070,java,if then else statement,tree_sitter_field,left,1
+1070,java,if then else statement,tree_sitter_field,right,1
+1072,java,ternary expressions,tree_sitter_field,alternative,1
+1072,java,ternary expressions,tree_sitter_field,condition,1
+1072,java,ternary expressions,tree_sitter_field,consequence,1
+1072,java,ternary expressions,tree_sitter_field,left,1
+1072,java,ternary expressions,tree_sitter_field,right,1
+1073,java,for statement,tree_sitter_field,arguments,1
+1073,java,for statement,tree_sitter_field,body,1
+1073,java,for statement,tree_sitter_field,condition,1
+1073,java,for statement,tree_sitter_field,declarator,1
+1073,java,for statement,tree_sitter_field,field,1
+1073,java,for statement,tree_sitter_field,init,1
+1073,java,for statement,tree_sitter_field,left,1
+1073,java,for statement,tree_sitter_field,name,1
+1073,java,for statement,tree_sitter_field,object,1
+1073,java,for statement,tree_sitter_field,right,1
+1073,java,for statement,tree_sitter_field,type,1
+1073,java,for statement,tree_sitter_field,update,1
+1073,java,for statement,tree_sitter_field,value,1
+1075,java,while statement,tree_sitter_field,arguments,1
+1075,java,while statement,tree_sitter_field,body,1
+1075,java,while statement,tree_sitter_field,condition,1
+1075,java,while statement,tree_sitter_field,declarator,1
+1075,java,while statement,tree_sitter_field,dimensions,1
+1075,java,while statement,tree_sitter_field,element,1
+1075,java,while statement,tree_sitter_field,field,1
+1075,java,while statement,tree_sitter_field,left,1
+1075,java,while statement,tree_sitter_field,name,1
+1075,java,while statement,tree_sitter_field,object,1
+1075,java,while statement,tree_sitter_field,parameters,1
+1075,java,while statement,tree_sitter_field,right,1
+1075,java,while statement,tree_sitter_field,type,1
+1075,java,while statement,tree_sitter_field,value,1
+1076,java,try-with-resources statements,tree_sitter_field,arguments,1
+1076,java,try-with-resources statements,tree_sitter_field,body,1
+1076,java,try-with-resources statements,tree_sitter_field,declarator,1
+1076,java,try-with-resources statements,tree_sitter_field,name,1
+1076,java,try-with-resources statements,tree_sitter_field,object,1
+1076,java,try-with-resources statements,tree_sitter_field,resources,1
+1076,java,try-with-resources statements,tree_sitter_field,type,1
+1076,java,try-with-resources statements,tree_sitter_field,value,1
+1083,java,traditional switch statement,tree_sitter_field,arguments,1
+1083,java,traditional switch statement,tree_sitter_field,body,1
+1083,java,traditional switch statement,tree_sitter_field,condition,1
+1083,java,traditional switch statement,tree_sitter_field,declarator,1
+1083,java,traditional switch statement,tree_sitter_field,dimensions,1
+1083,java,traditional switch statement,tree_sitter_field,element,1
+1083,java,traditional switch statement,tree_sitter_field,field,1
+1083,java,traditional switch statement,tree_sitter_field,left,1
+1083,java,traditional switch statement,tree_sitter_field,name,1
+1083,java,traditional switch statement,tree_sitter_field,object,1
+1083,java,traditional switch statement,tree_sitter_field,parameters,1
+1083,java,traditional switch statement,tree_sitter_field,right,1
+1083,java,traditional switch statement,tree_sitter_field,type,1
+1083,java,traditional switch statement,tree_sitter_field,value,1
+1084,java,functional switch statement,tree_sitter_field,arguments,1
+1084,java,functional switch statement,tree_sitter_field,body,1
+1084,java,functional switch statement,tree_sitter_field,condition,1
+1084,java,functional switch statement,tree_sitter_field,declarator,1
+1084,java,functional switch statement,tree_sitter_field,field,1
+1084,java,functional switch statement,tree_sitter_field,name,1
+1084,java,functional switch statement,tree_sitter_field,object,1
+1084,java,functional switch statement,tree_sitter_field,parameters,1
+1084,java,functional switch statement,tree_sitter_field,type,1
+1085,java,traditional-style switch expression,tree_sitter_field,arguments,1
+1085,java,traditional-style switch expression,tree_sitter_field,body,1
+1085,java,traditional-style switch expression,tree_sitter_field,condition,1
+1085,java,traditional-style switch expression,tree_sitter_field,declarator,1
+1085,java,traditional-style switch expression,tree_sitter_field,field,1
+1085,java,traditional-style switch expression,tree_sitter_field,left,1
+1085,java,traditional-style switch expression,tree_sitter_field,name,1
+1085,java,traditional-style switch expression,tree_sitter_field,object,1
+1085,java,traditional-style switch expression,tree_sitter_field,parameters,1
+1085,java,traditional-style switch expression,tree_sitter_field,right,1
+1085,java,traditional-style switch expression,tree_sitter_field,type,1
+1085,java,traditional-style switch expression,tree_sitter_field,value,1
+1086,java,functional switch expression,tree_sitter_field,body,1
+1086,java,functional switch expression,tree_sitter_field,condition,1
+1086,java,functional switch expression,tree_sitter_field,declarator,1
+1086,java,functional switch expression,tree_sitter_field,name,1
+1086,java,functional switch expression,tree_sitter_field,parameters,1
+1086,java,functional switch expression,tree_sitter_field,type,1
+1086,java,functional switch expression,tree_sitter_field,value,1
+1087,java,switch expression with block,tree_sitter_field,body,1
+1087,java,switch expression with block,tree_sitter_field,condition,1
+1087,java,switch expression with block,tree_sitter_field,declarator,1
+1087,java,switch expression with block,tree_sitter_field,name,1
+1087,java,switch expression with block,tree_sitter_field,parameters,1
+1087,java,switch expression with block,tree_sitter_field,type,1
+1087,java,switch expression with block,tree_sitter_field,value,1
+1088,java,switch expressions added,tree_sitter_field,body,1
+1088,java,switch expressions added,tree_sitter_field,condition,1
+1088,java,switch expressions added,tree_sitter_field,declarator,1
+1088,java,switch expressions added,tree_sitter_field,left,1
+1088,java,switch expressions added,tree_sitter_field,name,1
+1088,java,switch expressions added,tree_sitter_field,parameters,1
+1088,java,switch expressions added,tree_sitter_field,right,1
+1088,java,switch expressions added,tree_sitter_field,type,1
+1088,java,switch expressions added,tree_sitter_field,value,1
+1143,kotlin,Annotation with args before parenthesized expression in if block,tree_sitter_field,condition,1
+1143,kotlin,Annotation with args before parenthesized expression in if block,tree_sitter_field,consequence,1
+1197,kotlin,Line comment before else,tree_sitter_field,alternative,1
+1197,kotlin,Line comment before else,tree_sitter_field,condition,1
+1197,kotlin,Line comment before else,tree_sitter_field,consequence,1
+1198,kotlin,Block comment before else,tree_sitter_field,alternative,1
+1198,kotlin,Block comment before else,tree_sitter_field,condition,1
+1198,kotlin,Block comment before else,tree_sitter_field,consequence,1
+1272,kotlin,If else-if else expression,tree_sitter_field,alternative,1
+1272,kotlin,If else-if else expression,tree_sitter_field,condition,1
+1272,kotlin,If else-if else expression,tree_sitter_field,consequence,1
+1343,kotlin,Else after newline,tree_sitter_field,alternative,1
+1343,kotlin,Else after newline,tree_sitter_field,condition,1
+1343,kotlin,Else after newline,tree_sitter_field,consequence,1
+1344,kotlin,Else on the same line,tree_sitter_field,alternative,1
+1344,kotlin,Else on the same line,tree_sitter_field,condition,1
+1344,kotlin,Else on the same line,tree_sitter_field,consequence,1
+1396,kotlin,annotations,tree_sitter_field,receiver,1
+1418,kotlin,DynamicReceiver,tree_sitter_field,receiver,1
+1434,kotlin,ExtensionsWithQNReceiver,tree_sitter_field,receiver,1
+1438,kotlin,IfWithPropery,tree_sitter_field,alternative,1
+1438,kotlin,IfWithPropery,tree_sitter_field,condition,1
+1438,kotlin,IfWithPropery,tree_sitter_field,consequence,1
+1452,kotlin,modifiers,tree_sitter_field,condition,1
+1452,kotlin,modifiers,tree_sitter_field,consequence,1
+1452,kotlin,modifiers,tree_sitter_field,receiver,1
+1467,kotlin,propertyWithConstraints,tree_sitter_field,receiver,1
+1474,kotlin,SemicolonAfterIf,tree_sitter_field,condition,1
+1474,kotlin,SemicolonAfterIf,tree_sitter_field,consequence,1
+1479,kotlin,topLevelMembers,tree_sitter_field,receiver,1
+1484,kotlin,TypeModifiers,tree_sitter_field,receiver,1
+1485,kotlin,typeModifiers2,tree_sitter_field,receiver,1
+1486,kotlin,typeParams,tree_sitter_field,receiver,1
+1487,kotlin,types,tree_sitter_field,receiver,1
+1494,kotlin,varargArgumentWithFunctionalType,tree_sitter_field,receiver,1
+1683,swift,List with trailing comma,tree_sitter_field,element,1

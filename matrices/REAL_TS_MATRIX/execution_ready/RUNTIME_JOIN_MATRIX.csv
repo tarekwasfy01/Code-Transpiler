@@ -1,0 +1,10 @@
+﻿step,operation,left_matrix,left_key,right_matrix,right_key,result
+1,LEX_MODE,lex_modes.csv,language+parse_state,,,lex_state+external_lex_state
+2,LEX_DISPATCH,lex_dispatch.csv,language+lexer_function+lex_state,lex_predicate_bytecode.csv,predicate_id,ordered matching transition
+3,LEX_SET_MEMBERSHIP,lex_predicate_bytecode.csv,SET_CONTAINS.arg1,lex_character_sets.csv,language+set_name,boolean membership
+4,LEX_ACCEPT,lex_accepts.csv,language+lexer_function+lex_state,symbols.csv,language+symbol_id,lookahead symbol
+5,PARSE_ACTION_LOOKUP,parse_dispatch.csv,language+parse_state+terminal_symbol_id,parse_action_lists.csv,language+action_list_id,SHIFT/REDUCE/ACCEPT/RECOVER action list
+6,REDUCE,parse_action_lists.csv,language+action_list_id,field_map.csv,language+production_id,lhs node + child_count + fields
+7,REDUCE_ALIAS,parse_action_lists.csv,language+production_id,alias_sequences.csv,language+production_id,child aliases
+8,GOTO,parse_dispatch.csv,language+state_after_pop+lhs_symbol_id,,,dispatch_kind=STATE -> next_state
+9,EXTERNAL_LEX,lex_modes.csv,language+parse_state,external_scanner_kernels.csv,language+external_lex_state,external token path when required

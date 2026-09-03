@@ -1,0 +1,14 @@
+﻿language,repository,commit_sha,grammar_atoms,grammar_rules,node_types,grammar_fields,node_field_edges,node_child_edges,subtype_edges,queries,external_scanners,corpus_cases,special_entries,has_scanner,has_corpus,has_subtypes
+r,r-lib/tree-sitter-r,58a22794466c0fc15b0d3b40531db751593721e8,730,66,95,162,668,32,0,3,1,89,42,1,1,0
+go,tree-sitter/tree-sitter-go,2346a3ab1bb3857b48b29d779a1ef9799a248cd7,1669,116,188,130,165,67,62,2,0,67,89,0,1,1
+rust,tree-sitter/tree-sitter-rust,77a3747266f4d621d0757825e6b11edcbf991ca5,2315,182,280,192,321,226,109,3,1,151,62,1,1,1
+cpp,tree-sitter/tree-sitter-cpp,8b5b49eb196bec7040441bee33b2c9a4838d6967,4350,326,430,466,464,617,110,3,1,198,118,1,1,1
+c,tree-sitter/tree-sitter-c,b780e47fc780ddc8da13afa35a3f4ed5c157823d,2308,182,275,291,228,251,72,2,0,85,54,0,1,1
+python,tree-sitter/tree-sitter-python,26855eabccb19c6abf499fbc5b8dc7cc9ab8bc64,1485,150,218,141,180,172,78,2,1,116,133,1,1,1
+zig,tree-sitter-grammars/tree-sitter-zig,6479aa13f32f701c383083d8b28360ebd682fb7d,1554,108,242,118,105,176,69,5,0,0,26,0,0,1
+julia,tree-sitter/tree-sitter-julia,e0f9dcd180fdcfcfa8d79a3531e11d99e79321d3,1877,127,148,11,33,395,61,3,1,63,57,1,1,1
+nim,alaviss/tree-sitter-nim,ac72ba30d16edf0be021588a9301ede4accd6cf4,3422,219,221,178,1346,1145,0,1,1,72,188,1,1,0
+csharp,tree-sitter/tree-sitter-c-sharp,9150f7d56bb47f1a809fa23623f1ba1413e93fa9,2986,290,416,261,381,352,137,2,1,179,178,1,1,1
+java,tree-sitter/tree-sitter-java,e10607b45ff745f5f876bfa3e94fbcc6b44bdc11,1873,168,265,203,206,204,78,2,0,108,53,0,1,1
+kotlin,fwcd/tree-sitter-kotlin,1852ea17b7f60fb3f9d84e0b1555d56b46b39fb1,1752,203,268,7,45,2054,0,2,1,368,148,1,1,0
+swift,alex-pinkus/tree-sitter-swift,73c7923ac17ba6b9ebc0a2688bbddd0b75b725d6,2730,306,364,158,5848,1333,0,8,1,248,157,1,1,0

@@ -1,0 +1,21 @@
+{
+  "languages": 13,
+  "grammar_rules": 2443,
+  "grammar_atoms": 29051,
+  "node_types": 3410,
+  "grammar_fields": 2318,
+  "node_field_edges": 9990,
+  "node_child_edges": 7024,
+  "subtype_edges": 776,
+  "query_files": 38,
+  "external_scanners": 9,
+  "corpus_cases": 1744,
+  "grammar_operator_types": 16,
+  "operators_present_all_13": 14,
+  "rule_operation_classes": 1235,
+  "cross_language_rule_operation_classes": 234,
+  "rule_shape_classes": 1356,
+  "cross_language_rule_shape_classes": 197,
+  "rule_surface_classes": 1894,
+  "cross_language_rule_surface_classes": 201
+}

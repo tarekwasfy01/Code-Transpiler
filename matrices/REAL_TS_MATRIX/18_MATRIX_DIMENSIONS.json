@@ -1,0 +1,15 @@
+{
+  "languages": 13,
+  "upi_cells": 832,
+  "parser_files_available": 12,
+  "symbols": 4050,
+  "lex_modes": 40402,
+  "lex_transitions": 12920,
+  "lex_accepts": 3164,
+  "parse_entries": 3482938,
+  "parse_actions": 52629,
+  "construct_parse_state_edges": 527276,
+  "resolved_construct_kernels": 368,
+  "exact_true_parser_kernel_classes": 351,
+  "external_scanner_kernels": 8
+}
