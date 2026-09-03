@@ -1,1 +1,1 @@
-#include "../../matrices/REAL_TS_MATRIX/raw_parser_c/csharp/scanner.c"
+#include "scanner_csharp_impl.inc"

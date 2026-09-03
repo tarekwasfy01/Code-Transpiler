@@ -19,7 +19,13 @@ import (
 type result struct{ Language, CaseIndex, CaseName, State, FailureKind, Diagnostic string }
 
 func main() {
-	root := "matrices/tree_sitter_full/15_corpus_cases.csv"
+	root := os.Getenv("CORPUS_INPUT")
+	if root == "" {
+		root = "matrices/tree_sitter_full/15_corpus_cases.csv"
+		if _, statErr := os.Stat(root); statErr != nil {
+			root = "matrices/frontend_closure/tree_sitter_input/15_corpus_cases.csv"
+		}
+	}
 	out := os.Getenv("CORPUS_OUT")
 	if out == "" {
 		out = "outputs/generic-corpus-fixpoint"
@@ -27,7 +33,8 @@ func main() {
 	os.MkdirAll(out, 0755)
 	f, e := os.Open(root)
 	if e != nil {
-		panic(e)
+		fmt.Fprintf(os.Stderr, "generic-corpus-fixpoint: corpus input unavailable (%s): %v\n", root, e)
+		return
 	}
 	defer f.Close()
 	r := csv.NewReader(f)

@@ -1,1 +1,1 @@
-#include "../../matrices/REAL_TS_MATRIX/raw_parser_c/nim/scanner.c"
+#include "scanner_nim_impl.inc"
