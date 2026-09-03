@@ -345,8 +345,31 @@ func (l *goScalarLowerer) scalar(t types.Type) bool {
 	return ok && (b.Info()&(types.IsBoolean|types.IsString|types.IsFloat) != 0)
 }
 func (l *goScalarLowerer) supportedValue(t types.Type) bool {
-	if l.scalar(t) { return true }
-	switch x := t.(type) { case *types.Slice: return l.scalar(x.Elem()); case *types.Array: return l.scalar(x.Elem()); case *types.Signature: return true }
+	if t == nil {
+		return false
+	}
+	if l.scalar(t) {
+		return true
+	}
+	// Type aliases and named container declarations carry the same structural
+	// value contract as their underlying type.  Unwrap them before checking the
+	// element shape so a declaration such as `type Values []float64` does not
+	// reintroduce the old scalar-only guard.
+	if u := types.Unalias(t); u != t {
+		return l.supportedValue(u)
+	}
+	switch x := t.(type) {
+	case *types.Named:
+		return l.supportedValue(x.Underlying())
+	case *types.Slice:
+		return l.supportedValue(x.Elem())
+	case *types.Array:
+		return l.supportedValue(x.Elem())
+	case *types.Signature:
+		return true
+	case *types.Pointer:
+		return l.supportedValue(x.Elem())
+	}
 	return false
 }
 func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
@@ -385,6 +408,14 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 		case constant.Float:
 			e.LiteralKind = "number"
 			e.Text = tv.Value.ExactString()
+		case constant.Int:
+			// Integer constants are ordinary literal expressions.  Treating
+			// them as an unknown constant kind made even fmt.Println(1) fail
+			// before the shared call/argument contract was reached.
+			e.LiteralKind = "number"
+			e.Text = tv.Value.ExactString()
+		case constant.Complex:
+			l.fail(n, "complex constant lowering")
 		default:
 			l.fail(n, "constant kind")
 		}
@@ -490,7 +521,7 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 		ident := spec.Names[0]
 		object := l.info.Defs[ident]
 		if object == nil || !l.supportedValue(object.Type()) {
-			l.fail(n, "non-scalar declared type")
+			l.fail(n, "unsupported declared type")
 			break
 		}
 		s.Kind = "assign"
