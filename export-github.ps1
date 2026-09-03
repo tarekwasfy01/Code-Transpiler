@@ -29,7 +29,7 @@ if ($architecture) { Copy-Item -LiteralPath $architecture.FullName -Destination 
 # These directories are part of the productive, self-contained frontend/UAST
 # distribution.  In particular `matrices` is required at runtime by the CLI;
 # omitting it made the published package fall back to an incomplete frontend.
-foreach ($dir in @('.github', 'cmd', 'internal', 'assets', 'matrices', 'cpp_runtime', 'licenses', 'scripts', 'tools', 'docs', 'tests')) {
+foreach ($dir in @('.github', 'cmd', 'internal', 'assets', 'matrices', 'cpp_runtime', 'licenses', 'scripts', 'tools', 'docs', 'tests', 'oracle')) {
     Copy-Item -LiteralPath $dir -Destination (Join-Path $exportRoot $dir) -Recurse
 }
 # Never ship local build caches, downloaded JS dependencies, or helper binaries
