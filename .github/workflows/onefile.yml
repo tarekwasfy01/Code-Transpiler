@@ -22,11 +22,12 @@ jobs:
           install: mingw-w64-x86_64-gcc
 
       - name: Build standalone executable
-        shell: pwsh
+        shell: msys2 {0}
         env:
           BUILD_VERSION: ${{ github.ref_name }}
-          CC: C:\msys64\mingw64\bin\gcc.exe
-        run: .\build-onefile.ps1
+        run: |
+          export CC="$(command -v gcc)"
+          pwsh.exe -NoProfile -File ./build-onefile.ps1
 
       - name: Upload Windows executable
         uses: actions/upload-artifact@v4
