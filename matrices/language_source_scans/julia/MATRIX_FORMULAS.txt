@@ -1,0 +1,27 @@
+LANGUAGE SEMANTIC MATRIX — MATRIX MODEL
+
+Source: Julia
+
+Matrices
+--------
+X = File × Feature count matrix                 [1696 × 98]
+P = File × Feature presence matrix              [1696 × 98]
+C = Component × Feature matrix                  [12 × 98]
+S = Feature × SemanticAxis projection matrix    [98 × 9]
+Q = Feature × SemanticProgram projection matrix [98 × 25]
+
+Matrix calculations
+-------------------
+ComponentSemantic = C × S
+LanguageFeatureVector = 1ᵀ × X
+LanguageSemanticVector = LanguageFeatureVector × S
+SemanticProgramRequirementVector = LanguageFeatureVector × Q
+FeatureCooccurrence = Pᵀ × P
+
+Interpretation
+--------------
+- Compiler/language source is treated as evidence about the language model.
+- Grammar and AST definitions receive their own extracted node/rule matrices.
+- Counts are evidence strength, NOT a formal proof that a feature exists or has exactly the inferred semantics.
+- The returned ZIP should be reviewed against the official language specification and then projected into SemanticProgram/Codex matrices.
+- Do not implement isolated files. Work from semantic axes / matrix clusters.

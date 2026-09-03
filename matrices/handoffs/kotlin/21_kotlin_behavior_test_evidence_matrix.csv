@@ -1,0 +1,73 @@
+﻿feature,behavior_test_files,weighted_behavior_evidence,semantic_oracle
+kotlin.annotation_use_site,2596,1090.320,generated behavior/metadata + initialization order
+kotlin.klib_metadata,2263,950.460,expect/actual and platform compilation result
+kotlin.callable_reference,1264,530.880,selected overload/call target and argument mapping
+kotlin.native_c_objc_interop,1092,458.640,expect/actual and platform compilation result
+kotlin.smart_cast,1069,448.980,compile/diagnostic outcome + branch smart-cast behavior
+kotlin.fir_data_flow,1069,448.980,FIR/IR textual dump or backend box result
+kotlin.ir_semantics,995,417.900,FIR/IR textual dump or backend box result
+kotlin.coroutine_suspension_points,965,405.300,suspend/resume result and state-machine behavior
+kotlin.exception_throw_catch_finally,872,366.240,throw/catch/finally result and cleanup order
+kotlin.reflection_kclass,846,355.320,selected overload/call target and argument mapping
+kotlin.suspend_resume,724,304.080,suspend/resume result and state-machine behavior
+kotlin.nullable_type,718,301.560,compile/diagnostic outcome + branch smart-cast behavior
+kotlin.type_alias,651,273.420,compile success/failure + inferred-type fixture
+kotlin.range_progression_iteration,602,252.840,iteration result/order
+kotlin.null_safety_flow,572,240.240,compile/diagnostic outcome + branch smart-cast behavior
+kotlin.contracts_dsl,570,239.400,diagnostic/data-flow/const result
+kotlin.unsigned_integer_types,528,221.760,compile success/failure + inferred-type fixture
+kotlin.vararg_spread,493,207.060,selected overload/call target and argument mapping
+kotlin.wasm_backend_lowering,454,190.680,FIR/IR textual dump or backend box result
+kotlin.backing_field_accessor,425,178.500,generated behavior/metadata + initialization order
+kotlin.destructuring_component,409,171.780,selected overload/call target and argument mapping
+kotlin.delegated_property,404,169.680,generated behavior/metadata + initialization order
+kotlin.reified_type_parameter,347,145.740,compile success/failure + inferred-type fixture
+kotlin.default_arguments,291,122.220,selected overload/call target and argument mapping
+kotlin.data_class,276,115.920,generated behavior/metadata + initialization order
+kotlin.sealed_class_interface,268,112.560,generated behavior/metadata + initialization order
+kotlin.native_backend_lowering,196,82.320,FIR/IR textual dump or backend box result
+kotlin.enum_entry_semantics,191,80.220,generated behavior/metadata + initialization order
+kotlin.safe_call,188,78.960,compile/diagnostic outcome + branch smart-cast behavior
+kotlin.companion_object,188,78.960,generated behavior/metadata + initialization order
+kotlin.expect_actual,188,78.960,expect/actual and platform compilation result
+kotlin.value_class,175,73.500,generated behavior/metadata + initialization order
+kotlin.crossinline_noinline,170,71.400,inline/non-local-return/capture behavior
+kotlin.jvm_boxing_unboxing,166,69.720,boxing/signature/interop ABI fixture
+kotlin.intersection_type,165,69.300,compile success/failure + inferred-type fixture
+kotlin.inline_function,162,68.040,inline/non-local-return/capture behavior
+kotlin.elvis_operator,161,67.620,compile/diagnostic outcome + branch smart-cast behavior
+kotlin.nonlocal_return,149,62.580,inline/non-local-return/capture behavior
+kotlin.variance_in_out,141,59.220,compile success/failure + inferred-type fixture
+kotlin.captured_type,137,57.540,compile success/failure + inferred-type fixture
+kotlin.function_type,126,52.920,compile success/failure + inferred-type fixture
+kotlin.sam_conversion,116,48.720,selected overload/call target and argument mapping
+kotlin.object_singleton,102,42.840,generated behavior/metadata + initialization order
+kotlin.when_exhaustiveness,90,37.800,branch/result/control-flow behavior
+kotlin.non_null_assertion,85,35.700,compile/diagnostic outcome + branch smart-cast behavior
+kotlin.platform_flexible_type,78,32.760,compile/diagnostic outcome + branch smart-cast behavior
+kotlin.star_projection,69,28.980,compile success/failure + inferred-type fixture
+kotlin.calls_in_place_effect,62,26.040,diagnostic/data-flow/const result
+kotlin.nothing_type,60,25.200,compile success/failure + inferred-type fixture
+kotlin.const_evaluation,52,21.840,diagnostic/data-flow/const result
+kotlin.named_arguments,43,18.060,selected overload/call target and argument mapping
+kotlin.jvm_signature_mangling,33,13.860,boxing/signature/interop ABI fixture
+kotlin.suspend_lambda,32,13.440,suspend/resume result and state-machine behavior
+kotlin.suspend_function_type,28,11.760,compile success/failure + inferred-type fixture
+kotlin.returns_implies_effect,28,11.760,diagnostic/data-flow/const result
+kotlin.builder_inference,26,10.920,compile success/failure + inferred-type fixture
+kotlin.unit_type,25,10.500,compile success/failure + inferred-type fixture
+kotlin.overload_resolution,24,10.080,selected overload/call target and argument mapping
+kotlin.continuation_state_machine,18,7.560,suspend/resume result and state-machine behavior
+kotlin.constructor_init_order,16,6.720,generated behavior/metadata + initialization order
+kotlin.definitely_non_null_type,15,6.300,compile/diagnostic outcome + branch smart-cast behavior
+kotlin.fir_to_ir,13,5.460,FIR/IR textual dump or backend box result
+kotlin.infix_function,10,4.200,selected overload/call target and argument mapping
+kotlin.when_expression,9,3.780,branch/result/control-flow behavior
+kotlin.receiver_function_type,8,3.360,compile success/failure + inferred-type fixture
+kotlin.type_inference_constraint_system,7,2.940,compile success/failure + inferred-type fixture
+kotlin.trailing_lambda,7,2.940,selected overload/call target and argument mapping
+kotlin.operator_overloading,3,1.260,selected overload/call target and argument mapping
+kotlin.fir_semantic_resolution,3,1.260,FIR/IR textual dump or backend box result
+kotlin.generic_where_constraints,1,0.420,compile success/failure + inferred-type fixture
+kotlin.context_receivers_parameters,1,0.420,generated behavior/metadata + initialization order
+kotlin.try_expression,1,0.420,throw/catch/finally result and cleanup order

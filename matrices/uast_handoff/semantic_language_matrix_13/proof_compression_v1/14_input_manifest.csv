@@ -1,0 +1,5 @@
+﻿input,role,evidence_class
+matrices.zip,"Existing 553 feature signatures, 334 UASF facet signatures, 8-language source-derived matrices",USER_PROJECT_MATRIX
+missing_languages_build,Official source-derived Julia/Nim/Swift/Zig matrices; exact signature archetype mapping,USER_PROJECT_MATRIX
+semantic-language-matrix-13.zip,39 official/formal/external source summaries + 51 external semantic atoms,EXTERNAL_REFERENCE_MATRIX
+popl097.zip/KJ-paper-companion-TR.pdf,K-Java formal runtime rules for method invocation and object instantiation,FORMAL_SEMANTICS_PAPER

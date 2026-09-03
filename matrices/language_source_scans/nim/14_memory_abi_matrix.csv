@@ -1,0 +1,13 @@
+﻿component,abi_calling_convention,ffi,gc,layout_alignment,manual_memory,ownership,unsafe
+ast,3,2,0,25,0,6,6
+binding,0,0,0,0,0,0,0
+codegen,2,117,2,2,5,23,11
+docs,125,199,75,58,40,14,61
+grammar,6,13,2,4,0,0,0
+ir,0,0,0,0,0,0,0
+lexer,0,29,0,4,0,0,0
+optimizer,0,0,0,4,0,0,0
+other,3136,1671,163,838,215,459,475
+runtime,45,75,39,105,26,20,34
+tests,853,168,21,620,90,119,138
+types,3,2,0,27,0,0,4

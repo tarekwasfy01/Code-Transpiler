@@ -1,0 +1,12 @@
+﻿source_group,files,lines,mean_trust,derived_weight
+ast_core,167,175616,1.0000,0.963515
+sema_core,84,242641,1.0000,0.989309
+parser_core,21,41099,0.9800,0.839164
+lexer_preprocessor,53,34005,0.9500,0.811710
+basic_language_model,192,73986,0.9200,0.858764
+codegen_abi,87,144005,0.9500,0.923989
+analysis_cfg,61,30405,0.9000,0.782415
+serialization,27,41963,0.8200,0.772863
+frontend,46,37100,0.7200,0.721947
+static_analyzer,167,75377,0.6200,0.725786
+conformance_tests,3472,277433,0.4800,0.740000

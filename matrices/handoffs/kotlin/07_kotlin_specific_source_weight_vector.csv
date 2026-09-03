@@ -1,0 +1,12 @@
+﻿source_group,authority_weight,role
+compiler_frontend_core,1.000,language/frontend/compiler source
+core_types_descriptors,0.950,type/model/metadata source
+ir_codegen_backends,0.900,IR and backend lowering source
+stdlib_contract,0.620,stdlib/runtime language contract
+native_runtime,0.780,native runtime semantics
+interop_abi,0.720,platform ABI/interoperability
+spec_docs,0.700,specification/documentation
+behavior_tests,0.420,behavioral oracle tests
+plugins_extensions,0.320,compiler extension evidence
+tools_build,0.220,tooling/build evidence
+other,0.100,weak contextual evidence

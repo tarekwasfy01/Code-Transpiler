@@ -1,0 +1,57 @@
+language_id,canonical_semantic_id,corpus_observed,source_scan_present,source_anchors_found,source_scan_ast_nodes,source_scan_semantic_features,exact_uast_crosswalk_present,compiler_contract_verified,decision,reason
+julia,UASF_0022,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0051,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0119,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0151,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0182,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0183,1,true,3,144,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+julia,UASF_0217,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0218,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0302,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0304,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0305,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0306,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+julia,UASF_0308,1,true,3,144,98,false,true,VERIFIED_CANDIDATE,exact source crosswalk and referenced AST evidence are present; promotion is limited to this explicitly documented cell
+nim,UASF_0026,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0118,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0119,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0151,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0183,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0207,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0217,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0223,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0304,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0305,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0306,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0308,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+nim,UASF_0309,1,true,5,55,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0048,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0151,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0182,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0183,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0208,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0217,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0219,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0222,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0301,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0304,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0305,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0306,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0307,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0308,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0309,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+swift,UASF_0311,1,true,5,6863,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0022,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0024,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0118,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0153,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0154,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0178,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0183,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0206,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0208,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0219,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0305,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0306,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0308,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell
+zig,UASF_0309,1,true,5,88,98,false,false,SOURCE_SCAN_NOT_LANGUAGE_SPECIFIC,the source feature projection is byte-identical across scanned languages; it cannot prove a language-specific semantic cell

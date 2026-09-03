@@ -1,0 +1,17 @@
+source_channel,authority_weight,file_count,lines,matrix_weight
+docs,0.12,309,42337,0.079131
+expression_evaluator,0.45,99,62904,0.238216
+ide_csharp_features,0.18,1687,808852,0.153763
+language_server,0.05,1098,78039,0.040245
+other,0.1,3016,400544,0.092099
+razor,0.08,5998,235247,0.08
+roslyn_compiler_core,0.82,928,218705,0.644183
+roslyn_compiler_tests,0.45,982,2862368,0.356438
+roslyn_csharp_binder,1.0,162,105563,0.585532
+roslyn_csharp_bound_tree,0.98,85,13207,0.501792
+roslyn_csharp_flow,0.96,34,28373,0.392344
+roslyn_csharp_lowering,0.96,129,52612,0.537148
+roslyn_csharp_parser_syntax,1.0,163,54942,0.586235
+roslyn_csharp_portable,0.9,214,174092,0.555625
+roslyn_csharp_symbols,0.98,385,136091,0.670938
+tests_other,0.16,893,881845,0.124988

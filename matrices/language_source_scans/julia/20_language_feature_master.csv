@@ -1,0 +1,99 @@
+﻿feature,category,evidence_count,files_with_evidence,relative_weight,detection_terms,semanticprogram_axes
+abi_calling_convention,memory,2519,414,0.10292134831460674,"calling convention;abi;extern ""c"";cdecl;stdcall",memory.model;ownership.lifetime;abi.ffi
+allocation,effect,2445,332,0.09989785495403473,allocate;allocation;allocator;malloc;newexpr,effect.graph;purity;runtime.contract
+array_list,expression,18,8,0.0007354443309499489,arrayexpr;listexpr;array literal;list literal,nodes.expression;operations;evaluation.order;data.flow
+array_type,type,159,53,0.006496424923391216,arraytype;array type;slice type,types.structure;types.origin;conversion.semantics
+assignment,expression,916,145,0.03742594484167518,assignexpr;assignment;assignstmt,nodes.expression;operations;evaluation.order;data.flow
+atomic,concurrency,7164,259,0.29270684371807965,atomic;memory ordering;compareexchange,concurrency.model;synchronization;memory.ordering
+attribute_annotation,declaration,2239,235,0.09148110316649642,attribute;annotation;decorator;pragma,nodes.declaration;scope.binding;types.structure
+await,expression,4,3,0.0001634320735444331,awaitexpr;await ;co_await,nodes.expression;operations;evaluation.order;data.flow
+binary_op,expression,65,11,0.002655771195097038,binaryexpr;binaryop;binop;infixexpr,nodes.expression;operations;evaluation.order;data.flow
+break,control,0,0,0.0,breakstmt;break statement,control.flow;evaluation.order;effects.control
+bytecode_vm,meta,75,22,0.0030643513789581204,bytecode;virtual machine;opcode;interpreter loop,dialect.extension;compiletime.semantics;lowering.pipeline
+call,expression,61,20,0.002492339121552605,callexpr;call expression;applyexpr;invocationexpr,nodes.expression;operations;evaluation.order;data.flow
+capture,binding,798,165,0.0326046986721144,capture;captured variable;upvalue;free variable,scope.binding;binding.graph;capture.shadowing
+cast_conversion,expression,452,167,0.01846782431052094,castexpr;cast expression;conversion;coercion,nodes.expression;operations;evaluation.order;data.flow
+channel,concurrency,804,66,0.03284984678243105,channel;chan ;sendrecv,concurrency.model;synchronization;memory.ordering
+class,declaration,254,72,0.0103779366700715,classdecl;class ;objecttype,nodes.declaration;scope.binding;types.structure
+closure_lambda,expression,2595,216,0.10602655771195096,closure;lambda;anonymous function,nodes.expression;operations;evaluation.order;data.flow
+code_generation,meta,1307,213,0.053401430030643515,codegen;code generation;emitter;backend,dialect.extension;compiletime.semantics;lowering.pipeline
+compile_time_eval,meta,95,47,0.003881511746680286,compile time;constexpr;consteval;comptime,dialect.extension;compiletime.semantics;lowering.pipeline
+comprehension,expression,211,47,0.008621041879468846,comprehension;generator expression,nodes.expression;operations;evaluation.order;data.flow
+constant,declaration,3031,340,0.12384065372829418,constant;constdecl;literal,nodes.declaration;scope.binding;types.structure
+continue,control,0,0,0.0,continuestmt;continue statement,control.flow;evaluation.order;effects.control
+defer_cleanup,control,1786,291,0.07297242083758938,defer;cleanup;finally;raii,control.flow;evaluation.order;effects.control
+dynamic_dispatch,effect,88,41,0.0035955056179775282,dynamic dispatch;virtual call;vtable;method lookup,effect.graph;purity;runtime.contract
+enum,declaration,897,195,0.036649642492339124,enumdecl;enum ;variant,nodes.declaration;scope.binding;types.structure
+exception_try,control,6857,561,0.28016343207354444,trystmt;try statement;catch;except;finally,control.flow;evaluation.order;effects.control
+ffi,memory,2761,537,0.11280898876404494,ffi;foreign function;extern;cgo;jni;pinvoke,memory.model;ownership.lifetime;abi.ffi
+filesystem,effect,330,75,0.01348314606741573,filesystem;file system;open file,effect.graph;purity;runtime.contract
+for,control,31,4,0.0012665985699693565,forstmt;for statement;forexpr,control.flow;evaluation.order;effects.control
+foreach_iteration,control,2651,412,0.10831460674157303,foreach;for in;iterator;iterable,control.flow;evaluation.order;effects.control
+function,declaration,24475,1072,1.0,function;funcdecl;functiondef;fn ;methoddecl;lambda,nodes.declaration;scope.binding;types.structure
+function_type,type,1038,186,0.042410623084780386,functiontype;function type;callable type;signature,types.structure;types.origin;conversion.semantics
+gc,memory,1054,177,0.04306435137895812,garbage collector;garbage collection;gc ;gcmask;tracing gc,memory.model;ownership.lifetime;abi.ffi
+generic,declaration,2725,347,0.11133810010214505,generic;typeparam;type parameter;template,nodes.declaration;scope.binding;types.structure
+generic_constraint,type,249,69,0.01017364657814096,constraint;where clause;trait bound;concept,types.structure;types.origin;conversion.semantics
+global_state,effect,185,77,0.0075587334014300305,global state;global variable;static variable,effect.graph;purity;runtime.contract
+goto_label,control,549,94,0.022431052093973444,gotostmt;goto ;labelstmt,control.flow;evaluation.order;effects.control
+identifier,expression,1266,158,0.05172625127681307,identifier;identexpr;nameexpr;symbolref,nodes.expression;operations;evaluation.order;data.flow
+if,control,3,3,0.00012257405515832482,ifstmt;if statement;conditionalexpr;ifexpr,control.flow;evaluation.order;effects.control
+import,declaration,17383,1286,0.7102349336057201,import;include;use ;using ;require,nodes.declaration;scope.binding;types.structure
+index,expression,83,31,0.0033912155260469867,indexexpr;subscript;index expression,nodes.expression;operations;evaluation.order;data.flow
+interface_trait,declaration,827,232,0.033789581205311545,interface;trait;protocol,nodes.declaration;scope.binding;types.structure
+io,effect,1405,177,0.05740551583248212,stdout;stdin;io effect;file io,effect.graph;purity;runtime.contract
+ir,meta,5217,508,0.21315628192032687,intermediate representation;mir;hir;ssa;sil;zir;ir node,dialect.extension;compiletime.semantics;lowering.pipeline
+layout_alignment,memory,5576,457,0.22782431052093974,alignment;layout;sizeof;offsetof;repr(,memory.model;ownership.lifetime;abi.ffi
+lifetime,binding,151,38,0.006169560776302349,lifetime;region inference;borrowck,scope.binding;binding.graph;capture.shadowing
+literal_boolean,expression,22801,878,0.9316036772216547,boolliteral;boolean literal;true;false,nodes.expression;operations;evaluation.order;data.flow
+literal_null,expression,11927,667,0.4873135852911134,null;nil;none;nullptr;missing,nodes.expression;operations;evaluation.order;data.flow
+literal_numeric,expression,36,12,0.0014708886618998978,integerliteral;floatliteral;numeric literal;numberliteral,nodes.expression;operations;evaluation.order;data.flow
+literal_string,expression,101,27,0.004126659856996936,stringliteral;string literal;charliteral,nodes.expression;operations;evaluation.order;data.flow
+lock_mutex,concurrency,1108,100,0.045270684371807965,mutex;rwlock;lock guard;monitor,concurrency.model;synchronization;memory.ordering
+macro,meta,4141,318,0.16919305413687435,macro;preprocessor;quoteexpr;unquote,dialect.extension;compiletime.semantics;lowering.pipeline
+manual_memory,memory,1247,193,0.05094994892747702,malloc;free(;manual memory;allocator,memory.model;ownership.lifetime;abi.ffi
+map_dict,expression,199,54,0.008130745658835547,mapexpr;dictexpr;dictionary;map literal,nodes.expression;operations;evaluation.order;data.flow
+map_type,type,27,5,0.0011031664964249233,maptype;map type;dictionary type,types.structure;types.origin;conversion.semantics
+member_access,expression,7,4,0.0002860061287027579,memberexpr;member access;selectorexpr;fieldexpr,nodes.expression;operations;evaluation.order;data.flow
+memory_model,concurrency,13,8,0.0005311542390194076,memory model;happens-before;sequenced-before,concurrency.model;synchronization;memory.ordering
+module,declaration,10871,788,0.44416751787538306,module;namespace;package,nodes.declaration;scope.binding;types.structure
+mutation,effect,4861,542,0.19861082737487232,mutation;mutable;write barrier;store,effect.graph;purity;runtime.contract
+name_resolution,binding,8,5,0.0003268641470888662,name resolution;resolve name;lookupname;resolver,scope.binding;binding.graph;capture.shadowing
+network,effect,715,70,0.029213483146067417,network;socket,effect.graph;purity;runtime.contract
+optimizer,meta,1016,197,0.041511746680286,optimizer;optimization;constant folding;dead code,dialect.extension;compiletime.semantics;lowering.pipeline
+optional_nullable,type,600,210,0.024514811031664963,optional;nullable;option type;nullability,types.structure;types.origin;conversion.semantics
+overload_resolution,type,96,45,0.003922369765066394,overload;candidate function;method resolution;resolve call,types.structure;types.origin;conversion.semantics
+ownership,memory,174,63,0.007109295199182839,ownership;owned;move semantics;borrow checker,memory.model;ownership.lifetime;abi.ffi
+parameter,declaration,8637,661,0.35289070480081713,parameter;paramdecl;formal;argument,nodes.declaration;scope.binding;types.structure
+pattern,expression,698,133,0.028518896833503574,pattern;match arm;destructure,nodes.expression;operations;evaluation.order;data.flow
+pointer,type,284,39,0.01160367722165475,pointertype;pointer type;ptrtype;raw pointer,types.structure;types.origin;conversion.semantics
+primitive_bool,type,1,1,4.0858018386108277e-05,boolean type;booltype,types.structure;types.origin;conversion.semantics
+primitive_float,type,7509,439,0.30680286006128704,floating type;float32;float64;double;ieee,types.structure;types.origin;conversion.semantics
+primitive_integer,type,23765,674,0.9709908069458631,integer type;int8;int16;int32;int64;uint32;isinteger,types.structure;types.origin;conversion.semantics
+primitive_string,type,31,19,0.0012665985699693565,string type;strtype;text type,types.structure;types.origin;conversion.semantics
+random,effect,2527,204,0.1032482124616956,random;rng,effect.graph;purity;runtime.contract
+reference,type,29,17,0.00118488253319714,referencetype;reference type;borrow;lvalue reference,types.structure;types.origin;conversion.semantics
+reflection,effect,467,77,0.019080694586312563,reflection;reflect;runtime type info;rtti,effect.graph;purity;runtime.contract
+return,control,8,8,0.0003268641470888662,returnstmt;return statement,control.flow;evaluation.order;effects.control
+scope,binding,2944,233,0.12028600612870276,scope;lexical scope;block scope,scope.binding;binding.graph;capture.shadowing
+set,expression,0,0,0.0,setexpr;set literal,nodes.expression;operations;evaluation.order;data.flow
+shadowing,binding,105,24,0.004290091930541369,shadowing;shadowed,scope.binding;binding.graph;capture.shadowing
+slice,expression,11,7,0.00044943820224719103,sliceexpr;slicing;slice expression,nodes.expression;operations;evaluation.order;data.flow
+struct,declaration,5713,655,0.23342185903983656,structdecl;struct ;record,nodes.declaration;scope.binding;types.structure
+subtyping,type,1162,146,0.047477017364657814,subtype;assignable;variance;inheritance,types.structure;types.origin;conversion.semantics
+switch_match,control,1,1,4.0858018386108277e-05,switchstmt;switch statement;matchexpr;matchstmt;caseclause,control.flow;evaluation.order;effects.control
+symbol_table,binding,60,13,0.0024514811031664963,symbol table;symboltable;symtab;symbol table,scope.binding;binding.graph;capture.shadowing
+task_async,concurrency,7787,414,0.31816138917262515,async;task;future;promise,concurrency.model;synchronization;memory.ordering
+thread,concurrency,6031,284,0.246414708886619,thread;pthread;goroutine,concurrency.model;synchronization;memory.ordering
+throw_raise,control,653,227,0.026680286006128703,throwstmt;throw ;raise ;panic,control.flow;evaluation.order;effects.control
+time,effect,152,43,0.006210418794688458,clock;system time;monotonic time,effect.graph;purity;runtime.contract
+tuple,expression,12486,471,0.5101532175689479,tupleexpr;tuple;product type,nodes.expression;operations;evaluation.order;data.flow
+tuple_type,type,258,53,0.010541368743615935,tupletype;tuple type,types.structure;types.origin;conversion.semantics
+type_inference,type,319,67,0.01303370786516854,type inference;infer type;inferctx;typeck;typecheck,types.structure;types.origin;conversion.semantics
+unary_op,expression,27,10,0.0011031664964249233,unaryexpr;unaryop;prefixexpr;postfixexpr,nodes.expression;operations;evaluation.order;data.flow
+union_sum,type,523,50,0.02136874361593463,uniontype;union type;sum type;variant type,types.structure;types.origin;conversion.semantics
+unsafe,memory,2154,325,0.08800817160367722,unsafe;unchecked;raw pointer,memory.model;ownership.lifetime;abi.ffi
+variable,declaration,17373,920,0.7098263534218591,vardecl;variable;let ;const ;static ,nodes.declaration;scope.binding;types.structure
+visibility,declaration,2197,315,0.08976506639427988,public;private;protected;visibility;exported,nodes.declaration;scope.binding;types.structure
+while,control,0,0,0.0,whilestmt;while statement;whileexpr,control.flow;evaluation.order;effects.control
+yield,expression,728,152,0.029744637385086824,yieldexpr;yield ;generator,nodes.expression;operations;evaluation.order;data.flow

@@ -1,0 +1,13 @@
+﻿component,bytecode_vm,code_generation,compile_time_eval,ir,macro,optimizer
+ast,0,467,470,30,43,0
+binding,0,3,60,4,9,0
+codegen,1820,1182,634,1687,22,17
+docs,0,0,28,5,1,2
+grammar,10,3,388,144,143,0
+ir,58,40,139,1291,10,4
+lexer,0,2,41,43,98,0
+optimizer,0,20,76,32,27,6
+other,3206,1307,11883,53158,11973,468
+runtime,141,183,467,525,217,19
+tests,1,3584,3151,415,27,6
+types,13,88,1946,1739,103,6

@@ -1,0 +1,79 @@
+﻿rust_semantic_feature,detection_terms,authoritative_source_groups,related_generic_features,recommended_detector
+rust.move_semantics,move;move out;MovePath;Operand::Move,borrowck_regions;mir;stdlib_core,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.copy_semantics,Copy;is_copy;copy semantics,traits_types;borrowck_regions;stdlib_core,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.shared_borrow,BorrowKind::Shared;shared borrow;&T,borrowck_regions;traits_types;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.mutable_borrow,BorrowKind::Mut;mutable borrow;&mut,borrowck_regions;traits_types;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.reborrow,reborrow;borrowed place,borrowck_regions;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.borrow_checker,borrowck;BorrowSet;borrow check,borrowck_regions;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.nonlexical_lifetimes,NLL;non lexical lifetime;location insensitive,borrowck_regions;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.region_inference,region inference;RegionVid;universal regions,borrowck_regions;traits_types,type_inference,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.lifetime_parameters,Lifetime;'a;GenericParamKind::Lifetime,ast_hir;traits_types;borrowck_regions,lifetime,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.higher_ranked_lifetimes,for<;higher ranked;late bound region,traits_types;borrowck_regions;ast_hir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.drop_semantics,Drop;drop glue;TerminatorKind::Drop,mir;stdlib_core;borrowck_regions,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.drop_check,dropck;drop check,borrowck_regions;traits_types;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.destructor_order,drop order;drop elaboration,mir;stdlib_core,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.pin_unpin,Pin;Unpin,stdlib_core;traits_types;borrowck_regions,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.interior_mutability,UnsafeCell;interior mutability,stdlib_core;stdlib_alloc;borrowck_regions,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.cell_refcell,Cell;RefCell,stdlib_core;stdlib_alloc,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.smart_pointer_ownership,Box;Rc;Arc;Weak,stdlib_alloc;stdlib_core;borrowck_regions,ownership;pointer,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.raw_pointer_deref,RawPtr;*const;*mut;raw pointer,ast_hir;mir;codegen_abi,pointer,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.aliasing_model,alias;noalias;Stacked Borrows;Tree Borrows,borrowck_regions;mir;codegen_abi,memory_model,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.pointer_provenance,provenance;strict provenance;Pointer,mir;const_eval;codegen_abi;stdlib_core,pointer,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.unsafe_block,UnsafeBlock;unsafe block,ast_hir;mir;parser_lowering,unsafe,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.unsafe_trait_impl,unsafe trait;unsafe impl,ast_hir;traits_types,interface_trait;unsafe,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.trait_definition,ItemKind::Trait;TraitRef,ast_hir;traits_types,interface_trait,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.trait_impl,ItemKind::Impl;impl trait,ast_hir;traits_types,interface_trait,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.associated_types,AssocKind::Type;associated type,ast_hir;traits_types,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.associated_consts,AssocKind::Const;associated const,ast_hir;traits_types;const_eval,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.trait_object_dyn,dyn Trait;Dynamic;trait object,ast_hir;traits_types;codegen_abi,interface_trait,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.vtable_dispatch,vtable;VirtualIndex;trait object dispatch,traits_types;codegen_abi,dynamic_dispatch,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.generic_bounds,GenericBound;TraitBound,ast_hir;traits_types,generic;generic_constraint,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.where_clauses,WhereClause;WherePredicate,ast_hir;traits_types,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.blanket_impl,blanket impl,traits_types,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.coherence_orphan,coherence;orphan check;overlap,traits_types,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.specialization,specialization;default impl,traits_types,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.impl_trait,ImplTrait;impl Trait,ast_hir;traits_types,interface_trait,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.opaque_types,OpaqueTy;opaque type,traits_types;borrowck_regions,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.method_resolution,method resolution;probe;pick,traits_types;resolve_macros,name_resolution;overload_resolution,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.autoderef_autoref,autoderef;autoref,traits_types;borrowck_regions,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.deref_coercion,Deref coercion,traits_types;borrowck_regions,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.unsize_coercion,Unsize;CoerceUnsized;unsize,traits_types;codegen_abi,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.operator_traits,Add;Sub;Mul;Index;operator trait,traits_types;stdlib_core,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.pattern_destructuring,PatKind;pattern;destructure,ast_hir;parser_lowering;mir,pattern,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.match_exhaustiveness,usefulness;exhaustiveness,ast_hir;compiler_other,switch_match,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.match_guards,Guard;match guard,ast_hir;mir,switch_match,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.ref_patterns,BindingMode;ByRef;ref mut,ast_hir;borrowck_regions,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.enum_variant_semantics,VariantDef;VariantIdx;enum variant,ast_hir;traits_types;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.if_let_while_let,if let;while let,ast_hir;parser_lowering;mir,while,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.let_else,let else;LetElse,ast_hir;parser_lowering;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.loop_break_value,break value;Break;loop result,ast_hir;mir,break,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.never_type_divergence,Never;!;diverge,traits_types;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.result_question_operator,Try;?;branch residual;FromResidual,ast_hir;parser_lowering;mir;stdlib_core,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.option_niche_optimization,niche;ScalarPair;Option layout,traits_types;codegen_abi;stdlib_core,optional_nullable,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.panic_unwind_abort,panic;unwind;abort;UnwindAction,mir;codegen_abi;stdlib_core;stdlib_std,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.async_await,Async;Await;async fn,ast_hir;parser_lowering;mir,await;task_async,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.future_poll,Future;Poll;Context,stdlib_core;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.generator_coroutine,Coroutine;Yield;Generator,ast_hir;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.await_suspension,suspension point;await,mir;borrowck_regions,await,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.closure_capture_modes,Upvar;capture kind;ByValue;ByRef,ast_hir;borrowck_regions;mir,capture;closure_lambda,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.fn_traits,FnOnce;FnMut;Fn,traits_types;stdlib_core,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.send_sync_auto_traits,Send;Sync;auto trait,traits_types;stdlib_core;borrowck_regions,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.atomic_ordering,Ordering::Relaxed;Acquire;Release;SeqCst;Atomic,stdlib_core;mir;codegen_abi,atomic,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.thread_memory_model,memory model;data race;thread,stdlib_core;stdlib_std;codegen_abi,manual_memory;memory_model;thread,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.macro_rules_hygiene,macro_rules;SyntaxContext;hygiene,resolve_macros;parser_lowering,macro,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.proc_macro,proc_macro;TokenStream,resolve_macros;compiler_other,macro,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.name_resolution_hygiene,Resolver;hygiene;SyntaxContext,resolve_macros;ast_hir,name_resolution;overload_resolution,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.const_eval,const eval;InterpCx;Miri,const_eval;mir,constant;generic_constraint,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.const_generics,ConstParam;const generic,const_eval;traits_types;ast_hir,constant;generic_constraint,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.monomorphization,monomorph;MonoItem,mir;traits_types;codegen_abi,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.hir_lowering,lowering;rustc_ast_lowering;HIR,ast_hir;parser_lowering;mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.mir_semantics,Mir;Body;BasicBlock;TerminatorKind;Rvalue,mir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.abi_layout,Layout;TyAndLayout;FnAbi,codegen_abi;traits_types,layout_alignment,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.repr_attributes,repr(C);repr(transparent);ReprOptions,ast_hir;codegen_abi,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.ffi_extern_abi,"ExternAbi;extern ""C"";foreign item",ast_hir;codegen_abi,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.slice_fat_pointer,slice;fat pointer;ScalarPair,traits_types;codegen_abi;stdlib_core,pointer;slice,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.dst_unsized,Sized;Unsize;dynamically sized,traits_types;codegen_abi,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.crate_module_resolution,crate;module;DefMap;Resolver,resolve_macros;ast_hir,module;name_resolution;overload_resolution,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.visibility_privacy,Visibility;privacy,ast_hir;resolve_macros,visibility,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.attributes_cfg,cfg;cfg_attr;Attribute,resolve_macros;ast_hir,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction
+rust.feature_gates,feature gate;Features;unstable,parser_lowering;compiler_other,,rustc path + symbol/API pattern + AST/HIR/MIR enum/variant extraction

@@ -1,0 +1,13 @@
+﻿component,break,continue,defer_cleanup,exception_try,for,foreach_iteration,goto_label,if,return,switch_match,throw_raise,while
+ast,0,0,1,14,0,23,0,0,3,0,4,0
+binding,0,0,0,0,0,0,0,0,0,0,0,0
+codegen,0,0,2,14,0,11,0,0,0,0,2,0
+docs,5,4,57,459,17,289,7,24,3,0,81,6
+grammar,5,5,46,121,11,21,0,19,6,0,10,5
+ir,0,0,0,0,0,0,0,0,0,0,0,0
+lexer,0,0,5,13,0,5,0,0,0,0,5,0
+optimizer,3,0,6,15,0,4,0,6,4,0,2,4
+other,37,19,542,2333,78,1170,47,238,65,9,462,49
+runtime,3,2,56,216,4,58,11,13,3,0,32,3
+tests,4,2,383,1717,14,726,8,24,7,0,354,3
+types,0,0,0,13,0,38,0,0,0,0,4,0

@@ -1,0 +1,41 @@
+{
+  "package_sha256": "1f1a8be344af8a3110b17da5051f72208881e27c769001d9b78b7e043d224a94",
+  "files": 12,
+  "languages": 13,
+  "atoms": 51,
+  "evidence_rows": 390,
+  "sources": 39,
+  "canonical_capabilities": 334,
+  "confirmed_crosswalk_cells": 67,
+  "unresolved_crosswalk_cells": 16967,
+  "external_present_cells": 481,
+  "external_absent_cells": 201,
+  "diff_counts": {
+    "CONFIRMED": 301,
+    "CONFLICT": 76,
+    "NEW_EXTERNAL_EVIDENCE": 305,
+    "UNRESOLVED": 3660
+  },
+  "unmapped_atoms": [
+    "EXTSEM_ACTORS",
+    "EXTSEM_BYREF_PARAMETER_FORM",
+    "EXTSEM_CHECKED_ERROR_EFFECT",
+    "EXTSEM_COMPILETIME_META",
+    "EXTSEM_DYNAMIC_TYPING",
+    "EXTSEM_ERROR_VALUES_UNIONS",
+    "EXTSEM_FIRST_CLASS_FUNCTIONS",
+    "EXTSEM_FLOW_SENSITIVE_TYPING",
+    "EXTSEM_LEFT_TO_RIGHT_GENERAL_EVAL",
+    "EXTSEM_MULTIPLE_DISPATCH",
+    "EXTSEM_NOMINAL_TYPE_IDENTITY",
+    "EXTSEM_PARAMETRIC_POLYMORPHISM",
+    "EXTSEM_PASS_BY_VALUE_CORE",
+    "EXTSEM_RAII_DESTRUCTORS",
+    "EXTSEM_REFERENCE_COUNTING",
+    "EXTSEM_SHORT_CIRCUIT_BOOL",
+    "EXTSEM_STATIC_TYPING",
+    "EXTSEM_STRUCTURAL_INTERFACE_CONFORMANCE",
+    "EXTSEM_STRUCTURED_CONCURRENCY"
+  ],
+  "sha256_verified": true
+}

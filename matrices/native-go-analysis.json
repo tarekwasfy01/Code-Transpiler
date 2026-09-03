@@ -1,0 +1,1470 @@
+{
+  "schema": "code-transpiler.native-analysis.v1",
+  "language": "go",
+  "executable": false,
+  "events": [
+    {
+      "id": 0,
+      "kind": "go.File",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "end_offset": 149,
+        "start_line": 1,
+        "start_column": 1,
+        "end_line": 11,
+        "end_column": 2
+      },
+      "confidence": "unknown",
+      "scope": 1
+    },
+    {
+      "id": 1,
+      "kind": "go.Ident",
+      "name": "sample",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 8,
+        "end_offset": 14,
+        "start_line": 1,
+        "start_column": 9,
+        "end_line": 1,
+        "end_column": 15
+      },
+      "confidence": "unknown",
+      "scope": 1
+    },
+    {
+      "id": 2,
+      "kind": "go.FuncDecl",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 16,
+        "end_offset": 149,
+        "start_line": 3,
+        "start_column": 1,
+        "end_line": 11,
+        "end_column": 2
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 3,
+      "kind": "go.Ident",
+      "name": "preserve",
+      "type": {
+        "kind": "function",
+        "name": "func(x uint64) uint64",
+        "parameters": [
+          {
+            "kind": "integer",
+            "name": "uint64",
+            "bits": 64,
+            "signed": false,
+            "type_origin": "inferred"
+          }
+        ],
+        "result": {
+          "kind": "tuple",
+          "name": "(uint64)",
+          "parameters": [
+            {
+              "kind": "integer",
+              "name": "uint64",
+              "bits": 64,
+              "signed": false,
+              "type_origin": "inferred"
+            }
+          ],
+          "type_origin": "inferred"
+        },
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 21,
+        "end_offset": 29,
+        "start_line": 3,
+        "start_column": 6,
+        "end_line": 3,
+        "end_column": 14
+      },
+      "binding": 0,
+      "declaration": true,
+      "operation": "binding.declare",
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 4,
+      "kind": "go.FuncType",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 16,
+        "end_offset": 46,
+        "start_line": 3,
+        "start_column": 1,
+        "end_line": 3,
+        "end_column": 31
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 5,
+      "kind": "go.FieldList",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 29,
+        "end_offset": 39,
+        "start_line": 3,
+        "start_column": 14,
+        "end_line": 3,
+        "end_column": 24
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 6,
+      "kind": "go.Field",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 30,
+        "end_offset": 38,
+        "start_line": 3,
+        "start_column": 15,
+        "end_line": 3,
+        "end_column": 23
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 7,
+      "kind": "go.Ident",
+      "name": "x",
+      "type": {
+        "kind": "integer",
+        "name": "uint64",
+        "bits": 64,
+        "signed": false,
+        "type_origin": "explicit"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 30,
+        "end_offset": 31,
+        "start_line": 3,
+        "start_column": 15,
+        "end_line": 3,
+        "end_column": 16
+      },
+      "binding": 1,
+      "declaration": true,
+      "operation": "binding.declare",
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 8,
+      "kind": "go.Ident",
+      "name": "uint64",
+      "type": {
+        "kind": "integer",
+        "name": "uint64",
+        "bits": 64,
+        "signed": false,
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 32,
+        "end_offset": 38,
+        "start_line": 3,
+        "start_column": 17,
+        "end_line": 3,
+        "end_column": 23
+      },
+      "binding": 2,
+      "operation": "binding.reference",
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 9,
+      "kind": "go.FieldList",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 40,
+        "end_offset": 46,
+        "start_line": 3,
+        "start_column": 25,
+        "end_line": 3,
+        "end_column": 31
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 10,
+      "kind": "go.Field",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 40,
+        "end_offset": 46,
+        "start_line": 3,
+        "start_column": 25,
+        "end_line": 3,
+        "end_column": 31
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 11,
+      "kind": "go.Ident",
+      "name": "uint64",
+      "type": {
+        "kind": "integer",
+        "name": "uint64",
+        "bits": 64,
+        "signed": false,
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 40,
+        "end_offset": 46,
+        "start_line": 3,
+        "start_column": 25,
+        "end_line": 3,
+        "end_column": 31
+      },
+      "binding": 2,
+      "operation": "binding.reference",
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 12,
+      "kind": "go.BlockStmt",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 47,
+        "end_offset": 149,
+        "start_line": 3,
+        "start_column": 32,
+        "end_line": 11,
+        "end_column": 2
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 13,
+      "kind": "go.DeclStmt",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 50,
+        "end_offset": 74,
+        "start_line": 4,
+        "start_column": 2,
+        "end_line": 4,
+        "end_column": 26
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 14,
+      "kind": "go.GenDecl",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 50,
+        "end_offset": 74,
+        "start_line": 4,
+        "start_column": 2,
+        "end_line": 4,
+        "end_column": 26
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 15,
+      "kind": "go.ValueSpec",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 54,
+        "end_offset": 74,
+        "start_line": 4,
+        "start_column": 6,
+        "end_line": 4,
+        "end_column": 26
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 16,
+      "kind": "go.Ident",
+      "name": "pointer",
+      "type": {
+        "kind": "pointer",
+        "name": "*uint64",
+        "element": {
+          "kind": "integer",
+          "name": "uint64",
+          "bits": 64,
+          "signed": false,
+          "type_origin": "inferred"
+        },
+        "type_origin": "explicit"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 54,
+        "end_offset": 61,
+        "start_line": 4,
+        "start_column": 6,
+        "end_line": 4,
+        "end_column": 13
+      },
+      "binding": 3,
+      "declaration": true,
+      "operation": "binding.declare",
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 17,
+      "kind": "go.StarExpr",
+      "type": {
+        "kind": "pointer",
+        "name": "*uint64",
+        "element": {
+          "kind": "integer",
+          "name": "uint64",
+          "bits": 64,
+          "signed": false,
+          "type_origin": "inferred"
+        },
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 62,
+        "end_offset": 69,
+        "start_line": 4,
+        "start_column": 14,
+        "end_line": 4,
+        "end_column": 21
+      },
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 18,
+      "kind": "go.Ident",
+      "name": "uint64",
+      "type": {
+        "kind": "integer",
+        "name": "uint64",
+        "bits": 64,
+        "signed": false,
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 63,
+        "end_offset": 69,
+        "start_line": 4,
+        "start_column": 15,
+        "end_line": 4,
+        "end_column": 21
+      },
+      "binding": 2,
+      "operation": "binding.reference",
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 19,
+      "kind": "go.UnaryExpr",
+      "type": {
+        "kind": "pointer",
+        "name": "*uint64",
+        "element": {
+          "kind": "integer",
+          "name": "uint64",
+          "bits": 64,
+          "signed": false,
+          "type_origin": "inferred"
+        },
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 72,
+        "end_offset": 74,
+        "start_line": 4,
+        "start_column": 24,
+        "end_line": 4,
+        "end_column": 26
+      },
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 20,
+      "kind": "go.Ident",
+      "name": "x",
+      "type": {
+        "kind": "integer",
+        "name": "uint64",
+        "bits": 64,
+        "signed": false,
+        "type_origin": "explicit"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 73,
+        "end_offset": 74,
+        "start_line": 4,
+        "start_column": 25,
+        "end_line": 4,
+        "end_column": 26
+      },
+      "binding": 1,
+      "operation": "binding.reference",
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 21,
+      "kind": "go.AssignStmt",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 76,
+        "end_offset": 87,
+        "start_line": 5,
+        "start_column": 2,
+        "end_line": 5,
+        "end_column": 13
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 22,
+      "kind": "go.Ident",
+      "name": "_",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 76,
+        "end_offset": 77,
+        "start_line": 5,
+        "start_column": 2,
+        "end_line": 5,
+        "end_column": 3
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 23,
+      "kind": "go.Ident",
+      "name": "pointer",
+      "type": {
+        "kind": "pointer",
+        "name": "*uint64",
+        "element": {
+          "kind": "integer",
+          "name": "uint64",
+          "bits": 64,
+          "signed": false,
+          "type_origin": "inferred"
+        },
+        "type_origin": "explicit"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 80,
+        "end_offset": 87,
+        "start_line": 5,
+        "start_column": 6,
+        "end_line": 5,
+        "end_column": 13
+      },
+      "binding": 3,
+      "operation": "binding.reference",
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 24,
+      "kind": "go.BlockStmt",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 89,
+        "end_offset": 118,
+        "start_line": 6,
+        "start_column": 2,
+        "end_line": 9,
+        "end_column": 3
+      },
+      "confidence": "unknown",
+      "scope": 3
+    },
+    {
+      "id": 25,
+      "kind": "go.AssignStmt",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 93,
+        "end_offset": 107,
+        "start_line": 7,
+        "start_column": 3,
+        "end_line": 7,
+        "end_column": 17
+      },
+      "confidence": "unknown",
+      "scope": 3
+    },
+    {
+      "id": 26,
+      "kind": "go.Ident",
+      "name": "x",
+      "type": {
+        "kind": "integer",
+        "name": "uint32",
+        "bits": 32,
+        "signed": false,
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 93,
+        "end_offset": 94,
+        "start_line": 7,
+        "start_column": 3,
+        "end_line": 7,
+        "end_column": 4
+      },
+      "binding": 4,
+      "declaration": true,
+      "operation": "binding.declare",
+      "confidence": "exact",
+      "scope": 3
+    },
+    {
+      "id": 27,
+      "kind": "go.CallExpr",
+      "type": {
+        "kind": "integer",
+        "name": "uint32",
+        "bits": 32,
+        "signed": false,
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 98,
+        "end_offset": 107,
+        "start_line": 7,
+        "start_column": 8,
+        "end_line": 7,
+        "end_column": 17
+      },
+      "operation": "conversion.explicit",
+      "confidence": "exact",
+      "scope": 3
+    },
+    {
+      "id": 28,
+      "kind": "go.Ident",
+      "name": "uint32",
+      "type": {
+        "kind": "integer",
+        "name": "uint32",
+        "bits": 32,
+        "signed": false,
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 98,
+        "end_offset": 104,
+        "start_line": 7,
+        "start_column": 8,
+        "end_line": 7,
+        "end_column": 14
+      },
+      "binding": 5,
+      "operation": "binding.reference",
+      "confidence": "exact",
+      "scope": 3
+    },
+    {
+      "id": 29,
+      "kind": "go.BasicLit",
+      "literal": "3",
+      "type": {
+        "kind": "integer",
+        "name": "uint32",
+        "bits": 32,
+        "signed": false,
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 105,
+        "end_offset": 106,
+        "start_line": 7,
+        "start_column": 15,
+        "end_line": 7,
+        "end_column": 16
+      },
+      "confidence": "exact",
+      "scope": 3
+    },
+    {
+      "id": 30,
+      "kind": "go.AssignStmt",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 110,
+        "end_offset": 115,
+        "start_line": 8,
+        "start_column": 3,
+        "end_line": 8,
+        "end_column": 8
+      },
+      "confidence": "unknown",
+      "scope": 3
+    },
+    {
+      "id": 31,
+      "kind": "go.Ident",
+      "name": "_",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 110,
+        "end_offset": 111,
+        "start_line": 8,
+        "start_column": 3,
+        "end_line": 8,
+        "end_column": 4
+      },
+      "confidence": "unknown",
+      "scope": 3
+    },
+    {
+      "id": 32,
+      "kind": "go.Ident",
+      "name": "x",
+      "type": {
+        "kind": "integer",
+        "name": "uint32",
+        "bits": 32,
+        "signed": false,
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 114,
+        "end_offset": 115,
+        "start_line": 8,
+        "start_column": 7,
+        "end_line": 8,
+        "end_column": 8
+      },
+      "binding": 4,
+      "operation": "binding.reference",
+      "confidence": "exact",
+      "scope": 3
+    },
+    {
+      "id": 33,
+      "kind": "go.ReturnStmt",
+      "type": {
+        "kind": "unknown",
+        "type_origin": "unknown"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 120,
+        "end_offset": 147,
+        "start_line": 10,
+        "start_column": 2,
+        "end_line": 10,
+        "end_column": 29
+      },
+      "confidence": "unknown",
+      "scope": 2
+    },
+    {
+      "id": 34,
+      "kind": "go.BinaryExpr",
+      "type": {
+        "kind": "integer",
+        "name": "uint64",
+        "bits": 64,
+        "signed": false,
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 127,
+        "end_offset": 147,
+        "start_line": 10,
+        "start_column": 9,
+        "end_line": 10,
+        "end_column": 29
+      },
+      "operation": "integer.add",
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 35,
+      "kind": "go.Ident",
+      "name": "x",
+      "type": {
+        "kind": "integer",
+        "name": "uint64",
+        "bits": 64,
+        "signed": false,
+        "type_origin": "explicit"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 127,
+        "end_offset": 128,
+        "start_line": 10,
+        "start_column": 9,
+        "end_line": 10,
+        "end_column": 10
+      },
+      "binding": 1,
+      "operation": "binding.reference",
+      "confidence": "exact",
+      "scope": 2
+    },
+    {
+      "id": 36,
+      "kind": "go.BasicLit",
+      "literal": "9007199254740993",
+      "type": {
+        "kind": "integer",
+        "name": "uint64",
+        "bits": 64,
+        "signed": false,
+        "type_origin": "inferred"
+      },
+      "source": {
+        "file": "internal/backend/testdata/native_go.go",
+        "start_offset": 131,
+        "end_offset": 147,
+        "start_line": 10,
+        "start_column": 13,
+        "end_line": 10,
+        "end_column": 29
+      },
+      "confidence": "exact",
+      "scope": 2
+    }
+  ],
+  "syntax": {
+    "rows": 37,
+    "cols": 37,
+    "storage": "coo",
+    "entries": [
+      [
+        0,
+        1,
+        1
+      ],
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        2,
+        3,
+        1
+      ],
+      [
+        2,
+        4,
+        1
+      ],
+      [
+        2,
+        12,
+        1
+      ],
+      [
+        4,
+        5,
+        1
+      ],
+      [
+        4,
+        9,
+        1
+      ],
+      [
+        5,
+        6,
+        1
+      ],
+      [
+        6,
+        7,
+        1
+      ],
+      [
+        6,
+        8,
+        1
+      ],
+      [
+        9,
+        10,
+        1
+      ],
+      [
+        10,
+        11,
+        1
+      ],
+      [
+        12,
+        13,
+        1
+      ],
+      [
+        12,
+        21,
+        1
+      ],
+      [
+        12,
+        24,
+        1
+      ],
+      [
+        12,
+        33,
+        1
+      ],
+      [
+        13,
+        14,
+        1
+      ],
+      [
+        14,
+        15,
+        1
+      ],
+      [
+        15,
+        16,
+        1
+      ],
+      [
+        15,
+        17,
+        1
+      ],
+      [
+        15,
+        19,
+        1
+      ],
+      [
+        17,
+        18,
+        1
+      ],
+      [
+        19,
+        20,
+        1
+      ],
+      [
+        21,
+        22,
+        1
+      ],
+      [
+        21,
+        23,
+        1
+      ],
+      [
+        24,
+        25,
+        1
+      ],
+      [
+        24,
+        30,
+        1
+      ],
+      [
+        25,
+        26,
+        1
+      ],
+      [
+        25,
+        27,
+        1
+      ],
+      [
+        27,
+        28,
+        1
+      ],
+      [
+        27,
+        29,
+        1
+      ],
+      [
+        30,
+        31,
+        1
+      ],
+      [
+        30,
+        32,
+        1
+      ],
+      [
+        33,
+        34,
+        1
+      ],
+      [
+        34,
+        35,
+        1
+      ],
+      [
+        34,
+        36,
+        1
+      ]
+    ]
+  },
+  "binding": {
+    "rows": 37,
+    "cols": 6,
+    "storage": "coo",
+    "entries": [
+      [
+        3,
+        0,
+        1
+      ],
+      [
+        7,
+        1,
+        1
+      ],
+      [
+        8,
+        2,
+        1
+      ],
+      [
+        11,
+        2,
+        1
+      ],
+      [
+        16,
+        3,
+        1
+      ],
+      [
+        18,
+        2,
+        1
+      ],
+      [
+        20,
+        1,
+        1
+      ],
+      [
+        23,
+        3,
+        1
+      ],
+      [
+        26,
+        4,
+        1
+      ],
+      [
+        28,
+        5,
+        1
+      ],
+      [
+        32,
+        4,
+        1
+      ],
+      [
+        35,
+        1,
+        1
+      ]
+    ]
+  },
+  "same_binding": {
+    "rows": 37,
+    "cols": 37,
+    "storage": "coo",
+    "entries": [
+      [
+        3,
+        3,
+        1
+      ],
+      [
+        7,
+        7,
+        1
+      ],
+      [
+        7,
+        20,
+        1
+      ],
+      [
+        7,
+        35,
+        1
+      ],
+      [
+        8,
+        8,
+        1
+      ],
+      [
+        8,
+        11,
+        1
+      ],
+      [
+        8,
+        18,
+        1
+      ],
+      [
+        11,
+        8,
+        1
+      ],
+      [
+        11,
+        11,
+        1
+      ],
+      [
+        11,
+        18,
+        1
+      ],
+      [
+        16,
+        16,
+        1
+      ],
+      [
+        16,
+        23,
+        1
+      ],
+      [
+        18,
+        8,
+        1
+      ],
+      [
+        18,
+        11,
+        1
+      ],
+      [
+        18,
+        18,
+        1
+      ],
+      [
+        20,
+        7,
+        1
+      ],
+      [
+        20,
+        20,
+        1
+      ],
+      [
+        20,
+        35,
+        1
+      ],
+      [
+        23,
+        16,
+        1
+      ],
+      [
+        23,
+        23,
+        1
+      ],
+      [
+        26,
+        26,
+        1
+      ],
+      [
+        26,
+        32,
+        1
+      ],
+      [
+        28,
+        28,
+        1
+      ],
+      [
+        32,
+        26,
+        1
+      ],
+      [
+        32,
+        32,
+        1
+      ],
+      [
+        35,
+        7,
+        1
+      ],
+      [
+        35,
+        20,
+        1
+      ],
+      [
+        35,
+        35,
+        1
+      ]
+    ]
+  },
+  "requirements": [
+    "native.go.lowering"
+  ],
+  "scopes": [
+    {
+      "id": 0,
+      "kind": "lexical",
+      "parent": -1
+    },
+    {
+      "id": 1,
+      "kind": "lexical",
+      "parent": 0
+    },
+    {
+      "id": 2,
+      "kind": "lexical",
+      "parent": 1
+    },
+    {
+      "id": 3,
+      "kind": "lexical",
+      "parent": 2
+    }
+  ],
+  "scope_membership": {
+    "rows": 37,
+    "cols": 4,
+    "storage": "coo",
+    "entries": [
+      [
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1
+      ],
+      [
+        2,
+        2,
+        1
+      ],
+      [
+        3,
+        2,
+        1
+      ],
+      [
+        4,
+        2,
+        1
+      ],
+      [
+        5,
+        2,
+        1
+      ],
+      [
+        6,
+        2,
+        1
+      ],
+      [
+        7,
+        2,
+        1
+      ],
+      [
+        8,
+        2,
+        1
+      ],
+      [
+        9,
+        2,
+        1
+      ],
+      [
+        10,
+        2,
+        1
+      ],
+      [
+        11,
+        2,
+        1
+      ],
+      [
+        12,
+        2,
+        1
+      ],
+      [
+        13,
+        2,
+        1
+      ],
+      [
+        14,
+        2,
+        1
+      ],
+      [
+        15,
+        2,
+        1
+      ],
+      [
+        16,
+        2,
+        1
+      ],
+      [
+        17,
+        2,
+        1
+      ],
+      [
+        18,
+        2,
+        1
+      ],
+      [
+        19,
+        2,
+        1
+      ],
+      [
+        20,
+        2,
+        1
+      ],
+      [
+        21,
+        2,
+        1
+      ],
+      [
+        22,
+        2,
+        1
+      ],
+      [
+        23,
+        2,
+        1
+      ],
+      [
+        24,
+        3,
+        1
+      ],
+      [
+        25,
+        3,
+        1
+      ],
+      [
+        26,
+        3,
+        1
+      ],
+      [
+        27,
+        3,
+        1
+      ],
+      [
+        28,
+        3,
+        1
+      ],
+      [
+        29,
+        3,
+        1
+      ],
+      [
+        30,
+        3,
+        1
+      ],
+      [
+        31,
+        3,
+        1
+      ],
+      [
+        32,
+        3,
+        1
+      ],
+      [
+        33,
+        2,
+        1
+      ],
+      [
+        34,
+        2,
+        1
+      ],
+      [
+        35,
+        2,
+        1
+      ],
+      [
+        36,
+        2,
+        1
+      ]
+    ]
+  },
+  "type_check_architecture": "gc/amd64"
+}

@@ -1,0 +1,7 @@
+﻿check,observed,expected,severity,codex_fix
+source_root_name,C:\Users\tarek\Desktop\clang-master,clang,critical,Strong positive structural signature for clang/llvm-project roots.
+canonical_directories,include/clang;lib/AST;lib/Sema;lib/Parse;lib/Lex;lib/CodeGen,clang,critical,Directory signatures must dominate incidental keyword scores.
+swift_structure,canonical Swift compiler directories absent,swift score = 0,critical,Require >=2 Swift-specific structural signatures before classifying Swift.
+contradiction_guard,"detected swift=4, clang=0 despite Clang tree",reject contradictory classification,critical,Add contradiction matrix and confidence-margin threshold.
+duplicate_root,root paths plus clang-master/... duplicate subtree,normalize/dedupe,high,Strip repeated selected-root basename and dedupe relative files before aggregation.
+grammar_extractor,5123 pseudo-rules in hand-written C++ parser tree,not grammar rules,high,For Clang use parser/AST/Sema structural extraction; do not treat arbitrary YAML/TOML/C++ lines as grammar.
