@@ -26,8 +26,8 @@ jobs:
         env:
           BUILD_VERSION: ${{ github.ref_name }}
         run: |
-          export CC="$(command -v gcc)"
-          pwsh.exe -NoProfile -File ./build-onefile.ps1
+          export CC="$(cygpath -w "$(command -v gcc)")"
+          cmd.exe /c "powershell.exe -NoProfile -ExecutionPolicy Bypass -File build-onefile.ps1"
 
       - name: Upload Windows executable
         uses: actions/upload-artifact@v4

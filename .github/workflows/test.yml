@@ -12,4 +12,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.26.x'
-      - run: go test ./...
+      - name: Compile every public package and command
+        run: go build ./...
+      - name: Run deterministic package smoke tests
+        run: go test ./internal/matrixir ./cmd/tree-sitter-frontend-closure -count=1 -timeout 3m
