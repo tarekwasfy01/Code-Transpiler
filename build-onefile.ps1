@@ -28,8 +28,13 @@ Write-Host 'Using local icon resource and local project sources only.'
 $candidate = Join-Path $releaseDir 'CodeTranspiler.new.exe'
 Write-Host 'Building the standalone Windows executable...'
 $buildDate = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
-$commit = (& git rev-parse --short HEAD 2>$null)
-if ([string]::IsNullOrWhiteSpace($commit)) { $commit = 'local' }
+$commit = 'local'
+try {
+    $gitCommit = (& git rev-parse --short HEAD 2>$null | Out-String).Trim()
+    if (-not [string]::IsNullOrWhiteSpace($gitCommit)) { $commit = $gitCommit }
+} catch {
+    # Source exports are intentionally buildable without a .git directory.
+}
 $ldflags = "-s -w -H windowsgui -linkmode external -extldflags '-static' -X main.version=v1.0.7 -X main.commit=$commit -X main.buildDate=$buildDate"
 & go build -mod=readonly -trimpath -ldflags $ldflags -o $candidate ./cmd/r2many
 if ($LASTEXITCODE -ne 0) { throw 'Onefile build failed' }
