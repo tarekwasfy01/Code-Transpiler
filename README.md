@@ -1,5 +1,7 @@
 # Code-Transpiler
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg)](https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler)
+
 ## Local development additions (not yet released)
 
 Native Go analysis is available through
@@ -56,7 +58,6 @@ See [frontend migration status](SEMANTIC_FRONTEND_V2.md) and the complete
 [development instructions](SEMANTIC_DEVELOPMENT.md) for implemented boundaries,
 the 1,024-case arithmetic differential test, and remaining compiler work.
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg)](https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler)
 
 Code-Transpiler is a matrix-driven many-to-many compiler for 13 programming
 languages. It is available as a Windows application, a command-line program
