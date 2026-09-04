@@ -19,6 +19,7 @@ $files = @(
     'CROSSTL_DESIGN.md', 'SEMANTIC_FRONTEND_V2.md', 'SEMANTIC_DEVELOPMENT.md',
     'FRONTEND_UAST_CONTRACT.md', 'IMPLEMENTATION_MATRIX.md', 'UAST_MIGRATION_STATUS.md',
     'THIRD_PARTY_NOTICES.md', 'THIRD_PARTY_NOTICES.txt',
+    'Package.appxmanifest',
     'go.mod', 'go.sum', 'code_transpiler.go', 'code_transpiler_test.go',
     'build-onefile.ps1', 'build-code-transpiler.bat', 'build-universal-code-transpiler.bat',
     'export-github.ps1'
@@ -29,8 +30,26 @@ if ($architecture) { Copy-Item -LiteralPath $architecture.FullName -Destination 
 # These directories are part of the productive, self-contained frontend/UAST
 # distribution.  In particular `matrices` is required at runtime by the CLI;
 # omitting it made the published package fall back to an incomplete frontend.
-foreach ($dir in @('.github', 'cmd', 'internal', 'assets', 'matrices', 'cpp_runtime', 'licenses', 'scripts', 'tools', 'docs', 'tests', 'oracle')) {
+foreach ($dir in @('.github', 'cmd', 'internal', 'assets', 'cpp_runtime', 'licenses', 'scripts', 'tools', 'docs', 'tests', 'oracle')) {
     Copy-Item -LiteralPath $dir -Destination (Join-Path $exportRoot $dir) -Recurse
+}
+# Copy only the runtime-facing matrix contracts.  The complete raw parser and
+# mining corpus remain in the development checkout; they are not required by
+# the Go module build and made the previous export exceed proxy limits.
+$matrixRoot = Join-Path $exportRoot 'matrices'
+New-Item -ItemType Directory -Path $matrixRoot -Force | Out-Null
+foreach ($relative in @(
+    'REAL_TS_MATRIX/execution_ready',
+    'REAL_TS_MATRIX/15_construct_true_parser_kernel.csv',
+    'frontend_closure/producer_spec',
+    'uast_engine',
+    'uast_handoff/semantic_language_matrix_13'
+)) {
+    $sourcePath = Join-Path 'matrices' $relative
+    $destinationPath = Join-Path $matrixRoot $relative
+    $parent = Split-Path -Parent $destinationPath
+    New-Item -ItemType Directory -Path $parent -Force | Out-Null
+    Copy-Item -LiteralPath $sourcePath -Destination $destinationPath -Recurse -Force
 }
 # Never ship local build caches, downloaded JS dependencies, or helper binaries
 # from the workspace.  They are not part of the Go package and made earlier
@@ -41,6 +60,29 @@ Get-ChildItem -LiteralPath $exportRoot -Recurse -Directory |
     ForEach-Object { Remove-Item -LiteralPath $_.FullName -Recurse -Force }
 Get-ChildItem -LiteralPath (Join-Path $exportRoot 'tools') -Filter '*.exe' -File -ErrorAction SilentlyContinue |
     Remove-Item -Force
+
+# Keep the published Go module self-contained without copying the historical
+# raw parser sources and duplicate analysis dumps.  The product consumes the
+# partitioned execution-ready tables plus the producer/kernel contracts below;
+# raw parser.c files are development/Oracle inputs and are not needed to build
+# or run the packaged Go code.  Removing the global table copies is safe because
+# LoadRealTables selects the language partition whenever it exists.
+$prune = @(
+    'matrices/REAL_TS_MATRIX/raw_parser_c',
+    'matrices/REAL_TS_MATRIX/normalized',
+    'matrices/tree_sitter_full',
+    'matrices/language_source_scans',
+    'matrices/uast_corpus_partial',
+    'matrices/REAL_TS_MATRIX/execution_ready/parse_dispatch.csv',
+    'matrices/REAL_TS_MATRIX/execution_ready/parse_dispatch_supplement.csv',
+    'matrices/REAL_TS_MATRIX/execution_ready/parse_dispatch.pre_source_order.csv'
+)
+foreach ($relative in $prune) {
+    $path = Join-Path $exportRoot $relative
+    if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Recurse -Force
+    }
+}
 
 $dist = Join-Path $exportRoot 'dist'
 New-Item -ItemType Directory -Path $dist | Out-Null

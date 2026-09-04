@@ -581,3 +581,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 Tree-sitter assets and runtime-derived parser data are distributed under the MIT License. The complete notice is embedded in CodeTranspiler.exe and shown by: CodeTranspiler.exe licenses. Source copy: licenses/TreeSitterLicense.txt.
+
+================================================================================
+PROJECT: py2many
+SOURCE: https://github.com/py2many/py2many
+LICENSE: MIT
+================================================================================
+The empirical Python-to-target emitter contracts used during backend validation
+were derived from the local py2many project. py2many is not a runtime
+dependency of CodeTranspiler and is not executed by the product.
+
+Copyright (c) 2015 Lukas Martinelli
+Copyright (c) 2019 Julian Konchunas
+Copyright (c) 2020 Arun Sharma
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

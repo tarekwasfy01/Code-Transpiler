@@ -12,6 +12,14 @@ func generateTargetFromUniversalExisting(evaluation, target string, graph *uastE
 	return generateTargetFromUniversalMode(evaluation, target, graph, true)
 }
 
+// generateTargetFromUniversalHybrid keeps native emission as the default but
+// permits an individual unsupported UAST statement to cross the existing
+// compatibility boundary.  It is selected only after a strict direct attempt
+// has identified a concrete DIRECT_NATIVE_UNAVAILABLE contract gap.
+func generateTargetFromUniversalHybrid(evaluation, target string, graph *uastExecutionGraph) (string, error) {
+	return generateTargetFromUniversalMode(evaluation, target, graph, true, true)
+}
+
 // generateTargetFromUniversalCompatibility is intentionally private. It is
 // the one explicit UAST -> target compatibility entrance. It does not receive
 // a route mode from CLI or manytomany.
@@ -19,9 +27,10 @@ func generateTargetFromUniversalCompatibility(evaluation, target string, graph *
 	return generateTargetFromUniversalMode(evaluation, target, graph, false)
 }
 
-func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecutionGraph, nativeDirect bool) (string, error) {
+func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecutionGraph, nativeDirect bool, hybrid ...bool) (string, error) {
 	generator := &targetGen{evaluation: evaluation, target: target, declared: []map[string]bool{{}}, funcs: map[string]bool{}, inline: map[string]*FunctionExpr{}, activeInline: map[*FunctionExpr]bool{}, uastFunctions: map[string]int{}, uastInline: map[string]bool{}, uastActiveInline: map[int]bool{}, helperSources: map[string]string{}, directVectors: map[string]bool{}}
 	generator.nativeDirect = nativeDirect
+	generator.hybridFallback = len(hybrid) > 0 && hybrid[0]
 	generator.usedNames = reserveUASTSymbols(graph)
 	generator.cValues = map[string]bool{}
 	// Function IDs and inline eligibility come directly from UAST flow matrices.
@@ -62,13 +71,19 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 			return "", err
 		}
 		body := generator.b.String()
+		if generator.hybridFallback && generator.runtimeUsed {
+			return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
+		}
 		if nativeSourceWithoutRuntime(target, body, generator.requiredHelperSources()) {
 			return nativeTargetPrefix(target) + body, nil
 		}
 		if generator.nativeDirect {
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", target, nativeRuntimeMarker(body, generator.requiredHelperSources()))
 		}
-		return targetPrelude(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + generator.b.String(), nil
+		// Compatibility is the explicit runtime last resort. TargetSpec keeps
+		// syntax-only imports for the native path, so use the established
+		// complete runtime prelude here rather than returning unresolved r_* calls.
+		return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + generator.b.String(), nil
 	default:
 		generator.line(nativeMainOpen(target))
 		generator.indent++
@@ -81,13 +96,16 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 		generator.indent--
 		generator.line(mainClose(target))
 		body := generator.b.String()
+		if generator.hybridFallback && generator.runtimeUsed {
+			return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
+		}
 		if nativeSourceWithoutRuntime(target, body, generator.requiredHelperSources()) {
 			return nativeTargetPrefix(target) + body, nil
 		}
 		if generator.nativeDirect {
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", target, nativeRuntimeMarker(body, generator.requiredHelperSources()))
 		}
-		return targetPrelude(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
+		return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 	}
 }
 
@@ -123,7 +141,30 @@ func nativeTargetPrefix(target string) string {
 	case "rust":
 		return ""
 	case "cpp":
-		return "#include <iostream>\n#include <vector>\n\n"
+		return `#include <iostream>
+#include <vector>
+
+template <typename T>
+static void uast_print_one(const T& value) { std::cout << value; }
+
+template <typename T>
+static void uast_print_one(const std::vector<T>& values) {
+    std::cout << "[";
+    for (size_t i = 0; i < values.size(); ++i) {
+        if (i) std::cout << ", ";
+        uast_print_one(values[i]);
+    }
+    std::cout << "]";
+}
+
+template <typename... Values>
+static void uast_print(const Values&... values) {
+    bool first = true;
+    ((std::cout << (first ? "" : " "), first = false, uast_print_one(values)), ...);
+    std::cout << std::endl;
+}
+
+`
 	case "c":
 		return "#include <stdio.h>\n\n"
 	case "zig":

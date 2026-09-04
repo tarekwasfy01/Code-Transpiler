@@ -30,6 +30,12 @@ type targetGen struct {
 	// language; those retain the established runtime encoding and decoder
 	// contract.
 	nativeDirect     bool
+	// hybridFallback is enabled only for the second pass after a strict direct
+	// projection fails.  It lets the shared UAST emitter retain successful
+	// native statements while routing only unsupported statements through the
+	// established compatibility runtime.
+	hybridFallback bool
+	runtimeUsed   bool
 	generatedAt      map[string]int
 	uastFunctions    map[string]int
 	uastInline       map[string]bool

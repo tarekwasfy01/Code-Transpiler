@@ -55,7 +55,9 @@ func transpile(args []string) error {
 	fs.StringVar(&target, "to", "go", "alias of -target")
 	fs.StringVar(&out, "o", "", "output file, or directory for -target all")
 	native := fs.Bool("native", false, "strict native frontend; no legacy fallback")
-	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-source": true, "-from": true, "-target": true, "-to": true, "-o": true, "-native": false})); err != nil {
+	runtimeFallback := fs.Bool("runtime", true, "allow semantic runtime as last-resort fallback")
+	noRuntime := fs.Bool("no-runtime", false, "disable semantic runtime fallback (DIRECT only)")
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-source": true, "-from": true, "-target": true, "-to": true, "-o": true, "-native": false, "-runtime": true, "-no-runtime": false})); err != nil {
 		return err
 	}
 	if fs.NArg() != 1 {
@@ -128,7 +130,7 @@ func transpile(args []string) error {
 			// CLI and GUI share the same immutable request boundary. The CLI may
 			// still fan out targets, but every individual output crosses exactly
 			// the same Frontend -> UAST -> Native/Runtime core as GUI Convert.
-			result, coreErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: destination, EntryPoint: "cli"})
+			result, coreErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: destination, EntryPoint: "cli", DisableRuntimeFallback: *noRuntime || !*runtimeFallback})
 			code, err = result.Code, coreErr
 		} else if program.Semantic == nil && destination == source {
 			// This is the explicit legacy ingress compatibility case: parsing did

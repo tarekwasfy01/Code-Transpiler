@@ -73,11 +73,12 @@ type App struct {
 	sourceOpen, targetOpen                                                               bool
 	source, target                                                                       int
 
-	showInfo  bool
-	showRun   bool
-	runOutput string
-	status    string
-	busy      bool
+	showInfo        bool
+	showRun         bool
+	runOutput       string
+	status          string
+	busy            bool
+	runtimeFallback widget.Bool
 
 	convertGeneration atomic.Uint64
 	runGeneration     atomic.Uint64
@@ -100,13 +101,14 @@ func New() *App {
 	w.Option(app.Title("Code Transpiler"), app.Size(unit.Dp(1280), unit.Dp(760)), app.MinSize(unit.Dp(900), unit.Dp(560)))
 	a := &App{
 		window: w, theme: th, status: "Ready",
-		convertResults: make(chan conversionResult, 4),
-		runResults:     make(chan runResult, 2),
-		saveResults:    make(chan saveResult, 2),
-		sourceClicks:   make([]widget.Clickable, len(uiLanguages)),
-		targetClicks:   make([]widget.Clickable, len(uiLanguages)),
-		source:         0,
-		target:         1,
+		convertResults:  make(chan conversionResult, 4),
+		runResults:      make(chan runResult, 2),
+		saveResults:     make(chan saveResult, 2),
+		sourceClicks:    make([]widget.Clickable, len(uiLanguages)),
+		targetClicks:    make([]widget.Clickable, len(uiLanguages)),
+		source:          0,
+		target:          1,
+		runtimeFallback: widget.Bool{Value: true},
 	}
 	a.hl = highlight.NewService(w.Invalidate)
 	a.left = newCodeEditor(th, false, codeColorScheme(true, true))
@@ -391,12 +393,13 @@ func (a *App) startConvert() {
 	source := a.currentSource().ID
 	target := a.currentTarget().ID
 	lang := a.langForTarget()
+	disableRuntime := !a.runtimeFallback.Value
 	go func() {
 		err := readErr
 		code := ""
 		var toks []syntax.Token
 		if err == nil {
-			result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui"})
+			result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", DisableRuntimeFallback: disableRuntime})
 			code, err = result.Code, convertErr
 		}
 		if err == nil && strings.TrimSpace(code) != "" {
@@ -673,6 +676,11 @@ func (a *App) layoutFooter(gtx layout.Context) layout.Dimensions {
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.infoBtn, "Info") }),
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{Size: gtx.Constraints.Min} }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				check := material.CheckBox(a.theme, &a.runtimeFallback, "Semantic runtime fallback")
+				return check.Layout(gtx)
+			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 12}.Layout(gtx) }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				label := material.Caption(a.theme, fmt.Sprintf("13-language matrix | GUI thread pinned | %d Ps", runtime.GOMAXPROCS(0)))
 				label.Color = color.NRGBA{R: 110, G: 118, B: 129, A: 255}

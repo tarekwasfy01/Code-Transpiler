@@ -238,6 +238,36 @@ func EmitSemantic(target string, p *SemanticProgram) (string, error) {
 	return generateTargetFromUniversal(u.Evaluation, target, graph)
 }
 
+// EmitSemanticDirect is used by the intermediate-route planner. It shares the
+// canonical semantic/UAST construction with EmitSemantic but asks the
+// projector for a strict native result, so a route can be attempted before
+// compatibility runtime output is considered.
+func EmitSemanticDirect(target string, p *SemanticProgram) (string, error) {
+	if err := ValidateSemanticProgram(p); err != nil {
+		return "", err
+	}
+	if err := validateExecutableDialects(p); err != nil {
+		return "", err
+	}
+	u, err := canonicalUniversalAST(p)
+	if err != nil {
+		return "", err
+	}
+	if err := validateUASTTargetCapabilities(u, target); err != nil {
+		return "", err
+	}
+	if err := validateUASTTargetPreservation(u, target); err != nil {
+		return "", err
+	}
+	if u.Evaluation != "lazy_demand" && u.Evaluation != "eager_left_to_right" {
+		return "", fmt.Errorf("unknown evaluation contract %q", u.Evaluation)
+	}
+	if !validValueContract(u.ValueModel, u.Types) || u.IndexBase != 1 {
+		return "", fmt.Errorf("unmodeled value or indexing contract")
+	}
+	return (UniversalTargetProjector{}).EmitDirect(u, target)
+}
+
 // The node projections preserve lexical scope and ordered operand occurrences.
 // They are descriptions of this IR, not claims that all source-language types
 // or environment semantics were understood by the conservative frontends.

@@ -715,9 +715,14 @@ func (p UniversalTargetProjector) Project(u *UniversalASTDocument, spec TargetSp
 		if !strings.Contains(err.Error(), "DIRECT_NATIVE_UNAVAILABLE") {
 			return nil, err
 		}
-		// Compatibility is a last resort selected here, once, from the native
-		// result. It is never controlled by source provenance, CLI metadata, or
-		// manytomany route propagation.
+		// Retry with statement-level hybrid partitioning. Successful native
+		// statements remain native; only the statement whose structured UAST
+		// contract failed is emitted through the existing compatibility runtime.
+		if hybrid, hybridErr := generateTargetFromUniversalHybrid(u.Evaluation, spec.ID, graph); hybridErr == nil {
+			return DocText{Text: hybrid}, nil
+		}
+		// Compatibility remains the final document-level fallback when a block
+		// cannot be lowered even through the hybrid boundary.
 		source, err = generateTargetFromUniversalCompatibility(u.Evaluation, spec.ID, graph)
 		if err != nil {
 			return nil, err
@@ -745,12 +750,62 @@ func (p UniversalTargetProjector) Project(u *UniversalASTDocument, spec TargetSp
 	return EmitNativeDocument(spec, source)
 }
 
+// ProjectDirect is the strict counterpart used by the matrix route planner.
+// It performs the same structural and capability validation but never selects
+// compatibility runtime output. A caller can therefore try an intermediate
+// target and only invoke the normal Project method as the final fallback.
+func (p UniversalTargetProjector) ProjectDirect(u *UniversalASTDocument, spec TargetSpec) (Doc, error) {
+	if _, _, err := p.Analyze(u, spec); err != nil {
+		return nil, err
+	}
+	if err := validateUASTStructureProjectionContracts(u); err != nil {
+		return nil, err
+	}
+	if err := validateUASTTargetSyntaxTemplates(u, spec); err != nil {
+		return nil, err
+	}
+	graph, err := newUASTExecutionGraph(u)
+	if err != nil {
+		return nil, err
+	}
+	if spec.ID == "r" {
+		source, err := universalRSource(u, true)
+		if err != nil {
+			return nil, err
+		}
+		return EmitNativeDocument(spec, source)
+	}
+	source, err := generateTargetFromUniversalExisting(u.Evaluation, spec.ID, graph)
+	if err != nil {
+		return nil, err
+	}
+	if taint := AnalyzeRuntimeTaint(source, nil); taint.Tainted() {
+		return nil, fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", spec.ID, nativeRuntimeMarker(source, nil))
+	}
+	if syntax := CheckTargetSyntax(spec.ID, source); syntax.Checked && !syntax.Valid {
+		return nil, fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted invalid syntax", spec.ID)
+	}
+	return EmitNativeDocument(spec, source)
+}
+
 func (p UniversalTargetProjector) Emit(u *UniversalASTDocument, target string) (string, error) {
 	spec, ok := targetSpec(target)
 	if !ok {
 		return "", fmt.Errorf("unknown target %q", target)
 	}
 	doc, err := p.Project(u, spec)
+	if err != nil {
+		return "", err
+	}
+	return (UniversalFormatter{Indent: spec.Indent, Newline: "\n"}).Format(doc), nil
+}
+
+func (p UniversalTargetProjector) EmitDirect(u *UniversalASTDocument, target string) (string, error) {
+	spec, ok := targetSpec(target)
+	if !ok {
+		return "", fmt.Errorf("unknown target %q", target)
+	}
+	doc, err := p.ProjectDirect(u, spec)
 	if err != nil {
 		return "", err
 	}

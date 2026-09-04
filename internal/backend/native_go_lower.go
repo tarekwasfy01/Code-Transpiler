@@ -372,6 +372,18 @@ func (l *goScalarLowerer) supportedValue(t types.Type) bool {
 	}
 	return false
 }
+
+// canonicalGoIndex converts Go's zero-based source index into the canonical
+// UAST one-based index contract. Target projectors then apply their existing
+// target-specific representation once; the source index is never forwarded as
+// executable Go text.
+func (l *goScalarLowerer) canonicalGoIndex(n ast.Expr) *SemanticExpression {
+	return &SemanticExpression{
+		Kind: "binary", Operator: "+", Left: l.expr(n),
+		Right:  &SemanticExpression{Kind: "literal", LiteralKind: "number", Text: "1", Source: l.span(n)},
+		Source: l.span(n),
+	}
+}
 func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 	if typ, ok := nativeFixedInteger(l.info.TypeOf(n)); ok {
 		return l.integerExpr(n, typ)
@@ -423,19 +435,81 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 	}
 	switch x := n.(type) {
 	case *ast.CallExpr:
-		if id, ok := x.Fun.(*ast.Ident); ok && id.Name == "len" && len(x.Args)==1 { return &SemanticExpression{Kind:"call",Operator:"eager_left_to_right",Value:&SemanticExpression{Kind:"identifier",Name:"length"},Arguments:[]SemanticArgument{{Value:l.expr(x.Args[0])}},Source:l.span(x)} }
-		if id, ok := x.Fun.(*ast.Ident); ok && id.Name == "make" { e.Kind="call"; e.Operator="eager_left_to_right"; e.Value=&SemanticExpression{Kind:"identifier",Name:"__make_float64"}; for _,a:=range x.Args[1:] { e.Arguments=append(e.Arguments,SemanticArgument{Value:l.expr(a)}) }; return e }
-		if sel, ok := x.Fun.(*ast.SelectorExpr); ok && sel.Sel.Name=="Println" { e.Kind="call"; e.Operator="eager_left_to_right"; e.Value=&SemanticExpression{Kind:"identifier",Name:"print"}; for _,a:=range x.Args { e.Arguments=append(e.Arguments,SemanticArgument{Value:l.expr(a)}) }; return e }
-		if _, ok := x.Fun.(*ast.FuncLit); ok { e.Kind="call"; e.Operator="eager_left_to_right"; e.Value=l.expr(x.Fun); for _,a:=range x.Args { e.Arguments=append(e.Arguments,SemanticArgument{Value:l.expr(a)}) }; return e }
+		if id, ok := x.Fun.(*ast.Ident); ok && id.Name == "len" && len(x.Args) == 1 {
+			return &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "length"}, Arguments: []SemanticArgument{{Value: l.expr(x.Args[0])}}, Source: l.span(x)}
+		}
+		if id, ok := x.Fun.(*ast.Ident); ok && id.Name == "make" {
+			e.Kind = "call"
+			e.Operator = "eager_left_to_right"
+			e.Value = &SemanticExpression{Kind: "identifier", Name: "__make_float64"}
+			for _, a := range x.Args[1:] {
+				e.Arguments = append(e.Arguments, SemanticArgument{Value: l.expr(a)})
+			}
+			return e
+		}
+		if sel, ok := x.Fun.(*ast.SelectorExpr); ok && sel.Sel.Name == "Println" {
+			e.Kind = "call"
+			e.Operator = "eager_left_to_right"
+			e.Value = &SemanticExpression{Kind: "identifier", Name: "print"}
+			for _, a := range x.Args {
+				e.Arguments = append(e.Arguments, SemanticArgument{Value: l.expr(a)})
+			}
+			return e
+		}
+		if _, ok := x.Fun.(*ast.FuncLit); ok {
+			e.Kind = "call"
+			e.Operator = "eager_left_to_right"
+			e.Value = l.expr(x.Fun)
+			for _, a := range x.Args {
+				e.Arguments = append(e.Arguments, SemanticArgument{Value: l.expr(a)})
+			}
+			return e
+		}
 		return l.helperCall(x)
 	case *ast.CompositeLit:
-		e.Kind="aggregate"; for _,a:=range x.Elts { e.Arguments=append(e.Arguments,SemanticArgument{Value:l.expr(a)}) }; return e
+		e.Kind = "aggregate"
+		for _, a := range x.Elts {
+			e.Arguments = append(e.Arguments, SemanticArgument{Value: l.expr(a)})
+		}
+		return e
 	case *ast.IndexExpr:
-		e.Kind="index"; e.Value=l.expr(x.X); e.Arguments=[]SemanticArgument{{Value:l.expr(x.Index)}}; return e
+		e.Kind = "index"
+		e.Value = l.expr(x.X)
+		e.Arguments = []SemanticArgument{{Value: l.canonicalGoIndex(x.Index)}}
+		return e
 	case *ast.SliceExpr:
-		e.Kind="index"; e.Value=l.expr(x.X); if x.Low!=nil { e.Arguments=append(e.Arguments,SemanticArgument{Value:l.expr(x.Low)}) } else { e.Arguments=append(e.Arguments,SemanticArgument{Missing:true}) }; if x.High!=nil { e.Arguments=append(e.Arguments,SemanticArgument{Value:l.expr(x.High)}) } else { e.Arguments=append(e.Arguments,SemanticArgument{Missing:true}) }; if x.Slice3&&x.Max!=nil { e.Arguments=append(e.Arguments,SemanticArgument{Value:l.expr(x.Max)}) }; return e
+		e.Kind = "index"
+		e.Value = l.expr(x.X)
+		if x.Low != nil {
+			e.Arguments = append(e.Arguments, SemanticArgument{Value: l.expr(x.Low)})
+		} else {
+			e.Arguments = append(e.Arguments, SemanticArgument{Missing: true})
+		}
+		if x.High != nil {
+			e.Arguments = append(e.Arguments, SemanticArgument{Value: l.expr(x.High)})
+		} else {
+			e.Arguments = append(e.Arguments, SemanticArgument{Missing: true})
+		}
+		if x.Slice3 && x.Max != nil {
+			e.Arguments = append(e.Arguments, SemanticArgument{Value: l.expr(x.Max)})
+		}
+		return e
 	case *ast.FuncLit:
-		fn:=&SemanticFunction{}; if x.Type.Params!=nil { for _,f:=range x.Type.Params.List { for _,p:=range f.Names { fn.Parameters=append(fn.Parameters,SemanticParameter{Name:l.name(p),Passing:"value"}) } } }; prev:=l.inFunction; l.inFunction=true; fn.Body=l.stmt(x.Body); l.inFunction=prev; e.Kind="function"; e.Function=fn; return e
+		fn := &SemanticFunction{}
+		if x.Type.Params != nil {
+			for _, f := range x.Type.Params.List {
+				for _, p := range f.Names {
+					fn.Parameters = append(fn.Parameters, SemanticParameter{Name: l.name(p), Passing: "value"})
+				}
+			}
+		}
+		prev := l.inFunction
+		l.inFunction = true
+		fn.Body = l.stmt(x.Body)
+		l.inFunction = prev
+		e.Kind = "function"
+		e.Function = fn
+		return e
 	case *ast.ParenExpr:
 		return l.expr(x.X)
 	case *ast.Ident:
@@ -445,9 +519,16 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 		// Selectors remain ordinary callee expressions; the shared call
 		// projector normalizes qualified names through its target contract.
 		e.Kind = "identifier"
-		if pkg, ok := x.X.(*ast.Ident); ok { e.Name = pkg.Name + "." + x.Sel.Name } else { e.Name = x.Sel.Name }
+		if pkg, ok := x.X.(*ast.Ident); ok {
+			e.Name = pkg.Name + "." + x.Sel.Name
+		} else {
+			e.Name = x.Sel.Name
+		}
 	case *ast.UnaryExpr:
-		if x.Op != gotoken.NOT {
+		// Unary operations are semantic expressions. The target renderer already
+		// has a native unary contract, so preserve the Go AST operation instead
+		// of keeping the former boolean-only frontend restriction.
+		if x.Op != gotoken.NOT && x.Op != gotoken.ADD && x.Op != gotoken.SUB {
 			l.fail(n, "unary operation")
 			return e
 		}
@@ -455,7 +536,13 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 		e.Operator = "!"
 		e.Value = l.expr(x.X)
 	case *ast.BinaryExpr:
-		if x.Op != gotoken.EQL && x.Op != gotoken.NEQ && x.Op != gotoken.LAND && x.Op != gotoken.LOR && x.Op != gotoken.ADD && x.Op != gotoken.SUB && x.Op != gotoken.MUL && x.Op != gotoken.QUO && x.Op != gotoken.REM {
+		// These operators map one-for-one onto the existing typed binary UAST
+		// operation. Restrict only operations which need a distinct target
+		// contract (bitwise shifts, pointer arithmetic, channels, ...).
+		switch x.Op {
+		case gotoken.EQL, gotoken.NEQ, gotoken.LSS, gotoken.LEQ, gotoken.GTR, gotoken.GEQ,
+			gotoken.LAND, gotoken.LOR, gotoken.ADD, gotoken.SUB, gotoken.MUL, gotoken.QUO, gotoken.REM:
+		default:
 			l.fail(n, "binary operation")
 			return e
 		}
@@ -497,7 +584,7 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 		if !ok {
 			if idx, yes := x.Lhs[0].(*ast.IndexExpr); yes {
 				s.Kind = "expression"
-				s.Expression = &SemanticExpression{Kind:"call", Operator:"eager_left_to_right", Value:&SemanticExpression{Kind:"identifier",Name:"__index_set"}, Arguments:[]SemanticArgument{{Value:l.expr(idx.X)},{Value:l.expr(idx.Index)},{Value:l.expr(x.Rhs[0])}}, Source:l.span(n)}
+				s.Expression = &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "__index_set"}, Arguments: []SemanticArgument{{Value: l.expr(idx.X)}, {Value: l.canonicalGoIndex(idx.Index)}, {Value: l.expr(x.Rhs[0])}}, Source: l.span(n)}
 				break
 			}
 			l.fail(n, "nonlocal assignment")
@@ -559,21 +646,62 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 			s.Else = &other
 		}
 	case *ast.ForStmt:
-		if x.Init != nil || x.Post != nil || x.Cond == nil {
-			l.fail(n, "only condition-only for loops are supported")
+		if x.Cond == nil {
+			l.fail(n, "unbounded for loop")
 			break
 		}
-		s.Kind = "while"
-		s.Condition = l.expr(x.Cond)
+		// A counted Go loop is represented using existing language-neutral
+		// block, assignment and while contracts. This intentionally does not
+		// retain Go's `for init; condition; post` syntax past the frontend.
+		s.Kind = "block"
+		if x.Init != nil {
+			s.Statements = append(s.Statements, l.stmt(x.Init))
+		}
+		loop := SemanticStatement{Kind: "while", Condition: l.expr(x.Cond), Source: l.span(x)}
 		l.loopDepth++
 		body := l.stmt(x.Body)
 		l.loopDepth--
-		s.Body = &body
+		if x.Post != nil {
+			if body.Kind != "block" {
+				body = SemanticStatement{Kind: "block", Statements: []SemanticStatement{body}, Source: l.span(x.Body)}
+			}
+			body.Statements = append(body.Statements, l.stmt(x.Post))
+		}
+		loop.Body = &body
+		s.Statements = append(s.Statements, loop)
+	case *ast.IncDecStmt:
+		if x.Tok != gotoken.INC && x.Tok != gotoken.DEC {
+			l.fail(n, "increment operation")
+			break
+		}
+		ident, ok := x.X.(*ast.Ident)
+		if !ok {
+			l.fail(n, "nonlocal increment")
+			break
+		}
+		s.Kind = "assign"
+		s.Name = l.name(ident)
+		s.AssignOp = "<-"
+		op := "+"
+		if x.Tok == gotoken.DEC {
+			op = "-"
+		}
+		s.Expression = &SemanticExpression{Kind: "binary", Operator: op,
+			Left:  &SemanticExpression{Kind: "identifier", Name: s.Name, Source: l.span(ident)},
+			Right: &SemanticExpression{Kind: "literal", LiteralKind: "number", Text: "1", Source: l.span(x)}, Source: l.span(x)}
 	case *ast.RangeStmt:
 		value, ok := x.Value.(*ast.Ident)
-		if !ok { l.fail(n, "range value binding"); break }
+		if !ok {
+			l.fail(n, "range value binding")
+			break
+		}
 		s.Kind = "for"
 		s.Name = l.name(value)
+		if key, ok := x.Key.(*ast.Ident); ok && key.Name != "_" {
+			// The key is a structured binding fact. It is consumed by the common
+			// iterable-loop renderer, rather than retained as Go range syntax.
+			s.Attributes = map[string]any{"iteration.index_binding": l.name(key)}
+		}
 		s.Sequence = l.expr(x.X)
 		l.loopDepth++
 		body := l.stmt(x.Body)

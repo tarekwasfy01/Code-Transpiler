@@ -118,3 +118,90 @@ func TestNativeGoExecutableRejectsUnsupported(t *testing.T) {
 		})
 	}
 }
+
+// This is the container/iteration/closure shape used by the desktop client.
+// It must cross the Go AST -> FrontendSemanticFacts -> canonical UAST boundary
+// as structure, never as an embedded Go expression string.
+func TestNativeGoStructuredContainerIterationClosure(t *testing.T) {
+	source := `package main
+import "fmt"
+func main() {
+    var x []float64 = []float64{1, 2, 3}
+    fmt.Println(func() []float64 { out := make([]float64, len(x)); for i, v := range x { out[i] = v * 2 }; return out }())
+}`
+	p, err := LowerNativeGo("input.go", source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.UniversalAST == nil || len(p.UniversalAST.Nodes) == 0 {
+		t.Fatal("structured Go input did not produce a canonical UAST")
+	}
+	for _, n := range p.UniversalAST.Nodes {
+		if n.StructuralKind == "" {
+			t.Fatal("UAST contains an untyped structural node")
+		}
+	}
+	graph, err := newUASTExecutionGraph(p.UniversalAST)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cpp, err := generateTargetFromUniversalExisting(p.UniversalAST.Evaluation, "cpp", graph)
+	if err != nil {
+		t.Fatalf("structured Go UAST did not reach the native C++ backend: %v", err)
+	}
+	if taint := AnalyzeRuntimeTaint(cpp, nil); taint.Tainted() {
+		t.Fatalf("native C++ output contains runtime artifacts: %v\n%s", taint.Artifacts, cpp)
+	}
+	// The public projector must select this same runtime-free native path; it
+	// may not silently exchange a structurally projectable UAST for the
+	// compatibility backend.
+	routed, err := EmitSemantic("cpp", p)
+	if err != nil {
+		t.Fatalf("public C++ projection failed: %v", err)
+	}
+	if taint := AnalyzeRuntimeTaint(routed, nil); taint.Tainted() {
+		t.Fatalf("public C++ projection fell back to runtime artifacts: %v\n%s", taint.Artifacts, routed)
+	}
+	if _, err := exec.LookPath("g++"); err == nil {
+		file := filepath.Join(t.TempDir(), "main.cpp")
+		if err := os.WriteFile(file, []byte(routed), 0600); err != nil {
+			t.Fatal(err)
+		}
+		if output, err := exec.Command("g++", "-std=c++17", "-fsyntax-only", file).CombinedOutput(); err != nil {
+			t.Fatalf("C++ native closure output is not syntactically valid: %v\n%s\n%s", err, output, cpp)
+		}
+	}
+}
+
+// The failure primitive matrix identifies unary, relational binary and counted
+// loop lowering as one shared frontend contract. Keep them together so future
+// changes cannot reintroduce a scalar-only Go AST subset.
+func TestNativeGoStructuredOperatorsAndCountedLoop(t *testing.T) {
+	source := `package main
+import "fmt"
+func main() {
+    for i := 0.0; i < 3.0; i++ {
+        if -i <= 0.0 && i >= 0.0 { fmt.Println(i) }
+    }
+}`
+	p, err := LowerNativeGo("operators.go", source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cpp, err := EmitSemantic("cpp", p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if taint := AnalyzeRuntimeTaint(cpp, nil); taint.Tainted() {
+		t.Fatalf("counted-loop projection contains runtime artifacts: %v\n%s", taint.Artifacts, cpp)
+	}
+	if _, err := exec.LookPath("g++"); err == nil {
+		file := filepath.Join(t.TempDir(), "main.cpp")
+		if err := os.WriteFile(file, []byte(cpp), 0600); err != nil {
+			t.Fatal(err)
+		}
+		if output, err := exec.Command("g++", "-std=c++17", "-fsyntax-only", file).CombinedOutput(); err != nil {
+			t.Fatalf("C++ native counted-loop output is invalid: %v\n%s\n%s", err, output, cpp)
+		}
+	}
+}

@@ -17,6 +17,9 @@ import (
 // BOMs, normalizes line endings, or rewrites editor text before parsing.
 type TranspileRequest struct {
 	Source, SourceLanguage, TargetLanguage, EntryPoint string
+	// DisableRuntimeFallback is opt-in so existing CLI/API callers retain the
+	// established NATIVE -> semantic-runtime -> ERROR order.
+	DisableRuntimeFallback bool
 }
 
 // TranspileTrace makes a GUI/CLI divergence observable without exposing a
@@ -34,6 +37,7 @@ type TranspileTrace struct {
 	ErrorClass             string `json:"error_class,omitempty"`
 	NativeAttempt          bool   `json:"native_attempt"`
 	RuntimeFallback        bool   `json:"runtime_fallback"`
+	IntermediateRoute      string `json:"intermediate_route,omitempty"`
 }
 
 type TranspileResult struct {
@@ -66,8 +70,34 @@ func TranspileCore(request TranspileRequest) (TranspileResult, error) {
 			trace.UASTSHA256 = sha256Text(string(wire))
 		}
 	}
-	code, err := Emit(target, p)
+	code, err := EmitDirect(target, p)
 	if err != nil {
+		if request.DisableRuntimeFallback {
+			trace.ErrorClass = err.Error()
+			return TranspileResult{Trace: trace}, err
+		}
+		// Native and semantic-runtime emission are exhausted at this point.
+		// Use the matrix-defined language set as a bounded, cycle-free
+		// compatibility route: emit one intermediate target, parse that output
+		// through the same frontend, then emit the requested target.  This is a
+		// last resort and never replaces a successful direct/runtime result.
+		viaCode, via, routeErr := transpileViaIntermediate(p, target)
+		if routeErr != nil {
+			// Only after all strict matrix routes are exhausted use the explicit
+			// semantic-runtime projector as the last resort.
+			code, err = Emit(target, p)
+			if err != nil {
+				trace.ErrorClass = err.Error()
+				return TranspileResult{Trace: trace}, err
+			}
+		} else {
+			code = viaCode
+			trace.IntermediateRoute = via
+			trace.ProjectionMode = "matrix-route"
+		}
+	}
+	if request.DisableRuntimeFallback && backend.AnalyzeRuntimeTaint(code, nil).Tainted() {
+		err = fmt.Errorf("RUNTIME_DISABLED: native target emission unavailable for %s", target)
 		trace.ErrorClass = err.Error()
 		return TranspileResult{Trace: trace}, err
 	}
@@ -79,6 +109,41 @@ func TranspileCore(request TranspileRequest) (TranspileResult, error) {
 		trace.ProjectionMode = "native-first"
 	}
 	return TranspileResult{Code: code, Trace: trace}, nil
+}
+
+// transpileViaIntermediate tries each available language exactly once as an
+// intermediate representation.  It deliberately works on Program/Semantic
+// values and never calls TranspileCore recursively, so routes cannot cycle or
+// multiply indefinitely.
+func transpileViaIntermediate(program Program, target string) (string, string, error) {
+	for _, intermediate := range Languages {
+		if intermediate == target || intermediate == program.Source {
+			continue
+		}
+		// Prefer a fully native intermediate. If that target lacks one
+		// operation, its existing compatibility rendering is still useful as a
+		// bounded bridge: the generated target source is parsed once, then the
+		// requested target is attempted natively. This is strictly before the
+		// document-level runtime fallback and never recurses through TranspileCore.
+		middle, err := EmitDirect(intermediate, program)
+		routeKind := "native"
+		if err != nil || middle == "" {
+			middle, err = Emit(intermediate, program)
+			routeKind = "compat"
+		}
+		if err != nil || middle == "" {
+			continue
+		}
+		reparsed, err := Parse(intermediate, middle)
+		if err != nil {
+			continue
+		}
+		final, err := EmitDirect(target, reparsed)
+		if err == nil && final != "" {
+			return final, program.Source + "->" + intermediate + "->" + target + "(" + routeKind + ")", nil
+		}
+	}
+	return "", "", fmt.Errorf("no intermediate route from %s to %s", program.Source, target)
 }
 
 // Language is both a supported source and target language.
@@ -265,6 +330,19 @@ func Emit(target string, p Program) (string, error) {
 		b.WriteString("}}\n")
 	}
 	return b.String(), nil
+}
+
+// EmitDirect requests one strict native projection without changing the
+// normal Emit API, whose compatibility runtime fallback remains preserved.
+func EmitDirect(target string, p Program) (string, error) {
+	target = normalize(target)
+	if !supported(target) {
+		return "", fmt.Errorf("unsupported target %q", target)
+	}
+	if p.Semantic != nil {
+		return backend.EmitSemanticDirect(target, p.Semantic)
+	}
+	return Emit(target, p)
 }
 
 func Transpile(source, target, code string) (string, error) {

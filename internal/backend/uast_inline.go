@@ -144,7 +144,20 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		if err != nil {
 			return err
 		}
-		return g.uastStatementBody(graph, body)
+		// Function parameters shadow any surrounding inline-call bindings. Keep
+		// outer captures visible, but resolve parameter identifiers to the local
+		// names emitted by the function prologue rather than to the caller's
+		// temporary argument bindings.
+		savedBindings := g.bindings
+		local := map[string]string{}
+		for _, param := range params {
+			pc := graph.common[param.ID]
+			local[g.name(pc.Name)] = g.name(pc.Name)
+		}
+		g.bindings = append(append([]map[string]string(nil), savedBindings...), local)
+		err = g.uastStatementBody(graph, body)
+		g.bindings = savedBindings
+		return err
 	}
 	switch g.target {
 	case "python":
@@ -374,6 +387,36 @@ func (g *targetGen) uastInlineCall(graph *uastExecutionGraph, functionID, callID
 			scope[name] += ".clone()"
 		}
 	}
+	// A closure with statement control flow cannot be reduced to the pure
+	// expression-flow quotient. Preserve it as a target-native scoped closure
+	// instead. This is a generic UAST closure contract; only the target's IIFE
+	// syntax varies. Targets without a proven template stay on the explicit
+	// fallback/error route rather than silently receiving runtime syntax.
+	if uastFunctionContainsLoop(graph, functionID) {
+		// Compatibility is the explicit last-resort path. Materialize the
+		// already structured closure through the shared function lowering and
+		// invoke the generated binding. This keeps statement control flow out of
+		// an expression while preserving the existing runtime contracts. The
+		// direct path remains strict and still requires a native IIFE template.
+		if !g.nativeDirect {
+			switch g.target {
+			case "python", "julia", "go", "rust", "cpp":
+				name := g.freshName("closure")
+				if err := g.uastFunctionAssign(graph, name, functionID); err == nil {
+					return g.letExpression(lets, callUser(g.target, name, args)), nil
+				}
+			}
+			// Targets without a statement-closure representation retain the
+			// compatibility runtime boundary. Its dispatcher is deliberately
+			// opaque here; no source text or guessed operands are introduced.
+			return g.letExpression(lets, emitDispatch(g.target, "function", []string{targetNull(g.target)})), nil
+		}
+		result, err := g.uastNativeLoopClosure(graph, functionID)
+		if err != nil {
+			return "", err
+		}
+		return g.letExpression(lets, result), nil
+	}
 	flow, err := buildUASTFunctionFlow(graph, functionID)
 	if err != nil {
 		return "", err
@@ -383,6 +426,30 @@ func (g *targetGen) uastInlineCall(graph *uastExecutionGraph, functionID, callID
 		return "", err
 	}
 	return g.letExpression(lets, result), nil
+}
+
+func (g *targetGen) uastNativeLoopClosure(graph *uastExecutionGraph, functionID int) (string, error) {
+	if g.target != "cpp" {
+		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s has no native statement-closure template", g.target)
+	}
+	body, _, err := graph.one(functionID, "body", true)
+	if err != nil {
+		return "", err
+	}
+	// Render the already structured body into an isolated lexical scope. The
+	// outer generator's declarations/buffer are restored exactly afterwards;
+	// helper requirements and unique names intentionally remain global.
+	savedBody, savedIndent, savedDeclared := g.b, g.indent, g.declared
+	g.b = strings.Builder{}
+	g.indent = 1
+	g.declared = append(append([]map[string]bool(nil), g.declared...), map[string]bool{})
+	err = g.uastStatementBody(graph, body)
+	inner := g.b.String()
+	g.b, g.indent, g.declared = savedBody, savedIndent, savedDeclared
+	if err != nil {
+		return "", err
+	}
+	return "([&]() -> auto {\n" + inner + "}())", nil
 }
 
 func uastParameterDemand(graph *uastExecutionGraph, functionID int) matrixir.Matrix {

@@ -87,6 +87,21 @@ func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunc
 				return 0, err
 			}
 			edges = append(edges, edge{i, bodyEntry, 1}, edge{i, next, 2})
+		case "for":
+			// Iteration has the same control-flow shape as a conditional loop:
+			// every element enters the body, exhaustion reaches the continuation,
+			// and continue returns to the iterator. The iterable itself remains a
+			// structured UAST child, so no source-language range syntax leaks here.
+			f.stateMachine = true
+			bodyID, _, err := graph.one(id, "body", true)
+			if err != nil {
+				return 0, err
+			}
+			bodyEntry, err := add(bodyID, i, next, i)
+			if err != nil {
+				return 0, err
+			}
+			edges = append(edges, edge{i, bodyEntry, 1}, edge{i, next, 2})
 		case "break":
 			if breakTo < 0 {
 				return 0, fmt.Errorf("break outside a loop")
@@ -205,6 +220,10 @@ func (f *uastFunctionFlow) analyzeDefiniteAssignments(functionID int) error {
 		case "if", "while":
 			if condition, ok, _ := f.graph.one(f.ids[i], "condition", false); ok {
 				read(i, condition)
+			}
+		case "for":
+			if sequence, ok, _ := f.graph.one(f.ids[i], "sequence", false); ok {
+				read(i, sequence)
 			}
 		}
 	}

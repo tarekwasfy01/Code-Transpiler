@@ -2,6 +2,7 @@ package backend
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -150,26 +151,8 @@ func (g *targetGen) nativeDispatch(name string, args []string) (string, error) {
 		return "(" + args[0] + " " + op + " " + args[1] + ")", nil
 	}
 	if name == "length" && len(args) == 1 {
-		switch g.target {
-		case "go":
-			return "float64(len(" + args[0] + "))", nil
-		case "python", "julia", "nim", "kotlin", "swift":
-			return "len(" + args[0] + ")", nil
-		case "rust":
-			return args[0] + ".len() as f64", nil
-		case "cpp":
-			return args[0] + ".size()", nil
-		case "c":
-			if strings.Contains(args[0], "(double*)0") {
-				return "0", nil
-			}
-			return "(double)(sizeof(" + args[0] + ") / sizeof(double))", nil
-		case "csharp":
-			return args[0] + ".Length", nil
-		case "java":
-			return args[0] + ".length", nil
-		case "zig":
-			return "@as(f64, @floatFromInt(" + args[0] + ".len))", nil
+		if rendered, ok := nativeLengthExpression(g.target, args[0]); ok {
+			return rendered, nil
 		}
 	}
 	if name == "list" || name == "c" {
@@ -195,6 +178,44 @@ func (g *targetGen) nativeDispatch(name string, args []string) (string, error) {
 	return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: call %q has no native contract for target %q (arguments: %s)", name, g.target, strings.Join(args, ", "))
 }
 
+// nativeLengthExpression is the shared target-parameterized length contract.
+// The spelling is derived from the empirical emitter contracts (py2many and
+// the existing target specifications); callers remain on the common UAST call
+// path and do not need language-specific lowering.
+func nativeLengthExpression(target, value string) (string, bool) {
+	switch target {
+	case "go":
+		return "float64(len(" + value + "))", true
+	case "python":
+		return "len(" + value + ")", true
+	case "julia":
+		return "length(" + value + ")", true
+	case "nim":
+		return "len(" + value + ")", true
+	case "kotlin":
+		return value + ".size.toDouble()", true
+	case "swift":
+		return "Double(" + value + ".count)", true
+	case "rust":
+		return value + ".len() as f64", true
+	case "cpp":
+		return "static_cast<double>(" + value + ".size())", true
+	case "c":
+		if strings.Contains(value, "(double*)0") {
+			return "0", true
+		}
+		return "(double)(sizeof(" + value + ") / sizeof(double))", true
+	case "csharp":
+		return "(double)" + value + ".Length", true
+	case "java":
+		return "(double)" + value + ".length", true
+	case "zig":
+		return "@as(f64, @floatFromInt(" + value + ".len))", true
+	default:
+		return "", false
+	}
+}
+
 func isFallbackProjectionStructure(kind string) bool {
 	registry, err := UniversalStructureProjectionRegistry()
 	if err != nil {
@@ -216,6 +237,36 @@ func (g *targetGen) uastFallbackExpression(graph *uastExecutionGraph, id int) (s
 	if node == nil {
 		return "", fmt.Errorf("missing fallback UAST node %d", id)
 	}
+	// Compatibility mode is the explicit semantic-runtime last resort.  Keep
+	// the direct path strict, but preserve an unsupported-yet-structured node
+	// by forwarding its already decoded operation and child values through the
+	// existing runtime dispatcher.  No source text is reparsed here.
+	if !g.nativeDirect {
+		c := graph.common[id]
+		name := c.Name
+		if name == "" {
+			name = c.Operation.Operator
+		}
+		if name == "" {
+			name = "uast." + c.Kind
+		}
+		childIDs := make([]int, 0)
+		for _, items := range graph.children[id] {
+			for _, child := range items {
+				childIDs = append(childIDs, child.ID)
+			}
+		}
+		sort.Ints(childIDs)
+		args := make([]string, 0, len(childIDs))
+		for _, childID := range childIDs {
+			value, childErr := g.uastExpression(graph, childID)
+			if childErr != nil {
+				return "", childErr
+			}
+			args = append(args, value)
+		}
+		return emitDispatch(g.target, name, args), nil
+	}
 	return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node %s/%d", node.StructuralKind, node.ID)
 }
 
@@ -234,6 +285,138 @@ func (g *targetGen) uastFallbackStatement(graph *uastExecutionGraph, id int) err
 // the existing flow-safe inline lowering; it is never a full document and is
 // never written back to the UAST.
 func (g *targetGen) uastStatement(graph *uastExecutionGraph, id int) error {
+	if g.hybridFallback && g.nativeDirect {
+		return g.uastHybridStatement(graph, id)
+	}
+	return g.uastStatementCore(graph, id)
+}
+
+type targetGenCheckpoint struct {
+	body               string
+	indent             int
+	temp               int
+	declared           []map[string]bool
+	bindings           []map[string]string
+	helperRequirements []string
+	helperSources      map[string]string
+	usedNames          map[string]bool
+	cValues            map[string]bool
+	directVectors      map[string]bool
+	uastActiveInline   map[int]bool
+	runtimeUsed        bool
+}
+
+func cloneBoolMaps(in []map[string]bool) []map[string]bool {
+	out := make([]map[string]bool, len(in))
+	for i, m := range in {
+		out[i] = map[string]bool{}
+		for k, v := range m {
+			out[i][k] = v
+		}
+	}
+	return out
+}
+
+func cloneStringMaps(in []map[string]string) []map[string]string {
+	out := make([]map[string]string, len(in))
+	for i, m := range in {
+		out[i] = map[string]string{}
+		for k, v := range m {
+			out[i][k] = v
+		}
+	}
+	return out
+}
+
+func cloneBoolMap(in map[string]bool) map[string]bool {
+	out := map[string]bool{}
+	for k, v := range in {
+		out[k] = v
+	}
+	return out
+}
+
+func (g *targetGen) checkpoint() targetGenCheckpoint {
+	return targetGenCheckpoint{
+		body: g.b.String(), indent: g.indent, temp: g.temp,
+		declared: cloneBoolMaps(g.declared), bindings: cloneStringMaps(g.bindings),
+		helperRequirements: append([]string(nil), g.helperRequirements...),
+		helperSources:      cloneStringMapCopy(g.helperSources), usedNames: cloneBoolMap(g.usedNames),
+		cValues: cloneBoolMap(g.cValues), directVectors: cloneBoolMap(g.directVectors),
+		uastActiveInline: cloneIntBoolMap(g.uastActiveInline), runtimeUsed: g.runtimeUsed,
+	}
+}
+
+func cloneStringMapCopy(in map[string]string) map[string]string {
+	out := map[string]string{}
+	for k, v := range in {
+		out[k] = v
+	}
+	return out
+}
+
+func cloneIntBoolMap(in map[int]bool) map[int]bool {
+	out := map[int]bool{}
+	for k, v := range in {
+		out[k] = v
+	}
+	return out
+}
+
+func (g *targetGen) restore(cp targetGenCheckpoint) {
+	g.b.Reset()
+	g.b.WriteString(cp.body)
+	g.indent, g.temp = cp.indent, cp.temp
+	g.declared, g.bindings = cloneBoolMaps(cp.declared), cloneStringMaps(cp.bindings)
+	g.helperRequirements = append([]string(nil), cp.helperRequirements...)
+	g.helperSources, g.usedNames = cloneStringMapCopy(cp.helperSources), cloneBoolMap(cp.usedNames)
+	g.cValues, g.directVectors = cloneBoolMap(cp.cValues), cloneBoolMap(cp.directVectors)
+	g.uastActiveInline, g.runtimeUsed = cloneIntBoolMap(cp.uastActiveInline), cp.runtimeUsed
+}
+
+func hybridFallbackEligible(err error) bool {
+	if err == nil {
+		return false
+	}
+	message := err.Error()
+	return strings.Contains(message, "DIRECT_NATIVE_UNAVAILABLE") ||
+		strings.Contains(message, "unsupported UAST") ||
+		strings.Contains(message, "has no direct") ||
+		strings.Contains(message, "no native")
+}
+
+func (g *targetGen) uastHybridStatement(graph *uastExecutionGraph, id int) error {
+	cp := g.checkpoint()
+	// Disable the wrapper while trying the strict direct implementation. Any
+	// nested failure is handled by this same outer statement transaction.
+	g.hybridFallback = false
+	err := g.uastStatementCore(graph, id)
+	g.hybridFallback = true
+	if err == nil {
+		return nil
+	}
+	g.restore(cp)
+	if !hybridFallbackEligible(err) {
+		return err
+	}
+	// Re-run only this statement through the compatibility renderer. Existing
+	// native statements emitted before it remain in the builder untouched.
+	g.nativeDirect = false
+	g.runtimeUsed = true
+	compatErr := g.uastStatementCore(graph, id)
+	g.nativeDirect = true
+	if compatErr == nil {
+		return nil
+	}
+	g.restore(cp)
+	return compatErr
+}
+
+// uastStatementCore performs one ordinary lowering attempt.  The hybrid
+// wrapper above snapshots the generator around this function so a failed
+// native statement cannot leak partial declarations or helper requirements
+// into its runtime replacement.
+func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 	if node := graph.nodes[id]; node != nil && isMetadataOnlyProjectionStructure(node.StructuralKind) {
 		// The schema-derived contract proves that this node has no target
 		// syntax channel. Its facts were already consumed by validation and
@@ -505,6 +688,12 @@ func (g *targetGen) uastStatement(graph *uastExecutionGraph, id int) error {
 			return err
 		}
 		n := g.name(c.Name)
+		indexBinding := ""
+		if raw, ok := c.Attributes["iteration.index_binding"]; ok {
+			if value, ok := raw.(string); ok {
+				indexBinding = g.name(value)
+			}
+		}
 		switch g.target {
 		case "python":
 			g.line("for " + n + " in " + sequenceText + ":")
@@ -513,10 +702,26 @@ func (g *targetGen) uastStatement(graph *uastExecutionGraph, id int) error {
 		case "nim":
 			g.line("for " + n + " in " + sequenceText + ":")
 		case "go":
-			g.line("for _, " + n + " := range " + sequenceText + " {")
+			if indexBinding != "" {
+				g.line("for " + indexBinding + ", " + n + " := range " + sequenceText + " {")
+			} else {
+				g.line("for _, " + n + " := range " + sequenceText + " {")
+			}
 		case "rust":
 			g.line("for " + n + " in " + sequenceText + " {")
 		case "cpp":
+			if indexBinding != "" {
+				g.line("for (size_t " + indexBinding + " = 0; " + indexBinding + " < " + sequenceText + ".size(); ++" + indexBinding + ") {")
+				g.indent++
+				g.line("const auto& " + n + " = " + sequenceText + "[" + indexBinding + "];")
+				if err := g.uastStatementBody(graph, body); err != nil {
+					g.indent--
+					return err
+				}
+				g.indent--
+				g.line("}")
+				return nil
+			}
 			g.line("for (const auto& " + n + " : " + sequenceText + ") {")
 		case "csharp":
 			g.line("foreach (var " + n + " in " + sequenceText + ") {")
@@ -868,11 +1073,56 @@ func directNativeCall(target, name string, args []string) string {
 		name = "print"
 	}
 	joined := strings.Join(args, ", ")
+	// Index writes are a data-operation contract, not a frontend-specific
+	// helper. Their index has already been normalized to the canonical one-based
+	// UAST contract by the source adapter; each native target consumes its own
+	// indexing representation here.
+	if name == "__index_set" && len(args) == 3 {
+		index := "int(" + args[1] + ") - 1"
+		switch target {
+		case "rust":
+			index = "(" + args[1] + " as usize) - 1"
+		case "kotlin":
+			index = "(" + args[1] + ").toInt() - 1"
+		case "swift":
+			index = "Int(" + args[1] + ") - 1"
+		}
+		slot := args[0] + "[" + index + "]"
+		switch target {
+		case "go", "cpp", "csharp", "java", "kotlin", "swift", "zig", "nim", "python", "rust":
+			return "(" + slot + " = " + args[2] + ")"
+		case "julia":
+			return "(" + args[0] + "[Int(" + args[1] + ")] = " + args[2] + ")"
+		}
+	}
 	if name == "__make_float64" && len(args) == 1 {
-		switch target { case "go": return "make([]float64, int("+args[0]+"))"; case "cpp": return "std::vector<double>("+args[0]+")"; case "rust": return "vec![0.0; "+args[0]+"]"; case "python": return "[0.0] * int("+args[0]+")"; case "julia": return "zeros(Float64, "+args[0]+")"; case "nim": return "newSeq[float64]("+args[0]+")"; case "swift": return "Array(repeating: 0.0, count: "+args[0]+")"; case "kotlin": return "MutableList("+args[0]+") { 0.0 }"; case "csharp": return "new double["+args[0]+"]"; case "java": return "new double["+args[0]+"]" }
+		switch target {
+		case "go":
+			return "make([]float64, int(" + args[0] + "))"
+		case "cpp":
+			return "std::vector<double>(" + args[0] + ")"
+		case "rust":
+			return "vec![0.0; " + args[0] + "]"
+		case "python":
+			return "[0.0] * int(" + args[0] + ")"
+		case "julia":
+			return "zeros(Float64, " + args[0] + ")"
+		case "nim":
+			return "newSeq[float64](" + args[0] + ")"
+		case "swift":
+			return "Array(repeating: 0.0, count: " + args[0] + ")"
+		case "kotlin":
+			return "MutableList(" + args[0] + ") { 0.0 }"
+		case "csharp":
+			return "new double[" + args[0] + "]"
+		case "java":
+			return "new double[" + args[0] + "]"
+		}
 	}
 	if name == "length" && len(args) == 1 {
-		switch target { case "go": return "float64(len("+args[0]+"))"; case "cpp": return "static_cast<double>("+args[0]+".size())"; case "rust": return args[0]+".len() as f64"; case "python", "julia", "nim", "kotlin", "swift": return "len("+args[0]+")" }
+		if rendered, ok := nativeLengthExpression(target, args[0]); ok {
+			return rendered
+		}
 	}
 	// A native call is valid only when its already-rendered arguments contain
 	// no runtime value or dispatcher.  This keeps the decision data-driven at
@@ -929,7 +1179,9 @@ func directNativeCall(target, name string, args []string) string {
 			return "std::vector<double>{" + joined + "}"
 		}
 		if name == "print" || name == "show" || name == "cat" {
-			return "std::cout << " + joined + " << std::endl"
+			// Print is a semantic operation. Its arguments may be aggregates
+			// produced by any structured expression, so do not assume operator<<.
+			return "uast_print(" + joined + ")"
 		}
 	case "c":
 		if name == "c" {
