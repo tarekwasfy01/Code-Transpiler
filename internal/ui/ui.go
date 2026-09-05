@@ -25,6 +25,7 @@ import (
 	"github.com/oligo/gvcode/textstyle/syntax"
 	gvwidget "github.com/oligo/gvcode/widget"
 
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/highlight"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
@@ -67,11 +68,11 @@ type App struct {
 	hl          *highlight.Service
 	left, right *gvcode.Editor
 
-	convertBtn, copyBtn, saveBtn, infoBtn, copyInfoBtn, closeInfoBtn, openCMDBtn, runBtn widget.Clickable
-	sourceBtn, targetBtn                                                                 widget.Clickable
-	sourceClicks, targetClicks                                                           []widget.Clickable
-	sourceOpen, targetOpen                                                               bool
-	source, target                                                                       int
+	convertBtn, copyBtn, saveBtn, executableBtn, infoBtn, copyInfoBtn, closeInfoBtn, openCMDBtn, runBtn widget.Clickable
+	sourceBtn, targetBtn                                                                                widget.Clickable
+	sourceClicks, targetClicks                                                                          []widget.Clickable
+	sourceOpen, targetOpen                                                                              bool
+	source, target                                                                                      int
 
 	showInfo        bool
 	showRun         bool
@@ -295,6 +296,7 @@ func (a *App) applyBackgroundResults() {
 				a.status = "R script finished"
 			}
 		case res := <-a.saveResults:
+			a.busy = false
 			if res.err != nil {
 				a.status = "Save failed: " + res.err.Error()
 			} else if res.path != "" {
@@ -334,6 +336,9 @@ func (a *App) handleClicks(gtx layout.Context) {
 	}
 	if a.saveBtn.Clicked(gtx) {
 		a.startSaveAs(a.right.GetReader())
+	}
+	if a.executableBtn.Clicked(gtx) {
+		a.startSaveExecutable()
 	}
 	if a.infoBtn.Clicked(gtx) {
 		a.showInfo = !a.showInfo
@@ -458,6 +463,40 @@ func (a *App) startSaveAs(reader io.Reader) {
 		a.window.Invalidate()
 	}()
 }
+
+// startSaveExecutable uses the same public Compile path as the CLI.  The
+// native bytes are kept binary until the Save As dialog writes them; the
+// editor is never used as a transport for an executable.
+func (a *App) startSaveExecutable() {
+	if a.busy {
+		return
+	}
+	a.busy = true
+	a.status = "Building executable…"
+	data, err := io.ReadAll(a.left.GetReader())
+	source := a.currentSource().ID
+	go func() {
+		var out codetranspiler.CompileResult
+		if err == nil {
+			out, err = codetranspiler.Compile(string(data), codetranspiler.CompileOptions{
+				SourceLanguage: source, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64",
+				OutputKind: codetranspiler.Executable, EntryPoint: "",
+			})
+		}
+		path := ""
+		if err == nil {
+			path, err = platform.SaveSourceFileDialog("program.exe", ".exe", "Executable")
+		}
+		if err == nil && path != "" {
+			err = os.WriteFile(path, out.Bytes, 0700)
+		}
+		select {
+		case a.saveResults <- saveResult{path: path, err: err}:
+		default:
+		}
+		a.window.Invalidate()
+	}()
+}
 func (a *App) layout(gtx layout.Context) layout.Dimensions {
 	if a.busy {
 		gtx.Execute(op.InvalidateCmd{At: gtx.Now.Add(250 * time.Millisecond)})
@@ -504,6 +543,10 @@ func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
 		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{Size: gtx.Constraints.Min} }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return smallButton(gtx, a.theme, &a.targetBtn, "Output: "+a.currentTarget().Name+"  ▼")
+		}),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return smallButton(gtx, a.theme, &a.executableBtn, "Save Executable")
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {

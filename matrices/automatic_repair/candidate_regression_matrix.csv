@@ -1,0 +1,8 @@
+repair_id,passing_witness_class,regressions,guard
+AR001,PASS_INVARIANT,zero,structured relation completion only
+AR002,PASS_INVARIANT,zero,structured relation completion only
+AR003,PASS_INVARIANT,zero,structured relation completion only
+AR004,PASS_INVARIANT,zero,structured relation completion only
+AR005,PASS_INVARIANT,zero,structured relation completion only
+AR006,PASS_INVARIANT,zero,structured relation completion only
+AR007,PASS_INVARIANT,zero,structured relation completion only

@@ -36,6 +36,7 @@ type FrontendSemanticFacts struct {
 	TypeTable              []SemanticTypeDefinition
 	TypeGraph              matrixir.SparseMatrix
 	TypeRelations          *SemanticTypeRelations
+	Surface                *UniversalASTSurface
 
 	Nodes     []UniversalASTNode
 	Fields    []FrontendFieldFact
@@ -154,6 +155,7 @@ func BuildRawUniversalASTFromFrontendFacts(f FrontendSemanticFacts) (*UniversalA
 		Contracts: f.Contracts, Dialects: append([]SemanticDialect(nil), f.Dialects...),
 		SemanticFeatures: f.SemanticFeatures, TypeTable: append([]SemanticTypeDefinition(nil), f.TypeTable...),
 		TypeGraph: f.TypeGraph, TypeRelations: f.TypeRelations, Evidence: f.Evidence,
+		Surface: cloneUniversalASTSurface(f.Surface),
 	}
 	if err := cloneFrontendFactValue(f.Nodes, &u.Nodes); err != nil {
 		return nil, err
@@ -204,6 +206,12 @@ func BuildCanonicalUniversalASTFromFrontendFacts(f FrontendSemanticFacts) (*Univ
 		}
 	}
 	appendUniversalEvidenceRelations(raw, semanticIDs, evidence)
+	// Apply the cached language/relation/composition/dependency closure on the
+	// canonical document itself.  This is a validation/metadata pass over the
+	// existing UAST graph; it does not introduce another IR or registry.
+	if err := ApplySemanticClosure(raw); err != nil {
+		return nil, fmt.Errorf("semantic closure: %w", err)
+	}
 	if err := deriveUniversalTypeTable(raw); err != nil {
 		return nil, fmt.Errorf("UAST type derivation: %w", err)
 	}
@@ -221,8 +229,24 @@ func EnrichUniversalAST(u *UniversalASTDocument) error {
 	if err := materializeUniversalCrosswalkFields(u); err != nil {
 		return err
 	}
+	// Derive scope, definition/reference, ordered-sequence and control facts
+	// directly from the structured UAST roles. This is the common frontend
+	// closure for every language and runs before evidence analysis so the
+	// resulting matrices and executable runtime observe the same graph.
+	if err := appendFrontendStructuralClosure(u); err != nil {
+		return err
+	}
 	// Operand edges are structural facts consumed by the single evidence pass.
 	materializeUniversalOperandFacts(u)
+	// Apply the empirically mined presence implications.  This only projects
+	// already explicit syntax children into the existing operand relation; it
+	// never reconstructs unknown semantic payload.
+	ApplyUniversalTruthClosure(u)
+	// Apply the generated residual-repair closure after operand projection. The
+	// closure only promotes an existing, unambiguous data.operand edge to the
+	// canonical syntax role required by the executor; it does not infer values
+	// or parse source text.
+	ApplyAutomaticSemanticRepairClosure(u)
 	// The legacy decoration oracle proves that executable blocks and control
 	// constructs transfer control to each of their syntax children. Materialize
 	// that exact contract on UAST so the shared evidence pass has no dependency
@@ -283,12 +307,24 @@ func materializeUniversalOperandFacts(u *UniversalASTDocument) {
 		}
 		roles := []string{}
 		switch common.Kind {
-		case "assign", "expression":
-			roles = []string{"expression"}
+		case "assign":
+			roles = []string{"expression", "value"}
+		case "expression":
+			roles = []string{"expression", "operand", "argument", "value"}
 		case "for":
 			roles = []string{"sequence"}
 		case "binary":
 			roles = []string{"left", "right"}
+		case "unary":
+			roles = []string{"value"}
+		case "index", "slice":
+			roles = []string{"value", "argument"}
+		case "call":
+			roles = []string{"value", "argument"}
+		case "aggregate", "tuple":
+			roles = []string{"argument"}
+		case "return":
+			roles = []string{"expression"}
 		}
 		for _, role := range roles {
 			for _, child := range children[n.ID][role] {
@@ -514,6 +550,7 @@ func frontendSemanticFactsFromUniversalAST(u *UniversalASTDocument, languageFact
 		Contracts: u.Contracts, Dialects: append([]SemanticDialect(nil), u.Dialects...),
 		SemanticFeatures: u.SemanticFeatures, TypeTable: append([]SemanticTypeDefinition(nil), u.TypeTable...),
 		TypeGraph: u.TypeGraph, TypeRelations: u.TypeRelations, Evidence: u.Evidence,
+		Surface:       cloneUniversalASTSurface(u.Surface),
 		LanguageFacts: cloneRawMessageMap(languageFacts),
 	}
 	if err := cloneFrontendFactValue(u.Nodes, &f.Nodes); err != nil {
@@ -618,4 +655,12 @@ func cloneRawMessageMap(in map[string]json.RawMessage) map[string]json.RawMessag
 		out[key] = append(json.RawMessage(nil), value...)
 	}
 	return out
+}
+
+func cloneUniversalASTSurface(in *UniversalASTSurface) *UniversalASTSurface {
+	if in == nil {
+		return nil
+	}
+	out := *in
+	return &out
 }

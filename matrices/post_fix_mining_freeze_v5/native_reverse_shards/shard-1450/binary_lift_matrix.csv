@@ -1,0 +1,9 @@
+case_id,source_language,input_kind,status,input_bytes,uast_hash,diagnostic
+34a2895ebe82ad55d3b02d1272be58aa8c1a25c7899c5ba99ac2daa8ddc3b66f,kotlin,assembly,FAIL,325,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+34a2895ebe82ad55d3b02d1272be58aa8c1a25c7899c5ba99ac2daa8ddc3b66f,kotlin,machine_code,FAIL,62,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+34a2895ebe82ad55d3b02d1272be58aa8c1a25c7899c5ba99ac2daa8ddc3b66f,kotlin,object,FAIL,157,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+34a2895ebe82ad55d3b02d1272be58aa8c1a25c7899c5ba99ac2daa8ddc3b66f,kotlin,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+05a8715346d81dcdeaf19481678fcc68e8306430e41bd1dd76593147c7e30491,kotlin,assembly,FAIL,325,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+05a8715346d81dcdeaf19481678fcc68e8306430e41bd1dd76593147c7e30491,kotlin,machine_code,FAIL,62,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+05a8715346d81dcdeaf19481678fcc68e8306430e41bd1dd76593147c7e30491,kotlin,object,FAIL,157,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+05a8715346d81dcdeaf19481678fcc68e8306430e41bd1dd76593147c7e30491,kotlin,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""

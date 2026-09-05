@@ -1,0 +1,4 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,2ddf903c73c945c1a766f930871daae7a68ccea58ed3878f76da88efe74abc91,V0_SOURCE_PARSE,FRONTEND,source_target,expected expression
+Q0002,fba6c45370b109b20609996eb266d10c70c1004080f5857a4eb7cc9d5aab4db3,V4_NATIVE_EMISSION,BACKEND,source_target,"DIRECT_NATIVE_UNAVAILABLE: target rust emitted invalid syntax (expected expression: error: expected identifier, found keyword `match` --> C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-1085346099\program.rs:3:13 | 3 | let mut match"
+Q0003,ee62902259844a159cc8bdb429907dd0517e8c426843539d8a414bf8e699a1d9,V5_TARGET_REPARSE,TARGET_SYNTAX,source_target,entry-point early return requires explicit exit semantics

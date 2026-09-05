@@ -1,0 +1,51 @@
+case_id,source_language,status,bytes,instruction_count,diagnostic
+02209f409256f0223f50b05e261b623454c598f350a062d55a634fa5f6e7ac34,csharp,FAIL,0,0,"native unresolved binding ""partial"" node=1"
+d87b03cd864d7f5075f1b20845518112ddd2851b36ea149c56807c359ca923b6,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+b89b1bf51879861dd5da833636df57ba126f325dbc2ab0cd37999284d951e9cc,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+06c89b8690c43befd44eb92a0ebabf74906a7b2e6f8e21a9568781bd2bdea9cd,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+a4ddf19a51058d630cc6736c244ddada7264b2d309415b54e8f83c62acfe1b6a,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+6852f982c9c59c578d45a41ac3ffb036c85464e7e0c596ab6064874733154d77,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+18125a36c57e6a7ff5cf77c0d90f5d2ecff73a3d0095f4579a357443e3fb7954,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+fcac84c46eee3ac2fae6908b0024ff98c0dd5efd70629bd56aa80206de5741bc,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+cbbd44279c6b7d3d5a868167a9bc72e305bca639a831e539592582897b68d5ca,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+b73b5898647b2077415e5d9812988fb7fd0c0748b0f7fb366a31c374e1a84d54,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+51a060ed8b4c106278c168b4625b292036572142e216916b1d420006275dd0b6,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+2924abc785ef6c925d4f7509494f503b04ff16d5925f335740903448d0f68d8d,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=6
+d466b7721b206b5a04b7d3e3ea8db71aa6dcf717b11c9a8ed866494e1ebd1001,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=6
+3710a5235e6f2eb8c87569cda17de77caf98de40a3d52403cf055e2bcf69336f,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=6
+1cec2d5be700f2db16b32b197567457dcb19b6d3d7e18ea853a83701d84a214d,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=6
+2748c5f7a08a6b02d8c6d5c709fab69ae30ee41c282cb21d2c06a843abd4d4f1,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+eed20ac6fd9774abf6cae7661d6fe0ded2612348e34d59d7175357da0696fd85,csharp,PASS,76,23,
+91b5ab25ee2404d3923153c668a640957a79363b0a3beee1a63077ca8f75cde1,csharp,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+c85beacfa2ea235c3b9efa56b3a6b1f84ed7534b92b4cb172231572f604f8838,csharp,FAIL,0,0,"native unresolved binding ""class"" node=1"
+6e8345da830f851c25272bac636f7e6c9a6346f82709e17ae2930be0d1fbe512,csharp,PASS,62,21,
+8b02a8900c1d6432d2e6fa8d40e7d2d81e942c7970df03693c25d8a9641fb7db,java,FAIL,0,0,"native unresolved binding ""a"" node=1"
+b4b801f69e950f53d22e6765f7a0a55ce3e7f388cbe87d3e365b393d994b902e,java,PASS,46,12,
+74d9c4a9f0bee80dbd58aa36a486cf03af04ba91a04b218fc366c5a0178ba861,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+8501b58bc123c0548098589efeeb376e5c2d062afd482d46c98617eff1fb2277,java,FAIL,0,0,native assignment binding unavailable at 5
+b343e5234ec8171accde1f0d6330a718399086d583623d3456c90459d1e4480a,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+55e88e92a0cb16147c5f213edfed8cc742fd342f5a6a2596f8c58ea266cca0c4,java,FAIL,0,0,native node 1 missing operand [expression]
+c91b5e326a233bfb9ac89034647b8383c66053fd916d07ab9993a1268adce512,java,FAIL,0,0,native node 1 missing operand [expression]
+9ad6552bb381333eb522ad36fa5eda00fcc19017d097e3de9a546bb3396df6c5,java,FAIL,0,0,native node 1 missing operand [expression]
+da0a40d04f43008eacfff3b27bbc70e2a1f8e58bb38addc556e649e20ec05685,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+aebd839f8644852775fc909dc4b24c62a57fcd04d6f3f40e5fb26b8686f09944,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+b3fbed60c87cdb9d6a3de2e5d47c281e8bbf52808f8fd3b9ea38b535d5dcd9ff,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+96659ec1d5a4166fec583eef07c1e6111f39b1d4a07bf43f7709ebb446235ebc,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+514db153ed2c4fd3bd5b4fd6d6c5808951fda6e9367edf5f5928aa6722d4c0c2,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+55f0c102623d46c9540e0cb96b1562943174bd551f0b3982e60d4208529fb7a9,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+92caa2814c4508762491d27333bb8e0cf1d9c164650722e1917a378ab2f359a9,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+39ec22cf2d8e9805a690ff86a3cd3a32d07226bf2e84cac1d89e025d8505eb17,java,FAIL,0,0,"native unresolved binding ""class"" node=1"
+dcd2f9023a265e34c50a13f138b04f83df0380b09cbc0ef6a0b9c9b4b81d65d5,java,FAIL,0,0,"native unresolved binding ""public"" node=1"
+07f73c23018fbcb28a07bc8ba50035dbdc9dd7a126fe857f6c98475a78e45200,java,FAIL,0,0,"native unresolved binding ""public"" node=1"
+ae9d1b68248c1f00767f165b7fe066a17382efb9f5209baea2668edea9fcfb6d,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+c0c2e1907c23ccaae2c92f71a94db3ff35f81a20940b7b6636b813ee0c1106cf,java,FAIL,0,0,"native unresolved binding ""interface"" node=1"
+d2df9f44c8e4833f3ca7159c66dc821896f056075fe38af662c7b94598476245,java,FAIL,0,0,"native unresolved binding ""interface"" node=1"
+bcdd747c343a71ba539c1e3d307d0e330cc8cf3161d7fb71d9b530239f5e2ab9,java,FAIL,0,0,native node 1 missing operand [expression]
+a84bbf34770b0e315fe87e08b4d54e17a3afbe501d6c1fd8cfc31c8d3d088f6a,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=9
+e1516019da135a430b097e6440ffd12c46e346b1f222aa146126700352f44262,java,PASS,62,21,
+7e0943b69e5fb05c87d3940e56a849008cd164aa9e01e39d9e3cb3bfc63bec88,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=5
+7f24065d846701d27210882aef0824668903d8dc1e10f1d717650c6162f72f57,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=3
+cec3f0620db45fedeeb1be19ba5e05f22380632b24e01b2eee9deabcd36acb6c,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+013d631994be9974290a6706a8636cb375b81b07073f64315587910589e26170,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+06c5112ee6e055dbf0ba29183759f21d82817b7156ead9a648cf0ba8fc2be529,java,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+8f87b9d37dbe88806be014e2c48edbe778bf52342ec7e852a6a218f02270804f,java,FAIL,0,0,"native unresolved binding ""enum"" node=1"

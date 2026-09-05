@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/corpusfixture"
 )
 
 type corpusObservation struct {
@@ -129,7 +130,7 @@ func lowerCorpusSource(language, source string) (*backend.SemanticProgram, error
 		return backend.LowerNativeGo("corpus.go", source)
 	}
 	if language == "r" {
-		return backend.ParseSemantic(language, source)
+		return backend.LowerMatrixLanguage(language, source)
 	}
 	return backend.LowerMatrixLanguage(language, source)
 }
@@ -139,17 +140,7 @@ func lowerCorpusSource(language, source string) (*backend.SemanticProgram, error
 // documented corpus fields before either side is consumed.  This is container
 // decoding, not source-language parsing.
 func corpusSourceAndTree(source, tree string) (string, string) {
-	if strings.TrimSpace(tree) != "" {
-		return source, tree
-	}
-	lines := strings.Split(strings.ReplaceAll(source, "\r\n", "\n"), "\n")
-	for i, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if len(trimmed) >= 20 && strings.Trim(trimmed, "-") == "" {
-			return strings.TrimSpace(strings.Join(lines[:i], "\n")), strings.TrimSpace(strings.Join(lines[i+1:], "\n"))
-		}
-	}
-	return source, tree
+	return corpusfixture.SplitTreeSitterFixture(source, tree)
 }
 
 var failureAtomOrder = []string{

@@ -22,6 +22,44 @@ type Language struct {
 type TranspileRequest = manytomany.TranspileRequest
 type TranspileTrace = manytomany.TranspileTrace
 
+type CompileOptions = backend.CompileOptions
+type CompileResult = backend.CompileResult
+type CompileOutputKind = backend.CompileOutputKind
+type CompileInputKind = backend.CompileInputKind
+
+const (
+	InputSource     CompileInputKind = backend.CompileInputSource
+	InputAssembly   CompileInputKind = backend.CompileInputAssembly
+	InputMachine    CompileInputKind = backend.CompileInputMachine
+	InputObject     CompileInputKind = backend.CompileInputObject
+	InputExecutable CompileInputKind = backend.CompileInputExecutable
+)
+
+const (
+	Source      CompileOutputKind = backend.CompileSource
+	Assembly    CompileOutputKind = backend.CompileAssembly
+	MachineCode CompileOutputKind = backend.CompileMachineCode
+	Object      CompileOutputKind = backend.CompileObject
+	Executable  CompileOutputKind = backend.CompileExecutable
+)
+
+// Compile uses the same ModernFrontend and canonical UAST as Transpile.
+// Native outputs are encoded in-process; Assembly is an optional rendering.
+func Compile(source string, options CompileOptions) (CompileResult, error) {
+	if options.InputKind != "" && options.InputKind != InputSource {
+		return backend.CompileBinaryInput([]byte(source), options)
+	}
+	p, err := manytomany.Parse(options.SourceLanguage, source)
+	if err != nil {
+		return CompileResult{}, err
+	}
+	if options.OutputKind == Source {
+		text, err := manytomany.Emit(options.TargetLanguage, p)
+		return CompileResult{Text: text, OutputKind: Source}, err
+	}
+	return backend.CompileMachine(p.Semantic, options)
+}
+
 type Capability struct {
 	Feature string `json:"feature"`
 	Backend string `json:"backend"`

@@ -1,0 +1,3 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,48daad1ba14df4ec32b700c36fdf6341536ac28d93a5cdc101b8a0470d3785f7,V0_SOURCE_PARSE,FRONTEND,source_target,expected expression
+Q0002,f67e088fc14f01c463b1a36a7e3d5e37b6f8b59722b5a300b4084de531dead5e,V4_NATIVE_EMISSION,BACKEND,source_target,DIRECT_NATIVE_UNAVAILABLE: target cpp emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-3440513704\program.cpp: In function 'int main()': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-344051370

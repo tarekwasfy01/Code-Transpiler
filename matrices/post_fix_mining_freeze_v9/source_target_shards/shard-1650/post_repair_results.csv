@@ -1,0 +1,3 @@
+quotient_id,status,remaining_cases,note
+Q0001,PENDING_REPLAY,39,V0_SOURCE_PARSE|FRONTEND|source_target
+Q0002,PENDING_REPLAY,223,V4_NATIVE_EMISSION|BACKEND|source_target

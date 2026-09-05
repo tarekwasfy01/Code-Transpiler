@@ -1,7 +1,9 @@
 package backend
 
 import (
+	"crypto/sha256"
 	_ "embed"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -66,8 +68,47 @@ type UniversalASTDocument struct {
 	TypeGraph              matrixir.SparseMatrix    `json:"type_graph,omitempty"`
 	TypeRelations          *SemanticTypeRelations   `json:"type_relations,omitempty"`
 	Evidence               SemanticEvidence         `json:"evidence,omitempty"`
-	Nodes                  []UniversalASTNode       `json:"nodes"`
-	Relations              []UniversalASTRelation   `json:"relations"`
+	// Surface is the lossless source plane. It carries original bytes only;
+	// semantic lowering continues to use Nodes/Relations as the sole semantic
+	// representation. Same-language preservation can therefore round-trip
+	// source without reparsing or inventing a second IR.
+	Surface   *UniversalASTSurface   `json:"surface,omitempty"`
+	Nodes     []UniversalASTNode     `json:"nodes"`
+	Relations []UniversalASTRelation `json:"relations"`
+}
+
+type UniversalASTSurface struct {
+	Language    string `json:"language"`
+	Encoding    string `json:"encoding"`
+	SHA256      string `json:"sha256"`
+	ByteLength  int    `json:"byte_length"`
+	BytesBase64 string `json:"bytes_base64"`
+}
+
+func NewUniversalASTSurface(language, source string) *UniversalASTSurface {
+	sum := sha256.Sum256([]byte(source))
+	return &UniversalASTSurface{
+		Language: language, Encoding: "utf-8", SHA256: fmt.Sprintf("%x", sum[:]),
+		ByteLength: len(source), BytesBase64: base64.StdEncoding.EncodeToString([]byte(source)),
+	}
+}
+
+func (s *UniversalASTSurface) Bytes() ([]byte, error) {
+	if s == nil {
+		return nil, fmt.Errorf("missing source surface")
+	}
+	b, err := base64.StdEncoding.DecodeString(s.BytesBase64)
+	if err != nil {
+		return nil, fmt.Errorf("source surface bytes: %w", err)
+	}
+	if len(b) != s.ByteLength {
+		return nil, fmt.Errorf("source surface byte length mismatch")
+	}
+	sum := sha256.Sum256(b)
+	if fmt.Sprintf("%x", sum[:]) != s.SHA256 {
+		return nil, fmt.Errorf("source surface digest mismatch")
+	}
+	return b, nil
 }
 
 type UniversalASTNode struct {
@@ -297,6 +338,14 @@ func validateUniversalASTDocument(d *UniversalASTDocument) error {
 	}
 	if d.Projection == "semantic_document.v1" && len(d.SemanticDocumentSHA256) != 64 {
 		return fmt.Errorf("universal AST compatibility projection missing semantic document digest")
+	}
+	if d.Surface != nil {
+		if d.Surface.Language == "" || d.Surface.Encoding != "utf-8" || len(d.Surface.SHA256) != 64 || d.Surface.ByteLength < 0 {
+			return fmt.Errorf("invalid universal AST source surface metadata")
+		}
+		if _, err := d.Surface.Bytes(); err != nil {
+			return err
+		}
 	}
 	profileRow := indexOf(uastEmbedded.Basis.Languages, d.LanguageProfile)
 	if (profileRow < 0 && d.LanguageProfile != "universal") || len(d.LanguageFacet) != 334 {

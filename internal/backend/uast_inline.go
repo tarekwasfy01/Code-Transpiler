@@ -7,6 +7,42 @@ import (
 	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
+// uastFunctionHasExternalCapture is deliberately conservative. It permits a
+// generated file-scope helper only when every value reference is either a
+// formal parameter, a literal built-in, or a function-local assignment. This
+// is a semantic graph check; it does not inspect source text.
+func uastFunctionHasExternalCapture(graph *uastExecutionGraph, functionID int, parameters []string) bool {
+	allowed := map[string]bool{"TRUE": true, "FALSE": true, "T": true, "F": true, "NULL": true, "NA": true, "NaN": true, "Inf": true, "pi": true}
+	for _, parameter := range parameters {
+		allowed[parameter] = true
+	}
+	seen := map[int]bool{}
+	var walk func(int) bool
+	walk = func(nodeID int) bool {
+		if seen[nodeID] {
+			return false
+		}
+		seen[nodeID] = true
+		common := graph.common[nodeID]
+		if common.Kind == "assign" && common.Name != "" {
+			allowed[common.Name] = true
+		}
+		if common.Kind == "identifier" && common.Name != "" && !allowed[common.Name] {
+			return true
+		}
+		for _, relation := range graph.children[nodeID] {
+			for _, child := range relation {
+				if !child.Meta.Missing && walk(child.ID) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	body, ok, _ := graph.one(functionID, "body", false)
+	return ok && walk(body)
+}
+
 func uastFunctionContainsLoop(graph *uastExecutionGraph, id int) bool {
 	if graph.common[id].Kind == "while" || graph.common[id].Kind == "for" || graph.common[id].Kind == "repeat" {
 		return true
@@ -124,10 +160,120 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 	if flowErr != nil && strings.Contains(flowErr.Error(), "before definite assignment") {
 		return flowErr
 	}
-	if flowErr == nil && !uastFunctionContainsLoop(graph, id) {
+	// Inline eligibility must not erase an assigned function that happens not
+	// to be called. Always materialize the observable function binding.
+	params := graph.many(id, "parameter")
+	if g.nativeDirect {
+		names := make([]string, len(params))
+		for i, p := range params {
+			names[i] = g.name(graph.common[p.ID].Name)
+			if names[i] == "" {
+				names[i] = fmt.Sprintf("arg%d", i)
+			}
+		}
+		emitNativeBody := func() error {
+			body, _, err := graph.one(id, "body", true)
+			if err != nil {
+				return err
+			}
+			local := map[string]string{}
+			for _, n := range names {
+				local[n] = n
+			}
+			g.bindings = append(g.bindings, local)
+			err = g.uastStatementBody(graph, body)
+			g.bindings = g.bindings[:len(g.bindings)-1]
+			return err
+		}
+		typed := func(format string) string {
+			values := make([]string, len(names))
+			for i, n := range names {
+				values[i] = fmt.Sprintf(format, n)
+			}
+			return strings.Join(values, ", ")
+		}
+		if g.target == "c" {
+			// ISO C has no nested functions or closure values. A capture-free
+			// UAST function can nevertheless be represented exactly by a generated
+			// file-scope helper. Capturing closures remain on the documented
+			// runtime boundary rather than being emitted as non-standard C.
+			if !uastFunctionHasExternalCapture(graph, id, names) {
+				body, _, err := graph.one(id, "body", true)
+				if err != nil {
+					return err
+				}
+				sub := &targetGen{evaluation: g.evaluation, target: "c", declared: []map[string]bool{{}}, funcs: g.funcs, inline: g.inline, bindings: []map[string]string{{}}, activeInline: map[*FunctionExpr]bool{}, helperSources: map[string]string{}, usedNames: cloneBoolMap(g.usedNames), cValues: map[string]bool{}, directVectors: map[string]bool{}, nativeDirect: true, uastFunctions: g.uastFunctions, uastInline: g.uastInline, uastActiveInline: map[int]bool{}}
+				for _, n := range names {
+					sub.bindings[0][n] = n
+				}
+				if err := sub.uastStatementBody(graph, body); err != nil {
+					return err
+				}
+				for helperID, helper := range sub.helperSources {
+					g.requireHelper(helperID, helper)
+				}
+				g.requireHelper("helper.native.function."+name, "static double "+name+"("+typed("double %s")+") {\n"+sub.b.String()+"}\n")
+				return nil
+			}
+			return fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target c closure captures require runtime")
+		}
+		switch g.target {
+		case "python":
+			g.line("def " + name + "(" + strings.Join(names, ", ") + "):")
+			g.indent++
+			if err := emitNativeBody(); err != nil {
+				return err
+			}
+			g.indent--
+			return nil
+		case "julia":
+			g.line("function " + name + "(" + strings.Join(names, ", ") + ")")
+			g.indent++
+			if err := emitNativeBody(); err != nil {
+				return err
+			}
+			g.indent--
+			g.line("end")
+			return nil
+		case "nim":
+			g.line("proc " + name + "(" + typed("%s: float64") + "): float64 =")
+			g.indent++
+			if err := emitNativeBody(); err != nil {
+				return err
+			}
+			g.indent--
+			return nil
+		case "go":
+			g.line(name + " := func(" + typed("%s any") + ") any {")
+		case "rust":
+			g.line("let mut " + name + " = |" + typed("%s: f64") + "| {")
+		case "cpp":
+			g.line("auto " + name + " = [&](" + typed("double %s") + ") {")
+		case "csharp":
+			g.line("System.Func<dynamic, dynamic> " + name + " = (" + strings.Join(names, ", ") + ") => {")
+		case "java":
+			g.line("java.util.function.Function<Double, Double> " + name + " = (" + strings.Join(names, ", ") + ") -> {")
+		case "kotlin":
+			g.line("fun " + name + "(" + typed("%s: Double") + "): Double {")
+		case "swift":
+			g.line("func " + name + "(" + typed("_ %s: Double") + ") -> Double {")
+		case "zig":
+			g.line("const " + name + " = struct { fn call(" + typed("%s: f64") + ") f64 {")
+		default:
+			return fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s lacks a native function-value form", g.target)
+		}
+		g.indent++
+		if err := emitNativeBody(); err != nil {
+			return err
+		}
+		g.indent--
+		if g.target == "zig" {
+			g.line("} }.call;")
+		} else {
+			g.line("}" + stmtEnd(g.target))
+		}
 		return nil
 	}
-	params := graph.many(id, "parameter")
 	defaultText := func(param int) string {
 		defaultID, ok, _ := graph.one(param, "default", false)
 		if !ok {

@@ -423,7 +423,7 @@ func (p *SemanticProgram) documentFromCanonicalUniversalAST() (SemanticDocument,
 	if err := validateUniversalASTDocument(p.UniversalAST); err != nil {
 		return SemanticDocument{}, err
 	}
-	if p.UniversalAST.Projection != "semantic_document.v1" {
+	if p.UniversalAST.Projection != "semantic_document.v1" && p.UniversalAST.Projection != "frontend_facts.v1" {
 		return SemanticDocument{}, fmt.Errorf("universal AST payload is canonical but has no SemanticDocument compatibility view")
 	}
 	// Dialect operations have canonical UAST contracts but no lossless legacy

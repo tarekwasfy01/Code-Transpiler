@@ -75,7 +75,7 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 			return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 		}
 		if nativeSourceWithoutRuntime(target, body, generator.requiredHelperSources()) {
-			return nativeTargetPrefix(target) + body, nil
+			return nativeTargetPrefix(target) + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 		}
 		if generator.nativeDirect {
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", target, nativeRuntimeMarker(body, generator.requiredHelperSources()))
@@ -100,7 +100,7 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 			return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 		}
 		if nativeSourceWithoutRuntime(target, body, generator.requiredHelperSources()) {
-			return nativeTargetPrefix(target) + body, nil
+			return nativeTargetPrefix(target) + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 		}
 		if generator.nativeDirect {
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", target, nativeRuntimeMarker(body, generator.requiredHelperSources()))
@@ -137,12 +137,13 @@ func nativeMainOpen(target string) string {
 func nativeTargetPrefix(target string) string {
 	switch target {
 	case "go":
-		return "package main\n\nimport \"fmt\"\n\n"
+		return "package main\n\nimport (\n    \"fmt\"\n    \"math\"\n)\n\n"
 	case "rust":
 		return ""
 	case "cpp":
 		return `#include <iostream>
 #include <vector>
+#include <cmath>
 
 template <typename T>
 static void uast_print_one(const T& value) { std::cout << value; }
@@ -166,7 +167,7 @@ static void uast_print(const Values&... values) {
 
 `
 	case "c":
-		return "#include <stdio.h>\n\n"
+		return "#include <stdio.h>\n#include <stdbool.h>\n#include <math.h>\n\n"
 	case "zig":
 		return "const std = @import(\"std\");\n\n"
 	case "csharp":

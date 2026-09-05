@@ -1,0 +1,35 @@
+{
+  "grammars": [
+    {
+      "name": "julia",
+      "camelcase": "Julia",
+      "path": ".",
+      "scope": "source.julia",
+      "injection-regex": "^(jl|julia)$",
+      "file-types": [
+        "jl"
+      ],
+      "highlights": "queries/highlights.scm",
+      "injections": "queries/injections.scm",
+      "locals": "queries/locals.scm"
+    }
+  ],
+  "metadata": {
+    "version": "0.25.0",
+    "license": "MIT",
+    "description": "Julia grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Max Brunsfeld",
+        "email": "maxbrunsfeld@gmail.com"
+      },
+      {
+        "name": "Sergio A. Vargas",
+        "email": "savargasqu+git@unal.edu.co"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/tree-sitter/tree-sitter-julia"
+    }
+  }
+}

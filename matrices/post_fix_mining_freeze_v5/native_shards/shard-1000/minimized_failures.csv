@@ -1,0 +1,5 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,02209f409256f0223f50b05e261b623454c598f350a062d55a634fa5f6e7ac34,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""partial"" node=1"
+Q0002,02209f409256f0223f50b05e261b623454c598f350a062d55a634fa5f6e7ac34,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""partial"" node=1"
+Q0003,02209f409256f0223f50b05e261b623454c598f350a062d55a634fa5f6e7ac34,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""partial"" node=1"
+Q0004,02209f409256f0223f50b05e261b623454c598f350a062d55a634fa5f6e7ac34,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""partial"" node=1"

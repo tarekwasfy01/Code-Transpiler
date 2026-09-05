@@ -1,0 +1,6 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,1356bb7db4a7bb8ac0657cf353950a2f55cf8c513728a9c56f53285d76663a52,N0_SOURCE_PARSE,FRONTEND,native,expected expression
+Q0002,e1be0aaad93194e9aedc42928670fdf68f1ffa73f6d01b5752a105e69612abe7,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""asdfas"" node=1"
+Q0003,e1be0aaad93194e9aedc42928670fdf68f1ffa73f6d01b5752a105e69612abe7,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""asdfas"" node=1"
+Q0004,e1be0aaad93194e9aedc42928670fdf68f1ffa73f6d01b5752a105e69612abe7,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""asdfas"" node=1"
+Q0005,e1be0aaad93194e9aedc42928670fdf68f1ffa73f6d01b5752a105e69612abe7,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""asdfas"" node=1"

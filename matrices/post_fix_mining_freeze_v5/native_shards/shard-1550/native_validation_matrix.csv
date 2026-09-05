@@ -1,0 +1,197 @@
+case_id,source_language,architecture,os,abi,output_kind,stage,status,bytes,diagnostic
+1a96852970592f6ae4a9b210ff67dc7599b6ae3552d67547546fea9c7a2ee728,swift,x86_64,windows,win64,assembly,NATIVE,PASS,380,
+1a96852970592f6ae4a9b210ff67dc7599b6ae3552d67547546fea9c7a2ee728,swift,x86_64,windows,win64,machine_code,NATIVE,PASS,81,
+1a96852970592f6ae4a9b210ff67dc7599b6ae3552d67547546fea9c7a2ee728,swift,x86_64,windows,win64,object,NATIVE,PASS,176,
+1a96852970592f6ae4a9b210ff67dc7599b6ae3552d67547546fea9c7a2ee728,swift,x86_64,windows,win64,executable,NATIVE,PASS,2048,
+980e3bd6b15fdcad8739e7923943f4a9493dedc74b8cd88bad071be5a7ce061a,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+980e3bd6b15fdcad8739e7923943f4a9493dedc74b8cd88bad071be5a7ce061a,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+980e3bd6b15fdcad8739e7923943f4a9493dedc74b8cd88bad071be5a7ce061a,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+980e3bd6b15fdcad8739e7923943f4a9493dedc74b8cd88bad071be5a7ce061a,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+e09391faecd01bbc346ebd5a1ae4e9cd7e0fcf78c39e4f2601e795dedf79d1b9,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+e09391faecd01bbc346ebd5a1ae4e9cd7e0fcf78c39e4f2601e795dedf79d1b9,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+e09391faecd01bbc346ebd5a1ae4e9cd7e0fcf78c39e4f2601e795dedf79d1b9,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+e09391faecd01bbc346ebd5a1ae4e9cd7e0fcf78c39e4f2601e795dedf79d1b9,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+32e81ee5347d37695482cc9062757202612ff24c15b808d5f4a837df139fbcf1,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+32e81ee5347d37695482cc9062757202612ff24c15b808d5f4a837df139fbcf1,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+32e81ee5347d37695482cc9062757202612ff24c15b808d5f4a837df139fbcf1,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+32e81ee5347d37695482cc9062757202612ff24c15b808d5f4a837df139fbcf1,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+f40d1f37d9ca4f73aeafa7cd6eeae83563f3dd5478585fc206c06420d0f67b3a,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+f40d1f37d9ca4f73aeafa7cd6eeae83563f3dd5478585fc206c06420d0f67b3a,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+f40d1f37d9ca4f73aeafa7cd6eeae83563f3dd5478585fc206c06420d0f67b3a,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+f40d1f37d9ca4f73aeafa7cd6eeae83563f3dd5478585fc206c06420d0f67b3a,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+43da494c9da1db286defeda5d3b6a70568f35b0d33fbfd54793993030c1dce20,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+43da494c9da1db286defeda5d3b6a70568f35b0d33fbfd54793993030c1dce20,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+43da494c9da1db286defeda5d3b6a70568f35b0d33fbfd54793993030c1dce20,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+43da494c9da1db286defeda5d3b6a70568f35b0d33fbfd54793993030c1dce20,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+b46456b7a8045d5615478eca1d4a295aaa00c0ee539f5a945a4ebc8110ed58cc,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""event.0"" node=1"
+b46456b7a8045d5615478eca1d4a295aaa00c0ee539f5a945a4ebc8110ed58cc,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""event.0"" node=1"
+b46456b7a8045d5615478eca1d4a295aaa00c0ee539f5a945a4ebc8110ed58cc,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""event.0"" node=1"
+b46456b7a8045d5615478eca1d4a295aaa00c0ee539f5a945a4ebc8110ed58cc,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""event.0"" node=1"
+975d0af6cccaf6690064fe867f30d52f513ab28717ac33f655cbdcf5c9ba06fb,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+975d0af6cccaf6690064fe867f30d52f513ab28717ac33f655cbdcf5c9ba06fb,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+975d0af6cccaf6690064fe867f30d52f513ab28717ac33f655cbdcf5c9ba06fb,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+975d0af6cccaf6690064fe867f30d52f513ab28717ac33f655cbdcf5c9ba06fb,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+f50431368f986af6e7d1f7dee0d04e129bb55cc448572cfa0f89f605dd0c85d9,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+f50431368f986af6e7d1f7dee0d04e129bb55cc448572cfa0f89f605dd0c85d9,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+f50431368f986af6e7d1f7dee0d04e129bb55cc448572cfa0f89f605dd0c85d9,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+f50431368f986af6e7d1f7dee0d04e129bb55cc448572cfa0f89f605dd0c85d9,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""a"" node=1"
+d57f92e31a6f0fb6d67170e496287d4fe3ba922b1ad89830b5c61a9bcbef2677,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native call ""foo"" requires linked implementation"
+d57f92e31a6f0fb6d67170e496287d4fe3ba922b1ad89830b5c61a9bcbef2677,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native call ""foo"" requires linked implementation"
+d57f92e31a6f0fb6d67170e496287d4fe3ba922b1ad89830b5c61a9bcbef2677,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native call ""foo"" requires linked implementation"
+d57f92e31a6f0fb6d67170e496287d4fe3ba922b1ad89830b5c61a9bcbef2677,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native call ""foo"" requires linked implementation"
+cae6f44f777cb64279c28eee66afd12c43a507591e7c76d6ca8aa6b71c110157,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""false"" node=1"
+cae6f44f777cb64279c28eee66afd12c43a507591e7c76d6ca8aa6b71c110157,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""false"" node=1"
+cae6f44f777cb64279c28eee66afd12c43a507591e7c76d6ca8aa6b71c110157,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""false"" node=1"
+cae6f44f777cb64279c28eee66afd12c43a507591e7c76d6ca8aa6b71c110157,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""false"" node=1"
+45089cdd0493f8e6e02d05a8ee5ba25d685d4eb7f209d4697aa36465aa855a74,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native call ""print"" requires linked implementation"
+45089cdd0493f8e6e02d05a8ee5ba25d685d4eb7f209d4697aa36465aa855a74,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native call ""print"" requires linked implementation"
+45089cdd0493f8e6e02d05a8ee5ba25d685d4eb7f209d4697aa36465aa855a74,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native call ""print"" requires linked implementation"
+45089cdd0493f8e6e02d05a8ee5ba25d685d4eb7f209d4697aa36465aa855a74,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native call ""print"" requires linked implementation"
+9f7e5366b8e98197130711ec45b2826e14fd71a96bcdf175b9340b72af821660,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+9f7e5366b8e98197130711ec45b2826e14fd71a96bcdf175b9340b72af821660,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+9f7e5366b8e98197130711ec45b2826e14fd71a96bcdf175b9340b72af821660,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+9f7e5366b8e98197130711ec45b2826e14fd71a96bcdf175b9340b72af821660,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+57eed7276908655dadd5959f61c58c90331c622fcb27c44510042d224bb9a4df,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+57eed7276908655dadd5959f61c58c90331c622fcb27c44510042d224bb9a4df,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+57eed7276908655dadd5959f61c58c90331c622fcb27c44510042d224bb9a4df,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+57eed7276908655dadd5959f61c58c90331c622fcb27c44510042d224bb9a4df,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+093a09400c7a2223dcf5eddfed5ac30b917843edfae242128590950dfb583da8,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native call ""someCall"" requires linked implementation"
+093a09400c7a2223dcf5eddfed5ac30b917843edfae242128590950dfb583da8,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native call ""someCall"" requires linked implementation"
+093a09400c7a2223dcf5eddfed5ac30b917843edfae242128590950dfb583da8,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native call ""someCall"" requires linked implementation"
+093a09400c7a2223dcf5eddfed5ac30b917843edfae242128590950dfb583da8,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native call ""someCall"" requires linked implementation"
+73553cae1bb2b531171391e85079809b99be1262a7347d5ae073e71adeea48d1,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native assignment binding unavailable at 5
+73553cae1bb2b531171391e85079809b99be1262a7347d5ae073e71adeea48d1,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native assignment binding unavailable at 5
+73553cae1bb2b531171391e85079809b99be1262a7347d5ae073e71adeea48d1,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native assignment binding unavailable at 5
+73553cae1bb2b531171391e85079809b99be1262a7347d5ae073e71adeea48d1,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native assignment binding unavailable at 5
+8e9c2f62ee40c7ea0a91dda5c6717f975f8dcece48da7f9c49a0dbcee965eb4b,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+8e9c2f62ee40c7ea0a91dda5c6717f975f8dcece48da7f9c49a0dbcee965eb4b,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+8e9c2f62ee40c7ea0a91dda5c6717f975f8dcece48da7f9c49a0dbcee965eb4b,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+8e9c2f62ee40c7ea0a91dda5c6717f975f8dcece48da7f9c49a0dbcee965eb4b,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+13da9233a5217c67ef38f3e32902a4e982184ebe1306cc18f214e97e75d10324,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+13da9233a5217c67ef38f3e32902a4e982184ebe1306cc18f214e97e75d10324,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+13da9233a5217c67ef38f3e32902a4e982184ebe1306cc18f214e97e75d10324,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+13da9233a5217c67ef38f3e32902a4e982184ebe1306cc18f214e97e75d10324,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+3721895d8685a702efd475316f7c0b6d255406630dd97b22b2694a2022f7748f,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+3721895d8685a702efd475316f7c0b6d255406630dd97b22b2694a2022f7748f,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+3721895d8685a702efd475316f7c0b6d255406630dd97b22b2694a2022f7748f,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+3721895d8685a702efd475316f7c0b6d255406630dd97b22b2694a2022f7748f,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+ca2f1d7d18eb8126204fbf1f3a791abc5104e1eb3e9ddcdbe9217b0556ce9588,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native call ""print"" requires linked implementation"
+ca2f1d7d18eb8126204fbf1f3a791abc5104e1eb3e9ddcdbe9217b0556ce9588,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native call ""print"" requires linked implementation"
+ca2f1d7d18eb8126204fbf1f3a791abc5104e1eb3e9ddcdbe9217b0556ce9588,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native call ""print"" requires linked implementation"
+ca2f1d7d18eb8126204fbf1f3a791abc5104e1eb3e9ddcdbe9217b0556ce9588,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native call ""print"" requires linked implementation"
+596ccedfe7fbcf1a20e5edcf933e82392b06717073b20ade348df2cb20259281,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+596ccedfe7fbcf1a20e5edcf933e82392b06717073b20ade348df2cb20259281,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+596ccedfe7fbcf1a20e5edcf933e82392b06717073b20ade348df2cb20259281,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+596ccedfe7fbcf1a20e5edcf933e82392b06717073b20ade348df2cb20259281,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+f257347061620f1b8fa5ea26eab05f009f059ed6508867f7d6b8fd15cf6cc614,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"execution primitive ""call"": CALL_ARGUMENT: node 11 argument 10 has no structured value contract"
+f257347061620f1b8fa5ea26eab05f009f059ed6508867f7d6b8fd15cf6cc614,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"execution primitive ""call"": CALL_ARGUMENT: node 11 argument 10 has no structured value contract"
+f257347061620f1b8fa5ea26eab05f009f059ed6508867f7d6b8fd15cf6cc614,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"execution primitive ""call"": CALL_ARGUMENT: node 11 argument 10 has no structured value contract"
+f257347061620f1b8fa5ea26eab05f009f059ed6508867f7d6b8fd15cf6cc614,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"execution primitive ""call"": CALL_ARGUMENT: node 11 argument 10 has no structured value contract"
+c88028d26e19e2e0cf2176196fda385b73da2a9c0e017b17be3bfd7aba9c26a2,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+c88028d26e19e2e0cf2176196fda385b73da2a9c0e017b17be3bfd7aba9c26a2,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+c88028d26e19e2e0cf2176196fda385b73da2a9c0e017b17be3bfd7aba9c26a2,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+c88028d26e19e2e0cf2176196fda385b73da2a9c0e017b17be3bfd7aba9c26a2,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+dc7af50456a60220043933f3e5d437c1ae7abfb22879481a83cc648220001374,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+dc7af50456a60220043933f3e5d437c1ae7abfb22879481a83cc648220001374,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+dc7af50456a60220043933f3e5d437c1ae7abfb22879481a83cc648220001374,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+dc7af50456a60220043933f3e5d437c1ae7abfb22879481a83cc648220001374,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+aae3d14d1ae0ed43761d4f34f6cda4acf5c4d1608136f1bbafc68f457630f729,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+aae3d14d1ae0ed43761d4f34f6cda4acf5c4d1608136f1bbafc68f457630f729,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+aae3d14d1ae0ed43761d4f34f6cda4acf5c4d1608136f1bbafc68f457630f729,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+aae3d14d1ae0ed43761d4f34f6cda4acf5c4d1608136f1bbafc68f457630f729,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+5e13eca4a725bd2b30d9e8c3ec70894850e36cfcb098e97593de579aea4aac0d,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+5e13eca4a725bd2b30d9e8c3ec70894850e36cfcb098e97593de579aea4aac0d,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+5e13eca4a725bd2b30d9e8c3ec70894850e36cfcb098e97593de579aea4aac0d,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+5e13eca4a725bd2b30d9e8c3ec70894850e36cfcb098e97593de579aea4aac0d,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+da97e8d63711ba0bac4c7f2a6cd91be68ee983712ca5a0a3ecbca01a01a448b0,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+da97e8d63711ba0bac4c7f2a6cd91be68ee983712ca5a0a3ecbca01a01a448b0,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+da97e8d63711ba0bac4c7f2a6cd91be68ee983712ca5a0a3ecbca01a01a448b0,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+da97e8d63711ba0bac4c7f2a6cd91be68ee983712ca5a0a3ecbca01a01a448b0,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+12dae5c1c7c26c03a5e9e6bbd6dcdc59cbae77b3240e1b61d4812febd380f649,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+12dae5c1c7c26c03a5e9e6bbd6dcdc59cbae77b3240e1b61d4812febd380f649,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+12dae5c1c7c26c03a5e9e6bbd6dcdc59cbae77b3240e1b61d4812febd380f649,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+12dae5c1c7c26c03a5e9e6bbd6dcdc59cbae77b3240e1b61d4812febd380f649,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+325a6a5542b70ec5bc5301e054c1f4dfb1f6ce31201297f08b29185256297517,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+325a6a5542b70ec5bc5301e054c1f4dfb1f6ce31201297f08b29185256297517,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+325a6a5542b70ec5bc5301e054c1f4dfb1f6ce31201297f08b29185256297517,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+325a6a5542b70ec5bc5301e054c1f4dfb1f6ce31201297f08b29185256297517,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+47e48985ce1a1ad617f080233f34fa0ce15075ca86412f2de547bbbecfcc5c2b,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+47e48985ce1a1ad617f080233f34fa0ce15075ca86412f2de547bbbecfcc5c2b,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+47e48985ce1a1ad617f080233f34fa0ce15075ca86412f2de547bbbecfcc5c2b,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+47e48985ce1a1ad617f080233f34fa0ce15075ca86412f2de547bbbecfcc5c2b,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+1d48a7ffdc2888dfd56445a075abe3abfc218d9dc8700abae09d54309ee02740,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+1d48a7ffdc2888dfd56445a075abe3abfc218d9dc8700abae09d54309ee02740,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+1d48a7ffdc2888dfd56445a075abe3abfc218d9dc8700abae09d54309ee02740,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+1d48a7ffdc2888dfd56445a075abe3abfc218d9dc8700abae09d54309ee02740,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+1e2957ade89e6dffb9826fb96b245c23c5e036f0ff661ea4a84203bd18c918ab,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+1e2957ade89e6dffb9826fb96b245c23c5e036f0ff661ea4a84203bd18c918ab,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+1e2957ade89e6dffb9826fb96b245c23c5e036f0ff661ea4a84203bd18c918ab,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+1e2957ade89e6dffb9826fb96b245c23c5e036f0ff661ea4a84203bd18c918ab,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+a8a888de0d7706b79da998a38f28ff6b53b465ebd5ac9bd5cb9ca1e263f04512,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""self.foo.bar.baz"" node=2"
+a8a888de0d7706b79da998a38f28ff6b53b465ebd5ac9bd5cb9ca1e263f04512,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""self.foo.bar.baz"" node=2"
+a8a888de0d7706b79da998a38f28ff6b53b465ebd5ac9bd5cb9ca1e263f04512,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""self.foo.bar.baz"" node=2"
+a8a888de0d7706b79da998a38f28ff6b53b465ebd5ac9bd5cb9ca1e263f04512,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""self.foo.bar.baz"" node=2"
+a86fc5cce81c42d7151f09e7b492159312998ea002075bab4e7877688e2aa637,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+a86fc5cce81c42d7151f09e7b492159312998ea002075bab4e7877688e2aa637,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+a86fc5cce81c42d7151f09e7b492159312998ea002075bab4e7877688e2aa637,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+a86fc5cce81c42d7151f09e7b492159312998ea002075bab4e7877688e2aa637,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+d013535802373d26e6a79b86daf361a0abffe5c86215d1ca8e2e7dcc4fb78e41,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+d013535802373d26e6a79b86daf361a0abffe5c86215d1ca8e2e7dcc4fb78e41,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+d013535802373d26e6a79b86daf361a0abffe5c86215d1ca8e2e7dcc4fb78e41,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+d013535802373d26e6a79b86daf361a0abffe5c86215d1ca8e2e7dcc4fb78e41,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+6ba78f6c7174e81e8b814b345b22ef533fb5cf99dd1f0007d832bfd6f93b3990,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 6 missing operand [expression]
+6ba78f6c7174e81e8b814b345b22ef533fb5cf99dd1f0007d832bfd6f93b3990,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 6 missing operand [expression]
+6ba78f6c7174e81e8b814b345b22ef533fb5cf99dd1f0007d832bfd6f93b3990,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 6 missing operand [expression]
+6ba78f6c7174e81e8b814b345b22ef533fb5cf99dd1f0007d832bfd6f93b3990,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 6 missing operand [expression]
+bbeb53f9d7363d8b21e938b4246c5eac11f982bafa79548ca63acb19da6909ba,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+bbeb53f9d7363d8b21e938b4246c5eac11f982bafa79548ca63acb19da6909ba,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+bbeb53f9d7363d8b21e938b4246c5eac11f982bafa79548ca63acb19da6909ba,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+bbeb53f9d7363d8b21e938b4246c5eac11f982bafa79548ca63acb19da6909ba,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+84bb92083a82b40f792f3cc4ee83f259db0cedb5ba4e358af23e78770bf6a2ed,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+84bb92083a82b40f792f3cc4ee83f259db0cedb5ba4e358af23e78770bf6a2ed,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+84bb92083a82b40f792f3cc4ee83f259db0cedb5ba4e358af23e78770bf6a2ed,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+84bb92083a82b40f792f3cc4ee83f259db0cedb5ba4e358af23e78770bf6a2ed,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+975ddf2c6449bfe925d819fed3576929b809b0575a79b0227272a023cfeef396,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""await"" node=1"
+975ddf2c6449bfe925d819fed3576929b809b0575a79b0227272a023cfeef396,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""await"" node=1"
+975ddf2c6449bfe925d819fed3576929b809b0575a79b0227272a023cfeef396,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""await"" node=1"
+975ddf2c6449bfe925d819fed3576929b809b0575a79b0227272a023cfeef396,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""await"" node=1"
+01c7f43fcef4c55cf090e5f7e39d1a37b858e46c38d837a1b09505375f3e6ef6,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+01c7f43fcef4c55cf090e5f7e39d1a37b858e46c38d837a1b09505375f3e6ef6,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+01c7f43fcef4c55cf090e5f7e39d1a37b858e46c38d837a1b09505375f3e6ef6,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+01c7f43fcef4c55cf090e5f7e39d1a37b858e46c38d837a1b09505375f3e6ef6,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""try"" node=1"
+31c4746f406c7819e5df11af23a825d841ee0a2a88e2d6bfc29f875672fa1bf1,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""await"" node=1"
+31c4746f406c7819e5df11af23a825d841ee0a2a88e2d6bfc29f875672fa1bf1,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""await"" node=1"
+31c4746f406c7819e5df11af23a825d841ee0a2a88e2d6bfc29f875672fa1bf1,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""await"" node=1"
+31c4746f406c7819e5df11af23a825d841ee0a2a88e2d6bfc29f875672fa1bf1,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""await"" node=1"
+36829cf5ea757e5b6b1775668d4514ef09c07cf20277ce15e5e88afa2394f115,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=6 kind=for operation=
+36829cf5ea757e5b6b1775668d4514ef09c07cf20277ce15e5e88afa2394f115,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=6 kind=for operation=
+36829cf5ea757e5b6b1775668d4514ef09c07cf20277ce15e5e88afa2394f115,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=6 kind=for operation=
+36829cf5ea757e5b6b1775668d4514ef09c07cf20277ce15e5e88afa2394f115,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=6 kind=for operation=
+a54d1688026451448307ecf9c8d09d4660b24748c2572af8808517da322f7003,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""foo.bar"" node=1"
+a54d1688026451448307ecf9c8d09d4660b24748c2572af8808517da322f7003,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""foo.bar"" node=1"
+a54d1688026451448307ecf9c8d09d4660b24748c2572af8808517da322f7003,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""foo.bar"" node=1"
+a54d1688026451448307ecf9c8d09d4660b24748c2572af8808517da322f7003,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""foo.bar"" node=1"
+eae5f4f3ba1e42358a9193374a1f75cc5bce461d69670f66378beb3a32761d4c,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""false"" node=2"
+eae5f4f3ba1e42358a9193374a1f75cc5bce461d69670f66378beb3a32761d4c,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""false"" node=2"
+eae5f4f3ba1e42358a9193374a1f75cc5bce461d69670f66378beb3a32761d4c,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""false"" node=2"
+eae5f4f3ba1e42358a9193374a1f75cc5bce461d69670f66378beb3a32761d4c,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""false"" node=2"
+180355c64b1c22f6a8cbb3d788b57d86cee8c8903a08ded6b3e6bb4b4409ed59,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=7
+180355c64b1c22f6a8cbb3d788b57d86cee8c8903a08ded6b3e6bb4b4409ed59,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=7
+180355c64b1c22f6a8cbb3d788b57d86cee8c8903a08ded6b3e6bb4b4409ed59,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=7
+180355c64b1c22f6a8cbb3d788b57d86cee8c8903a08ded6b3e6bb4b4409ed59,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=7
+1ae3307bf3d0bb3740ce1398937a024dd0d35859a690d84574270982490efeb2,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=3 kind=index operation=
+1ae3307bf3d0bb3740ce1398937a024dd0d35859a690d84574270982490efeb2,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=3 kind=index operation=
+1ae3307bf3d0bb3740ce1398937a024dd0d35859a690d84574270982490efeb2,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=3 kind=index operation=
+1ae3307bf3d0bb3740ce1398937a024dd0d35859a690d84574270982490efeb2,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=3 kind=index operation=
+2ac51a0e68c36d22073a6e9e3aafa81e2ff705d1858f677f9b798db663150be9,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=5
+2ac51a0e68c36d22073a6e9e3aafa81e2ff705d1858f677f9b798db663150be9,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=5
+2ac51a0e68c36d22073a6e9e3aafa81e2ff705d1858f677f9b798db663150be9,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=5
+2ac51a0e68c36d22073a6e9e3aafa81e2ff705d1858f677f9b798db663150be9,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP function binding node=5
+e2dd602e550da67d3083307631ee0f1eae3ba7b92811c73ce4aeccd4abbe6a10,swift,x86_64,windows,win64,assembly,NATIVE,PASS,373,
+e2dd602e550da67d3083307631ee0f1eae3ba7b92811c73ce4aeccd4abbe6a10,swift,x86_64,windows,win64,machine_code,NATIVE,PASS,82,
+e2dd602e550da67d3083307631ee0f1eae3ba7b92811c73ce4aeccd4abbe6a10,swift,x86_64,windows,win64,object,NATIVE,PASS,177,
+e2dd602e550da67d3083307631ee0f1eae3ba7b92811c73ce4aeccd4abbe6a10,swift,x86_64,windows,win64,executable,NATIVE,PASS,2048,
+edf283eff7973a969e7199184c76053fc3f20e40c55fa05f2de47805b5bf0ef8,swift,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding """" node=2"
+edf283eff7973a969e7199184c76053fc3f20e40c55fa05f2de47805b5bf0ef8,swift,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding """" node=2"
+edf283eff7973a969e7199184c76053fc3f20e40c55fa05f2de47805b5bf0ef8,swift,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding """" node=2"
+edf283eff7973a969e7199184c76053fc3f20e40c55fa05f2de47805b5bf0ef8,swift,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding """" node=2"

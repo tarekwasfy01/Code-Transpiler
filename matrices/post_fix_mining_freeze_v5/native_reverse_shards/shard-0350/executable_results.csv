@@ -1,0 +1,50 @@
+case_id,source_language,status,bytes,format,executed,exit_code,diagnostic
+829378abfae98f2cbd1c694970c70dad14e7d5aa004ba20e02e87cb0688475ea,cpp,FAIL,0,PE32+,false,,"native unresolved binding ""int"" node=1"
+4ce09e6fd4bc8d70ea6243468f3511eda439d025116a1f017c68fe0d157d6b70,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=2
+44103fdcb4beda4b5ccd98ae434d37038b2cd194c37ec586ef67afea0c61f226,cpp,PASS,2048,PE32+,false,,
+d40655e844511e1769968d1123a44a9f3f9718aa9c096e1c7706faf574be1b2b,cpp,FAIL,0,PE32+,false,,"execution primitive ""call"": CALL_ARGUMENT: node 10 argument 9 has no structured value contract"
+8af56d531375e6c749be13e68fd3d52e575ecb592bc310b729cd94112685e850,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+a667fb5d314608095a1cefac41709780633e7d1ed658fbfea6286d64e811b494,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+0e30966d2d6e255ce318f9ae34f7fcbb36bcdbf2f68feb0bd3e9470af3553a83,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=3
+7d448e8befd248cfa04715165401899f0c52c1a1ac398fa133dcc8d94761117e,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+ecb982e784dadd2f806630786a5e33f9eeaf4fb14a17cb83aa47b3dfb3a52d78,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+76807e54c516f0904b03a9d379728ea20ab6b26b105da394d826dc4d60e19ced,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=3
+67654dbada144b05c72efb83398eb0b4d89d4b424fb205941c94e276975d95cc,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=3
+1b60d56bee9be3f84190e339bb1cdf1518434fea26524b2531dcde971684ed94,cpp,PASS,2048,PE32+,false,,
+06fccc73a423e05f5c0617fa4c6ca185cff21e0594dae4522a35dbb5c45d8108,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+dd676cf3c70b3e1a0bc6eb4f2b8694e654ece5072f216975a2c97a674df2ce65,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+e53dc6d93d5bc8a8a3bfebea154af45341fd6e3fb027c71124bf8029a8c8b35a,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+1719b095bddad312a04b10f4a48ba03ac6fa6700771552a29aeab4a30c7c73ed,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=2
+a50ea09e1edcdf6ec012978512c20128b7209399c8707da48b8fce34b23a09e7,cpp,FAIL,0,PE32+,false,,"native unresolved binding ""T"" node=2"
+ea11ad23f778af8114525ae38c2615b596eebec95a6f7a07900c78e3bf40782d,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+47f9d949b13fa5df49e3e15f7af059e70afe3cd406ec9d48e762099310037661,cpp,FAIL,0,PE32+,false,,"execution primitive ""call"": CALL_ARGUMENT: node 12 argument 11 has no structured value contract"
+80f7eec6d215d6d6caf7dbef8c6880bcb18f8c706e976061cd901ee466fb6e2d,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+81f28eb93e1b224f1327215512bd9803d39386bb1fec2b5e0c0ad20c31039003,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+a50b13a3f7344b193567c350bff1764d4887ccabf3a8813c5147eaedc23ecf57,cpp,FAIL,0,PE32+,false,,native node 15 missing operand [expression]
+5103a3a959fab96f5107c4b7193c9472af661633087b3423319c82d5c2c944ad,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+09bb732d6ef01984860f431b94df374842c6c2ee026a435530d21daaeca8f7fd,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+69d77cdb0340e43eb79da2ddc43f16e58b4af6a6c10a232b058817f12b558e6d,cpp,FAIL,0,PE32+,false,,"native unresolved binding ""nullptr"" node=2"
+5ffee1010ad57fa9f9acad4b4f90a9a1ff1e104e7f0f6e6054b9eb4e1984a583,cpp,FAIL,0,PE32+,false,,"native unresolved binding ""R"" node=2"
+8c2d4828dfaad687ef171815928363ba8a09e65719117035414fe823ef03a1a7,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+a51e897f553f56f5018285ca8771c6d563fd23faf7e01e883b68926255c6d6e4,cpp,FAIL,0,PE32+,false,,"execution primitive ""call"": CALL_ARGUMENT: node 11 argument 10 has no structured value contract"
+e9da13716c637bbe8a03cd71f41851ca7e165559ea116b8dec9b09b97f854121,cpp,FAIL,0,PE32+,false,,"native literal representation ""string"" unavailable"
+69ace43f6209920c30a3be8722f601612b14706dae656d3879d9b286f46e5b13,cpp,FAIL,0,PE32+,false,,"strconv.ParseFloat: parsing ""1.2_"": invalid syntax"
+83e6dabba5cf4ba0b63e092890acde13703465f1084d8bb80f39bf299f737085,cpp,FAIL,0,PE32+,false,,"native call ""int"" requires linked implementation"
+6b9be1f94e4a5794f67660a82ba43ef8998a39317515aed3d73c4873bf57f04c,cpp,FAIL,0,PE32+,false,,native assignment binding unavailable at 7
+b15ae5ee8c4a8588fc3103b81de6dd38206bf60786788cf54c2e9d931688c78b,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+ae626ffae9982fabfeec6038ae1aef76d418dd4d441894928bb6fcfdd557edb6,cpp,FAIL,0,PE32+,false,,native node 1 missing operand [expression]
+446325800f54393180fcb2e137d786b2453a8acd337e4edee7efc2562142b047,cpp,FAIL,0,PE32+,false,,native node 1 missing operand [expression]
+5628653de1c6a39793d07781e92acda866f63a9655cc4eaf1d68e3d395de525d,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+3a98309cf48df399b8d38b0110cfea3a299a660b5c0fa724b5b99a0aa50cf302,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP expression node=6 kind=index
+49d3862087429efda7280499baa0c5a846bc102b77437661d17af9d3a16a6a88,cpp,FAIL,0,PE32+,false,,"native unresolved binding ""x.template"" node=1"
+256163dea3afdc031b7bd99277363e1006e0a93d7b1de8ce505593b6ee9516ee,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+26fda8825883e9d5da791ce290d08668463e2155cf0783ca3d5190f040f422ce,cpp,FAIL,0,PE32+,false,,native node 1 missing operand [expression]
+380fca17fd1e1b18152731c68ae9af96c2745855e1464b628ebf842c55ff9dd7,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+429c82aca1402b844713a933f48068ee1967cb44ceaa0b003fc4613b9c0952c3,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=3
+8d0af25562d47f93375dd9d095d537d4926a3d9f38a956cefc7ed8ff3303bc84,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+4a0415fef6a60aac218fc92230c69ed60f740590585ead7fe8f0f04f7fcf8134,cpp,FAIL,0,PE32+,false,,"native unresolved binding ""export"" node=1"
+da1e1a11f1fdd3a253e4cc167d86aa5ecc4b80f19617a3cb632c2062671ab789,cpp,FAIL,0,PE32+,false,,"native unresolved binding ""export"" node=1"
+2cb3b4b0aeb137e11d0db05e138f24910e9e1932219e6d044af0e69af388f4b2,cpp,FAIL,0,PE32+,false,,"native unresolved binding ""export"" node=1"
+51611c1637c6288c2a05176861bf81c08c69eb86d8764e852f93f7b2133cbe31,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+6a04d461bb62ab358c7071d875a1a1502381db2a64cc26770fb20fd75e6fd8c6,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+34a39c0a1c2492a37d584542baa2a3506c9bda701bf12f07306d7c5e30a8c44a,cpp,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=

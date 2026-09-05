@@ -1,0 +1,10 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,85f3de218dc626818992dd5dd7d8d2eea92ee681cb1eaa3f30a8af4a949c663e,B5_UAST_LIFT,UNKNOWN_FAILURE,binary_lift_assembly,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0002,85f3de218dc626818992dd5dd7d8d2eea92ee681cb1eaa3f30a8af4a949c663e,B5_UAST_LIFT,UNKNOWN_FAILURE,binary_lift_executable,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0003,85f3de218dc626818992dd5dd7d8d2eea92ee681cb1eaa3f30a8af4a949c663e,B5_UAST_LIFT,UNKNOWN_FAILURE,binary_lift_machine_code,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0004,85f3de218dc626818992dd5dd7d8d2eea92ee681cb1eaa3f30a8af4a949c663e,B5_UAST_LIFT,UNKNOWN_FAILURE,binary_lift_object,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0005,f89632c565c55188252845c64cf36a06d36ae6f65a899538afb1c217a05a38cf,N0_SOURCE_PARSE,FRONTEND,native,unterminated string at 89
+Q0006,3e531b8594303528a4170d63b7af69b2614ac91094cea78dc1b6f244d4c9271b,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""mystruct.myfield"" node=1"
+Q0007,3e531b8594303528a4170d63b7af69b2614ac91094cea78dc1b6f244d4c9271b,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""mystruct.myfield"" node=1"
+Q0008,3e531b8594303528a4170d63b7af69b2614ac91094cea78dc1b6f244d4c9271b,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""mystruct.myfield"" node=1"
+Q0009,3e531b8594303528a4170d63b7af69b2614ac91094cea78dc1b6f244d4c9271b,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""mystruct.myfield"" node=1"

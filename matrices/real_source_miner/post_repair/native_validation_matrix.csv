@@ -1,0 +1,27 @@
+case_id,source_language,architecture,os,abi,output_kind,stage,status,bytes,diagnostic
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native function x: native node 6 missing operand [expression]
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native function x: native node 6 missing operand [expression]
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,x86_64,windows,win64,object,NATIVE,FAIL,0,native function x: native node 6 missing operand [expression]
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,x86_64,windows,win64,executable,NATIVE,FAIL,0,native function x: native node 6 missing operand [expression]
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""f"" node=1"
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""f"" node=1"
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""f"" node=1"
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""f"" node=1"
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,x86_64,windows,win64,assembly,NATIVE,FAIL,0,native node 1 missing operand [expression]
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,native node 1 missing operand [expression]
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,x86_64,windows,win64,object,NATIVE,FAIL,0,native node 1 missing operand [expression]
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,x86_64,windows,win64,executable,NATIVE,FAIL,0,native node 1 missing operand [expression]
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,x86_64,windows,win64,assembly,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=3 kind=member operation=
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=3 kind=member operation=
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,x86_64,windows,win64,object,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=3 kind=member operation=
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,x86_64,windows,win64,executable,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=3 kind=member operation=
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,x86_64,windows,win64,assembly,NATIVE,FAIL,0,"native unresolved binding ""x"" node=1"
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,x86_64,windows,win64,machine_code,NATIVE,FAIL,0,"native unresolved binding ""x"" node=1"
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,x86_64,windows,win64,object,NATIVE,FAIL,0,"native unresolved binding ""x"" node=1"
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,x86_64,windows,win64,executable,NATIVE,FAIL,0,"native unresolved binding ""x"" node=1"
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,x86_64,windows,win64,assembly,NATIVE,FAIL,0,UNIMPLEMENTED_NATIVE_GAP node=4 kind=index operation=
+8f5c370b77525c97c

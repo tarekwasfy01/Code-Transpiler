@@ -38,7 +38,61 @@ func AnalyzeSemanticStatementTokens(language string, event CanonicalSemanticEven
 	case "for":
 		return emitStructuredIteration(language, event, tokens)
 	case "function":
+		// Some grammars classify an assignment whose RHS is a function literal
+		// by its dominant function production. Preserve the surrounding binding
+		// from the already-tokenized grammar children instead of dropping it.
+		for at, tok := range tokens {
+			if tok.Class != TokenOperator || (tok.Text != "<-" && tok.Text != "<<-" && tok.Text != "=" && tok.Text != "->" && tok.Text != "->>") {
+				continue
+			}
+			left, err := analyzeAssignmentTarget(language, tokens[:at])
+			if err != nil {
+				return nil, err
+			}
+			right, err := emitStructuredClosure(language, event, tokens[at+1:])
+			if err != nil {
+				return nil, err
+			}
+			return joinAssignmentFacts(event, left, right, tok.Text), nil
+		}
 		return emitStructuredClosure(language, event, tokens)
+	case "if", "else":
+		// The grammar has already identified the control header and supplied its
+		// token children.  Lower the condition from those structured tokens; the
+		// event's normalized text is never consulted.  A plain `else` has no
+		// condition and is retained as a branch marker for the owning IfStmt.
+		if event.Action == "else" && strings.EqualFold(event.Fields["branch_kind"], "else") {
+			return nil, nil
+		}
+		start := 1
+		if event.Action == "else" && start < len(tokens) && tokens[start].Text == "if" {
+			start++
+		}
+		if event.Action == "else" && (start >= len(tokens) || tokens[start].Text != "if") && !strings.EqualFold(event.Fields["branch_kind"], "else-if") {
+			return nil, nil
+		}
+		condition := significant(append([]Lexeme(nil), tokens[start:]...))
+		for len(condition) > 0 && (condition[len(condition)-1].Text == "{" || condition[len(condition)-1].Text == ":") {
+			condition = condition[:len(condition)-1]
+		}
+		if len(condition) >= 2 && condition[0].Text == "(" && condition[len(condition)-1].Text == ")" {
+			condition = condition[1 : len(condition)-1]
+		}
+		if len(condition) == 0 {
+			return nil, nil
+		}
+		children, err := AnalyzeSemanticTokens(language, condition)
+		if err != nil {
+			return nil, err
+		}
+		id := len(children)
+		fields := map[string]string{}
+		for key, value := range event.Fields {
+			fields[key] = value
+		}
+		roles := []CanonicalRoleFact{{OwnerNodeID: id, ChildNodeID: children[len(children)-1].ID, Role: "condition"}}
+		children = append(children, CanonicalSemanticEvent{ID: id, Action: event.Action, StructureKind: "if", SourceOffset: event.SourceOffset, Fields: fields, Roles: roles})
+		return children, nil
 	}
 	// Expressions include aggregates, indexing, slices and Python lambdas.
 	if event.Action == "expression" || event.Action == "print" {
@@ -127,7 +181,7 @@ func emitStructuredIteration(language string, event CanonicalSemanticEvent, toke
 	for _, t := range tokens[1:bindEnd] {
 		if t.Class == TokenIdentifier && !isBindingModifier(t.Text) && !isTypeWord(t.Text) {
 			id := len(events)
-			events = append(events, CanonicalSemanticEvent{ID: id, StructureKind: "identifier", Text: t.Text, SourceOffset: t.Start})
+			events = append(events, CanonicalSemanticEvent{ID: id, StructureKind: "identifier", Text: t.Text, SourceOffset: t.Start, Fields: map[string]string{"name": t.Text}})
 			bindingIDs = append(bindingIDs, id)
 		}
 	}
@@ -139,7 +193,7 @@ func emitStructuredIteration(language string, event CanonicalSemanticEvent, toke
 		for i, bindingID := range bindingIDs {
 			patternRoles[i] = CanonicalRoleFact{OwnerNodeID: patternID, ChildNodeID: bindingID, Role: "binding", Ordinal: i}
 		}
-		events = append(events, CanonicalSemanticEvent{ID: patternID, StructureKind: "binding", SourceOffset: event.SourceOffset, Roles: patternRoles})
+		events = append(events, CanonicalSemanticEvent{ID: patternID, StructureKind: "binding", SourceOffset: event.SourceOffset, Roles: patternRoles, Fields: map[string]string{"binding_count": fmt.Sprint(len(bindingIDs))}})
 		roles = append(roles, CanonicalRoleFact{OwnerNodeID: -1, ChildNodeID: patternID, Role: "binding"})
 	}
 	iterStart := bindEnd + 1
@@ -191,7 +245,7 @@ func emitStructuredClosure(language string, event CanonicalSemanticEvent, tokens
 	for _, t := range tokens[open+1 : close] {
 		if t.Class == TokenIdentifier {
 			id := len(events)
-			events = append(events, CanonicalSemanticEvent{ID: id, StructureKind: "identifier", Text: t.Text, SourceOffset: t.Start})
+			events = append(events, CanonicalSemanticEvent{ID: id, StructureKind: "identifier", Text: t.Text, SourceOffset: t.Start, Fields: map[string]string{"name": t.Text}})
 			roles = append(roles, CanonicalRoleFact{OwnerNodeID: -1, ChildNodeID: id, Role: "parameter", Ordinal: len(roles)})
 		}
 	}

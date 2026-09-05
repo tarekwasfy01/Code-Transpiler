@@ -87,7 +87,17 @@ func (st *runState) uastStmt(env *runEnv, g *uastExecutionGraph, id int) (any, r
 		value, err := st.uastExpr(env, g, x)
 		return value, runNormal, err
 	case "assign":
-		x, _, err := child("expression", true)
+		// Canonical frontend facts use the semantic `value` role for an
+		// assignment initializer, while the legacy compatibility view calls the
+		// same edge `expression`.  Execute either representation directly from
+		// the UAST; never require a text-parsed compatibility node here.
+		x, ok, err := child("expression", false)
+		if err != nil {
+			return nil, runNormal, err
+		}
+		if !ok {
+			x, _, err = child("value", true)
+		}
 		if err != nil {
 			return nil, runNormal, err
 		}
@@ -95,7 +105,22 @@ func (st *runState) uastStmt(env *runEnv, g *uastExecutionGraph, id int) (any, r
 		if err != nil {
 			return nil, runNormal, err
 		}
-		if err := env.assign(c.Name, value); err != nil {
+		// The canonical assignment contract carries its binding in the typed
+		// target child. `name` is a convenience field for older projections, so
+		// recover it structurally when that optional field is absent. This keeps
+		// every frontend on the same definition/reference path.
+		name := c.Name
+		if name == "" {
+			if target, ok, targetErr := child("target", false); targetErr != nil {
+				return nil, runNormal, targetErr
+			} else if ok {
+				name = g.common[target].Name
+			}
+		}
+		if name == "" {
+			return nil, runNormal, fmt.Errorf("assignment has no structured binding target")
+		}
+		if err := env.assign(name, value); err != nil {
 			return nil, runNormal, err
 		}
 		return value, runNormal, nil
@@ -291,7 +316,13 @@ func (st *runState) uastExpr(env *runEnv, g *uastExecutionGraph, id int) (any, e
 		}
 		return evaluateInteger(*c.Operation.Typed, values)
 	case "unary":
-		x, err := one("value")
+		x, ok, err := g.one(id, "value", false)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			x, err = one("operand")
+		}
 		if err != nil {
 			return nil, err
 		}

@@ -1,0 +1,51 @@
+case_id,source_language,status,bytes,instruction_count,diagnostic
+f92a11dfb4b06ee982dbb8ea002a2b5afbe6625385c531abdaba8b29af74f5d3,kotlin,FAIL,0,0,"native call ""listOf"" requires linked implementation"
+158554041d80602d84565fe6c11eb9c1568fd164caa04711dcde1bd1c236d374,kotlin,PASS,335,15,
+8b51a2e720d3b086f65b33dd12fd4a3e5c044c9ebc4a392be64665e2f1e37dc7,kotlin,PASS,202,11,
+997f8ce5f0a95275187348ce408ec0302d7415e5a868748bb8899a8e89abe290,kotlin,FAIL,0,0,"native unresolved binding ""object"" node=1"
+e320dfd19e469860e5cd46f77a39aba48c0255f35fc428a229565f30e79f4409,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+c799d44fc04ea974a91253e92cfa502f5d1ceaa52789e872cddf901fbe18db44,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+0f368dccdf43a5f6f0fa3a286575db97d9e281e167b9360d971dd0fbe3b2b2ab,kotlin,FAIL,0,0,"native unresolved binding ""object"" node=1"
+b39ecd76c787eb2edbd2cc8006a860651702109610932809f8a95532e2731359,kotlin,FAIL,0,0,"native unresolved binding ""object"" node=2"
+8a3295b19688c8f8b7cb14e9ea87e9821781ac187ec3e6ed9fcc5dac07bf3877,kotlin,FAIL,0,0,"native unresolved binding ""internal"" node=1"
+a75850cc92bac2562375ea568cbc624f307c6734fa404b14f766454a15e86cef,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+c8309899fa6423fb99aae92b4cb0fb1674e8b32fcad946dcc0e1d21a0797d79b,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+7d5d64d568f9cea0ef302ab08e290f5b61ccf2949c5f1a9c0e269e07ab0b4727,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+54ef3b7e9151dfbafcaf8d0d8fe3c2980fd5b818860886512900ffb83915ffe1,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+063e07383b7ebe65ab41031ab3ad0fca20604188377bdb514da6f700407e97f6,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+8909c191f18a70170ff018b0f3ed14315c1748ab76c872e586f1625c1b05c43a,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+6e910245e4bd5bdc6f59c763e2818224d0a1d1f1ae3498375bf7869b753674b2,kotlin,FAIL,0,0,native node 1 missing operand [expression]
+824b6cdb46f625ea178643d6e5763591ca0a3694e66afb2660934b3a8477614d,kotlin,FAIL,0,0,native node 1 missing operand [expression]
+527d14d0ffaea53e83e89a6932937f4d638729874bee2486775ccb67647e2a09,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+941f06b6c0b25e0084665082a35bc40dadfbf27be5b00a6f3d494e525d83e76a,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+1ac0f93f4bbded0479aa1d4e9675c7e9a5df8bd72764127dfb134619f147e93f,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+b10c368315b1dc2144dacc9918c3d80734dfc33bbbf57df7131d11f7c4b8e342,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=3 kind=for operation=
+f4db78b114f231446f1d20a39f0fd7d10f2aa627e8e4ed46b420ea94fd92a115,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+b5e6192ba480c9c2d5124822ba2130b3f011a74bbe33f359fa84be8682b42e40,kotlin,PASS,334,15,
+e0734226ed4423afaebc809107d8194fb70e165eba804ef8751c113ca865b6f5,kotlin,FAIL,0,0,"native unresolved binding ""something"" node=1"
+cb0c9fea01391d43c0c1b5f4b80667dd8f7ea69f1c705ae56890af1533e84d28,kotlin,FAIL,0,0,"native unresolved binding ""something"" node=1"
+5e2f6501efb0d3da20daccf7cbeea678a8ae592210890dd960f8bdac7e2a41d6,kotlin,FAIL,0,0,"native unresolved binding ""somethingElse"" node=1"
+0243e869c64b232847596201a4705574933c470b151f8baf820aedc83ef45b5d,kotlin,FAIL,0,0,"native unresolved binding ""something"" node=1"
+a483f5209241a7511487b51b6d5ee98a30b641272401530411c6f5616e258e76,kotlin,FAIL,0,0,"native unresolved binding ""something"" node=1"
+2cea13c5c8c7e51de8d2202b8ead55ff1c1f7b189a577bebc6d6700df449d79b,kotlin,FAIL,0,0,"native unresolved binding ""unitFunction"" node=1"
+f64314a91f6118b45f7fa102ff843af8608e61b2fbcc1bccfea2bd860fd9b5ec,kotlin,FAIL,0,0,"native unresolved binding ""a"" node=1"
+9e95ad13785e9ac6661e3a35c8ed00f7a33667197d4331d86f8a8a2d5e180231,kotlin,FAIL,0,0,"native unresolved binding ""a"" node=1"
+05c850a76ac204b214c81e9677ba21186c9a0727e9d0b50f1ae83943cca914ba,kotlin,FAIL,0,0,"native unresolved binding ""a"" node=1"
+91ca1af5b3e13e5689c2540bc2de8c8a548169475c91bdb414da0f3ab9b81a8b,kotlin,FAIL,0,0,"native unresolved binding ""a"" node=1"
+2323da560618fefd2b3ddb8136ff8da7c519b058c2c261ef5b1534e1ef20cdb0,kotlin,FAIL,0,0,"native unresolved binding ""a"" node=1"
+5e99ee1bf549a1f72a14fc00bfa77929ac566626ded9d14a658deac5cdcec63f,kotlin,FAIL,0,0,"native unresolved binding ""Foo"" node=2"
+3d1fd3dc57a1ec16d483b876cd7f37f8ba41de5140a9d34913eb6225e2a5f604,kotlin,FAIL,0,0,"native unresolved binding ""Foo"" node=2"
+ef6e2a73db43f4dbfd9f88b7cde27237e34d095f1689d105224a41d56d23cf80,kotlin,FAIL,0,0,"native unresolved binding ""a"" node=1"
+1a520452d826d9b1c873c9fcbe0d013c4f2ae72fab8eff39148263a4aea92f4b,kotlin,FAIL,0,0,"native unresolved binding ""a"" node=1"
+0e0816ef97a6fef4106a3a45ff537f025ce424cd4c04c5326d20083bc6dd0276,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+cc041753416fb34dd68bfa1e7b250088cd52074b1c72df5e122c35befba4f7bb,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+740dd36d191570919f44601deb1f2311402da349369304d326075241cba8f0d7,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+fd1e7cca6ae3d2e4d6f7409ab231e6a78af84bdcbb4ad2cc610b81d9adfc536f,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+540d451320eec2eb93bac610972a523a5491ab52ff93042df51f462e769c30f7,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP expression node=4 kind=tuple
+9a9e75fce4dbb52407bcfd1263913449a1a3c6bc0753f2303cf89974b0eac08b,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=10
+724ed46a4733e631089b064166be481e75af01a07999e3ec9fa6e22ea5e70ba9,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=10
+c7dfd21c1df492191fe5b21a83fa2f885fe5ed439c9c8b07b38ac39da0505c6c,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+8833f408ed40a4d5953de9d22f482d44502b4c8a98658d983b2b0d0340d847a1,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=16
+4348d23dc03d5f5abab11ae768b5c50a78a1c756f0fef99ca0e0fce6dbd2656e,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+604e6bea7132b5be29acf9b41682c840b0bbf6ca60bb2e9f50b1f6b5987b038b,kotlin,FAIL,0,0,"native unresolved binding ""interface"" node=1"
+f76d55df5d71022edba0c16e2081a66d007d6b2f3bc28fd4725662bcb509b864,kotlin,FAIL,0,0,UNIMPLEMENTED_NATIVE_GAP function binding node=2

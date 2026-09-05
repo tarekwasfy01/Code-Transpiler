@@ -1,0 +1,7 @@
+family_id,relation,value
+Q0001,target/output,native
+Q0002,target/output,assembly
+Q0003,target/output,executable
+Q0004,target/output,machine_code
+Q0005,target/output,object
+Q0006,target/output,source

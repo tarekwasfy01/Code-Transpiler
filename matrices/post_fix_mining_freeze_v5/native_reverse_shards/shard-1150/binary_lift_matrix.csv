@@ -1,0 +1,13 @@
+case_id,source_language,input_kind,status,input_bytes,uast_hash,diagnostic
+06d8c54f3601660960da78a7f462dd4c1910dfff2533f036f99594467985776c,kotlin,assembly,FAIL,325,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+06d8c54f3601660960da78a7f462dd4c1910dfff2533f036f99594467985776c,kotlin,machine_code,FAIL,62,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+06d8c54f3601660960da78a7f462dd4c1910dfff2533f036f99594467985776c,kotlin,object,FAIL,157,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+06d8c54f3601660960da78a7f462dd4c1910dfff2533f036f99594467985776c,kotlin,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+7bf141a526b37ee52619228bbd1776d91a05fd27efd5f8d96ab35774373486ea,kotlin,assembly,FAIL,325,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+7bf141a526b37ee52619228bbd1776d91a05fd27efd5f8d96ab35774373486ea,kotlin,machine_code,FAIL,62,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+7bf141a526b37ee52619228bbd1776d91a05fd27efd5f8d96ab35774373486ea,kotlin,object,FAIL,157,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+7bf141a526b37ee52619228bbd1776d91a05fd27efd5f8d96ab35774373486ea,kotlin,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+1bc97da0845b814f784bb291dcb54fadba9bf5a6151dd58fcff06c8ef23fc668,kotlin,assembly,FAIL,325,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+1bc97da0845b814f784bb291dcb54fadba9bf5a6151dd58fcff06c8ef23fc668,kotlin,machine_code,FAIL,62,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+1bc97da0845b814f784bb291dcb54fadba9bf5a6151dd58fcff06c8ef23fc668,kotlin,object,FAIL,157,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+1bc97da0845b814f784bb291dcb54fadba9bf5a6151dd58fcff06c8ef23fc668,kotlin,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""

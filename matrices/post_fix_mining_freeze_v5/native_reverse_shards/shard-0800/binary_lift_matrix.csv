@@ -1,0 +1,13 @@
+case_id,source_language,input_kind,status,input_bytes,uast_hash,diagnostic
+43be2987ed027c40b207aa42802f5ee34dc07d4ad60169a7e9b1701719108af4,nim,assembly,FAIL,934,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+43be2987ed027c40b207aa42802f5ee34dc07d4ad60169a7e9b1701719108af4,nim,machine_code,FAIL,254,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+43be2987ed027c40b207aa42802f5ee34dc07d4ad60169a7e9b1701719108af4,nim,object,FAIL,349,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+43be2987ed027c40b207aa42802f5ee34dc07d4ad60169a7e9b1701719108af4,nim,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+136d974a3dc22638344464f957daa3b26999d6849efe8460f4a49b044f7bee58,nim,assembly,FAIL,352,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+136d974a3dc22638344464f957daa3b26999d6849efe8460f4a49b044f7bee58,nim,machine_code,FAIL,79,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+136d974a3dc22638344464f957daa3b26999d6849efe8460f4a49b044f7bee58,nim,object,FAIL,174,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+136d974a3dc22638344464f957daa3b26999d6849efe8460f4a49b044f7bee58,nim,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+bfe2ec05735367cf15b65197882b68f9b4d8fa10444c0c5e010c8e3fd6a3c59c,csharp,assembly,FAIL,392,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+bfe2ec05735367cf15b65197882b68f9b4d8fa10444c0c5e010c8e3fd6a3c59c,csharp,machine_code,FAIL,76,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+bfe2ec05735367cf15b65197882b68f9b4d8fa10444c0c5e010c8e3fd6a3c59c,csharp,object,FAIL,171,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+bfe2ec05735367cf15b65197882b68f9b4d8fa10444c0c5e010c8e3fd6a3c59c,csharp,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""

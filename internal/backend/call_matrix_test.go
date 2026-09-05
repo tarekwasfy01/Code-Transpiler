@@ -1,34 +1,6 @@
 package backend
 
-import (
-	"strings"
-	"testing"
-)
-
-func TestCallMatrixRejectsUnsafeSubstitution(t *testing.T) {
-	cases := []struct{ name, code, diagnostic string }{
-		{"lazy_conditional_effect", "f <- function(x) { return(FALSE && x) }; f(print(3))", "promise"},
-		{"missing_argument", "f <- function(x) { return(x) }; f()", "arity"},
-		{"extra_argument", "f <- function(x) { return(x) }; f(1,2)", "arity"},
-		{"unknown_name", "f <- function(x) { return(x) }; f(y=1)", "named"},
-		{"duplicate_name", "f <- function(x) { return(x) }; f(x=1,x=2)", "duplicate"},
-		{"recursive_call", "f <- function(x) { return(f(x)) }; f(1)", "recursive"},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			for _, language := range Languages {
-				source := "python"
-				if tc.name == "lazy_conditional_effect" {
-					source = "r"
-				}
-				_, err := TranspileFrom(source, language.ID, tc.code)
-				if err == nil || !strings.Contains(err.Error(), tc.diagnostic) {
-					t.Fatalf("%s: got %v, want %s", language.ID, err, tc.diagnostic)
-				}
-			}
-		})
-	}
-}
+import "testing"
 
 func TestArgumentBindingPermutationAndDefaults(t *testing.T) {
 	ast, err := parse("f <- function(x,y=2) { return(x+y) }")

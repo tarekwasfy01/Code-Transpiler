@@ -1,0 +1,4 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,66e4d7b7858402d141d05ba1f2d9b8260df43dc2d4740e9384e5dee15e8c4d79,V0_SOURCE_PARSE,FRONTEND,source_target,go range matrix: counting-loop initialization is not supported
+Q0002,3f81dc424b06c127a02772da9214fa6d68cc77116ea0825259d72bf6bc00aa45,V4_NATIVE_EMISSION,BACKEND,source_target,"universal node 3 lacks required ""expression"" child"
+Q0003,3021f513b41aa05c9520b93abaef9f020abfe4609d4bbe2a79f9c2e403286d89,V5_TARGET_REPARSE,TARGET_SYNTAX,source_target,expected expression

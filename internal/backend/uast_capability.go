@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"sort"
+	"sync"
 
 	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
@@ -96,7 +97,24 @@ func (p UASTCapabilityPlane) Status(row, col int) UASTExecutionStatus {
 	return UASTUnknown
 }
 
+// Target capability contracts are derived solely from immutable embedded UAST
+// data and static TargetSpecs. Cache the completed matrix so the real
+// Source→UAST→Target path does not reconstruct every projection plane for
+// every emitted node or target cell.
+var universalTargetCapabilityMatrixCache struct {
+	once sync.Once
+	m    UASTTargetCapabilityMatrix
+	err  error
+}
+
 func UniversalTargetCapabilityMatrix() (UASTTargetCapabilityMatrix, error) {
+	universalTargetCapabilityMatrixCache.once.Do(func() {
+		universalTargetCapabilityMatrixCache.m, universalTargetCapabilityMatrixCache.err = buildUniversalTargetCapabilityMatrix()
+	})
+	return universalTargetCapabilityMatrixCache.m, universalTargetCapabilityMatrixCache.err
+}
+
+func buildUniversalTargetCapabilityMatrix() (UASTTargetCapabilityMatrix, error) {
 	if err := loadUniversalASTBasis(); err != nil {
 		return UASTTargetCapabilityMatrix{}, err
 	}
@@ -144,11 +162,11 @@ func UniversalTargetCapabilityMatrix() (UASTTargetCapabilityMatrix, error) {
 		for col, target := range targets {
 			status := UASTUnknown
 			if executableStructures[structural] {
-				if target == "r" {
-					status = UASTDirect
-				} else {
-					status = UASTRuntimeRequired
-				}
+				// The shared TargetSpec/NativeEmitter contract is already
+				// runtime-free for every registered target.  Runtime remains a
+				// last-resort decision made from the actual emitted source, not a
+				// language-wide matrix default.
+				status = UASTDirect
 			} else if profile := profileRow(target); profile >= 0 {
 				available := false
 				for _, facet := range seeded {
@@ -165,11 +183,7 @@ func UniversalTargetCapabilityMatrix() (UASTTargetCapabilityMatrix, error) {
 		for col, target := range targets {
 			status := UASTUnknown
 			if executableFacets[facet] {
-				if target == "r" {
-					status = UASTDirect
-				} else {
-					status = UASTRuntimeRequired
-				}
+				status = UASTDirect
 			} else if profile := profileRow(target); profile >= 0 && uastEmbedded.Basis.CoverageUpper.At(profile, row) == 0 {
 				status = UASTUnsupported
 			}

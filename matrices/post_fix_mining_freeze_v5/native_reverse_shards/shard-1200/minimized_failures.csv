@@ -1,0 +1,9 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,1eaddc2c4f4ea92bebb5dba90ca7b2bbdad8c66a466a600aa1f324e63939a97c,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_assembly,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0002,1eaddc2c4f4ea92bebb5dba90ca7b2bbdad8c66a466a600aa1f324e63939a97c,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_executable,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0003,1eaddc2c4f4ea92bebb5dba90ca7b2bbdad8c66a466a600aa1f324e63939a97c,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_machine_code,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0004,1eaddc2c4f4ea92bebb5dba90ca7b2bbdad8c66a466a600aa1f324e63939a97c,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_object,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0005,cb0a04e41d8163eaeae04a149e909b805172bac50b15a97d73ac15b8c208a333,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""obj"" node=2"
+Q0006,cb0a04e41d8163eaeae04a149e909b805172bac50b15a97d73ac15b8c208a333,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""obj"" node=2"
+Q0007,cb0a04e41d8163eaeae04a149e909b805172bac50b15a97d73ac15b8c208a333,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""obj"" node=2"
+Q0008,cb0a04e41d8163eaeae04a149e909b805172bac50b15a97d73ac15b8c208a333,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""obj"" node=2"

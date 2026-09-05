@@ -29,13 +29,13 @@ type targetGen struct {
 	// compatibility API also accepts R-shaped snippets tagged as another
 	// language; those retain the established runtime encoding and decoder
 	// contract.
-	nativeDirect     bool
+	nativeDirect bool
 	// hybridFallback is enabled only for the second pass after a strict direct
 	// projection fails.  It lets the shared UAST emitter retain successful
 	// native statements while routing only unsupported statements through the
 	// established compatibility runtime.
-	hybridFallback bool
-	runtimeUsed   bool
+	hybridFallback   bool
+	runtimeUsed      bool
 	generatedAt      map[string]int
 	uastFunctions    map[string]int
 	uastInline       map[string]bool
@@ -92,7 +92,7 @@ func generateTargetFromMode(source, target string, ast *BlockStmt, nativeDirect 
 		}
 		body := g.b.String()
 		if nativeDirect {
-			return nativeTargetPrefix(target) + body, nil
+			return nativeTargetPrefix(target) + strings.Join(g.requiredHelperSources(), "\n") + "\n" + body, nil
 		}
 		return targetPrelude(target) + "\n" + strings.Join(g.helpers, "\n") + "\n" + body, nil
 	default:
@@ -114,7 +114,7 @@ func generateTargetFromMode(source, target string, ast *BlockStmt, nativeDirect 
 		g.line(mainClose(target))
 		body := g.b.String()
 		if nativeDirect {
-			return nativeTargetPrefix(target) + body, nil
+			return nativeTargetPrefix(target) + strings.Join(g.requiredHelperSources(), "\n") + "\n" + body, nil
 		}
 		return targetPrelude(target) + "\n" + strings.Join(g.helpers, "\n") + "\n" + body, nil
 	}

@@ -514,12 +514,20 @@ func universalRelationAllowed(n *UniversalASTNode, kind string) bool {
 	return false
 }
 func appendUniversalEvidenceRelations(u *UniversalASTDocument, ids map[int]int, e SemanticEvidence) {
+	// UAST node identifiers are stable document identifiers, not slice offsets.
+	// Projection can preserve sparse IDs, so relation authorization must resolve
+	// through this index instead of addressing u.Nodes with an ID directly.
+	nodesByID := make(map[int]*UniversalASTNode, len(u.Nodes))
+	for i := range u.Nodes {
+		nodesByID[u.Nodes[i].ID] = &u.Nodes[i]
+	}
 	seen := map[string]bool{}
 	for _, relation := range u.Relations {
 		seen[relation.Kind+"\x00"+strconv.Itoa(relation.From)+"\x00"+relation.To.Domain+"\x00"+relation.To.ID] = true
 	}
 	addRef := func(kind string, from int, to UniversalASTReference, attributes map[string]json.RawMessage) {
-		if from < 0 || from >= len(u.Nodes) || !universalRelationAllowed(&u.Nodes[from], kind) {
+		node := nodesByID[from]
+		if node == nil || !universalRelationAllowed(node, kind) {
 			return
 		}
 		key := kind + "\x00" + strconv.Itoa(from) + "\x00" + to.Domain + "\x00" + to.ID
@@ -881,7 +889,20 @@ func SemanticDocumentFromUniversalAST(u *UniversalASTDocument) (SemanticDocument
 			v, er := statement(q)
 			return &v, er
 		}
-		if s.Expression, e = getExpr("expression"); e != nil {
+		// Canonical frontend facts use the structured `value` role for an
+		// assignment.  The older SemanticDocument view called the same slot
+		// `expression`; accept both spellings at this boundary so the runtime
+		// compatibility executor can consume the canonical UAST without asking
+		// the frontend to synthesize a second relation.
+		expressionRole := "expression"
+		if c.Kind == "assign" {
+			if _, ok, roleErr := one(id, expressionRole); roleErr != nil {
+				return s, roleErr
+			} else if !ok {
+				expressionRole = "value"
+			}
+		}
+		if s.Expression, e = getExpr(expressionRole); e != nil {
 			return s, e
 		}
 		if s.Condition, e = getExpr("condition"); e != nil {
@@ -1000,6 +1021,11 @@ func validateExecutableUniversalProjection(u *UniversalASTDocument) error {
 	if err != nil {
 		return err
 	}
+	// The lossless source surface is deliberately outside the temporary
+	// executable SemanticDocument view. Preserve it on the comparison copy so
+	// compatibility validation checks semantic fidelity rather than discarding
+	// verified original bytes.
+	expected.Surface = cloneUniversalASTSurface(u.Surface)
 	actualJSON, err := json.Marshal(u)
 	if err != nil {
 		return err

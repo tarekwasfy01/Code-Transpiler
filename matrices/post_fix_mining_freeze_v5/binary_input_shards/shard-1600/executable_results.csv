@@ -1,0 +1,51 @@
+case_id,source_language,status,bytes,format,executed,exit_code,diagnostic
+7d52aa01522e5357ebf394c1db15405f9e7e64d97ce78c85ade6061b652f417e,swift,FAIL,0,PE32+,false,,"native unresolved binding ""switch"" node=2"
+ff5539f9e0bf3fc4915e8e26b6ac148d65d43ae2f1939d5b23bd5e5de0e5c901,swift,FAIL,0,PE32+,false,,native node 1 missing operand [expression]
+b3d2db4e190f9e22479e9e6a46b10ae6ea270c8a8bb9c796bfe4f695a6a73ac8,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+0bf2857bd55a3b01b810926c9e70f97388fe5465d31a2604249f66bf19b22b1b,swift,FAIL,0,PE32+,false,,native node 1 missing operand [expression]
+0653b7efc8aeef2004373c1e5a5ab822b2139333640bc021b677d31036fd0409,swift,FAIL,0,PE32+,false,,"native unresolved binding ""try"" node=2"
+d69d1741c989de552999d399d00d9b45116619d5035b19d9f46aa13907ee0d59,swift,FAIL,0,PE32+,false,,"native unresolved binding ""savedValue"" node=1"
+754479ea2ce62c92529a46e54d17345f383da77797a29a4247978a6af30532c2,swift,FAIL,0,PE32+,false,,native node 1 missing operand [expression]
+767aa71627e507b68b08b485ff3211ec59399be65b5aa87b53e85a3c2b7e681d,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=2
+9d259c66fce1bfc630db346d8c9f40d751f1b8346ab3fac45b95be64c520c82a,swift,PASS,2048,PE32+,false,,
+af1e48adda2b50d6451d38dbe850fea4a09b6496d4ced10e496367e416ffe287,swift,FAIL,0,PE32+,false,,"native unresolved binding ""consume"" node=2"
+8d1e4e35a35e7e6a844c92c2d50cc130522aec32f27786e7b25acc6563f71e6b,swift,FAIL,0,PE32+,false,,"native unresolved binding ""consume"" node=2"
+f75c6cdef3a81935d7de642e7e7f77f30a02a814b0261cd572c14d711a6b383e,swift,PASS,2048,PE32+,false,,
+04146d871bd7b68f97ce911b0b07ff50212f4fe0f71f3d49c35ea0883dc2d7d3,swift,FAIL,0,PE32+,false,,"native unresolved binding ""consume"" node=2"
+414a23de8c699b22e3a0a079c6c1fb164dfbc5051d80b7e523b8b0d0626c4558,swift,FAIL,0,PE32+,false,,"native unresolved binding ""try"" node=1"
+998f20cb6f77a21ccc75cdb55f066e9afabcf407fd59570cf3b0e5219774e032,swift,FAIL,0,PE32+,false,,"native unresolved binding ""consume"" node=2"
+973c5535ba4ca16e1108458038fafa780d11f0cfcd8536c70805f50f7423c83e,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+614bb96c9943db32de1bd955d8ffae991af1ffd0f23a547d9e6d93577387cfd0,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=3
+b5c9ebf3a51821116bf45f0ef66d6e7f7a8b4e337743cfc9fdccc447addd7663,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+f0d3353c16f193816451592a5bc5c69fefc514a8dc30e737900ed9b7501e0cd4,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=5
+c35b28ef768a906cf9ca4be0957b9f12343758ca6f7a3a02ab340608d275f79a,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=7
+c2e55cb08a18d47c90d8ab033289ebc372dbe2df3573d9903bd7868936ceaecc,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+71ac877a6c68f7a3eee9de729128563aac33f277f8b51975a280ac9b07917d4b,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+afc54395a7bf445b48c77331085528eec203a17c4cef563df915452fa5c7a4f7,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+b1e259cf6aa7d23d25e14a3e9430e17e1c1d80048780c4712e95df18bd8cd29a,swift,FAIL,0,PE32+,false,,"native unresolved binding ""precedencegroup"" node=1"
+dbb91dcc07f9ce6fee733d86274b37432d56f2a0e0b59085362d626b5f45760d,swift,FAIL,0,PE32+,false,,native node 1 missing operand [expression]
+cb5e8c0884ee83e67bf299b09cb52819af9ab67b8a80fc195740edfa0029603d,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+dd2d73ab2bb897df20d65c916d20e33ca38c8ae4fc3d98d1195203684d223d15,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+13e59c24b42af8b21440d2e9c1dc4633c9654fcab3d345b0db6fecf1b636bac8,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+b56b6066a26fd1687ab28beec6a1e9a7c83befbb299d3026a4de62b895bb94ca,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+14844d70530a012cb7109302f677d544325276d28701369d05fc11a7696cd391,swift,PASS,2048,PE32+,false,,
+5d2186adf28c61187b977de97d1c750fb8c108f834718db38971da557e793326,swift,FAIL,0,PE32+,false,,"native unresolved binding ""test"" node=1"
+f8414dbb19ffd92dd2965f56492fb8d2b9a4bed77e1106ef3dc0b7c334f5d7f6,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+7b4fd3c9581568de28fd40970ec58f4eec09553cad39be253019c137d32bc00e,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+589f0b5f53410a60530045623418099288f9151841079833a2806d06cda0cd65,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+7c0d46d4ff8b9230c9bb78d3600f61baeb011c6a0c638b918521b3c0c814e526,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=2
+ca97d2d5910fd640d4c267fe831649118efb24c2bbe80911f2683eac1aea0760,swift,FAIL,0,PE32+,false,,native node 1 missing operand [expression]
+85e928267f7d5f1d2272fe46489afc3c0876328821c9774f6591fa5769d6cb53,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=2
+875afd690a448bf6ea50f410de46be52128cf50706305c5bc34ba9a9b032774b,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+f114a66815d553ac2d2d8e94d3a693fe1b152f00c2301de3972ad80b88e1c509,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=3
+6902d87151610baad8981be809f63e87e5ab44ddc66706621fe487b1cf9c80f5,swift,FAIL,0,PE32+,false,,"native unresolved binding ""types.flatMap"" node=1"
+201e9b54423717ad731cc6d2d77e36f9aca622f71f3708a398c8ee354c8f617a,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+8b6709fc5f460d908fea6e2e2f89f63198de89398133dbb04a047a3648b6d5aa,swift,FAIL,0,PE32+,false,,"native unresolved binding ""myInstance.registerCallbacks"" node=1"
+4de8509a7494f23e56c104b476c7749bedcd7e28553e2713895fe8373f59e02e,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+b042535b0aab438c36b52c1d3986494031223b2858ba2acce2c63604a19d7d3b,swift,FAIL,0,PE32+,false,,"native unresolved binding ""types.flatMap"" node=1"
+8acc2c9bebd3b9713db5922cc953e1bd2ad987b9abb855cfde1f0767ea2f6187,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+c6d4af5e2ad7205ae4c2d13a7685e8be171f57b07697152271c931231a16bdc7,swift,FAIL,0,PE32+,false,,native node 1 missing operand [expression]
+e5039285cfec9ae526eeff54e7ba7459d14e3b7ab5e96a796a97a14909f8015e,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+7dfc95dd853810f7a31ced19f9b6759d660780765c7ad06d8f72cb9cac5f88cc,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+464bb0fb9c864c4339e411bfb0bd6f1cc81c707589469b63e6494b4a6fdc7b9f,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+c18eaae679d120e56e6ae6736143e29fe279b8123a9c4fcc9455a470900b4af5,swift,FAIL,0,PE32+,false,,UNIMPLEMENTED_NATIVE_GAP function binding node=1

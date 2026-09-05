@@ -1,0 +1,10 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,bb968a6a06fe4c68be09034df9cf81d9bef38f599cafd801f499e4a5176eb141,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_assembly,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0002,bb968a6a06fe4c68be09034df9cf81d9bef38f599cafd801f499e4a5176eb141,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_executable,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0003,bb968a6a06fe4c68be09034df9cf81d9bef38f599cafd801f499e4a5176eb141,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_machine_code,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0004,bb968a6a06fe4c68be09034df9cf81d9bef38f599cafd801f499e4a5176eb141,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_object,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0005,54b4e7b97358f6dde34f632985c68b333a47c8da28c7aeb4ad93548194a082c4,N0_SOURCE_PARSE,FRONTEND,native,"c range matrix: counting-loop step "" e"" requires explicit lowering"
+Q0006,d232edbc0619e891fa078407595052c6bc66c9a261b1bfc8235027dc1f2f33c3,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""int"" node=1"
+Q0007,d232edbc0619e891fa078407595052c6bc66c9a261b1bfc8235027dc1f2f33c3,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""int"" node=1"
+Q0008,d232edbc0619e891fa078407595052c6bc66c9a261b1bfc8235027dc1f2f33c3,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""int"" node=1"
+Q0009,d232edbc0619e891fa078407595052c6bc66c9a261b1bfc8235027dc1f2f33c3,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""int"" node=1"

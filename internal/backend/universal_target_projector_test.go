@@ -171,14 +171,14 @@ func TestPreservationFallbackOrderAndRuntimeIsolation(t *testing.T) {
 	}
 }
 
-func TestUniversalTargetProjectorClassifiesCoreRuntimePath(t *testing.T) {
+func TestUniversalTargetProjectorClassifiesCoreDirectPath(t *testing.T) {
 	u := universalBackendFixture(t)
 	_, decision, err := (UniversalTargetProjector{}).Analyze(u, TargetSpec{ID: "go"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(decision.Runtime) == 0 {
-		t.Fatal("Go core target path did not report its runtime consumer")
+	if len(decision.Direct) == 0 {
+		t.Fatal("Go core target path did not report its direct consumer")
 	}
 	if len(decision.Unsupported) != 0 {
 		t.Fatalf("core fixture has unexpected unsupported target semantics: %v", decision.Unsupported)

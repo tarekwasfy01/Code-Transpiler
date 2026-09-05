@@ -1,0 +1,10 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,88f472ad047ee8bd033bc287de7d32dfa68b73a2e531f57e06007482c5eb6102,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_assembly,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0002,88f472ad047ee8bd033bc287de7d32dfa68b73a2e531f57e06007482c5eb6102,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_executable,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0003,88f472ad047ee8bd033bc287de7d32dfa68b73a2e531f57e06007482c5eb6102,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_machine_code,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0004,88f472ad047ee8bd033bc287de7d32dfa68b73a2e531f57e06007482c5eb6102,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_object,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0005,4813ed3e38aa3c0734f9bf2227d654910568ec30d273be6a892ea3ade6815ecb,N0_SOURCE_PARSE,FRONTEND,native,unterminated string at 2382
+Q0006,e32230edb2b4a8c290d7c9e89d3cc1e9ebe51641b0964ff932ad70b7d05736fa,NATIVE,UNKNOWN_FAILURE,assembly,"native call ""nameof"" requires linked implementation"
+Q0007,e32230edb2b4a8c290d7c9e89d3cc1e9ebe51641b0964ff932ad70b7d05736fa,NATIVE,UNKNOWN_FAILURE,executable,"native call ""nameof"" requires linked implementation"
+Q0008,e32230edb2b4a8c290d7c9e89d3cc1e9ebe51641b0964ff932ad70b7d05736fa,NATIVE,UNKNOWN_FAILURE,machine_code,"native call ""nameof"" requires linked implementation"
+Q0009,e32230edb2b4a8c290d7c9e89d3cc1e9ebe51641b0964ff932ad70b7d05736fa,NATIVE,UNKNOWN_FAILURE,object,"native call ""nameof"" requires linked implementation"

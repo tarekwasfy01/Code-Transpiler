@@ -1,0 +1,48 @@
+case_id,source_language,status,bytes,format,diagnostic
+797d9d4f70a132e91a6ee455320e4d3806e202d0ac874bac724b13a34da34c04,nim,FAIL,0,,"native unresolved binding ""true"" node=1"
+2d367ffbed3c723f18872d529eb368751e8a79b009c8ad115b136dc9af4d5f16,nim,FAIL,0,,"native unresolved binding ""when"" node=1"
+f157470732691cef698aae79d27a9289ce3025aab79334fbc4ebea12df3a2bae,nim,FAIL,0,,"native unresolved binding ""case"" node=1"
+27e266429265c30f567febec14a924d83170f2d258df37a747e53c2fcb0e28a4,nim,FAIL,0,,"native unresolved binding ""try"" node=1"
+16951297d319fa9453fa392271ccf872435c8232286e929cf0239607c3ab106c,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+dbf7c17a6063cbb44fcbae8ae0cf11cf69c17dbd34105679c6601e20679eb4cb,nim,FAIL,0,,"native unresolved binding ""ref"" node=1"
+b5d1a8649bcb2f2105d4694f9a9759ed483a621cd11f8ab9445ce5cf412f7ea5,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=5
+919136c3a4eefad3ee0e81cc80191c23f159d433e4dabbafccc9d7cba6028498,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=3 kind=tuple operation=
+0e9a648d46d38fbda3280d36575c2ba75d18b5d374e5e8bed18067837b9e525c,nim,FAIL,0,,"native literal representation ""string"" unavailable"
+dd48995af7170ca692d6deb65cc84a9976d4e9bb1e619c1897b055f5dc7eeb3a,nim,FAIL,0,,"native call """" requires linked implementation"
+9e6f208c3a7c3c0337a68145ab6015970a8bfa9f731e8dec762b1fbf3a41018c,nim,FAIL,0,,"native unresolved binding ""foo"" node=1"
+1f11a184c2c42927e467f994beab9e176d8417d26707b1a4082240bdfcc1ef16,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=4
+acc52f56d0107106312824087446bca0a7800319fbb2ea2ad27387571ca11e74,nim,FAIL,0,,"native unresolved binding ""source_file"" node=1"
+9b9d8581d3e8827202785c8f1e3d8866a691bc023787eb0e5442d6a9f27feeef,nim,FAIL,0,,"native unresolved binding ""let"" node=1"
+43be2987ed027c40b207aa42802f5ee34dc07d4ad60169a7e9b1701719108af4,nim,PASS,349,PE/COFF,
+58bbc2348d85410cb9a9c6bb2efec8be331e807c1608303658c947e93faa3d23,nim,FAIL,0,,"strconv.ParseFloat: parsing ""12.34F"": invalid syntax"
+501294de6c1cf6df5fcda5d6c940a0a0f2403ba6b2e6103935be9d6acd394bbb,nim,FAIL,0,,"native literal representation ""string"" unavailable"
+784d19d95826ca94b31f10d1d7f7fe4bcab45613548725883cababf353a0ac0e,nim,FAIL,0,,"native literal representation ""string"" unavailable"
+faab3f79a236801997257b80760c5b0366b1385cca5f5c83ea2a0894378c75bb,nim,FAIL,0,,"native unresolved binding ""nil"" node=1"
+136d974a3dc22638344464f957daa3b26999d6849efe8460f4a49b044f7bee58,nim,PASS,174,PE/COFF,
+47dbb4dce6dbd51647f79daef47fc821037ea3a574ac45b4caf0cfc24e596c0d,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=3 kind=for operation=
+9c029a80a81105ab99bbc56625bf6041ccd3be5975c08a7614d3a60729603b9d,nim,FAIL,0,,native node 1 missing operand [expression]
+c8a586eef828a22201d7c7de0f032e892d8f9477c9d0e36e8e3ee4b24b825000,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+bde2c5359a382b7591458753de481cc5a02004f5612760bea97025cf6b6098c9,nim,FAIL,0,,"native unresolved binding ""export"" node=1"
+5fef8d83afb2949a51dc9972a50f60203caa92f162491da0a6bc1692cc5acd22,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+83428971dee20236921c30ec3c11df346a28dde23ca8e1122fe1420a28145c55,nim,FAIL,0,,"native unresolved binding ""include"" node=1"
+6749cd6becae82d442a73b92eadc05bc96f581e10b244f7333afa6a0903da0eb,nim,FAIL,0,,"native unresolved binding ""discard"" node=1"
+595f47bbea415e6c589f6673d2e1b5cfe4073ad6d7fcc8e88d1cb023f065341a,nim,FAIL,0,,"native unresolved binding ""asm"" node=1"
+374699fab624593af44b80ac831459fe451f79d088dc7b89726b312b12e9fae5,nim,FAIL,0,,"native unresolved binding ""bRe_ak"" node=1"
+6b5e1aa91dff8506dbf0c63be7635d89356c43aef34deb3f4032e8b19ca405dc,nim,FAIL,0,,"native unresolved binding ""con_tiNue"" node=1"
+b9c117178a7d9c92643ca00d89335f1d4abf8a6425479c200c2a184833859254,nim,FAIL,0,,"native unresolved binding ""raise"" node=1"
+dc200374d07a8b1ede8bdbcb601fead93a266f5a741e6d34ad0fff6b2c661fe5,nim,FAIL,0,,"native unresolved binding ""X"" node=2"
+9cbdeddaebaba013324ba59213c9ca718ca7a0c0408c58a01e59e2fedec353b9,nim,FAIL,0,,"native unresolved binding ""bind"" node=1"
+966981bde7f122309e3cf28acf9d8ae15b2ff55e6d8fffa15165e601c8963cca,nim,FAIL,0,,"native unresolved binding ""mixin"" node=1"
+5f6f3b82ace780d17ba06fc6e258978cc81acf8527599686604f2c8b80175f67,nim,FAIL,0,,"native unresolved binding ""yield"" node=1"
+05e1697c4259e11a861b32b4385ff11681798c3ea769be5ebd356e5b21e0d2b7,nim,FAIL,0,,"native unresolved binding ""static"" node=1"
+5396d1b9d8f055bd28bc1844c1a5bb27e090e93984539cc69746efa9222aad89,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+aeb6ea3b130376310a2639730841e6dc7127df542a5210656a50961516a4abb2,nim,FAIL,0,,"native unresolved binding ""defer"" node=1"
+cd9861aacee7845ec91976355a510f6a70c33231daee957de80c1c7d590e3599,csharp,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=3 kind=aggregate operation=
+4e77afdd721a133ed6e680d6511e85a23755c60cd63eefc80675ba5afebf39eb,csharp,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=25
+ed278a9470ba4f2dc9aa542b445dcc7d030ab957f5c9e603ae6c4a367b6efc64,csharp,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=9
+99d4923c9b10380d9a109fce3002db43fb757945f1f2ff1f5ddf3c6348969833,csharp,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=3
+88aaaf83bfd44818419c7a101384fdcecaf3ef95577725fa041e8b2419aae210,csharp,FAIL,0,,"native function greeting: native call ""Console.WriteLine"" requires linked implementation"
+32ed0000e815eafc14224083681a953690db0f5bf5d40b27f578279763aced1e,csharp,FAIL,0,,native node 1 missing operand [expression]
+a4dd0f5a5312fd38c23ec75e16ce0eb63573829e56e02383ef3011402808edcc,csharp,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=8
+bfe2ec05735367cf15b65197882b68f9b4d8fa10444c0c5e010c8e3fd6a3c59c,csharp,PASS,171,PE/COFF,
+d7ce8fa7b8ee0af6a92617d89242301ec0b138b8f0d3fd28721ccca01b680af5,csharp,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=4

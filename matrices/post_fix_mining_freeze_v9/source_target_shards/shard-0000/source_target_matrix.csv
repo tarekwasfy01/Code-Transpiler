@@ -1,0 +1,651 @@
+case_id,source_language,target_language,v0_parse,v1_matrixir,v2_uast,v3_closure,v4_emit,v5_reparse,v6_compile,v7_execute,v8_behavior,route,diagnostic
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3e8e621d84ae6ca756ab527546ec73de29e7a88e3ff416c892709fc9b58b38fe,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+1bbdf9aa65eaf971eba16b71ed1d50cdf60d6510225f0197c3a868dc63ea51b3,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3d5a8c128b6a8ef845a6a11569d52e14bda01184ccda68e3d00b0916e1ea5e03,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b05a6375cbe1a269f5a1218d790b8cf3eb97525ee2e7b07e8284d393a10477ac,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+3ae3ac069ead7b117c73046aaed937c31682b7ce1300bf54912fb252d2bd7d86,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+90bd71ba6f8692f20fb3550b77deb47623a20871393d811e32c2719fef9ce7f5,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b9176807c4ab8689b0dc40b4b60e9e2f7124c05c9bfde816b02335e8f78c3b97,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+fd76daed5ef1b026d5a48f3920e3e1ae46fe1d6739c8c0932f50530a12651b81,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+5ac4e3494be8f03dfe199b086f15ec2c097098790a82517494254cb4b2efa530,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ab51093cbbba0f3b07d9d5283a67d8c17b00ef0df0653d56ce54faaf367bdd55,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+061cd8b119c60e2e23383fb6157d3ec4a65f3f73d75dd7e824ab450c101027a4,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2483047e793fa67a8e5d815a510fadb9ec26783cb6edcfd50f1a91ce7f50d246,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+f2e42a8c27837bc43fcdba4832525a9182b252596b1f1464d0ffd22a720bc14f,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+dc8b502a2b967edc132b8bfb035ab04f79abaec589f9ec8a6ab667a327ad9bf9,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+995be36d1c65470f75d64b1b90ba620be3ef2c92336b8708b0e5e9d6d096dbcc,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4d03704823d015116aaa74f6800c0641e1972fa6b855f4c6ed896b6f097a4203,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+348cf3ea38d555ff3c6b61695e74f3599a216fc0bc1e37534c88f465e5b5c2e8,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+4a28c90f3e947a9003b3d1bc1d5a4318e04f7c020732f714ee46ca03a44ebcf6,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+8f5c370b77525c97c68403e6f97555869bd2421c427825e2e01e12ca18976b93,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,r,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"universal node 12 lacks required ""expression"" child"
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,go,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,rust,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,cpp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,c,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,python,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,java,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,go,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,rust,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,cpp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,c,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,python,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,java,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+112236a37bba911fabfbb151c809d54679ffc3fef06aa6733acd64f54c3bba01,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,r,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"universal node 2 lacks required ""expression"" child"
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,go,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,rust,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,cpp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,c,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,python,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,java,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+11d5f2282276ecca0f11aad2f178851953385d88201143f7e653b703e76ae37a,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+e17bcb312a36c900523967ae0686c9c35dfd255d8dad143180b58e3378400354,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,r,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,go,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,rust,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,cpp,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,c,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,python,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,zig,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,julia,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,nim,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,csharp,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,java,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,kotlin,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,r,swift,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: target go emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-1833647185\program.go:16:11: expected operand, found ')' C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-183"
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: target rust emitted invalid syntax (expected expression: error: expected expression, found `.` --> C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-721397226\program.rs:9:19 | 9 | (a.clone() == .clone()); |"
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target cpp emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-4073924013\program.cpp: In function 'int main()': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-407392401
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target c emitted invalid syntax (expected expression: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-2099540962\program.c: In function 'main': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-20995
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: target python emitted invalid syntax (other: File ""C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-485416027\program.py"", line 8 (a == ) ^ SyntaxError: invalid syntax)"
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target java emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-1200083356\Main.java:5: Fehler: Keine Anweisung (a == b); ^ C:\Users\tarek\AppData\Local\Temp\codetranspiler-synta
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+aa05ac249286f63626114ca61ea38afc20fd4c3904c8f206d02ecbe4d58ea31d,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+89a7fc287eacef9e0529b73e32c6fd91a4bc7850778c06322a08b89373d08a55,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,go,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target rust emitted invalid syntax (other: error[E0425]: cannot find value `b` in this scope --> C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-613237046\program.rs:3:5 | 3 | b.clone(); | ^ not found in t
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target cpp emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-2616543184\program.cpp: In function 'int main()': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-261654318
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target c emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-2815296494\program.c: In function 'main': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-2815296494\program.
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,python,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target java emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-839876707\Main.java:5: Fehler: Keine Anweisung b; ^ 1 Fehler)
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2525d19cfaa28bf83354b502a7ae766c16f662b50c68758296cfa66600cdfbbb,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,r,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,go,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,rust,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,cpp,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,c,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,python,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,zig,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,julia,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,nim,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,csharp,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,java,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,kotlin,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+ba1395d00888d0f03ed2a87e99bea316e04df230c6a84c8272b7c7a42e7151f0,r,swift,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,expected expression
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""go"" (arguments: c)"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""rust"" (arguments: c.clone())"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""cpp"" (arguments: c)"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""c"" (arguments: c)"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""python"" (arguments: c)"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""zig"" (arguments: c)"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""julia"" (arguments: c)"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""nim"" (arguments: r2ms63)"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""csharp"" (arguments: c)"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""java"" (arguments: c)"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""kotlin"" (arguments: c)"
+e6c0fa43d17f8ede2bf689bc4b44acfbfda403fcddb1fa3c2b2f890793829954,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""swift"" (arguments: c)"
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,go,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target rust emitted invalid syntax (other: error[E0425]: cannot find value `x` in this scope --> C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-3433680159\program.rs:3:6 | 3 | (x.clone() % y.clone()); | ^
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target cpp emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-812749267\program.cpp: In function 'int main()': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-812749267\
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target c emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-2407065667\program.c: In function 'main': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-2407065667\program.
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,python,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target java emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-1763462353\Main.java:5: Fehler: Keine Anweisung (x % y); ^ 1 Fehler)
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+c3d2a7f673445b910dd1c76f7476ceca56319f9e5e8444d657877a01ef3f9fd0,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,r,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"universal node 1 lacks required ""expression"" child"
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+c08a578d8e57afbd576efafcfe5c56d6268338844493022d7d88ef6a87ed7fa5,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,r,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"universal node 1 lacks required ""expression"" child"
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+a65d7f90d1889ff532250a7c63b82aea5a1de12823fe868f2eb6602b5f88cb33,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,r,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"universal node 3 lacks required ""expression"" child"
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+5e1b723c9eb67c9f65e3a0de42fff1ef5f48954a6243aae3cbb35f65726d4e47,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: index arity
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,r,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"universal node 4 lacks required ""expression"" child"
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+edff3ff74e8706b70a249450508321f1ee631da8199128224b345aa3a49cbc50,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/4
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,go,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target rust emitted invalid syntax (other: error[E0425]: cannot find value `a` in this scope --> C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-4248079588\program.rs:3:5 | 3 | a.clone()[vec![b.clone()[1.0
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target cpp emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-413462443\program.cpp: In function 'int main()': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-413462443\
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target c emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-70546065\program.c: In function 'main': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-70546065\program.c:7:
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,python,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target java emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-3563849390\Main.java:5: Fehler: Keine Anweisung a[(int)(new double[]{b[(int)(1 - 1)]} - 1)]; ^ C:\Users\tarek\AppD
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+ec19adbd850d819f5246adffd55ad048f349228c7f36792064759904ec5d09c4,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""go"" (arguments: y)"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""rust"" (arguments: y.clone())"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""cpp"" (arguments: y)"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""c"" (arguments: y)"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""python"" (arguments: y)"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""zig"" (arguments: y)"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""julia"" (arguments: y)"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""nim"" (arguments: r2ms79)"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""csharp"" (arguments: y)"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""java"" (arguments: y)"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""kotlin"" (arguments: y)"
+16fd267f5e5021185306cf2984974c64cd90072d19e69a28797e2c327d2f4bc1,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: call ""log"" has no native contract for target ""swift"" (arguments: y)"
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,go,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target rust emitted invalid syntax (other: error[E0425]: cannot find value `x` in this scope --> C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-1638868168\program.rs:3:9 | 3 | if (x.clone()) { | ^ not fou
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target cpp emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-3588981072\program.cpp: In function 'int main()': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-358898107
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target c emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-236391113\program.c: In function 'main': C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-236391113\program.c:
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: target python emitted invalid syntax (other: Sorry: IndentationError: expected an indented block after 'if' statement on line 4 (program.py, line 5))"
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: target java emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-4007767832\Main.java:5: Fehler: Symbol nicht gefunden if (x) { ^ Symbol: Variable x Ort: Klasse Main C:\Users\tare
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+6b5203bf6c23660b3176e76662658bcc8c4194f4d6a9f710d483d70c6f192811,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,go,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,rust,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,cpp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,c,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: target python emitted invalid syntax (other: Sorry: IndentationError: expected an indented block after 'if' statement on line 2 (program.py, line 3))"
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,java,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+f34c23fdfaf3556a2098f48ee45c38133165974e27b765ea478083708b25d8b3,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,go,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,rust,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,cpp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,c,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,python,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,java,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+2751183380fcac9241fd7aa7b3e0dd785b016726ffadf8fcba96ade3b85b3ec6,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,r,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,go,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,rust,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,cpp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,c,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"DIRECT_NATIVE_UNAVAILABLE: target python emitted invalid syntax (other: Sorry: IndentationError: expected an indented block after 'if' statement on line 2 (program.py, line 3))"
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,zig,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,julia,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,nim,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,csharp,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,java,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,kotlin,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+10e33b15dece1d772e4d58534facac39a3d604042e9570ecdeaadcd34d09cf91,r,swift,PASS,PASS,PASS,PASS,PASS,PASS,SKIP,SKIP,SKIP,DIRECT,
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,r,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,go,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,rust,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,cpp,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,c,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,python,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,zig,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,julia,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,nim,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,csharp,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,java,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,kotlin,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+57ffb46af502726da56792be3afbaa4d1f3eb6dcc625c5269eaa3425281d8b9c,r,swift,FAIL,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,DIRECT,r range matrix: range binding is not a single identifier
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b031f15b24649ee8de3c426002eb7f17d9794440fe2e31b209616e1890da1895,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,r,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"universal node 1 lacks required ""expression"" child"
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+b2115b0f50d69eb618db8042d7953acc3fece5a5cc15bab8142c18ee6f018757,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+505556b8587404c56e2390cddd57bdf6cd11968572a8b4b8279974161d34a202,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,r,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"universal node 1 lacks required ""expression"" child"
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+d402bf1504f322ada2b86883dd321ec91e80715f2a5a6e489bcc6b7e9a8c08ff,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+2f4f1d5c6cbbf268cf71b4be368ab09e3c49a45e2b4348f098cae2a41b7e6766,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,r,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"universal node 1 lacks required ""expression"" child"
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+ec97418fd033128d8523bacf8939da0f4fa8a416333f16391d445aa958d717e8,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: unsupported UAST node OperationExpr/1
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,r,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,"no R serialization for universal statement kind ""member"""
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,go,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,rust,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,cpp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,c,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,python,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,zig,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,julia,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,nim,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,csharp,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,java,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,kotlin,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name
+9acab53faaaf9bcef654ade8ff8ec96c9a1e7ce971072ff0e86e565a8aa7f66c,r,swift,PASS,PASS,PASS,PASS,FAIL,SKIP,SKIP,SKIP,SKIP,DIRECT,DIRECT_NATIVE_UNAVAILABLE: member node 3 lacks a structured member name

@@ -5,51 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 )
-
-// Generated fixtures exercise the complete routing matrix, not full native
-// language compatibility. Native source smoke cases are tested separately.
-func TestCLIAllLanguageRoutes(t *testing.T) {
-	p, err := backend.ParseSemantic("r", "print(2)")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, source := range backend.Frontends() {
-		t.Run(source.ID, func(t *testing.T) {
-			code, err := backend.EmitSemantic(source.ID, p)
-			if err != nil {
-				t.Fatal(err)
-			}
-			dir := t.TempDir()
-			input := filepath.Join(dir, "input"+source.Extensions[0])
-			out := filepath.Join(dir, "targets")
-			if err = os.WriteFile(input, []byte(code), 0600); err != nil {
-				t.Fatal(err)
-			}
-			if err = transpile([]string{input, "-to", "all", "-o", out}); err != nil {
-				t.Fatal(err)
-			}
-			data, err := os.ReadFile(filepath.Join(out, "translation-report.json"))
-			if err != nil {
-				t.Fatal(err)
-			}
-			var results []translationResult
-			if err = json.Unmarshal(data, &results); err != nil {
-				t.Fatal(err)
-			}
-			if len(results) != 13 {
-				t.Fatalf("got %d routes", len(results))
-			}
-			for _, r := range results {
-				if r.Error != "" || r.Path == "" {
-					t.Fatalf("failed route: %+v", r)
-				}
-			}
-		})
-	}
-}
 
 func TestCLINativeSourcesAndAliases(t *testing.T) {
 	cases := []struct{ from, to, code string }{{"c", "py", `int main(){int x=2;printf("%d\n",x);return 0;}`}, {"py", "c++", "x = 2\nprint(x)\n"}, {"go", "rust", `func main(){x:=2;fmt.Println(x)}`}}

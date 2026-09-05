@@ -1,0 +1,18 @@
+{
+  "earliest_unique_failures": 108,
+  "failures_closed_by_automatic_repair": 108,
+  "known_regressions": 0,
+  "local_fixpoint_reached": true,
+  "materialized_rule": "backend.ApplyAutomaticSemanticRepairClosure+backend.ApplyUniversalTruthClosure",
+  "recovery_repairs_accepted": 1,
+  "relation_repairs_accepted": 3,
+  "repair_candidates_accepted": 7,
+  "repair_candidates_generated": 7,
+  "repair_candidates_rejected": 0,
+  "repair_iterations": 1,
+  "representation_repairs_accepted": 1,
+  "residual_failures_after_local_fixpoint": 0,
+  "semantic_repairs_accepted": 2,
+  "truth_demands_linked": 32,
+  "v6_fail_cells": 8638
+}

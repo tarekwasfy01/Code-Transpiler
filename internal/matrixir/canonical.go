@@ -11,10 +11,19 @@ type CanonicalNode struct {
 	Action Vector
 	Text   string
 	Source int
+	// Parent is the canonical action node that owns this action's block.  It is
+	// filled while the grammar/block stack is active and lets the semantic
+	// event bridge preserve body/statement structure without reparsing text.
+	Parent int
 	// Close and Post are structural action payload, not R transport text.
 	// They make block boundaries available to direct semantic lowerers.
 	Close int
 	Post  string
+	// Branch records that an `else`/`elif` header is a branch of the
+	// immediately preceding if construct.  It is parser structure, not source
+	// text; the semantic lowering layer uses it to attach the branch body to
+	// the existing IfStmt.
+	Branch string
 }
 
 type CanonicalProgram struct {
@@ -159,6 +168,7 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 	var nodes []CanonicalNode
 	var events []CanonicalEvent
 	stack := []blockFrame{}
+	lastClosedIf := -1
 	rangePrefix := "__matrix_range_"
 	for strings.Contains(code, rangePrefix) {
 		rangePrefix = "_" + rangePrefix
@@ -183,9 +193,17 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			}
 		}
 	}
+	currentParent := func() int {
+		for i := len(stack) - 1; i >= 0; i-- {
+			if stack[i].node >= 0 {
+				return stack[i].node
+			}
+		}
+		return -1
+	}
 	appendAction := func(action int, text string, sourceAt int) (int, error) {
 		vector := Basis(ActionDimensions, action)
-		nodes = append(nodes, CanonicalNode{Action: vector, Text: text, Source: sourceAt})
+		nodes = append(nodes, CanonicalNode{Action: vector, Text: text, Source: sourceAt, Parent: currentParent()})
 		if text != "" {
 			output = append(output, text)
 			events = append(events, CanonicalEvent{Text: text, Source: sourceAt})
@@ -196,10 +214,16 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		for len(stack) > 0 && profile[GrammarIndent] != 0 && indent <= stack[len(stack)-1].indent {
 			frame := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
+			if frame.node >= 0 {
+				lastClosedIf = frame.node
+			}
 			closeFrame(frame)
 		}
 	}
 	for lineIndex, line := range lines {
+		// A branch can only bind to an if closed while processing this same
+		// source line.  Do not carry a stale closed frame across statements.
+		lastClosedIf = -1
 		trim := strings.TrimSpace(line.trim)
 		if trim == "" {
 			continue
@@ -221,6 +245,9 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		for ; leadingClose > 0 && len(stack) > 0; leadingClose-- {
 			frame := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
+			if frame.node >= 0 {
+				lastClosedIf = frame.node
+			}
 			closeFrame(frame)
 		}
 		if trim == "" {
@@ -251,15 +278,25 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			if profile[GrammarIndent] != 0 {
 				closeIndent(line.indent + 1)
 			}
+			branchOwner := lastClosedIf
 			if !hadLeadingClose && len(stack) > 0 {
 				frame := stack[len(stack)-1]
 				stack = stack[:len(stack)-1]
+				branchOwner = frame.node
+				if frame.node >= 0 {
+					lastClosedIf = frame.node
+				}
 				closeFrame(frame)
 			}
 			condition := strings.TrimSpace(strings.TrimPrefix(trim, "elif"))
 			condition = strings.TrimSpace(strings.TrimSuffix(condition, ":"))
 			id, _ := appendAction(ActionElse, "else if ("+normalizeExpression(source, condition, profile)+") {", line.start)
+			if id >= 0 && id < len(nodes) && branchOwner >= 0 {
+				nodes[id].Parent = branchOwner
+				nodes[id].Branch = "else-if"
+			}
 			stack = append(stack, blockFrame{indent: line.indent, semantic: true, node: id})
+			lastClosedIf = -1
 			continue
 		}
 		if strings.HasPrefix(lower, "else") {
@@ -269,13 +306,23 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			if profile[GrammarIndent] != 0 {
 				closeIndent(line.indent + 1)
 			}
+			branchOwner := lastClosedIf
 			if !hadLeadingClose && len(stack) > 0 {
 				frame := stack[len(stack)-1]
 				stack = stack[:len(stack)-1]
+				branchOwner = frame.node
+				if frame.node >= 0 {
+					lastClosedIf = frame.node
+				}
 				closeFrame(frame)
 			}
 			id, _ := appendAction(ActionElse, "else {", line.start)
+			if id >= 0 && id < len(nodes) && branchOwner >= 0 {
+				nodes[id].Parent = branchOwner
+				nodes[id].Branch = "else"
+			}
 			stack = append(stack, blockFrame{indent: line.indent, semantic: true, node: id})
+			lastClosedIf = -1
 			continue
 		}
 		// Python lambda is an expression with a ClosureExpr contract, not a
@@ -283,11 +330,13 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		// assignment through functionSignature.
 		if !(source == "python" && strings.Contains(trim, "lambda")) && isFunctionHeader(line.tokens, trim) {
 			name, params := functionSignature(source, line.tokens, trim, profile)
-			// An anonymous Go func literal is an expression grammar construct,
-			// not a named declaration. Keep the block frame for braces, while the
-			// typed token emitter below owns its parameters and closure roles.
-			if name == "" && source == "go" && startsKeyword(line.tokens, "func") {
-				id, _ := appendAction(ActionExpression, "closure", line.start)
+			// A grammar-selected unnamed function is a closure/function value,
+			// regardless of the language that produced the grammar node.  The
+			// named-declaration path below must not reject it merely because it has
+			// no binding.  Parameters remain token facts and are materialized by
+			// emitStructuredClosure; no source text is passed to a target.
+			if name == "" {
+				id, _ := appendAction(ActionFunction, "function("+strings.Join(params, ", ")+") {", line.start)
 				stack = append(stack, blockFrame{indent: line.indent, semantic: true, function: true, node: id})
 				continue
 			}
@@ -411,6 +460,22 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		if strings.Contains(lower, "++") || strings.Contains(lower, "--") {
 			continue
 		}
+		// A standalone punctuation/operator sequence is not an executable
+		// expression.  The old line-oriented normalizer used to preserve it as
+		// an opaque expression node (for example `???`), which made malformed
+		// source look like a complete UAST.  Keep the decision lexical and
+		// structure-based: only a line with an operand token can reach the
+		// generic expression event.
+		hasOperandToken := false
+		for _, token := range line.tokens {
+			if token.Class == TokenIdentifier || token.Class == TokenNumber || token.Class == TokenString {
+				hasOperandToken = true
+				break
+			}
+		}
+		if !hasOperandToken {
+			return CanonicalProgram{}, fmt.Errorf("expected expression")
+		}
 		_, _ = appendAction(ActionExpression, normalizeExpression(source, trim, profile), line.start)
 	}
 	for len(stack) > 0 {
@@ -439,7 +504,13 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		grammarTokens[line.start] = append([]Lexeme(nil), line.tokens...)
 	}
 	nextSemanticID := 0
-	for _, node := range nodes {
+	// rootEventByNode maps a canonical grammar/action node to the root event
+	// produced for that node. Structured expression lowering can emit several
+	// child events; the final event is the construct root (assignment, loop,
+	// closure, call, ...). Keeping this mapping here preserves block ownership
+	// as a typed relation instead of reconstructing it from source text later.
+	rootEventByNode := make(map[int]int, len(nodes))
+	for nodeIndex, node := range nodes {
 		action := canonicalActionName(node.Action)
 		semantic, err := ActionSemantic(node.Action)
 		if err != nil {
@@ -449,16 +520,25 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		if node.Text != "" {
 			fields["normalized_text"] = node.Text
 		}
+		if node.Branch != "" {
+			fields["branch"] = node.Branch
+			// Preserve the parser's branch form as structured metadata.  A plain
+			// else has no condition; an else-if owns a structured condition.  The
+			// event-to-facts bridge uses this discriminator instead of attempting to
+			// recover branch syntax from Event.Text.
+			fields["branch_kind"] = node.Branch
+		}
 		// Keep the grammar decision as the parent event, but attach the typed
 		// expression/statement children immediately here. Downstream frontends
 		// consume these roles and operands; they never need CanonicalEvent.Text.
-		base := CanonicalSemanticEvent{ID: nextSemanticID, Action: action, Semantic: semantic, StructureKind: canonicalActionStructure(action), Text: node.Text, SourceOffset: node.Source, Fields: fields, FactFamily: ParsedFamilyForStructure(canonicalActionStructure(action))}
+		base := CanonicalSemanticEvent{ID: nextSemanticID, Action: action, Semantic: semantic, StructureKind: canonicalActionStructure(action), Text: node.Text, SourceOffset: node.Source, Fields: fields, ParentID: -1, FactFamily: ParsedFamilyForStructure(canonicalActionStructure(action))}
 		structured, structuredErr := AnalyzeSemanticStatementTokens(source, base, grammarTokens[node.Source])
 		if structuredErr == nil && len(structured) != 0 {
 			offset := nextSemanticID
 			for i := range structured {
 				structured[i].ID += offset
 				structured[i].SourceOffset += node.Source
+				structured[i].ParentID = -1
 				if structured[i].Action == "" {
 					structured[i].Action = action
 				}
@@ -474,10 +554,37 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 				}
 			}
 			semanticEvents = append(semanticEvents, structured...)
+			rootID := nextSemanticID + len(structured) - 1
+			if node.Parent >= 0 {
+				if parentID, ok := rootEventByNode[node.Parent]; ok {
+					semanticEvents[len(semanticEvents)-1].ParentID = parentID
+				}
+			}
+			ownerID := rootID
+			// A grammar function node can also contain its surrounding assignment
+			// (for example `f <- function(...)`). The assignment is the source
+			// statement root, while nested grammar nodes belong to the closure
+			// body. Select that structured body owner explicitly so return/body
+			// events are not attached to the assignment and subsequently lost.
+			if action == "function" {
+				for i := len(structured) - 1; i >= 0; i-- {
+					if structured[i].StructureKind == "closure" || structured[i].StructureKind == "function" || structured[i].StructureKind == "lambda" {
+						ownerID = structured[i].ID
+						break
+					}
+				}
+			}
+			rootEventByNode[nodeIndex] = ownerID
 			nextSemanticID += len(structured)
 			continue
 		}
+		if node.Parent >= 0 {
+			if parentID, ok := rootEventByNode[node.Parent]; ok {
+				base.ParentID = parentID
+			}
+		}
 		semanticEvents = append(semanticEvents, base)
+		rootEventByNode[nodeIndex] = nextSemanticID
 		nextSemanticID++
 	}
 	_ = lexicalGraph
@@ -617,7 +724,7 @@ func isModuleScaffold(tokens []Lexeme, text string) bool {
 	}
 	first := strings.ToLower(tokens[0].Text)
 	switch first {
-	case "package", "import", "use", "using", "namespace", "module":
+	case "package", "import", "from", "use", "using", "namespace", "module":
 		return true
 	}
 	for _, token := range tokens {

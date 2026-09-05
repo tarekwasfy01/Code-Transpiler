@@ -1,0 +1,2 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,bdd77882f44d7638aa5a33d914b567eb80e8eb67a02d630d9f39db7127406539,V4_NATIVE_EMISSION,BACKEND,source_target,"DIRECT_NATIVE_UNAVAILABLE: call ""Assert.Range"" has no native contract for target ""go"" (arguments: from, to)"

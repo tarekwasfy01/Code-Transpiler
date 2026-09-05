@@ -42,6 +42,7 @@ foreach ($relative in @(
     'REAL_TS_MATRIX/execution_ready',
     'REAL_TS_MATRIX/15_construct_true_parser_kernel.csv',
     'frontend_closure/producer_spec',
+    'frontend_closure/tree_sitter_input',
     'uast_engine',
     'uast_handoff/semantic_language_matrix_13'
 )) {

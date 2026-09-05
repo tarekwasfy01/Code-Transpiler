@@ -42,4 +42,14 @@ def main():
   outputs=[str(p) for p in GEN.rglob('*') if p.is_file() and p.suffix in EXT]
   next_manifest.write_text('\n'.join(outputs),encoding='utf-8')
   print(f'GENERATED_MANIFEST={len(outputs)}')
+ if os.environ.get('UAST_ALLTOALL_ROUNDTRIP') == '1':
+  # A bounded second pass: consume successful generated files and emit every
+  # target again, preserving ancestry as source_file. Existing result rows are
+  # reused as the checkpoint, so interruption is safe.
+  rt=OUT/'roundtrip'; rt.mkdir(parents=True,exist_ok=True)
+  files=[p for p in GEN.rglob('*') if p.is_file() and p.suffix in EXT]
+  manifest=rt/'source_manifest.txt'; manifest.write_text('\n'.join(map(str,files)),encoding='utf-8')
+  os.environ['UAST_ALLTOALL_OUT']=str(rt)
+  os.environ.pop('UAST_ALLTOALL_ROUNDTRIP',None)
+  main()
 if __name__=='__main__':main()

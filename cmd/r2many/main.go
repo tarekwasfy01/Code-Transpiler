@@ -64,6 +64,11 @@ func main() {
 			fmt.Fprintln(os.Stderr, "r2many:", err)
 			os.Exit(1)
 		}
+	case "compile":
+		if err := compileNative(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
 	case "transpile-batch":
 		if err := transpileBatch(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -309,6 +314,13 @@ func transpileBatch() error {
 }
 
 const helpText = `Code Transpiler v1.0 - SemanticProgram v1
+
+Native compiler (direct machine encoder; assembly optional):
+  CodeTranspiler.exe compile -source go -target native-x86_64-windows input.go -entry entry -o program.exe
+  CodeTranspiler.exe compile -source go -target object-x86_64-windows input.go -entry entry -o program.obj
+  CodeTranspiler.exe compile -source go -target machine-x86_64 input.go -entry entry -o program.bin
+  CodeTranspiler.exe compile -source go -target asm-x86_64 input.go -entry entry -o program.asm
+  Optional: --via-assembly (requires NASM; direct compilation does not).
 Experimental common-subset translation; not full semantic compatibility.
 Runtime support SOURCE is embedded. Native target compilers are not bundled.
 

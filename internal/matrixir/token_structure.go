@@ -173,13 +173,35 @@ func statementSegments(source, code string, tokens []Lexeme, structure TokenStru
 		}
 		return false
 	}
+	// Function values may split their introducer from the parameter list across
+	// physical lines (R's `function\n() value`, Go's `func\n(...)`, and the
+	// compact anonymous-function marker used by several grammars).  Pair the
+	// already-tokenized header with its opening delimiter before deciding a
+	// statement boundary. This is a grammar-token continuation rule, not a
+	// source-text semantic reconstruction.
+	functionHeaderContinuation := func(tokens []Lexeme, next int) bool {
+		if len(tokens) == 0 {
+			return false
+		}
+		last := tokens[len(tokens)-1]
+		if !(last.Class == TokenIdentifier && isFunctionWord(last.Text)) && last.Text != "\\" {
+			return false
+		}
+		for j := next; j < len(tokens); j++ {
+			if tokens[j].Class == TokenNewline || tokens[j].Class == TokenComment {
+				continue
+			}
+			return tokens[j].Class == TokenDelimiter && tokens[j].Text == "("
+		}
+		return false
+	}
 	for i, t := range tokens {
 		if t.Class == TokenComment {
 			continue
 		}
 		if t.Class == TokenNewline {
 			if depth == 0 {
-				if conditionalContinuation(current, i+1) {
+				if conditionalContinuation(current, i+1) || functionHeaderContinuation(current, i+1) {
 					b.WriteByte(' ')
 				} else {
 					flush()

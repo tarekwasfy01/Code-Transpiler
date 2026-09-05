@@ -309,7 +309,12 @@ func (st *runState) uastPrimitiveStatement(env *runEnv, g *uastExecutionGraph, i
 	}
 	// Matrix-classified expression nodes can appear directly as statements.
 	if g.structureRequires(structural, execExpression) {
-		value, err := st.uastPrimitiveExpression(env, g, id)
+		// Prefer the canonical semantic kind when one is available. A CallExpr
+		// (and the other direct expression forms) has richer evaluation
+		// semantics than its structural label alone; dispatching through
+		// uastEvaluateNode keeps expression statements on the canonical UAST
+		// execution path.
+		value, err := st.uastEvaluateNode(env, g, id)
 		return value, runNormal, err
 	}
 	var last any

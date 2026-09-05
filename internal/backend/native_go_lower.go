@@ -128,6 +128,13 @@ func LowerNativeGo(filename, source string) (*SemanticProgram, error) {
 		return nil, err
 	}
 	program.Extensions = map[string]any{"native_binding_types": bindingTypes}
+	// Preserve source symbol identity for explicit compiler entry selection.
+	// The backend resolves these names against canonical function bindings.
+	functionNames := map[string]string{}
+	for _, fn := range helpers {
+		functionNames[fn.Name.Name] = l.functions[info.Defs[fn.Name]]
+	}
+	program.Extensions["function_entry_bindings"] = functionNames
 	if len(helpers) > 0 {
 		names := make([]string, len(helpers))
 		for i, fn := range helpers {
@@ -152,6 +159,7 @@ func LowerNativeGo(filename, source string) (*SemanticProgram, error) {
 	if err != nil {
 		return nil, err
 	}
+	uast.Surface = NewUniversalASTSurface("go", source)
 	program.UniversalAST, program.Body = uast, nil
 	return program, nil
 }
@@ -188,8 +196,11 @@ func (nativeGoFmtImporter) Import(path string) (*types.Package, error) {
 	return pkg, nil
 }
 
-// The call matrix orders declarations before their callers. Cycles are
-// rejected until every enabled target supports recursive closure binding.
+// orderFunctions emits a deterministic dependency-first declaration order.
+// A Go function declaration is in scope throughout its declaration group, so
+// a cycle is a valid call-graph edge rather than an unsupported source form.
+// Returning at an in-progress edge preserves SCCs without introducing a
+// source-language special case or dropping the recursive relation.
 func (l *goScalarLowerer) orderFunctions(functions []*ast.FuncDecl) ([]*ast.FuncDecl, matrixir.SparseMatrix, error) {
 	indices := map[types.Object]int{}
 	for i, fn := range functions {
@@ -213,7 +224,7 @@ func (l *goScalarLowerer) orderFunctions(functions []*ast.FuncDecl) ([]*ast.Func
 	var visit func(int) error
 	visit = func(i int) error {
 		if state[i] == 1 {
-			return fmt.Errorf("%s: recursive native functions are unsupported", l.fs.Position(functions[i].Pos()))
+			return nil // intra-SCC edge; the declaration is emitted once on unwind
 		}
 		if state[i] == 2 {
 			return nil

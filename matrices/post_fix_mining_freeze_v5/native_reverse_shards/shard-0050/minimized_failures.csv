@@ -1,0 +1,10 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,31fdde61c699a9f3833d1f926ec67c68ba247058f16a4ecf290446116a8d7543,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_assembly,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0002,31fdde61c699a9f3833d1f926ec67c68ba247058f16a4ecf290446116a8d7543,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_executable,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0003,31fdde61c699a9f3833d1f926ec67c68ba247058f16a4ecf290446116a8d7543,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_machine_code,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0004,31fdde61c699a9f3833d1f926ec67c68ba247058f16a4ecf290446116a8d7543,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_object,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0005,9a257df0361909946d9648e7bf9e64dd8842e8605b49b2b594169fa2194533b3,N0_SOURCE_PARSE,FRONTEND,native,expected expression
+Q0006,d565d345a5245d247325d94d12242711bb9af24bb03dec4ac781c0b4ac35b2c7,NATIVE,UNKNOWN_FAILURE,assembly,UNIMPLEMENTED_NATIVE_GAP node=3 kind=member operation=
+Q0007,d565d345a5245d247325d94d12242711bb9af24bb03dec4ac781c0b4ac35b2c7,NATIVE,UNKNOWN_FAILURE,executable,UNIMPLEMENTED_NATIVE_GAP node=3 kind=member operation=
+Q0008,d565d345a5245d247325d94d12242711bb9af24bb03dec4ac781c0b4ac35b2c7,NATIVE,UNKNOWN_FAILURE,machine_code,UNIMPLEMENTED_NATIVE_GAP node=3 kind=member operation=
+Q0009,d565d345a5245d247325d94d12242711bb9af24bb03dec4ac781c0b4ac35b2c7,NATIVE,UNKNOWN_FAILURE,object,UNIMPLEMENTED_NATIVE_GAP node=3 kind=member operation=

@@ -1,0 +1,7 @@
+family_id,feature,value
+Q0001,native_features,isa=x86_64;os=windows;abi=win64
+Q0002,native_features,isa=x86_64;os=windows;abi=win64
+Q0003,native_features,isa=x86_64;os=windows;abi=win64
+Q0004,native_features,isa=x86_64;os=windows;abi=win64
+Q0005,native_features,isa=x86_64;os=windows;abi=win64
+Q0006,native_features,isa=x86_64;os=windows;abi=win64

@@ -9,7 +9,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"sync/atomic"
 )
+
+// textSemanticParseCalls is test instrumentation for the migration boundary.
+// The canonical MatrixIR frontend must leave this counter unchanged; only the
+// explicitly named compatibility entry points may invoke the historical text
+// fact parser.
+var textSemanticParseCalls atomic.Uint64
 
 type ParsedNode struct {
 	ID     int
@@ -118,6 +125,7 @@ type factParser struct {
 }
 
 func parseFrontendFacts(language, code string, sink FrontendFactSink) (FrontendSemanticFacts, error) {
+	textSemanticParseCalls.Add(1)
 	if sink == nil {
 		return FrontendSemanticFacts{}, fmt.Errorf("missing frontend fact sink")
 	}

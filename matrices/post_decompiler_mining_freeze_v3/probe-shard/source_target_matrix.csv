@@ -1,0 +1,14 @@
+case_id,source_language,target_language,v0_parse,v1_matrixir,v2_uast,v3_closure,v4_emit,v5_reparse,v6_compile,v7_execute,v8_behavior,route,diagnostic
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,r,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,go,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,rust,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,cpp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,c,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,python,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,zig,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,julia,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,nim,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,csharp,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,java,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,kotlin,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture
+b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,r,swift,EXPECTED_INVALID,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,SKIP,,tree-sitter expected recovery/error fixture

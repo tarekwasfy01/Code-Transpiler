@@ -1,0 +1,10 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,a537cd72f10d2c7e30ac3fdd230fe37fcb04aa810c971e04e023f8aadb878721,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_assembly,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0002,a537cd72f10d2c7e30ac3fdd230fe37fcb04aa810c971e04e023f8aadb878721,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_executable,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0003,a537cd72f10d2c7e30ac3fdd230fe37fcb04aa810c971e04e023f8aadb878721,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_machine_code,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0004,a537cd72f10d2c7e30ac3fdd230fe37fcb04aa810c971e04e023f8aadb878721,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_object,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0005,1356bb7db4a7bb8ac0657cf353950a2f55cf8c513728a9c56f53285d76663a52,N0_SOURCE_PARSE,FRONTEND,native,expected expression
+Q0006,e1be0aaad93194e9aedc42928670fdf68f1ffa73f6d01b5752a105e69612abe7,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""asdfas"" node=1"
+Q0007,e1be0aaad93194e9aedc42928670fdf68f1ffa73f6d01b5752a105e69612abe7,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""asdfas"" node=1"
+Q0008,e1be0aaad93194e9aedc42928670fdf68f1ffa73f6d01b5752a105e69612abe7,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""asdfas"" node=1"
+Q0009,e1be0aaad93194e9aedc42928670fdf68f1ffa73f6d01b5752a105e69612abe7,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""asdfas"" node=1"

@@ -1,0 +1,17 @@
+{
+  "complete": false,
+  "stop_reason": "user_requested_partial_evaluation",
+  "source_cases_observed": 837,
+  "source_languages_observed": "c;cpp;go;julia;nim;python;r;rust",
+  "source_language_count": 8,
+  "valid_source_cases_observed": 796,
+  "expected_invalid_cases_observed": 41,
+  "target_cells_written": 10863,
+  "direct_pass_rows": 4108,
+  "direct_fail_rows": 6222,
+  "expected_invalid_rows": 533,
+  "failure_rows": 6220,
+  "exact_partial_failure_classes": 2,
+  "raw_dataset_unchanged": true,
+  "second_mining_freeze_complete": false
+}

@@ -1,0 +1,3 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,0560ca30c29c96ad8e6bd5409e1465fe10a42be2b868a3fca1ff1d21de10e6b7,V0_SOURCE_PARSE,FRONTEND,source_target,expected expression
+Q0002,dc2cca9ddc7cbd766629127f011a8bcc9eb7a537db597d4b0498caabbc6ce71d,V4_NATIVE_EMISSION,BACKEND,source_target,"DIRECT_NATIVE_UNAVAILABLE: call ""b"" has no native contract for target ""go"" (arguments: )"

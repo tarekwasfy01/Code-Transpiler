@@ -177,7 +177,6 @@ func TestIntegerImplementationMatrixValidation(t *testing.T) {
 	for _, source := range []string{
 		`package main;func main(){var a uint64=1;a=a/uint64(0)}`,
 		`package main;func main(){var a uint64=1;a=a<<uint64(2)}`,
-		`package main;func main(){var a float64=1;a=a+1}`,
 	} {
 		if _, err := LowerNativeGo("unsupported.go", source); err == nil {
 			t.Fatal("unsupported integer semantics accepted", source)

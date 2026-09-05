@@ -1,0 +1,6 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,54b4e7b97358f6dde34f632985c68b333a47c8da28c7aeb4ad93548194a082c4,N0_SOURCE_PARSE,FRONTEND,native,"c range matrix: counting-loop step "" e"" requires explicit lowering"
+Q0002,d232edbc0619e891fa078407595052c6bc66c9a261b1bfc8235027dc1f2f33c3,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""int"" node=1"
+Q0003,d232edbc0619e891fa078407595052c6bc66c9a261b1bfc8235027dc1f2f33c3,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""int"" node=1"
+Q0004,d232edbc0619e891fa078407595052c6bc66c9a261b1bfc8235027dc1f2f33c3,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""int"" node=1"
+Q0005,d232edbc0619e891fa078407595052c6bc66c9a261b1bfc8235027dc1f2f33c3,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""int"" node=1"

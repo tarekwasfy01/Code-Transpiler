@@ -1,0 +1,7 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,aa56d5f435bbcfb229fae6433968b14ca4b12cd20d0ba8cd94507ad307e9d467,N0_SOURCE_PARSE,FRONTEND,native,"r matrix parser: function name missing near ""function(x = function()) {"""
+Q0002,b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,NATIVE,UNKNOWN_FAILURE,assembly,native function x: native node 6 missing operand [expression]
+Q0003,b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,NATIVE,UNKNOWN_FAILURE,executable,native function x: native node 6 missing operand [expression]
+Q0004,b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,NATIVE,UNKNOWN_FAILURE,machine_code,native function x: native node 6 missing operand [expression]
+Q0005,b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,NATIVE,UNKNOWN_FAILURE,object,native function x: native node 6 missing operand [expression]
+Q0006,b20961b78481663737fb9b51143ce7f7acbdfca587c3963db5a900f973f4fcb9,V0_SOURCE_PARSE,FRONTEND,source,RUNTIME_ROUTE_FAILED (stage=runtime)

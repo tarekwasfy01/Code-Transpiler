@@ -1,0 +1,5 @@
+case_id,source_language,input_kind,status,input_bytes,uast_hash,diagnostic
+d4b2a4a3a3cd07400f2ea6f2eaa295ca30147eac4d114fe34b50f62256cac455,csharp,assembly,FAIL,579,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+d4b2a4a3a3cd07400f2ea6f2eaa295ca30147eac4d114fe34b50f62256cac455,csharp,machine_code,FAIL,120,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+d4b2a4a3a3cd07400f2ea6f2eaa295ca30147eac4d114fe34b50f62256cac455,csharp,object,FAIL,215,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+d4b2a4a3a3cd07400f2ea6f2eaa295ca30147eac4d114fe34b50f62256cac455,csharp,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""

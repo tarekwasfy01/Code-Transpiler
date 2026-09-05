@@ -1,0 +1,13 @@
+family_id,feature,value
+Q0001,validation_stage,N0_SOURCE_PARSE
+Q0001,failure_class,FRONTEND
+Q0002,validation_stage,NATIVE
+Q0002,failure_class,UNKNOWN_FAILURE
+Q0003,validation_stage,NATIVE
+Q0003,failure_class,UNKNOWN_FAILURE
+Q0004,validation_stage,NATIVE
+Q0004,failure_class,UNKNOWN_FAILURE
+Q0005,validation_stage,NATIVE
+Q0005,failure_class,UNKNOWN_FAILURE
+Q0006,validation_stage,V0_SOURCE_PARSE
+Q0006,failure_class,FRONTEND

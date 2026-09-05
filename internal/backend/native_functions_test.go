@@ -116,7 +116,7 @@ func TestNativeFunctions(t *testing.T) {
 
 func TestNativeFunctionBoundaries(t *testing.T) {
 	for _, source := range []string{
-		`package main; func a(){b()};func b(){a()};func main(){a()}`,
+		`package main; func a(){defer a()};func main(){a()}`,
 		`package main; func a(x ...string){};func main(){a("x")}`,
 		`package main; func a()(s string){return};func main(){a()}`,
 		`package main; func a()(bool,string){return true,"x"};func main(){a()}`,

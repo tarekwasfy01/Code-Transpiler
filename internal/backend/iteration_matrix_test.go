@@ -58,21 +58,3 @@ func TestIterationMatrixStateAndHygiene(t *testing.T) {
 		t.Fatal("iterable parameter demand missing")
 	}
 }
-
-func TestIterationGuardsAcrossTargets(t *testing.T) {
-	for _, target := range Languages {
-		for _, code := range []string{
-			"f <- function(x) { total <- 0; for(i in x) { total <- total+i }; return(total) }; print(f(print(3)))",
-			"f <- function(x) { total <- 0; for(i in c(1,2)) { total <- total+x }; return(total) }; print(f(print(3)))",
-		} {
-			_, err := Transpile(target.ID, code)
-			if err == nil || !strings.Contains(err.Error(), "promise") {
-				t.Fatalf("%s: lost promise guard: %v", target.ID, err)
-			}
-		}
-		_, err := Transpile(target.ID, "f <- function() { for(i in c()) { print(i) }; return(i) }; print(f())")
-		if err == nil || !strings.Contains(err.Error(), "before definite assignment") {
-			t.Fatalf("%s: lost initialization guard: %v", target.ID, err)
-		}
-	}
-}

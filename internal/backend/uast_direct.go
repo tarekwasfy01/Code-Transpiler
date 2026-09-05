@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 // uastExecutionGraph is a read-only index over the canonical UAST.  It is a
@@ -19,6 +20,32 @@ type uastExecutionGraph struct {
 	children  map[int]map[string][]universalChild
 	relations map[int]map[string][]UniversalASTReference
 	root      int
+}
+
+// expressionOwnedByStructuredParent reports whether a node is already
+// consumed as an operand/condition/value of another canonical node.  Shared
+// UAST graphs may retain the node as a root-level reachability attachment;
+// emitting it again as a statement would duplicate semantics.
+func expressionOwnedByStructuredParent(g *uastExecutionGraph, id int) bool {
+	if g == nil {
+		return false
+	}
+	for _, roles := range g.children {
+		for role, children := range roles {
+			for _, child := range children {
+				if child.ID != id {
+					continue
+				}
+				switch role {
+				case "statement", "body", "then", "else", "cleanup", "handler":
+					continue
+				default:
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 var directSemanticStructure = map[string]string{
@@ -74,6 +101,9 @@ func canonicalUniversalAST(p *SemanticProgram) (*UniversalASTDocument, error) {
 	}
 	if p.UniversalAST == nil {
 		return nil, fmt.Errorf("semantic program has no canonical UniversalASTDocument")
+	}
+	if err := ApplySemanticClosure(p.UniversalAST); err != nil {
+		return nil, err
 	}
 	return p.UniversalAST, nil
 }
@@ -362,6 +392,14 @@ func (g *uastExecutionGraph) validateShapes() error {
 				return err
 			}
 		case "expression":
+			// An unsupported.* operator is a structured capability marker emitted
+			// when MatrixIR has identified a construct but has not proved all
+			// children required for a concrete UAST shape.  It is intentionally
+			// accepted as a graph node so compatibility/runtime fallback can make
+			// the final decision; executable expression nodes remain strict.
+			if strings.HasPrefix(c.Operation.Operator, "unsupported.") {
+				continue
+			}
 			if err := one("expression", true); err != nil {
 				return err
 			}
@@ -420,7 +458,7 @@ func (g *uastExecutionGraph) validateShapes() error {
 			if err := one("body", true); err != nil {
 				return err
 			}
-			if err := g.rejectOtherRoles(id, "sequence", "body"); err != nil {
+			if err := g.rejectOtherRoles(id, "sequence", "body", "binding"); err != nil {
 				return err
 			}
 		case "return":
@@ -435,10 +473,14 @@ func (g *uastExecutionGraph) validateShapes() error {
 				return err
 			}
 		case "unary", "iteration":
-			if err := one("value", true); err != nil {
-				return err
+			// MatrixIR may use the neutral `operand` role for unary/iteration
+			// constructs.  Both roles describe the same single expression edge.
+			if _, ok, _ := g.one(id, "value", false); !ok {
+				if err := one("operand", true); err != nil {
+					return err
+				}
 			}
-			if err := g.rejectOtherRoles(id, "value"); err != nil {
+			if err := g.rejectOtherRoles(id, "value", "operand"); err != nil {
 				return err
 			}
 		case "binary":
@@ -683,6 +725,15 @@ func directTypedRequirements(g *uastExecutionGraph) ([]string, error) {
 		}
 		if c.Kind == "call" && c.Operation.Typed == nil {
 			callee, _, _ := g.one(id, "value", true)
+			// Output builtins are variadic sinks rather than user function
+			// declarations.  Their arguments still retain exact integer
+			// values, so they are valid without a typed-parameter contract.
+			if callee >= 0 && g.common[callee].Kind == "identifier" {
+				switch g.common[callee].Name {
+				case "print", "println", "show", "fmt.Println", "fmt.Print", "fmt.Printf":
+					continue
+				}
+			}
 			fn := -1
 			if g.common[callee].Kind == "identifier" {
 				if q, ok := functions[g.common[callee].Name]; ok {

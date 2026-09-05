@@ -1,0 +1,9 @@
+case_id,source_language,input_kind,status,input_bytes,uast_hash,diagnostic
+31fdde61c699a9f3833d1f926ec67c68ba247058f16a4ecf290446116a8d7543,r,assembly,FAIL,413,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+31fdde61c699a9f3833d1f926ec67c68ba247058f16a4ecf290446116a8d7543,r,machine_code,FAIL,91,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+31fdde61c699a9f3833d1f926ec67c68ba247058f16a4ecf290446116a8d7543,r,object,FAIL,186,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+31fdde61c699a9f3833d1f926ec67c68ba247058f16a4ecf290446116a8d7543,r,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+f998da52e73a9f5df450204163cdc9623f89dd58ceecfee23cddec10f6a514c6,r,assembly,FAIL,400,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+f998da52e73a9f5df450204163cdc9623f89dd58ceecfee23cddec10f6a514c6,r,machine_code,FAIL,96,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+f998da52e73a9f5df450204163cdc9623f89dd58ceecfee23cddec10f6a514c6,r,object,FAIL,191,,"binary frontend: semantic lifting unavailable for instruction ""push"""
+f998da52e73a9f5df450204163cdc9623f89dd58ceecfee23cddec10f6a514c6,r,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""

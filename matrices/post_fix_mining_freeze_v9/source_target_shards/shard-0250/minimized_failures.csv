@@ -1,0 +1,4 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,f89632c565c55188252845c64cf36a06d36ae6f65a899538afb1c217a05a38cf,V0_SOURCE_PARSE,FRONTEND,source_target,unterminated string at 89
+Q0002,3e531b8594303528a4170d63b7af69b2614ac91094cea78dc1b6f244d4c9271b,V4_NATIVE_EMISSION,BACKEND,source_target,"DIRECT_NATIVE_UNAVAILABLE: call ""foo"" has no native contract for target ""go"" (arguments: )"
+Q0003,a717666afb556ff6415f40f20e1e867202ebf11744851d4317f4f325604a207d,V5_TARGET_REPARSE,TARGET_SYNTAX,source_target,expected expression

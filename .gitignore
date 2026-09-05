@@ -4,3 +4,8 @@ github-release/
 dist/*.previous-*.exe
 dist/*.new.exe
 *.tmp
+
+# generated local caches
+tools/**/.gocache/
+tools/**/.gocache2/
+tools/**/node_modules/

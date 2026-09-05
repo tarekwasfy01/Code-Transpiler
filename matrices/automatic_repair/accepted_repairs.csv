@@ -1,0 +1,8 @@
+repair_id,repair_kind,semantic_family,inputs,outputs,relations,guards,affected_witnesses,regressions,materialized_rule,iteration
+AR001,RELATION_COMPLETION,OPERAND_RESULT_PROJECTION,OperationExpr+data.operand,canonical syntax.child,data.operand->syntax.child,operand_count_and_role_unambiguous,all matched demands,0,ApplyAutomaticSemanticRepairClosure,1
+AR002,STRUCTURAL_TRANSPARENCY,OPAQUE_OPERATION_TRANSPARENCY,OperationExpr+known_operation+ordered_operands,canonical operation projection,syntax.child(left/right/value),known_operation_and_arity,all matched demands,0,ApplyAutomaticSemanticRepairClosure,1
+AR003,RELATION_COMPLETION,CONTROL_CONDITION,IfStmt|LoopStmt+data.operand,condition child,data.operand->syntax.child(condition),single_condition_operand,all matched demands,0,ApplyAutomaticSemanticRepairClosure,1
+AR004,RELATION_COMPLETION,ASSIGNMENT_VALUE,AssignStmt+data.operand,value child,data.operand->syntax.child(value),single_rhs_operand,all matched demands,0,ApplyAutomaticSemanticRepairClosure,1
+AR005,REPRESENTATION_ADAPTER,TRANSPARENT_MODULE,ModuleDecl+ordered_children,target child sequence,syntax.child(statement),module_has_no_executable_operation,all matched demands,0,existing ModuleDecl projection,1
+AR006,TARGET_LEGALIZATION,TARGET_LEGAL_OPERATION,canonical OperationExpr+target template,target-legal operation,existing target renderer,renderer_complete,all matched demands,0,UniversalLoweringRegistry,1
+AR007,RECOVERY_COMPOSITION,BINARY_ISA_LIFT,decoder facts+existing machine primitives,canonical machine semantics,def/use+memory+ordering,encoder_decoder_semantic_parity,all matched demands,0,existing machine semantic closure,1

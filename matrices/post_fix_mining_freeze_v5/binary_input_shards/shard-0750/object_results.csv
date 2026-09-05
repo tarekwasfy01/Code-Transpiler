@@ -1,0 +1,42 @@
+case_id,source_language,status,bytes,format,diagnostic
+f4ca876e0ff1bb249a54cc72ebae6f3d0add2c6e809bbab7f95593a2c0e9ba28,julia,FAIL,0,,"native unresolved binding ""a"" node=1"
+da91f298d7cd6a3c56d90d04a8a0d546158f7c9ecbb4813eb1fd5089e4a5f65e,julia,FAIL,0,,"native unresolved binding ""a"" node=1"
+91506c97713777ec9e569ae9243542576f272b5ced51cde0121060819dcf7599,julia,FAIL,0,,"native unresolved binding ""batch_size"" node=2"
+e6562dad8e17a30a0b6e2938371d72ffdfab725353c48d4345bf9c8ac6fdbe18,julia,FAIL,0,,"native unresolved binding ""begin"" node=1"
+e2e4442fe3ce32f819da5cc0d6e37c5f03b56539e3aac30f5fd9ea19cd1bc8a2,julia,FAIL,0,,"native unresolved binding ""quote"" node=1"
+346dda6ebb672f0a9d54e789358d425305263890427c3338a77bf193d627d52a,julia,FAIL,0,,"native unresolved binding ""let"" node=1"
+b054bc6a9d5cd016a848f9478e7e22facf5b32c55ed9b21953a9f4433e9c8a4c,julia,FAIL,0,,"native unresolved binding ""a"" node=1"
+9129bffde2a3f841055833308396dd88f94976361f46c44ee893cc927a160be5,julia,FAIL,0,,"native unresolved binding ""try"" node=1"
+c67ed92e34ca7556bd5b2c58988762f6462fde12c0a862b727a7c74ad764a7ea,julia,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=3 kind=for operation=
+d34fc982b7d7d85cc8e10f906d1b98ea2ed294bfcb142abc537d2151159fd8de,julia,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=8 kind=for operation=
+02019535d7dd1964ecfe3e75aae2c64ff30dfd0a0949f8963eab4532f3c7d704,julia,FAIL,0,,native node 1 missing operand [expression]
+cf7bff2f076ab2c932ac2faee076fb9e535c6003ea4a0aa204fb52c02cf95c07,julia,FAIL,0,,"native unresolved binding ""a"" node=2"
+e21d007c5035d14e4aa0d3e9b5eeb51877ce8f2f2e35265271e22543cb450d0a,julia,FAIL,0,,"native unresolved binding ""export"" node=1"
+5f3a58d0f65b1a9df5ca151b6d397df5f5360b0c01d04ecab720010c2e92a51c,julia,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+c7cf03e0446dafe0e1dd65066d5c7e8ebc750357d663f7fb5ce9d96a19f235b7,julia,FAIL,0,,native node 7 missing operand [expression]
+435d0988dc4bd5842798d5f2754823d6db9798c507be6cc812e5bc6907663870,julia,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=8
+7ca81f5588432dde4d2eb1fa4b8bb735a87b959c1467b7d18cb15ec67a31a32d,julia,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=8
+737cc705021419b5813a260cdebc03694ab38e3d8b6bbf2c1e6d7a2994b8c54a,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+a2c68e05c845409fe079bd0faec1a24b400788819a531e82749f82a3669b63d0,nim,FAIL,0,,"native unresolved binding ""const"" node=7"
+42765766c80220989013310b5d2bba8baec9890d2a76944924e76a2107b0c757,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=21
+daa5a804ad5c4e38859a2b96739164e6d31bd27928226aa1a0686ebd34f0b280,nim,FAIL,0,,"strconv.ParseFloat: parsing ""0d"": invalid syntax"
+0dea9380934a00b294739eb6b173f8caa41a88754582cfd0342ffa8cea50c5df,nim,FAIL,0,,"native unresolved binding ""int"" node=2"
+89cd50a3c0c7796a620c0037fe75013fed43d877388f75c91faefa44f2bae5fb,nim,FAIL,0,,"native unresolved binding ""type"" node=1"
+38dd9288dcf2d892d54c9595d9321247331d061bbed7ef832b5f7adb61356f2e,nim,FAIL,0,,"native unresolved binding ""type"" node=1"
+56f51627fc68cf99d5ee9995ba1a045a55247b3f8c52562ae8423dd43163dad2,nim,FAIL,0,,"native unresolved binding ""type"" node=1"
+580467512e6a3be4d603f466197ff763f42ec20ca3a2ece75c600018d6472ae3,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=1
+cb0d732a992c9e0177d48c009a74279560ce82f9f765b435ed64987c203737ba,nim,FAIL,0,,"native unresolved binding ""type"" node=1"
+9dbeb63e288fb2256d7bfd36d261c411c5cbf04401fdd3b59ce2ec4498d7125b,nim,FAIL,0,,"native unresolved binding ""type"" node=1"
+b454f702117c43038b26918369026e42752fe4df39e079e54d1c0f0b58fc4120,nim,FAIL,0,,"native literal representation ""string"" unavailable"
+4b844ab3b14b5e0156f13dd0ed531a9c534caeecf2e947e3bcb91afe1356859e,nim,FAIL,0,,"native unresolved binding ""a"" node=1"
+caf792d1fd96dff03195a913e91b0b6aa5142002114418d4736d64e0f760dd77,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=1 kind=module operation=
+5f9b638b912d47d1641cbaf16c3a53244f932fbd800493390f1b60e05b48e60a,nim,FAIL,0,,"native unresolved binding ""finally"" node=4"
+bd059f9ea77ea4148973d87ad17dac6cf556f38ba77e4a4cff6ad1384290466c,nim,FAIL,0,,"native unresolved binding ""x"" node=1"
+2edea38429c5bcb5a3826363ba9997b701db0cc4fd6eb8fe2543673176eb1c5e,nim,FAIL,0,,"native literal representation ""string"" unavailable"
+edce99b505287f28ca6b1c176d5c7194fa4ee3596670f081ae14f1ff6641d498,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP function binding node=18
+b3aee6f062e7d07ff8043166dddff0395dd5eb12dc89a44cceeea9be50c72864,nim,FAIL,0,,native node 1 missing operand [expression]
+81f21ac7320f2198da7ba381274a3b4c317183e1e20c4c6d574b19c63e363769,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=3 kind=index operation=
+6ef03fa971d4dbcd96bef56bb50cb704091022a93533b5f8d4211fc66ee715fc,nim,FAIL,0,,"native unresolved binding ""a.b"" node=1"
+0252810a9dff30a11711476b3fcd63312529784d3184d4ae5a0778b5887ba6a1,nim,FAIL,0,,"native unresolved binding ""echo"" node=1"
+12437efcdd8653f2232824014dc23a5ab6ca971c86f3600cee5012cbc30f429c,nim,FAIL,0,,UNIMPLEMENTED_NATIVE_GAP node=3 kind=slice operation=
+2d9aea3896397ecc9bc917bd78c4f75eadc46f201f29c4a8ff928afc5cee0934,nim,FAIL,0,,"native unresolved binding ""block"" node=1"

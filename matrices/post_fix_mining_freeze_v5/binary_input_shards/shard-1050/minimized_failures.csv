@@ -1,0 +1,10 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,d5d6c46c16487ccd3a36e1f49cf457e2eb4c9545b183c0d0aed0f9e040f559b8,B5_UAST_LIFT,UNKNOWN_FAILURE,binary_lift_assembly,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0002,d5d6c46c16487ccd3a36e1f49cf457e2eb4c9545b183c0d0aed0f9e040f559b8,B5_UAST_LIFT,UNKNOWN_FAILURE,binary_lift_executable,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0003,d5d6c46c16487ccd3a36e1f49cf457e2eb4c9545b183c0d0aed0f9e040f559b8,B5_UAST_LIFT,UNKNOWN_FAILURE,binary_lift_machine_code,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0004,d5d6c46c16487ccd3a36e1f49cf457e2eb4c9545b183c0d0aed0f9e040f559b8,B5_UAST_LIFT,UNKNOWN_FAILURE,binary_lift_object,"binary frontend: semantic lifting unavailable for instruction ""push"""
+Q0005,7c04e4c5b28717531b17eea5234afb0dd87fd0896695219656aa055cac2f8c3d,N0_SOURCE_PARSE,FRONTEND,native,java range matrix: counting-loop initialization is not supported
+Q0006,1e38d2eabef461f9bcc8ae4878a2a16342e0ccdc5a9d98151c79a0a239b227bd,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""public"" node=1"
+Q0007,1e38d2eabef461f9bcc8ae4878a2a16342e0ccdc5a9d98151c79a0a239b227bd,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""public"" node=1"
+Q0008,1e38d2eabef461f9bcc8ae4878a2a16342e0ccdc5a9d98151c79a0a239b227bd,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""public"" node=1"
+Q0009,1e38d2eabef461f9bcc8ae4878a2a16342e0ccdc5a9d98151c79a0a239b227bd,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""public"" node=1"

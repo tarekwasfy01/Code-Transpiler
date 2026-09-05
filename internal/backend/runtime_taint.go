@@ -40,9 +40,10 @@ var runtimeArtifacts = []struct {
 // detector is used before entering the explicit compatibility fallback.
 func AnalyzeRuntimeTaint(source string, helperIDs []string) RuntimeTaintReport {
 	seen := map[string]bool{}
-	if len(helperIDs) != 0 {
-		seen["runtime helper"] = true
-	}
+	// Helper IDs are intent metadata, not runtime evidence. Native helpers and
+	// compatibility helpers share the same registration mechanism; classify the
+	// generated final source by its actual runtime markers below.
+	_ = helperIDs
 	for _, artifact := range runtimeArtifacts {
 		if strings.Contains(source, artifact.marker) {
 			seen[artifact.id] = true

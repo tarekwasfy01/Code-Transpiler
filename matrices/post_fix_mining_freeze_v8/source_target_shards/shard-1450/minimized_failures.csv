@@ -1,0 +1,3 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,329932c1c2d8dc16318e3e2a4207b17a47eb59424d66d945182689eb5f863893,V0_SOURCE_PARSE,FRONTEND,source_target,expected expression
+Q0002,04abd1ad7f7343622454a74fcfee82439a1c570aa2d0840c316e6452177b09f6,V4_NATIVE_EMISSION,BACKEND,source_target,DIRECT_NATIVE_UNAVAILABLE: target rust emitted invalid syntax (other: error[E0425]: cannot find value `System_out` in this scope --> C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-2634212388\program.rs:3:17 | 3 | let mut z = System

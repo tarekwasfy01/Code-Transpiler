@@ -1,0 +1,3 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,70ce8bab6462acaba5a6276b43b472302a6f03ada77b8ebc2dd8d7e004256e41,V0_SOURCE_PARSE,FRONTEND,source_target,unterminated string at 55
+Q0002,a64087e927818e77d680762ea7721605d619e1b20d9d9359992aed8679719917,V4_NATIVE_EMISSION,BACKEND,source_target,"DIRECT_NATIVE_UNAVAILABLE: call ""assert"" has no native contract for target ""go"" (arguments: true)"

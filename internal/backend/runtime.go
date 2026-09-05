@@ -141,7 +141,12 @@ func RunSemantic(program *SemanticProgram) (string, error) {
 	// Body is a public compatibility view. Execution above is entirely UAST
 	// based; rematerializing the view afterwards prevents a caller's legacy
 	// mutation from appearing to become a second semantic truth.
-	if u.Metadata["frontend"] != "native-go-uast-v1" {
+	// Matrix/front-end facts carry the canonical UAST directly and do not have
+	// the legacy SemanticDocument projection.  Refreshing the compatibility
+	// body is therefore meaningful only for the explicit semantic_document
+	// compatibility projection; never reject an otherwise executable canonical
+	// UAST merely because its derived legacy view is unavailable.
+	if u.Projection == "semantic_document.v1" && u.Metadata["frontend"] != "native-go-uast-v1" {
 		if err := refreshLegacyExecutableBodyView(program, u); err != nil {
 			return st.out.String(), err
 		}

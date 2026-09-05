@@ -1,0 +1,6 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,7c04e4c5b28717531b17eea5234afb0dd87fd0896695219656aa055cac2f8c3d,N0_SOURCE_PARSE,FRONTEND,native,java range matrix: counting-loop initialization is not supported
+Q0002,1e38d2eabef461f9bcc8ae4878a2a16342e0ccdc5a9d98151c79a0a239b227bd,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""public"" node=1"
+Q0003,1e38d2eabef461f9bcc8ae4878a2a16342e0ccdc5a9d98151c79a0a239b227bd,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""public"" node=1"
+Q0004,1e38d2eabef461f9bcc8ae4878a2a16342e0ccdc5a9d98151c79a0a239b227bd,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""public"" node=1"
+Q0005,1e38d2eabef461f9bcc8ae4878a2a16342e0ccdc5a9d98151c79a0a239b227bd,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""public"" node=1"

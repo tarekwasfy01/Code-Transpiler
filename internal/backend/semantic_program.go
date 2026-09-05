@@ -12,8 +12,13 @@ import (
 // the binary64 contract; typed operations use an explicit exact-scalar contract
 // and integer-width domains. Unknown types/effects remain explicit in matrices.
 type SemanticProgram struct {
-	nodeSources      map[int]SemanticSourceSpan
-	sourceTree       []byte
+	nodeSources map[int]SemanticSourceSpan
+	sourceTree  []byte
+	// CompatibilityR is a generated diagnostic view retained for callers that
+	// still execute the matrix language's canonical compatibility form. It is
+	// produced by the modern MatrixIR frontend; it is never used as semantic
+	// input by emitters or by TranspileCore.
+	CompatibilityR   string                `json:"-"`
 	Body             *BlockStmt            `json:"-"`
 	Evaluation       string                `json:"evaluation"`
 	ValueModel       string                `json:"value_model"`
@@ -116,7 +121,10 @@ type SemanticBinding struct {
 	TypeOrigin string `json:"type_origin"`
 }
 
-func ParseSemantic(source, code string) (*SemanticProgram, error) {
+// ParseSemanticCompatibility is the explicit legacy text ingress retained for
+// compatibility fixtures and oracle tooling.  The productive source path is
+// LowerSource, which never calls this function.
+func ParseSemanticCompatibility(source, code string) (*SemanticProgram, error) {
 	body, err := parse(code)
 	if err != nil {
 		return nil, err
@@ -139,10 +147,27 @@ func ParseSemantic(source, code string) (*SemanticProgram, error) {
 	}
 	// ParseSemantic is a legacy ingress API. Project once at ingress so every
 	// runtime and target backend receives the canonical UAST only.
-	if _, err := p.Document(); err != nil {
+	doc, err := p.Document()
+	if err != nil {
 		return nil, err
 	}
+	// Keep the original source in the dedicated lossless surface plane. This
+	// is metadata for same-language preservation, never an executable semantic
+	// fallback and never a second intermediate representation.
+	if doc.UniversalAST != nil {
+		doc.UniversalAST.Surface = NewUniversalASTSurface(source, code)
+		p.UniversalAST = doc.UniversalAST
+	}
 	return p, nil
+}
+
+// ParseSemantic is kept as a source-compatible alias for older callers. New
+// product code must use LowerSource so text parsing cannot re-enter the
+// canonical frontend after structured facts have been produced.
+// Deprecated: use LowerSource for production and ParseSemanticCompatibility
+// only for explicit compatibility/oracle work.
+func ParseSemantic(source, code string) (*SemanticProgram, error) {
+	return ParseSemanticCompatibility(source, code)
 }
 func NewSemanticProgram(body *BlockStmt, evaluation string) *SemanticProgram {
 	p := &SemanticProgram{Body: body, Evaluation: evaluation, ValueModel: "tagged_dynamic_binary64", IndexBase: 1, Types: defaultSemanticTypeContract(), Origin: SemanticOrigin{SourceLanguage: "semantic", EntryPoint: "main"}}
@@ -238,6 +263,28 @@ func EmitSemantic(target string, p *SemanticProgram) (string, error) {
 	return generateTargetFromUniversal(u.Evaluation, target, graph)
 }
 
+// EmitSemanticPreserveOriginal is the explicit same-language surface-plane
+// mode. The ordinary EmitSemantic path still regenerates canonical target
+// source from UAST, while callers that request PRESERVE_ORIGINAL can return
+// the verified original bytes without making source text part of semantics.
+func EmitSemanticPreserveOriginal(target string, p *SemanticProgram) (string, error) {
+	if err := ValidateSemanticProgram(p); err != nil {
+		return "", err
+	}
+	if p == nil || p.UniversalAST == nil || p.UniversalAST.Surface == nil {
+		return "", fmt.Errorf("source surface is unavailable")
+	}
+	u := p.UniversalAST
+	if NormalizeLanguage(target) != NormalizeLanguage(u.LanguageProfile) {
+		return "", fmt.Errorf("PRESERVE_ORIGINAL requires same-language target %q", target)
+	}
+	b, err := u.Surface.Bytes()
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
 // EmitSemanticDirect is used by the intermediate-route planner. It shares the
 // canonical semantic/UAST construction with EmitSemantic but asks the
 // projector for a strict native result, so a route can be attempted before
@@ -266,6 +313,48 @@ func EmitSemanticDirect(target string, p *SemanticProgram) (string, error) {
 		return "", fmt.Errorf("unmodeled value or indexing contract")
 	}
 	return (UniversalTargetProjector{}).EmitDirect(u, target)
+}
+
+// EmitSemanticLoweredDirect is the explicit second stage in the native-first
+// pipeline. It records lowering separately so a failed clone cannot leak into
+// intermediate or runtime fallback.
+func EmitSemanticLoweredDirect(target string, p *SemanticProgram) (string, LoweringTrace, error) {
+	if err := ValidateSemanticProgram(p); err != nil {
+		return "", LoweringTrace{Target: target, Attempted: true}, err
+	}
+	if err := validateExecutableDialects(p); err != nil {
+		return "", LoweringTrace{Target: target, Attempted: true}, err
+	}
+	u, err := canonicalUniversalAST(p)
+	if err != nil {
+		return "", LoweringTrace{Target: target, Attempted: true}, err
+	}
+	// Primitive closure is a productive stage of semantic lowering. It uses
+	// generated recipes when their canonical operation is present and validates
+	// the remaining recipes on isolated UAST clones.
+	var applied []string
+	u, applied, err = ApplyPrimitiveClosure(u, target)
+	if err != nil {
+		return "", LoweringTrace{Target: target, Attempted: true, ErrorClass: "PRIMITIVE_CLOSURE_FAILED"}, err
+	}
+	if err := validateUASTTargetCapabilities(u, target); err != nil {
+		return "", LoweringTrace{Target: target, Attempted: true}, err
+	}
+	if err := validateUASTTargetPreservation(u, target); err != nil {
+		return "", LoweringTrace{Target: target, Attempted: true}, err
+	}
+	spec, ok := targetSpec(target)
+	if !ok {
+		return "", LoweringTrace{Target: target, Attempted: true}, fmt.Errorf("unknown target %q", target)
+	}
+	doc, trace, err := (UniversalTargetProjector{}).ProjectLoweredDirect(u, spec)
+	if err != nil {
+		return "", trace, err
+	}
+	if len(applied) > 0 {
+		trace.Rules = append(trace.Rules, applied...)
+	}
+	return (UniversalFormatter{Indent: spec.Indent, Newline: "\n"}).Format(doc), trace, nil
 }
 
 // The node projections preserve lexical scope and ordered operand occurrences.

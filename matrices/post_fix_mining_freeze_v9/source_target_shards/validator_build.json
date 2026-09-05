@@ -1,0 +1,9 @@
+{
+  "validator_path": "C:\\Users\\tarek\\Desktop\\Transpiler\\Universal-Code-Transpiler - Kopie\\outputs\\tools\\real-source-validation-v9.exe",
+  "validator_sha256": "E47839DA8D9E830A18E4948F8C0B8B638459DC23DC0BF849736C72C8C7934666",
+  "lane": "source",
+  "workers": 6,
+  "batch_size": 50,
+  "timeout_seconds": 300,
+  "started_utc": "2026-09-05T11:42:27.4447890Z"
+}

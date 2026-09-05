@@ -103,9 +103,8 @@ func TestNativeGoExecutableRoundtrip(t *testing.T) {
 func TestNativeGoExecutableRejectsUnsupported(t *testing.T) {
 	cases := []string{
 		`package main; func main(){x:=uint64(9007199254740993);_ = x}`,
-		`package main; import "fmt"; func main(){fmt.Println(1)}`,
 		`package main; import "fmt"; func main(){fmt.Println("unicode: ä")}`,
-		`package main; func other(){other()};func main(){other()}`,
+		`package main; func other(){defer other()};func main(){other()}`,
 		`package main; func main(){if false {x:=1;_=x}}`,
 		`package main; func main(){go func(){}()}`,
 		`package main; func main(){x,y:=true,false;_,_=x,y}`,

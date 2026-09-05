@@ -6,8 +6,31 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
+
+type syntaxToolPath struct {
+	path string
+	ok   bool
+}
+
+// Tool discovery is invariant for a process. Caching it avoids repeatedly
+// traversing a potentially very large Windows PATH for every UAST cell while
+// retaining the exact same syntax-checking behaviour.
+var syntaxToolPaths sync.Map // map[string]syntaxToolPath
+
+func resolveSyntaxTool(tool string) (string, bool) {
+	if cached, ok := syntaxToolPaths.Load(tool); ok {
+		v := cached.(syntaxToolPath)
+		return v.path, v.ok
+	}
+	path, err := exec.LookPath(tool)
+	v := syntaxToolPath{path: path, ok: err == nil}
+	actual, _ := syntaxToolPaths.LoadOrStore(tool, v)
+	v = actual.(syntaxToolPath)
+	return v.path, v.ok
+}
 
 // TargetSyntaxCheck is an observation of a parser/compiler in syntax-only
 // mode. Checked=false means the local toolchain is unavailable; it is not a
@@ -71,8 +94,8 @@ func CheckTargetSyntax(target, source string) TargetSyntaxCheck {
 	if tool == "" {
 		return TargetSyntaxCheck{Failure: "no syntax checker configured"}
 	}
-	path, err := exec.LookPath(tool)
-	if err != nil {
+	path, found := resolveSyntaxTool(tool)
+	if !found {
 		return TargetSyntaxCheck{Tool: tool, Failure: "tool unavailable"}
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)

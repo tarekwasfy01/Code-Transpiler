@@ -50,7 +50,7 @@ func AnalyzeRuntimeTaintMatrix(fixtures []RuntimeTaintFixture) ([]RuntimeTaintCe
 	sort.Slice(targets, func(i, j int) bool { return targets[i].ID < targets[j].ID })
 	cells := make([]RuntimeTaintCell, 0, len(targets)*len(fixtures)*6)
 	for _, fixture := range fixtures {
-		program, err := ParseSemantic("r", fixture.Source)
+		program, err := ParseSemanticCompatibility("r", fixture.Source)
 		if err != nil {
 			return nil, fmt.Errorf("runtime-taint fixture %s: %w", fixture.ID, err)
 		}

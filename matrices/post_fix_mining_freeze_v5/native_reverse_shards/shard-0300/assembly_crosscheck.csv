@@ -1,0 +1,5 @@
+case_id,status,assembler,direct_bytes,assembler_bytes,equivalent,diagnostic
+56465747026917db861fc3b3e3e9f556cb6786f61c79672115cc55e9735d9567,PASS,nasm,392,76,true,
+07bcec9ed834548b4d485fd335a55de9af77eb105a69cb1082be47a94a5ab696,PASS,nasm,325,62,true,
+dc520e057860919c7da578923ae88a361a4556b6519dd18b1591fa0f32a8f223,PASS,nasm,325,62,true,
+f0e5139df2508dfddb61a33f4f13f2aed57a233978eefe21970fe09bb5976f2a,PASS,nasm,325,62,true,

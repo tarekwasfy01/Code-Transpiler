@@ -1,0 +1,5 @@
+quotient_id,representative_case_id,stage,class,kind,diagnostic
+Q0001,bdd77882f44d7638aa5a33d914b567eb80e8eb67a02d630d9f39db7127406539,NATIVE,UNKNOWN_FAILURE,assembly,"native call ""Assert.Range"" requires linked implementation"
+Q0002,bdd77882f44d7638aa5a33d914b567eb80e8eb67a02d630d9f39db7127406539,NATIVE,UNKNOWN_FAILURE,executable,"native call ""Assert.Range"" requires linked implementation"
+Q0003,bdd77882f44d7638aa5a33d914b567eb80e8eb67a02d630d9f39db7127406539,NATIVE,UNKNOWN_FAILURE,machine_code,"native call ""Assert.Range"" requires linked implementation"
+Q0004,bdd77882f44d7638aa5a33d914b567eb80e8eb67a02d630d9f39db7127406539,NATIVE,UNKNOWN_FAILURE,object,"native call ""Assert.Range"" requires linked implementation"

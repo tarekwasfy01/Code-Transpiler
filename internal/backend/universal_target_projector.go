@@ -152,20 +152,14 @@ func (r RequirementRegistry) Resolve(ids []string) ([]Requirement, error) {
 }
 
 func DefaultPreservationRegistry() PreservationRegistry {
-	// These are the proven paths used by the direct UAST emitter.  R emits the
-	// common semantic core in its own syntax; every other registered target
-	// emits that exact core through its checked-in target runtime prelude.  Do
-	// not add a rule here merely because a target language has comparable
-	// syntax: a rule is a product path and therefore must name its handler and
-	// regression test.
+	// These are the proven paths used by the shared direct UAST emitter.  Every
+	// registered target has a TargetSpec/template/renderer path for the common
+	// semantic core. Runtime remains a last-resort result of actual emission
+	// taint or syntax failure, never a language-wide default.
 	rules := []PreservationRule{}
 	for _, target := range Backends() {
-		mode := PreservationRuntime
-		handler := "UniversalTargetEngine+targetPrelude"
-		if target.ID == "r" {
-			mode = PreservationDirect
-			handler = "UniversalTargetEngine"
-		}
+		mode := PreservationDirect
+		handler := "UniversalTargetEngine"
 		rules = append(rules, PreservationRule{Capability: "uast.core", Target: target.ID, Mode: mode, Handler: handler, Test: "TestUniversalBackendUASTOnlyTargetMatrix"})
 	}
 	return PreservationRegistry{Rules: rules}
@@ -715,6 +709,14 @@ func (p UniversalTargetProjector) Project(u *UniversalASTDocument, spec TargetSp
 		if !strings.Contains(err.Error(), "DIRECT_NATIVE_UNAVAILABLE") {
 			return nil, err
 		}
+		// Direct failed for a concrete native capability gap. Lower a private
+		// UAST clone through the shared semantic worklist, then retry the same
+		// direct emitter. The original graph remains the fallback input.
+		if lowered, _, lowerErr := UniversalLower(u, spec.ID); lowerErr == nil {
+			if loweredSource, emitErr := p.emitLoweredDirect(lowered, spec); emitErr == nil {
+				return DocText{Text: loweredSource}, nil
+			}
+		}
 		// Retry with statement-level hybrid partitioning. Successful native
 		// statements remain native; only the statement whose structured UAST
 		// contract failed is emitted through the existing compatibility runtime.
@@ -750,6 +752,28 @@ func (p UniversalTargetProjector) Project(u *UniversalASTDocument, spec TargetSp
 	return EmitNativeDocument(spec, source)
 }
 
+func (p UniversalTargetProjector) emitLoweredDirect(u *UniversalASTDocument, spec TargetSpec) (string, error) {
+	graph, err := newUASTExecutionGraph(u)
+	if err != nil {
+		return "", err
+	}
+	source, err := generateTargetFromUniversalExisting(u.Evaluation, spec.ID, graph)
+	if err != nil {
+		return "", err
+	}
+	if taint := AnalyzeRuntimeTaint(source, nil); taint.Tainted() {
+		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: lowered output contains %s", nativeRuntimeMarker(source, nil))
+	}
+	if syntax := CheckTargetSyntax(spec.ID, source); syntax.Checked && !syntax.Valid {
+		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: lowered output has invalid syntax")
+	}
+	doc, err := EmitNativeDocument(spec, source)
+	if err != nil {
+		return "", err
+	}
+	return (UniversalFormatter{Indent: spec.Indent, Newline: "\n"}).Format(doc), nil
+}
+
 // ProjectDirect is the strict counterpart used by the matrix route planner.
 // It performs the same structural and capability validation but never selects
 // compatibility runtime output. A caller can therefore try an intermediate
@@ -783,9 +807,29 @@ func (p UniversalTargetProjector) ProjectDirect(u *UniversalASTDocument, spec Ta
 		return nil, fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", spec.ID, nativeRuntimeMarker(source, nil))
 	}
 	if syntax := CheckTargetSyntax(spec.ID, source); syntax.Checked && !syntax.Valid {
-		return nil, fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted invalid syntax", spec.ID)
+		return nil, fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted invalid syntax (%s)", spec.ID, syntax.Failure)
 	}
 	return EmitNativeDocument(spec, source)
+}
+
+// ProjectLoweredDirect is the explicit second stage after ProjectDirect. It
+// owns the private UAST clone and returns only a runtime-free native document.
+func (p UniversalTargetProjector) ProjectLoweredDirect(u *UniversalASTDocument, spec TargetSpec) (Doc, LoweringTrace, error) {
+	if _, _, err := p.Analyze(u, spec); err != nil {
+		return nil, LoweringTrace{Target: spec.ID, Attempted: true}, err
+	}
+	lowered, trace, err := UniversalLower(u, spec.ID)
+	if err != nil {
+		return nil, trace, err
+	}
+	source, err := p.emitLoweredDirect(lowered, spec)
+	if err != nil {
+		trace.Success = false
+		trace.ErrorClass = err.Error()
+		return nil, trace, err
+	}
+	trace.Success = true
+	return DocText{Text: source}, trace, nil
 }
 
 func (p UniversalTargetProjector) Emit(u *UniversalASTDocument, target string) (string, error) {
