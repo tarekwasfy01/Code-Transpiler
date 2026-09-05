@@ -1,3 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,7c04e4c5b28717531b17eea5234afb0dd87fd0896695219656aa055cac2f8c3d,V0_SOURCE_PARSE,FRONTEND,source_target,java range matrix: counting-loop initialization is not supported
-Q0002,1e38d2eabef461f9bcc8ae4878a2a16342e0ccdc5a9d98151c79a0a239b227bd,V4_NATIVE_EMISSION,BACKEND,source_target,DIRECT_NATIVE_UNAVAILABLE: target go emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-216651285\program.go:7:13: illegal character U+0040 '@' C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-2166

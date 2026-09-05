@@ -1,1 +1,0 @@
-case_id,status,assembler,direct_machine_bytes_len,assembled_machine_bytes_len,byte_equal,semantic_instruction_equal,first_mismatch_offset,diagnostic

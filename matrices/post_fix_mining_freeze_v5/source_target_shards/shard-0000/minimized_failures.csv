@@ -1,3 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,108d7f4cb4253f1584a20e98889248e067b7d674195a3012a526bb6465eeb6dd,V0_SOURCE_PARSE,FRONTEND,source_target,expected expression
-Q0002,a35ceb7274a1f61c3d037a4ffdca4e3f0d994a719669b67be9d115786008fe8b,V4_NATIVE_EMISSION,BACKEND,source_target,"universal node 12 lacks required ""expression"" child"

@@ -1,2 +1,0 @@
-truth_id,closure_rule,safe
-T-CLOSURE-001,explicit syntax.child -> data.operand,1

@@ -1,2 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,7d52aa01522e5357ebf394c1db15405f9e7e64d97ce78c85ade6061b652f417e,V4_NATIVE_EMISSION,BACKEND,source_target,"DIRECT_NATIVE_UNAVAILABLE: target go emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-3258883876\program.go:7:10: expected operand, found 'switch' C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax"

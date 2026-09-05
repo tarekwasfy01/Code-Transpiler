@@ -1,6 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,e0ca95cd292bdf369da8cd1926402baa31dcd0d11276ff5c2cca78544a63efd8,N0_SOURCE_PARSE,FRONTEND,native,expected expression
-Q0002,8a659f83eeed78026fdf5b686650e503738026c1c51e462f8c2de8702ae2df8d,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""STR."" node=1"
-Q0003,8a659f83eeed78026fdf5b686650e503738026c1c51e462f8c2de8702ae2df8d,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""STR."" node=1"
-Q0004,8a659f83eeed78026fdf5b686650e503738026c1c51e462f8c2de8702ae2df8d,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""STR."" node=1"
-Q0005,8a659f83eeed78026fdf5b686650e503738026c1c51e462f8c2de8702ae2df8d,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""STR."" node=1"

@@ -1,7 +1,0 @@
-truth_id,antecedent,consequent,classification
-N0001,kind:AddressOf,kind:AggregateExpr,OBSERVED_EXCLUSION
-N0002,operation:BIT_AND,operation:ITERATION,OBSERVED_EXCLUSION
-N0003,operation:BIT_OR,operation:ITERATION,OBSERVED_EXCLUSION
-N0004,primitive:BIT_AND,primitive:ITERATION,OBSERVED_EXCLUSION
-N0005,primitive:BIT_OR,primitive:ITERATION,OBSERVED_EXCLUSION
-N0006,uast:AddressOf,uast:AggregateExpr,OBSERVED_EXCLUSION

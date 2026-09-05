@@ -1,3 +1,0 @@
-case_id,status,assembler,direct_bytes,assembler_bytes,equivalent,diagnostic
-1a96852970592f6ae4a9b210ff67dc7599b6ae3552d67547546fea9c7a2ee728,PASS,nasm,380,81,true,
-e2dd602e550da67d3083307631ee0f1eae3ba7b92811c73ce4aeccd4abbe6a10,PASS,nasm,373,82,true,

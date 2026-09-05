@@ -1,5 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,7d52aa01522e5357ebf394c1db15405f9e7e64d97ce78c85ade6061b652f417e,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""switch"" node=2"
-Q0002,7d52aa01522e5357ebf394c1db15405f9e7e64d97ce78c85ade6061b652f417e,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""switch"" node=2"
-Q0003,7d52aa01522e5357ebf394c1db15405f9e7e64d97ce78c85ade6061b652f417e,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""switch"" node=2"
-Q0004,7d52aa01522e5357ebf394c1db15405f9e7e64d97ce78c85ade6061b652f417e,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""switch"" node=2"

@@ -1,9 +1,0 @@
-case_id,source_language,input_kind,status,input_bytes,uast_hash,diagnostic
-1a96852970592f6ae4a9b210ff67dc7599b6ae3552d67547546fea9c7a2ee728,swift,assembly,FAIL,380,,"binary frontend: semantic lifting unavailable for instruction ""push"""
-1a96852970592f6ae4a9b210ff67dc7599b6ae3552d67547546fea9c7a2ee728,swift,machine_code,FAIL,81,,"binary frontend: semantic lifting unavailable for instruction ""push"""
-1a96852970592f6ae4a9b210ff67dc7599b6ae3552d67547546fea9c7a2ee728,swift,object,FAIL,176,,"binary frontend: semantic lifting unavailable for instruction ""push"""
-1a96852970592f6ae4a9b210ff67dc7599b6ae3552d67547546fea9c7a2ee728,swift,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""
-e2dd602e550da67d3083307631ee0f1eae3ba7b92811c73ce4aeccd4abbe6a10,swift,assembly,FAIL,373,,"binary frontend: semantic lifting unavailable for instruction ""push"""
-e2dd602e550da67d3083307631ee0f1eae3ba7b92811c73ce4aeccd4abbe6a10,swift,machine_code,FAIL,82,,"binary frontend: semantic lifting unavailable for instruction ""push"""
-e2dd602e550da67d3083307631ee0f1eae3ba7b92811c73ce4aeccd4abbe6a10,swift,object,FAIL,177,,"binary frontend: semantic lifting unavailable for instruction ""push"""
-e2dd602e550da67d3083307631ee0f1eae3ba7b92811c73ce4aeccd4abbe6a10,swift,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""

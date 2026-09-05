@@ -1,3 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,2a94d180bf3f6ba76914b887db091d9f4da89a69649a49d6c2989eb2fa4c2bbb,V4_NATIVE_EMISSION,BACKEND,source_target,DIRECT_NATIVE_UNAVAILABLE: target c closure captures require runtime
-Q0002,4f05fdeac5042261368616b0fbb19fa866408ed0beda38f6826f095ff8be9981,V5_TARGET_REPARSE,TARGET_SYNTAX,source_target,expected expression
