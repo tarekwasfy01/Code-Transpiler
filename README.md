@@ -2,7 +2,8 @@
 
 
 <p align="center">
-  <img width="300" height="300" alt="code-transpiler-logo" src="[https://github.com](https://github.com/user-attachments/assets/c408e5e0-0255-4cfd-904d-7fe7b60c7ae5)" />
+  <img width="256" height="256" alt="code-transpiler-logo" src="https://github.com/user-attachments/assets/88fbf224-6e52-426e-a124-5482df814b75" />
+
 </p>
 
 
