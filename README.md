@@ -1,6 +1,8 @@
 # Code-Transpiler
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg)](https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler)
+[![Go Reference](https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg)](https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler) <a href="https://get.microsoft.com/installer/download/9n1kb1kxxtmn?referrer=appbadge" target="_self" >
+	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
+</a>
 
 ## Local development additions (not yet released)
 
