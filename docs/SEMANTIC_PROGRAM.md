@@ -187,3 +187,4 @@ The generated coverage report is written to
 `outputs/uast-coverage/coverage.json` and `coverage.csv`. It distinguishes
 schema representability, compatibility projection and direct execution; none
 of these counts is presented as full language-semantic parity.
+

@@ -52,8 +52,8 @@ Implemented native input is currently **Go**. Exact integer target adapters are
 **Go, Python, Rust, C, C++, Java and C#**. Other native frontends and exact target adapters
 remain explicit unsupported matrix entries, not claimed implementations.
 
-See [frontend migration status](SEMANTIC_FRONTEND_V2.md) and the complete
-[development instructions](SEMANTIC_DEVELOPMENT.md) for implemented boundaries,
+See [frontend migration status](docs/SEMANTIC_FRONTEND_V2.md) and the complete
+[development instructions](docs/SEMANTIC_DEVELOPMENT.md) for implemented boundaries,
 the 1,024-case arithmetic differential test, and remaining compiler work.
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg)](https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler)
@@ -97,7 +97,7 @@ Canonical JSON contains universal nodes, semantic facets, typed fields,
 language projection, source positions and graph relations. A backend rejects
 UAST semantics that its direct or compatibility lowering cannot preserve.
 
-See [Universal AST migration status](UAST_MIGRATION_STATUS.md) for measured
+See [Universal AST migration status](docs/UAST_MIGRATION_STATUS.md) for measured
 direct coverage, target capability matrices and the remaining compatibility
 adapters.
 
@@ -480,7 +480,7 @@ Sparse relations use COO encoding:
 }
 ```
 
-See [SEMANTIC_PROGRAM.md](SEMANTIC_PROGRAM.md) for the complete current format
+See [docs/SEMANTIC_PROGRAM.md](docs/SEMANTIC_PROGRAM.md) for the complete current format
 and its semantic boundaries.
 
 ## Build from source
@@ -492,7 +492,7 @@ Requirements:
 - PowerShell
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build-onefile.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\build-onefile.ps1
 ```
 
 Output:
@@ -530,11 +530,11 @@ emulation or an explicit unsupported result.
 ## License
 
 Code-Transpiler is licensed under the MIT License. See [LICENSE](LICENSE).
-Third-party information is recorded in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+Third-party information is recorded in [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md)
 and [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt).
 
 CrossTL source is not bundled. Its possible future role as an external GPU
-adapter is described in [CROSSTL_DESIGN.md](CROSSTL_DESIGN.md).
+adapter is described in [docs/CROSSTL_DESIGN.md](docs/CROSSTL_DESIGN.md).
 
 ## Repository
 
@@ -548,3 +548,5 @@ For the combined Go/Python/R/Rust/C++/Kotlin/Java/C# matrix handoffs, use
 `./run-all-handoffs.ps1`; see [Joint handoff workflow](tools/matrix-audit/ALL_HANDOFFS.md).
 
 https://github.com/tarekwasfy01/Code-Transpiler
+
+

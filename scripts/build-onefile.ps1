@@ -1,10 +1,10 @@
-$ErrorActionPreference = 'Stop'
-Set-Location -LiteralPath $PSScriptRoot
-$env:GOCACHE = Join-Path $PSScriptRoot '.audit-cache\go-build'
+$projectRoot = Split-Path -Parent $PSScriptRoot`r`n$ErrorActionPreference = 'Stop'
+Set-Location -LiteralPath $projectRoot
+$env:GOCACHE = Join-Path $projectRoot '.audit-cache\go-build'
 $env:CGO_ENABLED = '1'
 $localCC = 'C:\msys64\mingw64\bin\gcc.exe'
 if (Test-Path -LiteralPath $localCC) { $env:CC = $localCC }
-$releaseDir = Join-Path $PSScriptRoot 'dist'
+$releaseDir = Join-Path $projectRoot 'dist'
 New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
 
 Write-Host 'Testing source smoke packages...'
@@ -19,7 +19,7 @@ if ($env:RUN_FULL_SOURCE_TESTS -eq '1') {
 }
 if ($LASTEXITCODE -ne 0) { throw 'Package tests failed' }
 
-$iconResource = Join-Path $PSScriptRoot 'cmd\r2many\r2many_windows.syso'
+$iconResource = Join-Path $projectRoot 'cmd\r2many\r2many_windows.syso'
 if (-not (Test-Path -LiteralPath $iconResource)) {
     throw 'Local icon resource is missing; refusing to fetch build inputs from GitHub.'
 }
@@ -56,3 +56,5 @@ if (Test-Path -LiteralPath $final) {
 Move-Item -LiteralPath $candidate -Destination $final -Force
 Get-FileHash -LiteralPath $final -Algorithm SHA256
 Write-Host ('Built: ' + $final)
+
+
