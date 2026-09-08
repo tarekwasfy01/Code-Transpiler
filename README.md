@@ -16,7 +16,7 @@
 
 ## Semantic Programming Language
 
-The **Semantic Programming Language (`.sp`) originated from Code Transpiler** and its language-independent `SemanticProgram / Universal AST`.
+The self hosted **Semantic Programming Language (`.sp`) originated from Code Transpiler** and its language-independent `SemanticProgram / Universal AST`.
 
 Code Transpiler remains the associated **Go package, reference implementation and bootstrap compiler**.
 
