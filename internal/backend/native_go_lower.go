@@ -183,7 +183,11 @@ func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*Se
 				if index < len(valueSpec.Values) {
 					stmt.Expression = l.expr(valueSpec.Values[index])
 				} else {
-					stmt.Expression = nativeGoZeroExpression(object.Type(), *l.span(valueSpec))
+					if object != nil {
+						stmt.Expression = nativeGoZeroExpression(object.Type(), *l.span(valueSpec))
+					} else {
+						stmt.Expression = &SemanticExpression{Kind: "literal", LiteralKind: "null", Text: "NULL", Source: l.span(valueSpec)}
+					}
 				}
 				draft.Statements = append(draft.Statements, stmt)
 			}
