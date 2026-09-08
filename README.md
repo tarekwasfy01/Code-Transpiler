@@ -105,6 +105,26 @@ adapters.
 > emitted. It does not claim complete equivalence for every feature of every
 > source and target language.
 
+## Semantic formats
+
+Semantic is the language-independent program representation. `.se` is the
+readable Semantic language, `.sp` is compact Semantic transport text, and
+`.spz` is its compressed transport form. All three are lossless views of the
+same `SemanticProgram`; JSON remains an explicit interchange/debug format.
+
+SFPC (Semantic Fixed Point Compression) stores only an irreducible explicit
+basis and derives repeated facts by closure. For a program graph `G`:
+
+```text
+F(G) = G_explicit ∪ derive(F(G))
+closure(B) = G
+```
+
+where `B` is the smallest explicit basis. Grammar compression encodes a
+repeated production `A → X₁…Xₙ` once and uses references, reducing repeated
+cost from `k·Σ|Xᵢ|` to `Σ|Xᵢ| + k·|ref(A)|`. `.spz` compresses that canonical
+stream; decoding satisfies `Decode(Encode(P)) ≡ P`.
+
 ## Supported languages
 
 | ID | Language | Extensions |
@@ -129,7 +149,7 @@ Aliases include `py`, `rs`, `c++` and `c#`. The registry therefore exposes
 ## Install the Go package
 
 ```bash
-go get github.com/tarekwasfy01/Code-Transpiler
+go get github.com/tarekwasfy01/Code-Transpiler@v1.2.9
 ```
 
 Import it:
@@ -393,22 +413,46 @@ Get-Content requests.json |
 ### Export SemanticProgram
 
 ```powershell
-CodeTranspiler.exe semantic-export `
+sp semantic-export `
   -source python `
   input.py `
   -o program.semantic.json
 ```
 
+Use the same command for the three Semantic formats:
+
+```powershell
+sp semantic-export -source go input.go -format se  -o program.se
+sp semantic-export -source go input.go -format sp  -o program.sp
+sp semantic-export -source go input.go -format spz -o program.spz
+```
+
 ### Translate SemanticProgram
 
 ```powershell
-CodeTranspiler.exe semantic-transpile `
+sp semantic-transpile `
   -target rust `
-  program.semantic.json `
+  program.se `
   -o output.rs
 ```
 
 If `-o` is omitted, generated source is written to standard output.
+
+Convert and format Semantic documents without changing their meaning:
+
+```powershell
+sp semantic-convert program.semantic.json -o program.se
+sp semantic-format program.se --readable -o readable.se
+sp semantic-format program.se --compact -o compact.se
+sp semantic-format program.se -o program.sp
+sp semantic-format program.se -o program.spz
+sp semantic-validate program.spz
+sp semantic-info program.se
+```
+
+Every command shown here also accepts the executable form
+`CodeTranspiler.exe <command> ...`; `sp <command> ...` and
+`CodeTranspiler.exe <command> ...` are equivalent.
 
 ### Query a capability
 
@@ -548,5 +592,4 @@ For the combined Go/Python/R/Rust/C++/Kotlin/Java/C# matrix handoffs, use
 `./run-all-handoffs.ps1`; see [Joint handoff workflow](tools/matrix-audit/ALL_HANDOFFS.md).
 
 https://github.com/tarekwasfy01/Code-Transpiler
-
 
