@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package main
 
 // miner-cross-transpile folds existing miner/all-to-all output into a bounded,

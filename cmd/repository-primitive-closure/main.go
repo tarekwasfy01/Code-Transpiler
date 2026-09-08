@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // repository-primitive-closure resolves the repository-wide primitive handoff
 // through one shared, data-driven implementation table.  It deliberately
 // treats compiler internals as filtered evidence and never promotes them to

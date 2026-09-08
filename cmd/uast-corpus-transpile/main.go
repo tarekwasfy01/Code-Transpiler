@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // uast-corpus-transpile streams a source corpus through the productive
 // source->UAST->target path. It never executes corpus source or generated
 // output: the result is an evidence/error matrix keyed only by hashes and

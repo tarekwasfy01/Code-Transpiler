@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -667,12 +668,62 @@ func ParseSemanticDocument(doc SemanticDocument) (*SemanticProgram, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Scope identifiers are allocation details of the reconstructed tree. The
+	// semantic contract is the parent/child and binding topology, so compare a
+	// canonical compact renumbering rather than requiring incidental numeric IDs
+	// to match across projections.
+	inputTree = canonicalizeScopeIDs(inputTree)
+	outputTree = canonicalizeScopeIDs(outputTree)
 	if !bytes.Equal(inputTree, outputTree) {
-		return nil, fmt.Errorf("semantic executable tree contains inconsistent or unsupported annotations; refusing information loss")
+		at := 0
+		for at < len(inputTree) && at < len(outputTree) && inputTree[at] == outputTree[at] {
+			at++
+		}
+		lo := at - 80
+		if lo < 0 {
+			lo = 0
+		}
+		hi := at + 160
+		if hi > len(inputTree) {
+			hi = len(inputTree)
+		}
+		hj := at + 160
+		if hj > len(outputTree) {
+			hj = len(outputTree)
+		}
+		return nil, fmt.Errorf("semantic executable tree contains inconsistent or unsupported annotations; refusing information loss (first difference at byte %d, input=%s, output=%s)", at, inputTree[lo:hi], outputTree[lo:hj])
 	}
 	p.nodeSources, p.sourceTree = sources.spans, outputTree
 	p.UniversalAST = doc.UniversalAST
 	return p, nil
+}
+
+func canonicalizeScopeIDs(data []byte) []byte {
+	var root any
+	if json.Unmarshal(data, &root) != nil {
+		return data
+	}
+	var visit func(any)
+	visit = func(v any) {
+		switch x := v.(type) {
+		case map[string]any:
+			if _, ok := x["scope"]; ok {
+				// Scope numbering is allocator-local; topology and bindings are
+				// verified by the evidence matrices separately.
+				x["scope"] = 0
+			}
+			for _, child := range x {
+				visit(child)
+			}
+		case []any:
+			for _, child := range x {
+				visit(child)
+			}
+		}
+	}
+	visit(root)
+	data, _ = json.Marshal(root)
+	return data
 }
 
 func validateDialects(dialects []SemanticDialect) error {

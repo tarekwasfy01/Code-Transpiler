@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -5,8 +6,8 @@ import (
 	"testing"
 )
 
-func TestEightLanguageSemanticFeatureSpaceMatrixRoundTrip(t *testing.T) {
-	cases := map[string]string{"go": "go", "python": "python", "r": "r", "rust": "rust", "cpp": "clang_cpp", "kotlin": "kotlin", "java": "java", "csharp": "csharp"}
+func TestTwelveLanguageSemanticFeatureSpaceMatrixRoundTrip(t *testing.T) {
+	cases := map[string]string{"go": "go", "python": "python", "r": "r", "rust": "rust", "cpp": "clang_cpp", "c": "c", "kotlin": "kotlin", "java": "java", "csharp": "csharp", "julia": "julia", "nim": "nim", "swift": "swift"}
 	for source, profile := range cases {
 		t.Run(source, func(t *testing.T) {
 			p := NewSemanticProgram(&BlockStmt{}, "eager_left_to_right")
@@ -15,7 +16,7 @@ func TestEightLanguageSemanticFeatureSpaceMatrixRoundTrip(t *testing.T) {
 				t.Fatal(err)
 			}
 			m := p.SemanticFeatures
-			if m.ProfileLanguage != profile || len(m.Basis.Languages) != 8 || len(m.Basis.Features) != 98 || len(m.Basis.DialectFeatures) != 434 || len(m.Basis.NodeKinds) != 82 || len(m.Basis.RelationKinds) != 23 {
+			if m.ProfileLanguage != profile || len(m.Basis.Languages) != 12 || len(m.Basis.Features) != 98 || len(m.Basis.DialectFeatures) != 434 || len(m.Basis.NodeKinds) != 82 || len(m.Basis.RelationKinds) != 23 {
 				t.Fatalf("unexpected semantic matrix dimensions/profile: %+v", m)
 			}
 			data, err := p.MarshalSemanticJSON()

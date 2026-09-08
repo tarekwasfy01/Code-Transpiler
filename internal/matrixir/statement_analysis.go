@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 import (
@@ -56,7 +57,7 @@ func AnalyzeSemanticStatementTokens(language string, event CanonicalSemanticEven
 			return joinAssignmentFacts(event, left, right, tok.Text), nil
 		}
 		return emitStructuredClosure(language, event, tokens)
-	case "if", "else":
+	case "if", "else", "while":
 		// The grammar has already identified the control header and supplied its
 		// token children.  Lower the condition from those structured tokens; the
 		// event's normalized text is never consulted.  A plain `else` has no
@@ -65,6 +66,9 @@ func AnalyzeSemanticStatementTokens(language string, event CanonicalSemanticEven
 			return nil, nil
 		}
 		start := 1
+		if event.Action == "while" {
+			start = 1
+		}
 		if event.Action == "else" && start < len(tokens) && tokens[start].Text == "if" {
 			start++
 		}
@@ -91,7 +95,13 @@ func AnalyzeSemanticStatementTokens(language string, event CanonicalSemanticEven
 			fields[key] = value
 		}
 		roles := []CanonicalRoleFact{{OwnerNodeID: id, ChildNodeID: children[len(children)-1].ID, Role: "condition"}}
-		children = append(children, CanonicalSemanticEvent{ID: id, Action: event.Action, StructureKind: "if", SourceOffset: event.SourceOffset, Fields: fields, Roles: roles})
+		structureKind := "if"
+		family := ParsedConstructFamily("")
+		if event.Action == "while" {
+			structureKind = "while"
+			family = ParsedIteration
+		}
+		children = append(children, CanonicalSemanticEvent{ID: id, Action: event.Action, StructureKind: structureKind, SourceOffset: event.SourceOffset, Fields: fields, Roles: roles, FactFamily: family})
 		return children, nil
 	}
 	// Expressions include aggregates, indexing, slices and Python lambdas.
@@ -141,6 +151,40 @@ func analyzeAssignmentTarget(language string, tokens []Lexeme) ([]CanonicalSeman
 }
 
 func joinAssignmentFacts(event CanonicalSemanticEvent, left, right []CanonicalSemanticEvent, op string) []CanonicalSemanticEvent {
+	// A function literal assigned through the ordinary structured assignment
+	// production still has a binding: the target identifier names the function.
+	// Preserve that fact on the closure event before IDs are shifted.  This is a
+	// grammar-neutral projection from already parsed children; it deliberately
+	// does not inspect or split source text.
+	targetName := ""
+	if len(left) > 0 {
+		for i := len(left) - 1; i >= 0; i-- {
+			if left[i].StructureKind == "identifier" {
+				targetName = left[i].Fields["name"]
+				if targetName == "" {
+					targetName = left[i].Text
+				}
+				if targetName != "" {
+					break
+				}
+			}
+		}
+	}
+	if targetName != "" {
+		for i := len(right) - 1; i >= 0; i-- {
+			kind := strings.ToLower(right[i].StructureKind)
+			if kind != "function" && kind != "closure" && kind != "lambda" {
+				continue
+			}
+			if right[i].Fields == nil {
+				right[i].Fields = map[string]string{}
+			}
+			if right[i].Fields["name"] == "" {
+				right[i].Fields["name"] = targetName
+			}
+			break
+		}
+	}
 	offset := len(left)
 	for i := range right {
 		right[i].ID += offset
@@ -253,7 +297,18 @@ func emitStructuredClosure(language string, event CanonicalSemanticEvent, tokens
 	for i := range roles {
 		roles[i].OwnerNodeID = id
 	}
-	events = append(events, CanonicalSemanticEvent{ID: id, Action: "function", StructureKind: "closure", SourceOffset: event.SourceOffset, Roles: roles, FactFamily: ParsedClosure})
+	fields := map[string]string{}
+	// Function declarations carry their binding in grammar tokens. Preserve it
+	// on the closure fact so declaration/use relations can resolve the same
+	// canonical function value. Anonymous `func(...)`/lambda values simply have
+	// no name field.
+	for i, token := range tokens {
+		if token.Text == "def" && i+1 < len(tokens) && tokens[i+1].Class == TokenIdentifier {
+			fields["name"] = tokens[i+1].Text
+			break
+		}
+	}
+	events = append(events, CanonicalSemanticEvent{ID: id, Action: "function", StructureKind: "closure", SourceOffset: event.SourceOffset, Fields: fields, Roles: roles, FactFamily: ParsedClosure})
 	return events, nil
 }
 

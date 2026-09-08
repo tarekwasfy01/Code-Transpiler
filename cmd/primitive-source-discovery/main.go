@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // primitive-source-discovery analyzes an existing source corpus exactly once
 // per file. It stops at Canonical UAST and never selects or invokes a target
 // backend. All primitive evidence comes from backend.BuildSemanticTrace.

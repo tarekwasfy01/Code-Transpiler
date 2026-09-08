@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -101,6 +102,20 @@ func canonicalUniversalAST(p *SemanticProgram) (*UniversalASTDocument, error) {
 	}
 	if p.UniversalAST == nil {
 		return nil, fmt.Errorf("semantic program has no canonical UniversalASTDocument")
+	}
+	// Rich/non-executable canonical documents are validated by their own
+	// schema path. Do not run executable binding/closure derivation on them:
+	// doing so would turn a deliberate "no executable lowering" result into a
+	// misleading missing-semantic-kind error.
+	if p.UniversalAST.Projection != "semantic_document.v1" && p.UniversalAST.Projection != "frontend_facts.v1" {
+		return p.UniversalAST, nil
+	}
+	// Compatibility-imported canonical documents may not have gone through the
+	// matrix frontend's final structural pass. Complete the same binding/scope
+	// closure from their existing syntax.child graph before validating and
+	// executing, so both ingress paths expose one identical symbol graph.
+	if err := appendFrontendStructuralClosure(p.UniversalAST); err != nil {
+		return nil, err
 	}
 	if err := ApplySemanticClosure(p.UniversalAST); err != nil {
 		return nil, err
@@ -242,6 +257,20 @@ func validateDirectProjectedRelations(u *UniversalASTDocument) error {
 		}
 	}
 	appendUniversalEvidenceRelations(&copyDocument, semanticIDs, u.Evidence)
+	// canonicalUniversalAST always completes the same structural closure,
+	// including for compatibility-imported documents. Reproduce that complete
+	// deterministic pass on the validation copy before applying semantic
+	// implications so evidence and executable relations are compared equally.
+	if err := appendFrontendStructuralClosure(&copyDocument); err != nil {
+		return err
+	}
+	// canonicalUniversalAST applies the semantic closure after rebuilding the
+	// structural graph. Reproduce that deterministic matrix closure on the
+	// validation copy as well; otherwise relations such as scope.parent that
+	// are materialized by the closure appear as false projection mismatches.
+	if err := ApplySemanticClosure(&copyDocument); err != nil {
+		return err
+	}
 	key := func(relation UniversalASTRelation) (string, error) {
 		data, err := json.Marshal(relation)
 		return string(data), err
@@ -268,6 +297,23 @@ func validateDirectProjectedRelations(u *UniversalASTDocument) error {
 		expected[value]++
 	}
 	if !reflect.DeepEqual(actual, expected) {
+		keys := make([]string, 0, len(actual)+len(expected))
+		seen := map[string]bool{}
+		for key := range actual {
+			seen[key] = true
+			keys = append(keys, key)
+		}
+		for key := range expected {
+			if !seen[key] {
+				keys = append(keys, key)
+			}
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			if actual[key] != expected[key] {
+				return fmt.Errorf("universal relation graph differs from matrix/evidence projection: relation=%s actual=%d expected=%d", key, actual[key], expected[key])
+			}
+		}
 		return fmt.Errorf("universal relation graph differs from matrix/evidence projection")
 	}
 	return nil
@@ -566,7 +612,21 @@ func validateDirectSignatureContracts(g *uastExecutionGraph) (bool, error) {
 			}
 			continue
 		}
-		if binding != "exact_v1" || (defaults != "definition" && defaults != "call") {
+		// Lexical function bindings are not the exact-signature feature. They
+		// only identify a declaration for ordinary call resolution and therefore
+		// remain valid without a default-evaluation contract.
+		if binding != "exact_v1" {
+			if defaults == "" {
+				for _, item := range params {
+					if g.common[item.ID].Operation.ParameterMode != "" {
+						return false, fmt.Errorf("parameter modes require exact binding")
+					}
+				}
+				continue
+			}
+			return false, fmt.Errorf("unsupported function binding/default contract")
+		}
+		if defaults != "definition" && defaults != "call" {
 			return false, fmt.Errorf("unsupported function binding/default contract")
 		}
 		exact = true
@@ -657,7 +717,7 @@ func directTypedRequirements(g *uastExecutionGraph) ([]string, error) {
 			}
 		}
 		if c.Kind == "parameter" && c.Operation.ParameterPassing == "value" {
-			integerBindings[c.Name] = true
+			_, integerBindings[c.Name] = uastExactIntegerParameterType(c.Type)
 		}
 		if c.Kind == "return" {
 			if expr, ok, _ := g.one(id, "expression", false); ok && integerExpr(expr) {
@@ -680,7 +740,11 @@ func directTypedRequirements(g *uastExecutionGraph) ([]string, error) {
 	for _, id := range ids {
 		c := g.common[id]
 		if c.Kind == "parameter" && c.Operation.ParameterPassing == "value" {
-			op := SemanticOperation{Name: "integer.value", Type: c.Type}
+			exactType, isExactInteger := uastExactIntegerParameterType(c.Type)
+			if !isExactInteger {
+				continue
+			}
+			op := SemanticOperation{Name: "integer.value", Type: exactType}
 			if err := op.validate(1); err != nil {
 				return nil, err
 			}
@@ -756,6 +820,9 @@ func directTypedRequirements(g *uastExecutionGraph) ([]string, error) {
 					return nil, fmt.Errorf("integer argument needs an explicit typed load")
 				}
 				actual, expected := actualOp.resultType(), g.common[params[i].ID].Type
+				if exactType, ok := uastExactIntegerParameterType(expected); ok {
+					expected = exactType
+				}
 				actual.TypeOrigin, expected.TypeOrigin = "", ""
 				if !reflect.DeepEqual(actual, expected) {
 					return nil, fmt.Errorf("integer function argument type mismatch")

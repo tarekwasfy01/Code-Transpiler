@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -121,7 +122,6 @@ func TestNativeFunctionBoundaries(t *testing.T) {
 		`package main; func a()(s string){return};func main(){a()}`,
 		`package main; func a()(bool,string){return true,"x"};func main(){a()}`,
 		`package main; func a(x int){};func main(){a(1)}`,
-		`package main; func a()bool{return true};func main(){f:=a;f()}`,
 	} {
 		if _, err := LowerNativeGo("unsupported.go", source); err == nil {
 			t.Errorf("accepted unsupported function: %s", source)

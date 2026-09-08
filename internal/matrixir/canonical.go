@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 import (
@@ -88,7 +89,7 @@ func ParsedFamilyForStructure(kind string) ParsedConstructFamily {
 	switch kind {
 	case "AggregateExpr", "TupleExpr", "ComprehensionExpr", "aggregate", "tuple", "comprehension":
 		return ParsedContainer
-	case "ForEachStmt", "LoopStmt", "IterationExpr", "foreach", "loop", "iteration":
+	case "ForEachStmt", "LoopStmt", "IterationExpr", "foreach", "loop", "iteration", "while":
 		return ParsedIteration
 	case "ClosureExpr", "FunctionExpr", "function", "closure", "lambda":
 		return ParsedClosure
@@ -220,7 +221,7 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			closeFrame(frame)
 		}
 	}
-	for lineIndex, line := range lines {
+	for _, line := range lines {
 		// A branch can only bind to an if closed while processing this same
 		// source line.  Do not carry a stale closed frame across statements.
 		lastClosedIf = -1
@@ -431,17 +432,12 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 				}
 			}
 			if entry {
-				terminal := true
-				for _, remaining := range lines[lineIndex+1:] {
-					if strings.Trim(remaining.trim, " };\t\r\n") != "" {
-						terminal = false
-						break
-					}
-				}
-				if terminal && (expression == "0" || expression == "EXIT_SUCCESS") {
-					continue
-				}
-				return CanonicalProgram{}, fmt.Errorf("entry-point early return requires explicit exit semantics")
+				// A return from a recognized entry function is still an explicit
+				// structured control-flow result.  Older normalization discarded a
+				// terminal `return 0` but rejected every other value, turning a
+				// general Return primitive into an artificial source-parse failure.
+				// Preserve it uniformly; target legalization owns each language's
+				// entry-point exit representation.
 			}
 			_, _ = appendAction(ActionReturn, "return("+normalizeExpression(source, expression, profile)+")", line.start)
 			continue
@@ -984,6 +980,30 @@ func normalizeExpression(source, expression string, profile Vector) string {
 	e = strings.ReplaceAll(e, " and ", " && ")
 	e = strings.ReplaceAll(e, " or ", " || ")
 	e = strings.ReplaceAll(e, " div ", " %/% ")
+	// `^` is exponentiation in R, whereas it is bitwise XOR in several target
+	// languages.  Canonicalize the source-observable R meaning to the existing
+	// POWER spelling before UAST construction so target legalization can choose
+	// math.Pow/pow rather than reusing a target XOR token.
+	if source == "r" {
+		e = strings.ReplaceAll(e, "^", "**")
+	}
+	// Python has two distinct arithmetic operators that are represented by
+	// single-character tokens in the generic semantic grammar: ``//`` is
+	// floor division and ``%`` is remainder.  Keep this conversion at the
+	// canonical-expression boundary so all downstream producers see the same
+	// structured operation as the other languages.  Literals have already
+	// been protected above, so operators inside strings/comments are untouched.
+	if source == "python" {
+		// Temporarily protect the two-character floor-division spelling while
+		// normalising the remainder operator.  Replacing '%' first would turn
+		// the second character of '//' in a future extension that uses percent
+		// escapes, and more importantly would make the transformation order
+		// dependent.  The marker cannot occur in a protected source literal.
+		const floorMarker = "__matrix_python_floor_div__"
+		e = strings.ReplaceAll(e, "//", floorMarker)
+		e = strings.ReplaceAll(e, "%", "%%")
+		e = strings.ReplaceAll(e, floorMarker, "%/%")
+	}
 	if strings.Contains(e, "@divTrunc") {
 		numbers := numericTexts(Tokenize(source, e))
 		if len(numbers) >= 2 {

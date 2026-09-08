@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -150,7 +151,7 @@ func loadUniversalASTBasis() error {
 }
 
 func validateUniversalASTBasis(b *UniversalASTBasis) error {
-	if b.Schema != "code-transpiler.universal-ast-basis.v1" || len(b.Features) != 553 || len(b.Facets) != 334 || len(b.StructuralKinds) != 109 || len(b.SemanticAxes) != 44 || len(b.RelationAxes) != 23 || len(b.ConcreteRelations) != 55 || len(b.Fields) != 57 || len(b.Layers) != 17 || len(b.Languages) != 8 || len(b.GlobalRelations) == 0 || len(b.CrosswalkFields) == 0 {
+	if b.Schema != "code-transpiler.universal-ast-basis.v1" || len(b.Features) != 553 || len(b.Facets) != 334 || len(b.StructuralKinds) != 109 || len(b.SemanticAxes) != 44 || len(b.RelationAxes) != 23 || len(b.ConcreteRelations) != 55 || len(b.Fields) != 57 || len(b.Layers) != 17 || len(b.Languages) != 12 || len(b.GlobalRelations) == 0 || len(b.CrosswalkFields) == 0 {
 		return fmt.Errorf("universal AST basis dimensions differ from v1 contract")
 	}
 	if !uniqueNonempty(b.Features) || !uniqueNonempty(b.Facets) || !uniqueNonempty(b.SemanticAxes) || !uniqueNonempty(b.RelationAxes) || !uniqueNonempty(b.Languages) || !uniqueNonempty(b.StructuralKinds) || !uniqueNonempty(b.ConcreteRelations) || !uniqueNonempty(b.Fields) || !uniqueNonempty(b.Layers) || !uniqueNonempty(b.GlobalRelations) || !uniqueNonempty(b.CrosswalkFields) {
@@ -179,8 +180,8 @@ func validateUniversalASTBasis(b *UniversalASTBasis) error {
 		m    matrixir.SparseMatrix
 		r, c int
 	}{
-		{b.FeatureFacet, 553, 334}, {b.FeatureSignature, 553, 67}, {b.FacetAxis, 334, 44}, {b.FacetRelationAxis, 334, 23}, {b.LanguageFacet, 8, 334},
-		{b.CoverageLower, 8, 334}, {b.CoverageUpper, 8, 334}, {b.FacetLayer, 334, 17}, {b.StructuralLayer, 109, 17},
+		{b.FeatureFacet, 553, 334}, {b.FeatureSignature, 553, 67}, {b.FacetAxis, 334, 44}, {b.FacetRelationAxis, 334, 23}, {b.LanguageFacet, len(b.Languages), 334},
+		{b.CoverageLower, len(b.Languages), 334}, {b.CoverageUpper, len(b.Languages), 334}, {b.FacetLayer, 334, 17}, {b.StructuralLayer, 109, 17},
 		{b.StructuralFacetSeed, 109, 334},
 		{b.FacetConcreteRelation, 334, 55}, {b.StructuralConcreteRelation, 109, 55}, {b.FacetField, 334, 57}, {b.StructuralField, 109, 57},
 	}
@@ -224,7 +225,7 @@ func validateUniversalASTBasis(b *UniversalASTBasis) error {
 	if len(signatureFacet) != 334 {
 		return fmt.Errorf("semantic facet quotient does not contain 334 exact classes")
 	}
-	for row := 0; row < 8; row++ {
+	for row := 0; row < len(b.Languages); row++ {
 		for col := 0; col < 334; col++ {
 			lo, hi := b.CoverageLower.At(row, col), b.CoverageUpper.At(row, col)
 			if math.IsNaN(lo) || math.IsNaN(hi) || math.IsInf(lo, 0) || math.IsInf(hi, 0) || lo < 0 || hi > 1 || lo > hi {

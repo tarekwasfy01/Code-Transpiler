@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import "strings"
@@ -40,13 +41,16 @@ var runtimeArtifacts = []struct {
 // detector is used before entering the explicit compatibility fallback.
 func AnalyzeRuntimeTaint(source string, helperIDs []string) RuntimeTaintReport {
 	seen := map[string]bool{}
-	// Helper IDs are intent metadata, not runtime evidence. Native helpers and
-	// compatibility helpers share the same registration mechanism; classify the
-	// generated final source by its actual runtime markers below.
-	_ = helperIDs
-	for _, artifact := range runtimeArtifacts {
-		if strings.Contains(source, artifact.marker) {
-			seen[artifact.id] = true
+	// The generator keeps helper bodies separately until document assembly.
+	// Inspect both the main body and those concrete helper sources; otherwise a
+	// runtime call hidden in a helper is misclassified as native and the helper
+	// is emitted without its required compatibility prelude.
+	sources := append([]string{source}, helperIDs...)
+	for _, text := range sources {
+		for _, artifact := range runtimeArtifacts {
+			if strings.Contains(text, artifact.marker) {
+				seen[artifact.id] = true
+			}
 		}
 	}
 	artifacts := make([]string, 0, len(seen))

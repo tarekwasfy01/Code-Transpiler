@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import "fmt"
@@ -9,13 +10,21 @@ func ValidateSemanticProgram(p *SemanticProgram) error {
 		return fmt.Errorf("missing semantic program")
 	}
 	if p.UniversalAST != nil {
-		if err := validateUniversalASTDocument(p.UniversalAST); err != nil {
+		// Complete the canonical structural closure before validating the
+		// executable graph. Compatibility-imported UAST documents may carry only
+		// syntax/evidence relations at ingress; canonicalUniversalAST derives the
+		// same binding/scope relations used by the direct runtime and emitters.
+		u, err := canonicalUniversalAST(p)
+		if err != nil {
 			return err
 		}
-		if p.UniversalAST.Projection != "semantic_document.v1" {
+		if err := validateUniversalASTDocument(u); err != nil {
+			return err
+		}
+		if u.Projection != "semantic_document.v1" {
 			return nil
 		}
-		_, err := newUASTExecutionGraph(p.UniversalAST)
+		_, err = newUASTExecutionGraph(u)
 		return err
 	}
 	doc, err := p.Document()

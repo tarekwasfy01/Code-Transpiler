@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 import (
@@ -24,6 +25,32 @@ func planRange(source, text string, profile Vector) (rangeLowering, error) {
 		p.Affine.Set(i, i, 1)
 	}
 	h := headerExpression(text, "for")
+	// Generated C-family output may put a complete counting loop and its body
+	// on one physical line. Only counting headers use semicolon clauses, so
+	// extract their balanced parenthesized header here without changing the
+	// grammar shapes of Zig's `for (range) |binding|` and other range forms.
+	if strings.HasPrefix(h, "(") {
+		depth := 0
+		for i, r := range []rune(h) {
+			switch r {
+			case '(':
+				depth++
+			case ')':
+				depth--
+				if depth == 0 {
+					candidate := string([]rune(h)[1:i])
+					if len(splitTopLevel(candidate, ';')) == 3 {
+						h = candidate
+					}
+					// A later range binding belongs to a different grammar form.
+					break
+				}
+			}
+			if depth == 0 && i > 0 {
+				break
+			}
+		}
+	}
 	clauses := splitTopLevel(h, ';')
 	if len(clauses) == 3 {
 		var ok bool
@@ -40,7 +67,19 @@ func planRange(source, text string, profile Vector) (rangeLowering, error) {
 		case p.Name + "--", "--" + p.Name, p.Name + "-=1":
 			p.Advance = p.Name + " <- " + p.Name + " - 1"
 		default:
-			return p, fmt.Errorf("counting-loop step %q requires explicit lowering", clauses[2])
+			// Compound updates are the same parameterized ADD/SUB primitive as
+			// ++/--.  Preserve the update operand structurally instead of
+			// rejecting generated loops merely because the stride is symbolic.
+			// Assignment to a different binding remains fail-closed.
+			if strings.HasPrefix(step, p.Name+"+=") && len(step) > len(p.Name)+2 {
+				operand := normalizeExpression(source, step[len(p.Name)+2:], profile)
+				p.Advance = p.Name + " <- " + p.Name + " + " + operand
+			} else if strings.HasPrefix(step, p.Name+"-=") && len(step) > len(p.Name)+2 {
+				operand := normalizeExpression(source, step[len(p.Name)+2:], profile)
+				p.Advance = p.Name + " <- " + p.Name + " - " + operand
+			} else {
+				return p, fmt.Errorf("counting-loop step %q requires explicit lowering", clauses[2])
+			}
 		}
 		p.Begin = normalizeExpression(source, p.Begin, profile)
 		return p, nil

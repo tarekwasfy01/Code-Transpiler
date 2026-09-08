@@ -1,7 +1,10 @@
+// Copyright (c) 2026 Tarek Wasfy
 package codetranspiler
 
 import (
 	"testing"
+
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 )
 
 func TestPublicPackageManyToManyAndSemanticJSON(t *testing.T) {
@@ -44,5 +47,39 @@ func TestPublicNativeSemanticPipeline(t *testing.T) {
 	}
 	if _, err := NativeSemanticJSON("go", "integer.go", `package main;func main(){x:=1;_=x}`); err == nil {
 		t.Fatal("native frontend fell back to legacy")
+	}
+}
+
+func TestPublicCompileUsesNativeGoFrontend(t *testing.T) {
+	result, err := Compile(`package main
+func main() { x := int32(2); if x > 1 { x = x + 1 } }`, CompileOptions{
+		SourceLanguage: "go",
+		TargetArch:     "x86_64",
+		TargetOS:       "windows",
+		ABI:            "win64",
+		OutputKind:     Assembly,
+	})
+	if err != nil {
+		t.Fatalf("native Go compile: %v", err)
+	}
+	if result.Text == "" || result.InstructionCount == 0 {
+		t.Fatalf("native Go compile produced no assembly: %+v", result)
+	}
+}
+
+func TestPublicCompileAcceptsSemanticJSONFrontend(t *testing.T) {
+	p := backend.NewSemanticProgram(&backend.BlockStmt{List: []backend.Stmt{
+		&backend.ReturnStmt{X: &backend.LiteralExpr{Kind: "integer", Text: "34"}},
+	}}, "eager_left_to_right")
+	wire, err := p.MarshalSemanticJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := Compile(string(wire), CompileOptions{SourceLanguage: "semantic", InputKind: InputSource, OutputKind: Assembly, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64"})
+	if err != nil {
+		t.Fatalf("semantic JSON compile: %v", err)
+	}
+	if got.Text == "" || got.InstructionCount == 0 {
+		t.Fatalf("semantic JSON compile produced no assembly: %#v", got)
 	}
 }

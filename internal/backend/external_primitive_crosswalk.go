@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // This file imports the external primitive workbook as evidence only.  It

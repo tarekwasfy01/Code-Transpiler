@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -506,7 +507,7 @@ func (st *runState) uastFunctionValue(env *runEnv, g *uastExecutionGraph, id int
 	for _, item := range g.many(id, "parameter") {
 		p := g.common[item.ID]
 		param := runUASTParameter{name: p.Name, mode: p.Operation.ParameterMode, passing: p.Operation.ParameterPassing, defaultNode: -1}
-		if p.Type.Kind != "" {
+		if p.Type.Kind != "" && p.Type.Kind != "unknown" {
 			typ := p.Type
 			param.typ = &typ
 		}

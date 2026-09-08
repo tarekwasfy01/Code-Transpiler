@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // real-source-root-cause derives replay-safe root-cause families from a frozen
 // real-source validation run. It never uses diagnostic text to infer semantics:
 // semantic identity comes only from the Canonical UAST rebuilt for each witness.
@@ -19,7 +20,7 @@ import (
 	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
-type sourceCase struct{ ID, Language, Path, Hash string }
+type sourceCase struct{ ID, Language, Path, Hash, Text string }
 type failure struct{ CaseID, Language, Target, Kind, Stage, Class string }
 type witness struct {
 	CaseID, Language, Target, Stage, Class, UASTHash, Operations, Primitives, ParserShapes, Family, Cause string
@@ -127,24 +128,22 @@ func main() {
 		if e != nil || info == nil || info.IsDir() {
 			return nil
 		}
-		// A v5 freeze can retain preliminary measurement lanes for provenance.
-		// Only its final source-target and binary-input lane directories define
-		// the immutable causal dataset; preliminary rows must never double-count.
-		clean := filepath.ToSlash(path)
-		if !strings.Contains(clean, "/source_target_shards/") && !strings.Contains(clean, "/binary_input_shards/") {
-			return nil
-		}
-		dir := filepath.Dir(path)
-		if _, e := os.Stat(filepath.Join(dir, "final_summary.json")); e != nil {
-			return nil
-		}
 		switch filepath.Base(path) {
-		case "source_cases.csv":
+		case "source_cases.csv", "source_cases_freeze.csv":
 			rows, _ := readCSV(path)
 			for _, r := range rows {
-				sources[r["case_id"]] = sourceCase{r["case_id"], r["source_language"], r["source_path"], r["source_hash"]}
+				id := r["case_id"]
+				// Validation writes this immutable source snapshot beside its CSV.
+				// It is the primary root-cause input because external corpus paths and
+				// case hashes are not portable between runs.
+				witnessPath := filepath.Join(filepath.Dir(path), "source_witnesses", id+".source")
+				text := ""
+				if data, readErr := os.ReadFile(witnessPath); readErr == nil {
+					text = string(data)
+				}
+				sources[id] = sourceCase{ID: id, Language: r["source_language"], Path: r["source_path"], Hash: r["source_hash"], Text: text}
 			}
-		case "failures_raw.csv":
+		case "failures_raw.csv", "failures_raw_freeze.csv":
 			rows, _ := readCSV(path)
 			for _, r := range rows {
 				failures = append(failures, failure{r["case_id"], r["source_language"], r["target_language"], r["output_kind"], r["validation_stage"], r["diagnostic_class"]})
@@ -165,12 +164,16 @@ func main() {
 		}
 	}
 	var rawRows [][]string
-	for _, f := range failures { rawRows = append(rawRows, []string{f.CaseID, f.Language, f.Target, f.Kind, f.Stage, f.Class}) }
+	for _, f := range failures {
+		rawRows = append(rawRows, []string{f.CaseID, f.Language, f.Target, f.Kind, f.Stage, f.Class})
+	}
 	_ = writeCSV(filepath.Join(*out, "failures_raw.csv"), []string{"case_id", "source_language", "target_language", "output_kind", "validation_stage", "diagnostic_class"}, rawRows)
 	firstTargets := map[string]map[string]bool{}
 	for _, f := range failures {
 		if chosen, ok := first[f.CaseID]; ok && stageRank(f.Stage) == stageRank(chosen.Stage) && f.Target != "" {
-			if firstTargets[f.CaseID] == nil { firstTargets[f.CaseID] = map[string]bool{} }
+			if firstTargets[f.CaseID] == nil {
+				firstTargets[f.CaseID] = map[string]bool{}
+			}
 			firstTargets[f.CaseID][f.Target] = true
 		}
 	}
@@ -202,6 +205,35 @@ func main() {
 				sort.Strings(b)
 				ops = strings.Join(unique(a), "|")
 				prims = strings.Join(unique(b), "|")
+			} else if text := sc.Text; text != "" {
+				// The source snapshot was produced by the same validation invocation.
+				// Rebuild only structured MatrixIR/UAST facts; diagnostics and source
+				// text patterns are never treated as semantic evidence.
+				if parsed, pe := matrixir.NewGenericLexerLREngine(sc.Language).Parse(text); pe == nil {
+					parserShapes = matrixIRGapShapes(parsed.SemanticEvents)
+					shapeCache[f.CaseID] = parserShapes
+				}
+				p, e := manytomany.Parse(sc.Language, text)
+				if e == nil && p.Semantic != nil && p.Semantic.UniversalAST != nil {
+					tr := backend.BuildSemanticTrace(true, p.Semantic.UniversalAST, backend.SemanticTraceRoute{RouteType: "DIRECT"})
+					cache[f.CaseID] = tr
+					hash = tr.UASTHash
+					var a, b []string
+					for _, n := range tr.Nodes {
+						if n.SemanticOperation != "" {
+							a = append(a, n.SemanticOperation)
+						}
+					}
+					for _, d := range tr.PrimitiveDemands {
+						if d.PrimitiveID != "" {
+							b = append(b, d.PrimitiveID+"("+d.Parameterization+")")
+						}
+					}
+					sort.Strings(a)
+					sort.Strings(b)
+					ops = strings.Join(unique(a), "|")
+					prims = strings.Join(unique(b), "|")
+				}
 			} else if text, found := corpusText[sc.Hash]; found {
 				// This uses the same matrix parser that built the canonical UAST.
 				// It records only missing structured-event contracts, never tokens or
@@ -250,7 +282,9 @@ func main() {
 	var featureRows [][]string
 	for _, w := range witnesses {
 		for feature, value := range map[string]string{"semantic_operations": w.Operations, "primitive_demands": w.Primitives, "matrixir_missing_shape": w.ParserShapes, "earliest_stage": w.Stage, "root_cause_kind": w.Family, "minimal_cause": w.Cause} {
-			if value != "" { featureRows = append(featureRows, []string{w.CaseID, feature, value}) }
+			if value != "" {
+				featureRows = append(featureRows, []string{w.CaseID, feature, value})
+			}
 		}
 	}
 	_ = writeCSV(filepath.Join(*out, "failure_feature_matrix.csv"), []string{"case_id", "feature", "value"}, featureRows)
@@ -300,11 +334,18 @@ func main() {
 	for _, g := range gr {
 		row := []string{g[0], g[1], g[2], g[3], g[8], g[9]}
 		switch g[1] {
-		case "SEMANTIC_ROOT_CAUSE": semanticRows = append(semanticRows, row)
-		case "REPRESENTATION_ROOT_CAUSE", "NATIVE_ROOT_CAUSE", "BINARY_LIFT_ROOT_CAUSE": representationRows = append(representationRows, row)
-		case "TARGET_SYNTAX_ROOT_CAUSE": recoveryRows = append(recoveryRows, row)
+		case "SEMANTIC_ROOT_CAUSE":
+			semanticRows = append(semanticRows, row)
+		case "REPRESENTATION_ROOT_CAUSE", "NATIVE_ROOT_CAUSE", "BINARY_LIFT_ROOT_CAUSE":
+			representationRows = append(representationRows, row)
+		case "TARGET_SYNTAX_ROOT_CAUSE":
+			recoveryRows = append(recoveryRows, row)
 		default:
-			if strings.HasPrefix(g[3], "PRIMITIVE_COMPOSITION:") { relationRows = append(relationRows, row) } else { recoveryRows = append(recoveryRows, row) }
+			if strings.HasPrefix(g[3], "PRIMITIVE_COMPOSITION:") {
+				relationRows = append(relationRows, row)
+			} else {
+				recoveryRows = append(recoveryRows, row)
+			}
 		}
 	}
 	head := []string{"root_cause_id", "root_cause_kind", "earliest_stage", "minimal_structured_cause", "affected_cells", "minimal_witness_case"}

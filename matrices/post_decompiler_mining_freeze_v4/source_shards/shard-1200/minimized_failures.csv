@@ -1,2 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,cb0a04e41d8163eaeae04a149e909b805172bac50b15a97d73ac15b8c208a333,V4_NATIVE_EMISSION,BACKEND,source_target,DIRECT_NATIVE_UNAVAILABLE: target rust emitted invalid syntax (other: error[E0425]: cannot find value `obj` in this scope --> C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-977468898\program.rs:3:17 | 3 | let mut x = obj.clone(); |

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -114,7 +115,17 @@ func RunSemantic(program *SemanticProgram) (string, error) {
 		return "", err
 	}
 	for _, requirement := range u.Contracts.Requires {
-		if requirement != "core" && requirement != "native.go.scalar" && requirement != "native.go.functions" && requirement != ExactSignatureCapability && !exactIntegerCapability(requirement) {
+		// These native-call requirements describe the ABI contract consumed by
+		// machine selection.  The canonical UAST interpreter already executes
+		// their semantic equivalents: a receiver is a first ordinary binding,
+		// product results are ordered aggregate values, calls evaluate their
+		// arguments once from left to right, and uastBlock executes declaration
+		// and initializer statements in ordinal order.  Rejecting the contracts
+		// here therefore made the differential oracle less capable than the
+		// native backend it is supposed to verify.
+		if requirement != "core" && requirement != "native.go.scalar" && requirement != "native.go.functions" &&
+			requirement != "native.call.receiver.v1" && requirement != "native.call.ordered_product.v1" && requirement != "native.init.order.v1" &&
+			requirement != ExactSignatureCapability && !exactIntegerCapability(requirement) {
 			return "", fmt.Errorf("semantic runtime does not support required capability %q", requirement)
 		}
 	}
@@ -630,7 +641,13 @@ func runBinary(op string, a, b any) (any, error) {
 		case "^", "**":
 			return math.Pow(X, Y), nil
 		case "%%":
-			return math.Mod(X, Y), nil
+			// Floor-modulo is distinct from the machine remainder.  Keep the
+			// canonical contract independent of the source spelling and make the
+			// divisor-sign invariant explicit for negative operands.
+			if Y == 0 {
+				return math.NaN(), nil
+			}
+			return X - math.Floor(X/Y)*Y, nil
 		case "%/%":
 			return math.Floor(X / Y), nil
 		case "==":

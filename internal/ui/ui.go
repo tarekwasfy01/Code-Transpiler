@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Tarek Wasfy
+
 package ui
 
 import (
@@ -30,6 +32,7 @@ import (
 	"github.com/tarekwasfy01/Code-Transpiler/internal/highlight"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/targetrun"
 )
 
 type conversionResult struct {
@@ -59,6 +62,10 @@ var uiLanguages = func() []languageChoice {
 	for _, l := range backend.Languages {
 		out = append(out, languageChoice{ID: l.ID, Name: l.Name, Extension: l.Extension})
 	}
+	// Semantic Programming is a first-class transport input/output in the GUI.
+	out = append(out, languageChoice{ID: "sp", Name: "Semantic Program (.sp)", Extension: ".sp"})
+	out = append(out, languageChoice{ID: "spz", Name: "Semantic Program compressed (.spz)", Extension: ".spz"})
+	out = append(out, languageChoice{ID: "semantic", Name: "Semantic JSON (.json)", Extension: ".json"})
 	return out
 }()
 
@@ -68,13 +75,14 @@ type App struct {
 	hl          *highlight.Service
 	left, right *gvcode.Editor
 
-	convertBtn, copyBtn, saveBtn, executableBtn, infoBtn, copyInfoBtn, closeInfoBtn, openCMDBtn, runBtn widget.Clickable
-	sourceBtn, targetBtn                                                                                widget.Clickable
-	sourceClicks, targetClicks                                                                          []widget.Clickable
-	sourceOpen, targetOpen                                                                              bool
-	source, target                                                                                      int
+	convertBtn, copyBtn, saveBtn, executableBtn, infoBtn, copyInfoBtn, closeInfoBtn, openCMDBtn, setPathBtn, runBtn widget.Clickable
+	sourceBtn, targetBtn                                                                                            widget.Clickable
+	sourceClicks, targetClicks                                                                                      []widget.Clickable
+	sourceOpen, targetOpen                                                                                          bool
+	source, target                                                                                                  int
 
 	showInfo        bool
+	infoScroll      widget.List
 	showRun         bool
 	runOutput       string
 	status          string
@@ -111,6 +119,7 @@ func New() *App {
 		target:          1,
 		runtimeFallback: widget.Bool{Value: true},
 	}
+	a.infoScroll.List.Axis = layout.Vertical
 	a.hl = highlight.NewService(w.Invalidate)
 	a.left = newCodeEditor(th, false, codeColorScheme(true, true))
 	a.right = newCodeEditor(th, true, codeColorScheme(true, true))
@@ -356,6 +365,16 @@ func (a *App) handleClicks(gtx layout.Context) {
 			a.status = "Open CMD failed: " + err.Error()
 		}
 	}
+	if a.setPathBtn.Clicked(gtx) {
+		exe, err := os.Executable()
+		if err != nil {
+			a.status = "Set PATH failed: " + err.Error()
+		} else if err = platform.SetPath(exe); err != nil {
+			a.status = "Set PATH failed: " + err.Error()
+		} else {
+			a.status = "PATH update requested (UAC)"
+		}
+	}
 	if a.sourceBtn.Clicked(gtx) {
 		a.sourceOpen = !a.sourceOpen
 		a.targetOpen = false
@@ -404,8 +423,26 @@ func (a *App) startConvert() {
 		code := ""
 		var toks []syntax.Token
 		if err == nil {
-			result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", DisableRuntimeFallback: disableRuntime})
-			code, err = result.Code, convertErr
+			if source == "sp" || source == "spz" {
+				code, err = manytomany.TranspileSemanticSP(target, data)
+			} else if target == "sp" || target == "spz" {
+				var sp []byte
+				sp, err = manytomany.SemanticSP(source, string(data))
+				if err == nil && target == "spz" {
+					p, e := backend.ParseSemanticSP(sp)
+					if e != nil {
+						err = e
+					} else {
+						var z []byte
+						z, err = p.MarshalSemanticSPZ()
+						sp = z
+					}
+				}
+				code = string(sp)
+			} else {
+				result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", DisableRuntimeFallback: disableRuntime})
+				code, err = result.Code, convertErr
+			}
 		}
 		if err == nil && strings.TrimSpace(code) != "" {
 			toks, _ = highlight.Tokens(ctx, lang, code)
@@ -418,10 +455,6 @@ func (a *App) startConvert() {
 	}()
 }
 func (a *App) startRun() {
-	if a.currentSource().ID != "r" {
-		a.status = "Run currently supports R input; use Convert for other languages"
-		return
-	}
 	if a.cancelRun != nil {
 		a.cancelRun()
 	}
@@ -429,13 +462,40 @@ func (a *App) startRun() {
 	a.cancelRun = cancel
 	gen := a.runGeneration.Add(1)
 	a.busy = true
-	a.status = "Running R with embedded runtime…"
+	a.status = "Running " + a.currentSource().Name + " with embedded runtime…"
 	reader := a.left.GetReader()
+	source := a.currentSource().ID
 	go func() {
 		data, err := io.ReadAll(reader)
 		out := ""
 		if err == nil {
-			out, err = backend.Run(string(data))
+			if source == "sp" || source == "spz" {
+				var p *backend.SemanticProgram
+				var e error
+				if source == "spz" {
+					p, e = backend.ParseSemanticSPZ(data)
+				} else {
+					p, e = backend.ParseSemanticSP(data)
+				}
+				if e != nil {
+					err = e
+				} else {
+					out, err = backend.RunSemantic(p)
+				}
+			} else if source == "semantic" {
+				p, e := backend.ParseSemanticJSON(data)
+				if e != nil {
+					err = e
+				} else {
+					out, err = backend.RunSemantic(p)
+				}
+			} else {
+				result, e := targetrun.RunSource("embedded", source, string(data))
+				out, err = result.Stdout, e
+				if result.Stderr != "" {
+					out += "\n" + result.Stderr
+				}
+			}
 		}
 		select {
 		case a.runResults <- runResult{generation: gen, output: out, err: err}:
@@ -528,10 +588,7 @@ func (a *App) layout(gtx layout.Context) layout.Dimensions {
 	})
 }
 func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
-	runLabel := "Run R"
-	if a.currentSource().ID != "r" {
-		runLabel = "Run (R only)"
-	}
+	runLabel := "Run " + a.currentSource().Name
 	return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return smallButton(gtx, a.theme, &a.sourceBtn, "Input: "+a.currentSource().Name+"  ▼")
@@ -695,10 +752,10 @@ func (a *App) layoutInfo(gtx layout.Context) layout.Dimensions {
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						return layout.Spacer{Height: 8}.Layout(gtx)
 					}),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 						label := material.Body2(a.theme, cliHelp)
 						label.Color = color.NRGBA{R: 31, G: 35, B: 40, A: 255}
-						return label.Layout(gtx)
+						return a.infoScroll.Layout(gtx, 1, func(gtx layout.Context, _ int) layout.Dimensions { return label.Layout(gtx) })
 					}),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -718,6 +775,10 @@ func (a *App) layoutFooter(gtx layout.Context) layout.Dimensions {
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.saveBtn, "Save As") }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.infoBtn, "Info") }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return smallButton(gtx, a.theme, &a.setPathBtn, "Set PATH")
+			}),
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{Size: gtx.Constraints.Min} }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				check := material.CheckBox(a.theme, &a.runtimeFallback, "Semantic runtime fallback")
@@ -744,13 +805,45 @@ func smallButton(gtx layout.Context, th *material.Theme, click *widget.Clickable
 
 const cliHelp = `Code Transpiler CLI - complete command reference
 
+COMMAND ALIASES (EXACTLY EQUIVALENT)
+  sp <command> [options]     ==    CodeTranspiler.exe <command> [options]
+  Every command listed here can be invoked with either name.
+
 GENERAL
   CodeTranspiler.exe
   CodeTranspiler.exe gui
   CodeTranspiler.exe help
+  CodeTranspiler.exe --help
+  CodeTranspiler.exe -h
   CodeTranspiler.exe version
+  CodeTranspiler.exe --version
   CodeTranspiler.exe targets
+  CodeTranspiler.exe languages
   CodeTranspiler.exe runtimes
+  CodeTranspiler.exe routes
+  CodeTranspiler.exe licenses
+  CodeTranspiler.exe setpath
+
+SEMANTIC / UAST
+  CodeTranspiler.exe semantic-export -source <language> input -o program.semantic.json
+  CodeTranspiler.exe semantic-export -source <language> input -format sp -o program.sp
+  CodeTranspiler.exe semantic-export -native -source go input.go -o program.json
+  CodeTranspiler.exe semantic-export -input executable program.exe -o program.semantic.json
+  CodeTranspiler.exe semantic-transpile -target <language> program.semantic.json -o output
+  CodeTranspiler.exe semantic-transpile -target <language> program.sp -o output
+  CodeTranspiler.exe semantic-convert input.json -o output.sp
+  CodeTranspiler.exe semantic-format input.sp -o formatted.sp
+  CodeTranspiler.exe semantic-validate input.sp
+  CodeTranspiler.exe semantic-info input.sp
+  CodeTranspiler.exe semantic-info input.json
+  CodeTranspiler.exe native-analysis -source <language> input -o analysis.json
+  CodeTranspiler.exe machine-ir -input executable program.exe -o machine-ir.json
+  CodeTranspiler.exe decompile -input executable program.exe -o program.semantic.json
+
+CAPABILITIES
+  CodeTranspiler.exe capability <target> <feature>
+  CodeTranspiler.exe capability-matrix [feature ...]
+  CodeTranspiler.exe implementation-matrix
 
 EMBEDDED R RUN
   CodeTranspiler.exe run input.R
@@ -782,6 +875,15 @@ TRANSPILATION
   CodeTranspiler.exe transpile -target java input.R -o Main.java
   CodeTranspiler.exe transpile -target kotlin input.R -o output.kt
   CodeTranspiler.exe transpile -target swift input.R -o output.swift
+
+NATIVE COMPILE
+  CodeTranspiler.exe compile input.sp -o input.exe
+  CodeTranspiler.exe compile input.json -o input.exe
+  CodeTranspiler.exe compile -source go -target native-x86_64-windows input.go -o program.exe
+
+BATCH / ANALYSIS
+  CodeTranspiler.exe transpile-batch
+  CodeTranspiler.exe run -source <language|auto> -target <embedded|language> input
 
 The -o option is optional. Without it, Code Transpiler chooses the output extension.
 

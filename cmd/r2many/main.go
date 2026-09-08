@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package main
 
 import (
@@ -5,6 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
 
 	"gioui.org/app"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
@@ -28,6 +33,14 @@ func main() {
 	if len(os.Args) < 2 {
 		launchGUI()
 		return
+	}
+	// `sp <command>` is a compact alias for every CLI command.
+	if strings.EqualFold(os.Args[1], "sp") {
+		if len(os.Args) < 3 {
+			fmt.Print(helpText)
+			return
+		}
+		os.Args = append([]string{os.Args[0]}, os.Args[2:]...)
 	}
 	platform.EnsureCLIConsole()
 	switch os.Args[1] {
@@ -87,6 +100,16 @@ func main() {
 			fmt.Fprintln(os.Stderr, "r2many:", err)
 			os.Exit(1)
 		}
+	case "machine-ir":
+		if err := machineIRExport(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
+	case "decompile":
+		if err := decompileSemantic(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
 	case "native-analysis":
 		if err := nativeAnalysis(os.Args[2:]); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -94,6 +117,26 @@ func main() {
 		}
 	case "semantic-transpile":
 		if err := semanticTranspile(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
+	case "semantic-convert":
+		if err := semanticConvert(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
+	case "semantic-format":
+		if err := semanticFormat(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
+	case "semantic-validate":
+		if err := semanticValidate(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
+	case "semantic-info":
+		if err := semanticInfo(os.Args[2:]); err != nil {
 			fmt.Fprintln(os.Stderr, "r2many:", err)
 			os.Exit(1)
 		}
@@ -108,29 +151,66 @@ func main() {
 		_ = json.NewEncoder(os.Stdout).Encode(backend.SemanticCapabilityMatrix(os.Args[2:]))
 	case "implementation-matrix":
 		_ = json.NewEncoder(os.Stdout).Encode(backend.TypedImplementationMatrix())
+	case "setpath":
+		if err := setPath(); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Print(helpText)
 		os.Exit(2)
 	}
 }
 
+func setPath() error {
+	exe, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	dir := filepath.Dir(exe)
+	if runtime.GOOS != "windows" {
+		return fmt.Errorf("setpath is supported on Windows only")
+	}
+	// Use an elevated PowerShell process so the installation directory is
+	// available to all users. The existing PATH is preserved and duplicates are
+	// avoided by the script itself.
+	quoted := strings.ReplaceAll(dir, "'", "''")
+	script := "$d='" + quoted + "'; $p=[Environment]::GetEnvironmentVariable('Path','Machine'); if(-not (($p -split ';') -contains $d)){ [Environment]::SetEnvironmentVariable('Path',(($p.TrimEnd(';')+';'+$d).Trim(';')),'Machine') }"
+	cmd := exec.Command("powershell.exe", "-NoProfile", "-Command", "Start-Process powershell.exe -Verb RunAs -ArgumentList '-NoProfile','-Command',\""+strings.ReplaceAll(script, "\"", "\\\"")+"\"")
+	return cmd.Run()
+}
+
 func semanticExport(args []string) error {
 	fs := flag.NewFlagSet("semantic-export", flag.ContinueOnError)
 	native := fs.Bool("native", false, "use strict native frontend without legacy fallback")
 	source := fs.String("source", "r", "source language")
+	inputKind := fs.String("input", "source", "source|assembly|machine|object|executable")
 	out := fs.String("o", "", "SemanticProgram JSON output path")
-	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-source": true, "-o": true, "-native": false})); err != nil {
+	format := fs.String("format", "json", "json or sp")
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-source": true, "-input": true, "-o": true, "-format": true, "-native": false})); err != nil {
 		return err
 	}
 	if fs.NArg() != 1 || *out == "" {
-		return fmt.Errorf("usage: semantic-export -source <language> input -o program.semantic.json")
+		return fmt.Errorf("usage: semantic-export -source <language> input -o program.semantic.json (or -input assembly|machine|object|executable)")
 	}
 	data, err := os.ReadFile(fs.Arg(0))
 	if err != nil {
 		return err
 	}
 	var semantic *backend.SemanticProgram
-	if *native {
+	if *inputKind != "source" {
+		kind := map[string]backend.CompileInputKind{
+			"assembly":     backend.CompileInputAssembly,
+			"machine":      backend.CompileInputMachine,
+			"machine_code": backend.CompileInputMachine,
+			"object":       backend.CompileInputObject,
+			"executable":   backend.CompileInputExecutable,
+		}[*inputKind]
+		if kind == "" {
+			return fmt.Errorf("unsupported semantic-export input kind %q", *inputKind)
+		}
+		semantic, err = backend.LiftBinaryInput(data, backend.CompileOptions{InputKind: kind, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64"})
+	} else if *native {
 		if backend.NormalizeLanguage(*source) != "go" {
 			return fmt.Errorf("native executable frontend supports go only")
 		}
@@ -143,11 +223,51 @@ func semanticExport(args []string) error {
 	if err != nil {
 		return err
 	}
-	encoded, err := semantic.MarshalSemanticJSON()
+	var encoded []byte
+	if *format == "spz" || strings.HasSuffix(strings.ToLower(*out), ".spz") {
+		encoded, err = semantic.MarshalSemanticSPZ()
+	} else if *format == "sp" || strings.HasSuffix(strings.ToLower(*out), ".sp") {
+		encoded, err = semantic.MarshalSemanticSP()
+	} else {
+		encoded, err = semantic.MarshalSemanticJSON()
+	}
 	if err != nil {
 		return err
 	}
 	return os.WriteFile(*out, encoded, 0644)
+}
+
+func machineIRExport(args []string) error {
+	fs := flag.NewFlagSet("machine-ir", flag.ContinueOnError)
+	inputKind := fs.String("input", "machine", "assembly|machine|object|executable")
+	out := fs.String("o", "", "MachineIR JSON output path")
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-input": true, "-o": true})); err != nil {
+		return err
+	}
+	if fs.NArg() != 1 {
+		return fmt.Errorf("usage: machine-ir -input assembly|machine|object|executable input [-o machine-ir.json]")
+	}
+	kind := map[string]backend.CompileInputKind{"assembly": backend.CompileInputAssembly, "machine": backend.CompileInputMachine, "machine_code": backend.CompileInputMachine, "object": backend.CompileInputObject, "executable": backend.CompileInputExecutable}[*inputKind]
+	if kind == "" {
+		return fmt.Errorf("unsupported machine-ir input kind %q", *inputKind)
+	}
+	data, err := os.ReadFile(fs.Arg(0))
+	if err != nil {
+		return err
+	}
+	ir, err := backend.DecodeMachineIR(data, backend.CompileOptions{InputKind: kind, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64"})
+	if err != nil {
+		return err
+	}
+	encoded, err := json.MarshalIndent(ir, "", "  ")
+	if err != nil {
+		return err
+	}
+	if *out == "" {
+		_, err = os.Stdout.Write(append(encoded, '\n'))
+		return err
+	}
+	return os.WriteFile(*out, append(encoded, '\n'), 0644)
 }
 
 func nativeAnalysis(args []string) error {
@@ -195,11 +315,16 @@ func semanticTranspile(args []string) error {
 	if err != nil {
 		return err
 	}
-	program, err := manytomany.ParseDocument(data)
-	if err != nil {
-		return err
+	var code string
+	if strings.HasSuffix(strings.ToLower(fs.Arg(0)), ".spz") || strings.HasSuffix(strings.ToLower(fs.Arg(0)), ".sp") {
+		code, err = manytomany.TranspileSemanticSP(*target, data)
+	} else {
+		program, e := manytomany.ParseDocument(data)
+		if e != nil {
+			return e
+		}
+		code, err = manytomany.Emit(*target, program)
 	}
-	code, err := manytomany.Emit(*target, program)
 	if err != nil {
 		return err
 	}
@@ -208,6 +333,150 @@ func semanticTranspile(args []string) error {
 		return nil
 	}
 	return os.WriteFile(*out, []byte(code), 0644)
+}
+
+func semanticConvert(args []string) error {
+	fs := flag.NewFlagSet("semantic-convert", flag.ContinueOnError)
+	out := fs.String("o", "", "output path (.sp or .json)")
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-o": true})); err != nil {
+		return err
+	}
+	if fs.NArg() != 1 || *out == "" {
+		return fmt.Errorf("usage: semantic-convert input.semantic.json|input.sp -o output.sp|output.json")
+	}
+	data, err := os.ReadFile(fs.Arg(0))
+	if err != nil {
+		return err
+	}
+	var encoded []byte
+	if strings.HasSuffix(strings.ToLower(fs.Arg(0)), ".spz") || strings.HasSuffix(strings.ToLower(fs.Arg(0)), ".sp") {
+		var p *backend.SemanticProgram
+		var e error
+		if strings.HasSuffix(strings.ToLower(fs.Arg(0)), ".spz") {
+			p, e = backend.ParseSemanticSPZ(data)
+		} else {
+			p, e = backend.ParseSemanticSP(data)
+		}
+		if e != nil {
+			return e
+		}
+		if strings.HasSuffix(strings.ToLower(*out), ".spz") {
+			encoded, err = p.MarshalSemanticSPZ()
+		} else if strings.HasSuffix(strings.ToLower(*out), ".sp") {
+			encoded, err = p.MarshalSemanticSP()
+		} else {
+			encoded, err = p.MarshalSemanticJSON()
+		}
+	} else {
+		p, e := backend.ParseSemanticJSON(data)
+		if e != nil {
+			return e
+		}
+		if strings.HasSuffix(strings.ToLower(*out), ".spz") {
+			encoded, err = p.MarshalSemanticSPZ()
+		} else if strings.HasSuffix(strings.ToLower(*out), ".sp") {
+			encoded, err = p.MarshalSemanticSP()
+		} else {
+			encoded, err = p.MarshalSemanticJSON()
+		}
+	}
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(*out, encoded, 0644)
+}
+
+func semanticFormat(args []string) error {
+	fs := flag.NewFlagSet("semantic-format", flag.ContinueOnError)
+	out := fs.String("o", "", "formatted SP output")
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-o": true})); err != nil {
+		return err
+	}
+	if fs.NArg() != 1 {
+		return fmt.Errorf("usage: semantic-format input.sp [-o output.sp]")
+	}
+	data, err := os.ReadFile(fs.Arg(0))
+	if err != nil {
+		return err
+	}
+	var formatted []byte
+	if strings.HasSuffix(strings.ToLower(fs.Arg(0)), ".spz") {
+		if strings.HasSuffix(strings.ToLower(*out), ".spz") || *out == "" {
+			formatted, err = backend.FormatSemanticSPZ(data)
+		} else {
+			p, e := backend.ParseSemanticSPZ(data)
+			if e != nil {
+				return e
+			}
+			formatted, err = p.MarshalSemanticSP()
+		}
+	} else {
+		if strings.HasSuffix(strings.ToLower(*out), ".spz") {
+			p, e := backend.ParseSemanticSP(data)
+			if e != nil {
+				return e
+			}
+			formatted, err = p.MarshalSemanticSPZ()
+		} else {
+			formatted, err = backend.FormatSemanticSP(data)
+		}
+	}
+	if err != nil {
+		return err
+	}
+	if *out == "" {
+		_, err = os.Stdout.Write(formatted)
+		return err
+	}
+	return os.WriteFile(*out, formatted, 0644)
+}
+
+func semanticValidate(args []string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("usage: semantic-validate input.sp|input.json")
+	}
+	data, err := os.ReadFile(args[0])
+	if err != nil {
+		return err
+	}
+	if strings.HasSuffix(strings.ToLower(args[0]), ".spz") {
+		_, err = backend.ParseSemanticSPZ(data)
+	} else if strings.HasSuffix(strings.ToLower(args[0]), ".sp") {
+		_, err = backend.ParseSemanticSP(data)
+	} else {
+		_, err = backend.ParseSemanticJSON(data)
+	}
+	if err != nil {
+		return err
+	}
+	fmt.Println("VALID")
+	return nil
+}
+
+func semanticInfo(args []string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("usage: semantic-info input.sp|input.json")
+	}
+	data, err := os.ReadFile(args[0])
+	if err != nil {
+		return err
+	}
+	var p *backend.SemanticProgram
+	if strings.HasSuffix(strings.ToLower(args[0]), ".spz") {
+		p, err = backend.ParseSemanticSPZ(data)
+	} else if strings.HasSuffix(strings.ToLower(args[0]), ".sp") {
+		p, err = backend.ParseSemanticSP(data)
+	} else {
+		p, err = backend.ParseSemanticJSON(data)
+	}
+	if err != nil {
+		return err
+	}
+	info := map[string]any{"schema_version": backend.SemanticSPVersion, "source_language": p.Origin.SourceLanguage, "evaluation": p.Evaluation, "uast": p.UniversalAST != nil, "semantic_nodes": len(p.Evidence.Nodes)}
+	if p.UniversalAST != nil && p.UniversalAST.LanguageProfile != "" {
+		info["source_language"] = p.UniversalAST.LanguageProfile
+	}
+	return json.NewEncoder(os.Stdout).Encode(info)
 }
 func launchGUI() {
 	go func() {
@@ -315,7 +584,13 @@ func transpileBatch() error {
 
 const helpText = `Code Transpiler v1.0 - SemanticProgram v1
 
+COMMAND ALIASES (EXACTLY EQUIVALENT)
+  sp <command> [options]     ==    CodeTranspiler.exe <command> [options]
+  The complete command set below is valid with either executable name.
+
 Native compiler (direct machine encoder; assembly optional):
+  sp compile input.sp -o input.exe
+  sp compile input.json -o input.exe
   CodeTranspiler.exe compile -source go -target native-x86_64-windows input.go -entry entry -o program.exe
   CodeTranspiler.exe compile -source go -target object-x86_64-windows input.go -entry entry -o program.obj
   CodeTranspiler.exe compile -source go -target machine-x86_64 input.go -entry entry -o program.bin
@@ -356,9 +631,30 @@ GENERAL
 
   CodeTranspiler.exe semantic-export -source c input.c -o program.semantic.json
       Parse source and save the complete SemanticProgram JSON document.
+  CodeTranspiler.exe semantic-export -source go input.go -format sp -o program.sp
+      Export the same canonical program in readable Semantic Programming form.
+
+  CodeTranspiler.exe semantic-export -input executable program.exe -o program.semantic.json
+      Lift a supported x86-64 PE/executable into the same SemanticProgram JSON.
+
+  CodeTranspiler.exe machine-ir -input executable program.exe -o machine-ir.json
+      Export decoded x86-64 addressing, CFG and primitive mapping facts.
+
+  CodeTranspiler.exe decompile -input assembly program.asm -o program.semantic.json
+  CodeTranspiler.exe decompile -input machine program.bin -o program.semantic.json
+  CodeTranspiler.exe decompile -input executable program.exe -o program.semantic.json
+      Lift binary/assembly/object/PE input directly to SemanticProgram JSON.
 
   CodeTranspiler.exe semantic-transpile -target rust program.semantic.json -o output.rs
       Load SemanticProgram JSON and emit a target without original source.
+  CodeTranspiler.exe semantic-transpile -target rust program.sp -o output.rs
+      Load Semantic Programming source and emit a target without reparsing source.
+
+  CodeTranspiler.exe semantic-convert input.json -o output.sp
+  CodeTranspiler.exe semantic-format input.sp -o formatted.sp
+  CodeTranspiler.exe semantic-validate input.sp
+  CodeTranspiler.exe semantic-info input.sp
+      Convert, canonicalize, validate, or inspect Semantic Programming documents.
 
   CodeTranspiler.exe capability go core
       Print the backend capability contract as JSON.

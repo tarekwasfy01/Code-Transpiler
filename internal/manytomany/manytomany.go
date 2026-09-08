@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package manytomany
 
 import (
@@ -52,6 +53,19 @@ func typedFailure(class backend.FailureClass, stage, source, target string, err 
 	return backend.NewTranspileFailure(class, stage, source, target, err)
 }
 
+// targetSyntaxError validates the emitted representation only. Parse(target,
+// code) is intentionally not used here: it lowers the output as a new source
+// program and can therefore reject valid target syntax merely because a small
+// semantic witness contains an unresolved free symbol. Scope/type resolution
+// belongs to the separately reported target-compile stage.
+func targetSyntaxError(target, code string) error {
+	check := backend.CheckTargetSyntax(target, code)
+	if check.Checked && !check.Valid {
+		return fmt.Errorf("target syntax failed: %s", check.Failure)
+	}
+	return nil
+}
+
 func sha256Text(text string) string {
 	sum := sha256.Sum256([]byte(text))
 	return hex.EncodeToString(sum[:])
@@ -89,21 +103,45 @@ func TranspileCore(request TranspileRequest) (result TranspileResult, retErr err
 		}
 	}
 	code, err := EmitDirect(target, p)
+	// Direct projection is only a successful route when its target source can
+	// enter the same modern frontend again.  This is a target-independent
+	// legality guard: a renderer must not be allowed to commit a syntactically
+	// invalid direct form merely because it produced non-empty text.  Mark it
+	// unavailable so the existing universal lowering/intermediate/runtime
+	// sequence can choose another representation of the *same* canonical UAST.
+	if err == nil {
+		if reparseErr := targetSyntaxError(target, code); reparseErr != nil {
+			err = typedFailure(backend.FailureDirectUnavailable, "direct-reparse", source, target,
+				fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target reparse failed: %w", reparseErr))
+		}
+	}
 	if err != nil {
 		err = typedFailure(backend.FailureDirectUnavailable, "direct", source, target, err)
 		trace.UniversalLoweringAttempt = true
-		if loweredCode, loweringTrace, loweringErr := backend.EmitSemanticLoweredDirect(target, p.Semantic); loweringErr == nil {
-			code = loweredCode
-			err = nil
-			trace.UniversalLoweringSuccess = true
-			trace.UniversalLoweringIterations = loweringTrace.Iterations
-			trace.UniversalLoweringRules = append([]string(nil), loweringTrace.Rules...)
-			trace.UniversalLoweringResiduals = append([]string(nil), loweringTrace.Residuals...)
-			trace.ProjectionMode = "lowered-native"
-		} else {
-			trace.UniversalLoweringIterations = loweringTrace.Iterations
-			trace.UniversalLoweringRules = append([]string(nil), loweringTrace.Rules...)
-			trace.UniversalLoweringResiduals = append([]string(nil), loweringTrace.Residuals...)
+		// C's ISO emitter cannot represent the private expression-binding
+		// helpers used by the lowered direct path. Let the canonical compatibility
+		// projector handle those documents instead of accepting a syntactically
+		// invalid mixed RValue/double translation unit.
+		if target != "c" {
+			if loweredCode, loweringTrace, loweringErr := backend.EmitSemanticLoweredDirect(target, p.Semantic); loweringErr == nil {
+				// Generated lowering recipes are productive only when their target
+				// representation is legal. Keep the failed direct form out of the
+				// result and let the existing later routes handle an invalid lowered
+				// representation as well.
+				if reparseErr := targetSyntaxError(target, loweredCode); reparseErr == nil {
+					code = loweredCode
+					err = nil
+					trace.UniversalLoweringSuccess = true
+					trace.UniversalLoweringIterations = loweringTrace.Iterations
+					trace.UniversalLoweringRules = append([]string(nil), loweringTrace.Rules...)
+					trace.UniversalLoweringResiduals = append([]string(nil), loweringTrace.Residuals...)
+					trace.ProjectionMode = "lowered-native"
+				}
+			} else {
+				trace.UniversalLoweringIterations = loweringTrace.Iterations
+				trace.UniversalLoweringRules = append([]string(nil), loweringTrace.Rules...)
+				trace.UniversalLoweringResiduals = append([]string(nil), loweringTrace.Residuals...)
+			}
 		}
 		if err != nil && request.DisableRuntimeFallback {
 			trace.ErrorClass = string(backend.FailureClassOf(err))
@@ -119,10 +157,18 @@ func TranspileCore(request TranspileRequest) (result TranspileResult, retErr err
 		viaCode, via, routeInfo, routeErr := transpileViaIntermediate(p, target)
 		if routeErr != nil {
 			// Only after all strict matrix routes are exhausted use the explicit
-			// semantic-runtime projector as the last resort.
-			code, err = Emit(target, p)
+			// canonical-UAST compatibility projector as the last resort. Emit is
+			// intentionally strict-native, so calling it here would make runtime
+			// fallback unreachable for the CLI and GUI.
+			code, err = backend.EmitSemanticCompatibility(target, p.Semantic)
 			if err != nil {
 				wrapped := typedFailure(backend.FailureRuntime, "runtime", source, target, err)
+				trace.ErrorClass = string(backend.FailureClassOf(wrapped))
+				return TranspileResult{Trace: trace}, wrapped
+			}
+			if reparseErr := targetSyntaxError(target, code); reparseErr != nil {
+				wrapped := typedFailure(backend.FailureRuntime, "runtime-reparse", source, target,
+					fmt.Errorf("compatibility target reparse failed: %w", reparseErr))
 				trace.ErrorClass = string(backend.FailureClassOf(wrapped))
 				return TranspileResult{Trace: trace}, wrapped
 			}
@@ -212,6 +258,9 @@ func transpileViaIntermediate(program Program, target string) (string, string, s
 		}
 		final, err := EmitDirect(target, reparsed)
 		if err == nil && final != "" {
+			if reparseErr := targetSyntaxError(target, final); reparseErr != nil {
+				continue
+			}
 			info := semanticIntermediateRoute{Language: intermediate, Route: program.Source + "->" + intermediate + "->" + target + "(" + routeKind + ")", Leg1OutputHash: sha256Text(middle), Leg2InputHash: sha256Text(middle), Leg2OutputHash: sha256Text(final)}
 			if program.Semantic != nil {
 				if b, e := program.Semantic.MarshalSemanticJSON(); e == nil {
@@ -345,6 +394,32 @@ func EmitDirect(target string, p Program) (string, error) {
 func Transpile(source, target, code string) (string, error) {
 	result, err := TranspileCore(TranspileRequest{Source: code, SourceLanguage: source, TargetLanguage: target, EntryPoint: "api"})
 	return result.Code, err
+}
+
+// SemanticSP parses source through the normal frontend and serializes the
+// resulting canonical SemanticProgram as readable SP.
+func SemanticSP(source, code string) ([]byte, error) {
+	p, err := Parse(source, code)
+	if err != nil {
+		return nil, err
+	}
+	return p.Semantic.MarshalSemanticSP()
+}
+
+// TranspileSemanticSP imports SP and emits the requested target using the
+// existing SemanticProgram/UAST backend.
+func TranspileSemanticSP(target string, data []byte) (string, error) {
+	var p *backend.SemanticProgram
+	var err error
+	if len(data) >= 4 && string(data[:4]) == "SPZ2" {
+		p, err = backend.ParseSemanticSPZ(data)
+	} else {
+		p, err = backend.ParseSemanticSP(data)
+	}
+	if err != nil {
+		return "", err
+	}
+	return Emit(target, Program{Source: "semantic", Semantic: p})
 }
 
 func normalize(s string) string {

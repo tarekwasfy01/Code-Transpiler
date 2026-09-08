@@ -1,4 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,0f2c7a98eb6565e96dbff610a84f00fc7a11167188fab539087184adf74b45cc,V0_SOURCE_PARSE,FRONTEND,source_target,entry-point early return requires explicit exit semantics
-Q0002,50ca93b96437eb5b5ea58d3a066ccdf4cdd49cdb37557b70b7e79376b50391a6,V4_NATIVE_EMISSION,BACKEND,source_target,"universal node 1 lacks required ""expression"" child"
-Q0003,460a4d6948017465b0c42b0bee37a8b2758446d125073935ab3e2ed59e4f99a4,V5_TARGET_REPARSE,TARGET_SYNTAX,source_target,entry-point early return requires explicit exit semantics

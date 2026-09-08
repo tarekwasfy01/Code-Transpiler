@@ -1,5 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,f92a11dfb4b06ee982dbb8ea002a2b5afbe6625385c531abdaba8b29af74f5d3,NATIVE,UNKNOWN_FAILURE,assembly,"native call ""listOf"" requires linked implementation"
-Q0002,f92a11dfb4b06ee982dbb8ea002a2b5afbe6625385c531abdaba8b29af74f5d3,NATIVE,UNKNOWN_FAILURE,executable,"native call ""listOf"" requires linked implementation"
-Q0003,f92a11dfb4b06ee982dbb8ea002a2b5afbe6625385c531abdaba8b29af74f5d3,NATIVE,UNKNOWN_FAILURE,machine_code,"native call ""listOf"" requires linked implementation"
-Q0004,f92a11dfb4b06ee982dbb8ea002a2b5afbe6625385c531abdaba8b29af74f5d3,NATIVE,UNKNOWN_FAILURE,object,"native call ""listOf"" requires linked implementation"

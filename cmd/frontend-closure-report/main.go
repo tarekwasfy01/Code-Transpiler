@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // frontend-closure-report prints the computed frontend closure axes from the
 // productive parser/UAST implementation. It is intentionally read-only: the
 // report is derived from the same matrices used by the canonical path.

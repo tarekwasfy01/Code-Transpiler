@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -14,12 +15,18 @@ type modernFrontend func(filename, source string) (*SemanticProgram, error)
 func firstModernFrontend(candidates ...modernFrontend) modernFrontend {
 	return func(filename, source string) (*SemanticProgram, error) {
 		var last error
-		for _, candidate := range candidates {
+		for index, candidate := range candidates {
 			if candidate == nil {
 				continue
 			}
 			program, err := candidate(filename, source)
 			if err == nil {
+				if index > 0 && program != nil && program.UniversalAST != nil {
+					if program.UniversalAST.Metadata == nil {
+						program.UniversalAST.Metadata = map[string]string{}
+					}
+					program.UniversalAST.Metadata["frontend_route"] = "NATIVE_ORACLE_RESCUE"
+				}
 				return program, nil
 			}
 			last = err
@@ -43,11 +50,14 @@ var modernFrontends = func() map[string]modernFrontend {
 			return LowerMatrixLanguage(language, source)
 		}
 	}
+	// Go uses the same universal matrix frontend by default.  The existing
+	// structured go/ast producer remains a fail-closed oracle/bootstrap
+	// fallback for source-only deployments or incomplete table bundles.
 	frontends["go"] = firstModernFrontend(
+		frontends["go"],
 		func(filename, source string) (*SemanticProgram, error) {
 			return LowerNativeGo(filename, source)
 		},
-		frontends["go"],
 	)
 	return frontends
 }()
@@ -65,4 +75,57 @@ func LowerSource(language, filename, source string) (*SemanticProgram, error) {
 		return nil, fmt.Errorf("unsupported source language %q", language)
 	}
 	return frontend(filename, source)
+}
+
+// LowerSourceWithDiagnostics runs the same productive frontend selection as
+// LowerSource while exposing a separate, transient diagnostic context. In
+// strict mode it is equivalent to LowerSource. In saturating mode a failed
+// frontend call is recorded as structured diagnostic data, but no placeholder
+// is returned as a SemanticProgram and no recovery value is accepted by the
+// production path.
+func LowerSourceWithDiagnostics(language, filename, source string, mode DiagnosticMode) (*SemanticProgram, *DiagnosticContext, error) {
+	ctx := NewDiagnosticContext(mode)
+	language = NormalizeLanguage(language)
+	var program *SemanticProgram
+	var err error
+	program, err = LowerSource(language, filename, source)
+	if err != nil && mode == DiagnosticSaturate && language == "go" {
+		// First preserve the exact productive frontend selection. Only when that
+		// path fails do we replay the structured Go AST producer with a separate
+		// diagnostic sink to expose node-local contracts. No partial program or
+		// transient hole enters canonical UAST.
+		var detailErr error
+		program, detailErr = LowerNativeGoWithDiagnostics(filename, source, ctx)
+		if detailErr != nil {
+			err = detailErr
+		}
+	}
+	if err == nil {
+		return program, ctx, nil
+	}
+	failure := SemanticFailure{
+		Stage:             "SOURCE_TO_UAST",
+		Category:          "FRONTEND",
+		SourceLanguage:    language,
+		SourceFile:        filename,
+		FailureFamily:     "frontend_lowering",
+		ObservedStructure: "structured frontend returned error",
+		Diagnostic:        err.Error(),
+		RecoveryKind:      RecoveryFatal,
+		RecoverySafety:    "no-canonical-recovery",
+	}
+	// Detailed structured failures may already have been recorded by the Go
+	// producer. Keep one coarse boundary row only when no detail exists.
+	if len(ctx.Failures) == 0 {
+		if recordErr := ctx.Record(failure); recordErr != nil {
+			return nil, ctx, recordErr
+		}
+	}
+	if mode == DiagnosticSaturate {
+		return nil, ctx, err
+	}
+	if recordErr := ctx.Record(failure); recordErr != nil {
+		return nil, ctx, recordErr
+	}
+	return nil, ctx, err
 }

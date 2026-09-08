@@ -1,6 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,f024a059c3a04e3a3c48cc953d1b2e4f2e0e96c893faa3da2219987620d14e9a,N0_SOURCE_PARSE,FRONTEND,native,"unmatched delimiter ""}"" at 81"
-Q0002,3845173ad6b9fb9f1d9c9b005fcc001d8e8bf48da1d748483d5bd1519e4eef32,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""print"" node=7"
-Q0003,3845173ad6b9fb9f1d9c9b005fcc001d8e8bf48da1d748483d5bd1519e4eef32,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""print"" node=7"
-Q0004,3845173ad6b9fb9f1d9c9b005fcc001d8e8bf48da1d748483d5bd1519e4eef32,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""print"" node=7"
-Q0005,3845173ad6b9fb9f1d9c9b005fcc001d8e8bf48da1d748483d5bd1519e4eef32,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""print"" node=7"

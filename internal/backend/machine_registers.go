@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import "sort"
@@ -33,6 +34,12 @@ func allocateX64Registers(p *x64Program) int {
 			in := p.Instructions[i]
 			for j, o := range []x64Operand{in.A, in.B} {
 				if o.Kind != 'm' || o.Reg != xRBP || o.Value >= 0 {
+					continue
+				}
+				// An address-taking LEA consumes the place itself, not the
+				// value stored in the slot. Promoting its memory operand would
+				// turn `lea rax,[rbp-8]` into the invalid `lea rax,r11`.
+				if in.Op == "lea" {
 					continue
 				}
 				r := ranges[o.Value]

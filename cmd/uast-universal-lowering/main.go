@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // Command uast-universal-lowering emits the matrix/report plane for the
 // universal UAST lowering stage.  It never changes the productive registries.
 package main

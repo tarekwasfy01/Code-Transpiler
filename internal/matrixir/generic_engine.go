@@ -1,9 +1,12 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 import (
 	"context"
 	"fmt"
 	"sort"
+	"strconv"
+	"strings"
 	"sync"
 	"unicode/utf8"
 )
@@ -63,6 +66,9 @@ type ParseNode struct {
 	Missing                            bool
 	Children                           []*ParseNode
 	Fields                             map[int][]int
+	// FieldChildren preserves the structural child ordinals selected by the
+	// production field map. Fields remains the compatibility symbol view.
+	FieldChildren map[int][]int
 }
 
 func NewGenericLexerEngine(language string) *GenericLexerEngine {
@@ -568,6 +574,141 @@ func (e *GenericGLRConflictEngine) Resolve(events []CanonicalSemanticEvent) []Ca
 }
 func (e *GenericProducerEngine) Produce(program CanonicalProgram) []CanonicalSemanticEvent {
 	return program.SemanticEvents
+}
+
+// ProduceParseNode is the language-neutral producer boundary for the
+// execution-ready parser.  It deliberately consumes only parser facts and
+// symbol metadata; no source spelling, diagnostics, or language switch is
+// consulted.  The event shape is intentionally the same CanonicalSemanticEvent
+// contract used by the existing MatrixIR frontend.
+func (e *GenericProducerEngine) ProduceParseNode(language string, tables RealTables, root *ParseNode) []CanonicalSemanticEvent {
+	if root == nil {
+		return nil
+	}
+	var events []CanonicalSemanticEvent
+	var visit func(*ParseNode, int) int
+	visit = func(n *ParseNode, parent int) int {
+		id := len(events)
+		kind := productionStructure(tables, n)
+		structure := kind
+		if strings.HasPrefix(structure, "sym_") {
+			structure = strings.TrimPrefix(structure, "sym_")
+		}
+		event := CanonicalSemanticEvent{ID: id, Action: "parse_node", Semantic: Basis(SemanticDimensions, SemExpression), StructureKind: structure, SourceOffset: n.Start, ParentID: parent, ChildIDs: []int{}, Roles: []CanonicalRoleFact{}, Operands: []CanonicalOperandFact{}, Fields: map[string]string{
+			"symbol_id":     strconv.Itoa(n.SymbolID),
+			"production_id": strconv.Itoa(n.ProductionID),
+			"child_count":   strconv.Itoa(len(n.Children)),
+		}, LanguageFacts: map[string]string{"language": language}}
+		if meta, ok := tables.Symbols[n.SymbolID]; ok {
+			event.LanguageFacts["symbol_name"] = meta.Name
+			event.LanguageFacts["symbol_kind"] = meta.Kind
+			event.LanguageFacts["visible"] = strconv.FormatBool(meta.Visible)
+			event.LanguageFacts["named"] = strconv.FormatBool(meta.Named)
+			event.LanguageFacts["supertype"] = strconv.FormatBool(meta.Supertype)
+		}
+		event.FactFamily = ParsedFamilyForStructure(structure)
+		events = append(events, event)
+		for ordinal, child := range n.Children {
+			childID := visit(child, id)
+			events[id].ChildIDs = append(events[id].ChildIDs, childID)
+			events[id].Roles = append(events[id].Roles, CanonicalRoleFact{OwnerNodeID: id, ChildNodeID: childID, Ordinal: ordinal, Role: "child"})
+		}
+		for fieldID, ordinals := range n.FieldChildren {
+			fieldName := fmt.Sprintf("field_%d", fieldID)
+			for _, fm := range tables.FieldMapByProduction[n.ProductionID] {
+				if fm.FieldID == fieldID && fm.FieldName != "" {
+					fieldName = fm.FieldName
+					break
+				}
+			}
+			for _, ordinal := range ordinals {
+				events[id].Fields[fieldName] = strings.Trim(strings.ReplaceAll(fmt.Sprint(ordinals), " ", ","), "[]")
+				if ordinal >= 0 && ordinal < len(n.Children) {
+					childID := -1
+					for _, role := range events[id].Roles {
+						if role.Ordinal == ordinal {
+							childID = role.ChildNodeID
+							break
+						}
+					}
+					if childID >= 0 {
+						events[id].Roles = append(events[id].Roles, CanonicalRoleFact{OwnerNodeID: id, ChildNodeID: childID, Ordinal: ordinal, Role: fieldName})
+					}
+				}
+			}
+		}
+		for _, alias := range tables.Aliases[n.ProductionID] {
+			if alias.ChildIndex < 0 || alias.ChildIndex >= len(n.Children) || alias.AliasSymbolID == 0 {
+				continue
+			}
+			childID := -1
+			for _, role := range events[id].Roles {
+				if role.Ordinal == alias.ChildIndex {
+					childID = role.ChildNodeID
+					break
+				}
+			}
+			if childID >= 0 {
+				role := "alias"
+				if alias.AliasSymbolName != "" {
+					role = "alias:" + alias.AliasSymbolName
+				}
+				events[id].Roles = append(events[id].Roles, CanonicalRoleFact{OwnerNodeID: id, ChildNodeID: childID, Ordinal: alias.ChildIndex, Role: role})
+			}
+		}
+		return id
+	}
+	visit(root, -1)
+	return events
+}
+
+// productionStructure classifies a reduction from its field contract and
+// child shape. Symbol names remain provenance only; they never decide the
+// semantic kind. This keeps the producer shared across grammars whose node
+// names differ but whose production contracts are equivalent.
+func productionStructure(t RealTables, n *ParseNode) string {
+	roles := map[string]bool{}
+	fieldMap := t.FieldMapByProduction[n.ProductionID]
+	if fieldMap == nil {
+		fieldMap = t.FieldMap
+	}
+	for _, fm := range fieldMap {
+		if fm.FieldName != "" {
+			name := strings.ToLower(strings.TrimSpace(fm.FieldName))
+			name = strings.TrimPrefix(name, "field_")
+			roles[name] = true
+		}
+	}
+	has := func(names ...string) bool {
+		for _, name := range names {
+			if roles[strings.ToLower(name)] {
+				return true
+			}
+		}
+		return false
+	}
+	switch {
+	case has("condition", "test", "predicate") && has("consequence", "then", "body"):
+		return "IfStmt"
+	case has("callee", "function", "target") && has("arguments", "args", "parameters"):
+		return "CallExpr"
+	case has("left", "lhs", "operator") && has("right", "rhs"):
+		return "BinaryExpr"
+	case has("base", "object", "value") && has("index", "indices"):
+		return "IndexExpr"
+	case has("base", "object", "value") && has("start", "end", "step"):
+		return "SliceExpr"
+	case has("parameters", "params") && has("body", "block"):
+		return "FunctionExpr"
+	case has("iterable", "sequence", "source") && has("body", "block"):
+		return "ForEachStmt"
+	case has("name", "binding", "target") && has("value", "initializer", "expression"):
+		return "AssignStmt"
+	case has("module", "path", "import"):
+		return "ModuleDecl"
+	default:
+		return "OperationExpr"
+	}
 }
 
 func NewGenericLexerLREngine(language string) *GenericLexerLREngine {

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // Code generated from the checked-in UAST renderer contracts; DO NOT EDIT.

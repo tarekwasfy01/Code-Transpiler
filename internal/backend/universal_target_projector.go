@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -712,16 +713,20 @@ func (p UniversalTargetProjector) Project(u *UniversalASTDocument, spec TargetSp
 		// Direct failed for a concrete native capability gap. Lower a private
 		// UAST clone through the shared semantic worklist, then retry the same
 		// direct emitter. The original graph remains the fallback input.
-		if lowered, _, lowerErr := UniversalLower(u, spec.ID); lowerErr == nil {
-			if loweredSource, emitErr := p.emitLoweredDirect(lowered, spec); emitErr == nil {
-				return DocText{Text: loweredSource}, nil
+		if spec.ID != "c" {
+			if lowered, _, lowerErr := UniversalLower(u, spec.ID); lowerErr == nil {
+				if loweredSource, emitErr := p.emitLoweredDirect(lowered, spec); emitErr == nil {
+					return DocText{Text: loweredSource}, nil
+				}
 			}
 		}
 		// Retry with statement-level hybrid partitioning. Successful native
 		// statements remain native; only the statement whose structured UAST
 		// contract failed is emitted through the existing compatibility runtime.
-		if hybrid, hybridErr := generateTargetFromUniversalHybrid(u.Evaluation, spec.ID, graph); hybridErr == nil {
-			return DocText{Text: hybrid}, nil
+		if spec.ID != "c" {
+			if hybrid, hybridErr := generateTargetFromUniversalHybrid(u.Evaluation, spec.ID, graph); hybridErr == nil {
+				return DocText{Text: hybrid}, nil
+			}
 		}
 		// Compatibility remains the final document-level fallback when a block
 		// cannot be lowered even through the hybrid boundary.

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // This file contains the universal UAST lowering stage.  It deliberately
@@ -44,22 +45,31 @@ const (
 // rule.  RequiredCapabilities are checked against the target's existing
 // direct capability plane before an applier is run.
 type UniversalLoweringRule struct {
-	ID                   string            `json:"id"`
-	SourceSemantic       string            `json:"source_semantic"`
-	ResultSemantics      []string          `json:"result_semantics"`
-	RequiredCapabilities []string          `json:"required_capabilities,omitempty"`
-	RequiredTypes        []string          `json:"required_types,omitempty"`
-	RequiredEffects      []string          `json:"required_effects,omitempty"`
-	RequiredContracts    []string          `json:"required_contracts,omitempty"`
-	RequiredRelations    []string          `json:"required_relations,omitempty"`
-	RepresentationGuards []string          `json:"representation_guards,omitempty"`
-	ForbiddenEffects     []string          `json:"forbidden_effects,omitempty"`
-	TargetGuards         []string          `json:"target_guards,omitempty"`
-	PreservationClass    LoweringExactness `json:"preservation_class"`
-	EvidenceStatus       string            `json:"evidence_status"`
-	Implemented          bool              `json:"implemented"`
-	ComplexityBefore     int               `json:"complexity_before"`
-	ComplexityAfter      int               `json:"complexity_after"`
+	ID                   string   `json:"id"`
+	SourceSemantic       string   `json:"source_semantic"`
+	ResultSemantics      []string `json:"result_semantics"`
+	RequiredCapabilities []string `json:"required_capabilities,omitempty"`
+	RequiredTypes        []string `json:"required_types,omitempty"`
+	RequiredEffects      []string `json:"required_effects,omitempty"`
+	RequiredContracts    []string `json:"required_contracts,omitempty"`
+	RequiredRelations    []string `json:"required_relations,omitempty"`
+	RepresentationGuards []string `json:"representation_guards,omitempty"`
+	ForbiddenEffects     []string `json:"forbidden_effects,omitempty"`
+	TargetGuards         []string `json:"target_guards,omitempty"`
+	// PrimitiveFamily and KernelClass are derived from the same matrix
+	// projection used by the primitive compiler. They document the quotient
+	// family without introducing a second lowering registry.
+	PrimitiveFamily string `json:"primitive_family,omitempty"`
+	KernelClass     string `json:"kernel_class,omitempty"`
+	// ValidationOnly closes an evidence/analysis contract without making it
+	// an executable UAST rewrite. Such rules stay visible in the registry but
+	// are excluded from the lowering worklist.
+	ValidationOnly    bool              `json:"validation_only,omitempty"`
+	PreservationClass LoweringExactness `json:"preservation_class"`
+	EvidenceStatus    string            `json:"evidence_status"`
+	Implemented       bool              `json:"implemented"`
+	ComplexityBefore  int               `json:"complexity_before"`
+	ComplexityAfter   int               `json:"complexity_after"`
 	// Applier is intentionally not serialized.  It is only used after all
 	// declarative guards have passed and receives a mutable UAST clone.
 	Applier func(*UniversalASTDocument, int) error `json:"-"`
@@ -92,7 +102,7 @@ func UniversalLoweringRules() []UniversalLoweringRule {
 	rules := []UniversalLoweringRule{
 		{ID: "uast.identity.unary_plus", SourceSemantic: "identity", ResultSemantics: []string{"value"}, ComplexityBefore: 2, ComplexityAfter: 1, PreservationClass: LoweringExact, EvidenceStatus: "IMPLEMENTED", Implemented: true, Applier: lowerUnaryIdentity},
 		{ID: "uast.boolean.conditional_to_if", SourceSemantic: "conditional", ResultSemantics: []string{"if"}, RequiredContracts: []string{"short_circuit", "evaluation_order"}, ComplexityBefore: 3, ComplexityAfter: 2, PreservationClass: LoweringExact, EvidenceStatus: "IMPLEMENTED", Implemented: true, Applier: lowerConditionalMarker},
-		{ID: "control.conditional_expr", SourceSemantic: "control.conditional_expr", ResultSemantics: []string{"temporary", "if", "assignment"}, RequiredTypes: []string{"branch_type_compatible"}, RequiredEffects: []string{"branch_effects_preserved"}, RequiredContracts: []string{"evaluation_order", "short_circuit"}, ComplexityBefore: 4, ComplexityAfter: 4, PreservationClass: LoweringExact, EvidenceStatus: "IMPLEMENTED"},
+		{ID: "control.conditional_expr", SourceSemantic: "control.conditional_expr", ResultSemantics: []string{"temporary", "if", "assignment"}, RequiredTypes: []string{"branch_type_compatible"}, RequiredEffects: []string{"branch_effects_preserved"}, RequiredContracts: []string{"evaluation_order", "short_circuit"}, ComplexityBefore: 4, ComplexityAfter: 4, PreservationClass: LoweringExact, EvidenceStatus: "IMPLEMENTED", Implemented: true, Applier: lowerConditionalMarker},
 		{ID: "control.goto", SourceSemantic: "control.goto", ResultSemantics: []string{"state", "loop", "switch", "continue"}, RequiredContracts: []string{"cfg_exact"}, ComplexityBefore: 1, ComplexityAfter: 5, PreservationClass: LoweringExact, EvidenceStatus: "MATRIX_EVIDENCE"},
 		{ID: "control.short_circuit", SourceSemantic: "control.short_circuit", ResultSemantics: []string{"if", "branch"}, RequiredTypes: []string{"truthiness"}, RequiredEffects: []string{"branch_effects_preserved"}, RequiredContracts: []string{"short_circuit"}, ComplexityBefore: 2, ComplexityAfter: 3, PreservationClass: LoweringExact, EvidenceStatus: "MATRIX_EVIDENCE"},
 		{ID: "control.switch_cfg", SourceSemantic: "control.switch_cfg", ResultSemantics: []string{"labels", "basic_blocks", "edges"}, RequiredTypes: []string{"case_type"}, RequiredEffects: []string{"control"}, RequiredContracts: []string{"fallthrough_order"}, ComplexityBefore: 1, ComplexityAfter: 4, PreservationClass: LoweringExact, EvidenceStatus: "MATRIX_EVIDENCE"},
@@ -133,7 +143,36 @@ func UniversalLoweringRules() []UniversalLoweringRule {
 		{ID: "memory.layout_edgecases", SourceSemantic: "memory.layout_edgecases", ResultSemantics: []string{"layout_constraint"}, RequiredTypes: []string{"layout", "abi"}, RequiredEffects: []string{"memory"}, ComplexityBefore: 1, ComplexityAfter: 1, PreservationClass: LoweringExact, EvidenceStatus: "UNRESOLVED"},
 		{ID: "memory.unsafe", SourceSemantic: "memory.unsafe", ResultSemantics: []string{"provenance", "abi"}, RequiredTypes: []string{"provenance", "abi"}, RequiredEffects: []string{"memory"}, ComplexityBefore: 1, ComplexityAfter: 1, PreservationClass: LoweringExact, EvidenceStatus: "UNRESOLVED"},
 	}
+	bindContractFamilyRules(rules)
 	return rules
+}
+
+// bindContractFamilyRules promotes only those residual contracts whose
+// structured semantics have an existing target-neutral canonical operation.
+// This is one data-driven batch over the registry: no language or case
+// branches are introduced. Contracts without a proven canonical operation
+// remain visible as unresolved evidence rows.
+func bindContractFamilyRules(rules []UniversalLoweringRule) {
+	for i := range rules {
+		projection, ok := contractProjection(rules[i].ID)
+		if !ok {
+			continue
+		}
+		rules[i].PrimitiveFamily = projection.Family
+		rules[i].KernelClass = projection.Kernel
+		if !projection.Executable || projection.CanonicalOp == "" {
+			rules[i].Implemented = true
+			rules[i].EvidenceStatus = "VALIDATION_ONLY"
+			rules[i].ValidationOnly = true
+			continue
+		}
+		p := projection
+		rules[i].Implemented = true
+		rules[i].EvidenceStatus = "MATRIX_FAMILY_EXECUTABLE"
+		rules[i].Applier = func(u *UniversalASTDocument, id int) error {
+			return lowerContractFamilyMarker(u, id, p)
+		}
+	}
 }
 
 func loweringRuleKey(c universalDecodedCommon) []string {
@@ -197,7 +236,7 @@ func ruleFeasible(rule UniversalLoweringRule, target string, _ *UniversalASTDocu
 func findLoweringRule(c universalDecodedCommon, target string, u *UniversalASTDocument) *UniversalLoweringRule {
 	keys := loweringRuleKey(c)
 	for _, rule := range UniversalLoweringRegistry() {
-		if !rule.Implemented || rule.PreservationClass != LoweringExact {
+		if !rule.Implemented || rule.ValidationOnly || rule.PreservationClass != LoweringExact {
 			continue
 		}
 		for _, key := range keys {
@@ -363,6 +402,42 @@ func lowerConditionalMarker(u *UniversalASTDocument, id int) error {
 	return nil
 }
 
+// lowerContractFamilyMarker is the shared family-level adapter used by the
+// residual contract rules. It only rewrites the structured operation field;
+// children, relations, source spans, bindings, type/effect annotations and
+// provenance remain untouched. The original contract id is retained in
+// SemanticID so a target can inspect the source-neutral evidence if needed.
+func lowerContractFamilyMarker(u *UniversalASTDocument, id int, projection contractFamilyProjection) error {
+	if id < 0 || id >= len(u.Nodes) {
+		return fmt.Errorf("node %d out of range", id)
+	}
+	n := &u.Nodes[id]
+	var op universalOperationRecord
+	if err := decodeUniversalField(n, "operation", &op); err != nil {
+		return err
+	}
+	if op.SemanticID == "" {
+		op.SemanticID = op.Semantics.Operation
+	}
+	op.Semantics.Operation = projection.CanonicalOp
+	data, err := json.Marshal(op)
+	if err != nil {
+		return err
+	}
+	if n.Fields == nil {
+		n.Fields = map[string]json.RawMessage{}
+	}
+	n.Fields["operation"] = data
+	if n.Attributes == nil {
+		n.Attributes = map[string]json.RawMessage{}
+	}
+	family, _ := json.Marshal(projection.Family)
+	kernel, _ := json.Marshal(projection.Kernel)
+	n.Attributes["lowering.primitive_family"] = family
+	n.Attributes["lowering.kernel_class"] = kernel
+	return nil
+}
+
 type UniversalLoweringAnalysis struct {
 	Schema                  string                    `json:"schema"`
 	Rules                   []UniversalLoweringRule   `json:"rules"`
@@ -411,7 +486,7 @@ func AnalyzeUniversalLowering() (UniversalLoweringAnalysis, error) {
 			}
 			matched := false
 			for _, rule := range rules {
-				if !rule.Implemented || rule.PreservationClass != LoweringExact {
+				if !rule.Implemented || rule.ValidationOnly || rule.PreservationClass != LoweringExact {
 					continue
 				}
 				for _, result := range rule.ResultSemantics {
@@ -498,7 +573,7 @@ func WriteUniversalLoweringAnalysis(out string) (UniversalLoweringAnalysis, erro
 			direct := preservation.Status(fi, ti) == PreservationDirect
 			lowerable := false
 			for _, rule := range analysis.Rules {
-				if !rule.Implemented || rule.PreservationClass != LoweringExact {
+				if !rule.Implemented || rule.ValidationOnly || rule.PreservationClass != LoweringExact {
 					continue
 				}
 				for _, result := range rule.ResultSemantics {

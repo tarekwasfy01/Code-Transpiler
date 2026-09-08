@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // matrix-audit exposes the existing transpilers without the GUI/runtimeassets dependency.
 // It is an audit adapter, not an alternate implementation of translation.
 package main

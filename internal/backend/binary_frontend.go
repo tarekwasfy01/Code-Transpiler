@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // This file is the productive binary boundary for the bounded x86-64 subset
@@ -64,6 +65,14 @@ func CompileBinaryInput(data []byte, opts CompileOptions) (CompileResult, error)
 		if target == "" {
 			target = "c"
 		}
+		if strings.EqualFold(target, "semantic") || strings.EqualFold(target, "uast") {
+			encoded, e := sp.MarshalSemanticJSON()
+			if e != nil {
+				return result, e
+			}
+			result.Text = string(encoded)
+			return result, nil
+		}
 		text, e := EmitSemantic(target, sp)
 		if e != nil {
 			return result, e
@@ -123,11 +132,30 @@ func CompileBinaryInput(data []byte, opts CompileOptions) (CompileResult, error)
 		if err != nil {
 			return result, err
 		}
-		result.Bytes, err = pe64Image(code, labels, []x64Function{{Label: "native_entry", End: "native_end", Frame: 16}})
+		// Preserve the frame contract of the reconstructed prologue.  A fixed
+		// default here silently produced incorrect .xdata after ASM/binary
+		// round-trips (for example an 80-byte frame became 16 bytes).
+		frame := inferredX64Frame(wrapped.Instructions)
+		result.Bytes, err = pe64Image(code, labels, []x64Function{{Label: "native_entry", End: "native_end", Frame: frame}})
 	default:
 		return result, fmt.Errorf("binary frontend: unsupported output kind %q", opts.OutputKind)
 	}
 	return result, err
+}
+
+// inferredX64Frame recovers the stack allocation represented by the parsed
+// instruction stream.  It deliberately only accepts the explicit structured
+// sub_sp operation; unknown prologues remain fail-closed in pe64Image rather
+// than being assigned a guessed frame size.
+func inferredX64Frame(instructions []x64Instruction) int {
+	for _, in := range instructions {
+		if in.Op == "sub_sp" && in.A.Kind == 'i' && in.A.Value > 0 {
+			return int(in.A.Value)
+		}
+	}
+	// A minimal wrapper has no explicit allocation but still needs a valid
+	// aligned unwind record for the saved frame pointer.
+	return 16
 }
 
 // LiftBinaryInput exposes the same canonical SemanticProgram used by source
@@ -211,12 +239,22 @@ func liftStraightLineX64(p x64Program) (*SemanticProgram, error) {
 		}
 		return &BinaryExpr{Op: op, L: left, R: right}
 	}
-	for _, in := range p.Instructions {
+	for i, in := range p.Instructions {
 		switch in.Op {
-		case "label", "sub_sp", "add_sp", "cqo":
+		case "label", "nop", "sub_sp", "add_sp", "cqo":
 			// Labels and a balanced frame setup carry representation facts but do
-			// not alter the recovered expression value on this proven path.
+			// not alter the recovered expression value on this proven path. NOP and
+			// residual padding are likewise retained by the decoder but have no
+			// source-level value to recover.
 			continue
+		case "int3":
+			// INT3 is only ignorable when CFG reachability proved it is residual
+			// padding. A reachable INT3 is an observable trap and must never be
+			// silently erased while lifting to canonical source semantics.
+			if i < len(p.Classifications) && p.Classifications[i] == "padding_int3" {
+				continue
+			}
+			return nil, fmt.Errorf("binary frontend: reachable INT3 trap has no proven source-semantic lift")
 		case "push":
 			machineStack = append(machineStack, operand(in.A))
 		case "pop":
@@ -320,6 +358,20 @@ func parseAsmOperand(ts []asmTok) (x64Operand, int, error) {
 	if strings.HasPrefix(t, "xmm") {
 		if r, e := strconv.Atoi(strings.TrimPrefix(t, "xmm")); e == nil {
 			return xr(byte(r)), 1, nil
+		}
+	}
+	// NASM/renderer output may spell signed immediates as two tokens ("-",
+	// "1") because '-' is also the memory-displacement operator.  Preserve
+	// the sign here instead of treating the sign as a label and the magnitude
+	// as a second operand.  This is required for mov/add/sub/cmp negative
+	// immediates as well as signed stack-frame adjustments.
+	if (t == "-" || t == "+") && len(ts) >= 2 {
+		v, e := strconv.ParseInt(strings.TrimPrefix(ts[1].text, "#"), 0, 64)
+		if e == nil {
+			if t == "-" {
+				v = -v
+			}
+			return xi(v), 2, nil
 		}
 	}
 	if t == "[" {
@@ -428,9 +480,19 @@ func parseX64Assembly(src string) (x64Program, error) {
 		}
 		if op == "sub" && a.Kind == 'r' && a.Reg == xRSP {
 			op = "sub_sp"
+			// The textual form has rsp as the destination and the frame
+			// immediate as the second operand.  x64Program's structured
+			// sub_sp/add_sp form stores that immediate in A, so do not drop it
+			// while canonicalizing the instruction.
+			if b.Kind == 'i' {
+				a = b
+			}
 		}
 		if op == "add" && a.Kind == 'r' && a.Reg == xRSP {
 			op = "add_sp"
+			if b.Kind == 'i' {
+				a = b
+			}
 		}
 		p.Instructions = append(p.Instructions, x64Instruction{op, a, b})
 	}
@@ -554,30 +616,82 @@ func decodeX64(b []byte, base uint64) (x64Program, error) {
 			if mod == 3 {
 				return r, xr(rmReg(low)), nil
 			}
-			if mod != 2 {
-				return 0, x64Operand{}, fmt.Errorf("x64: unsupported ModRM mode %d at %d", mod, at)
-			}
-			baseReg := rmReg(low)
-			if low == 4 {
+			// Decode all architectural memory forms.  In particular mod=01 is a
+			// signed disp8 (the common stack-frame form), while mod=00/rm=5 is
+			// RIP-relative and mod=00/SIB.base=5 is absolute disp32.
+			mem := x64Operand{Kind: 'm'}
+			if low == 4 { // SIB
 				if err := need(i, 1); err != nil {
 					return 0, x64Operand{}, err
 				}
 				sib := b[i]
 				i++
-				if sib != 0x24 {
-					return 0, x64Operand{}, fmt.Errorf("x64: unsupported SIB 0x%02x at %d", sib, at)
+				scale := byte(1) << (sib >> 6)
+				idxRaw, baseRaw := (sib>>3)&7, sib&7
+				mem.Scale = scale
+				if idxRaw != 4 {
+					mem.Index, mem.HasIndex = rmReg(idxRaw), true
 				}
-				baseReg = rmReg(sib)
+				if mod == 0 && baseRaw == 5 {
+					mem.Absolute = true
+				} else {
+					mem.Reg, mem.HasBase = rmReg(baseRaw), true
+				}
+			} else if mod == 0 && low == 5 {
+				mem.RIPRelative = true
+			} else {
+				mem.Reg, mem.HasBase = rmReg(low), true
 			}
-			if err := need(i, 4); err != nil {
-				return 0, x64Operand{}, err
+			switch mod {
+			case 0:
+				if mem.RIPRelative || mem.Absolute {
+					if err := need(i, 4); err != nil {
+						return 0, x64Operand{}, err
+					}
+					mem.Value = int64(int32(binary.LittleEndian.Uint32(b[i:])))
+					i += 4
+				}
+			case 1:
+				if err := need(i, 1); err != nil {
+					return 0, x64Operand{}, err
+				}
+				mem.Value = int64(int8(b[i]))
+				i++
+			case 2:
+				if err := need(i, 4); err != nil {
+					return 0, x64Operand{}, err
+				}
+				mem.Value = int64(int32(binary.LittleEndian.Uint32(b[i:])))
+				i += 4
+			default:
+				return 0, x64Operand{}, fmt.Errorf("x64: unsupported ModRM mode %d at %d", mod, at)
 			}
-			disp := int64(int32(binary.LittleEndian.Uint32(b[i:])))
-			i += 4
-			return r, xm(baseReg, int(disp)), nil
+			return r, mem, nil
 		}
 		add := func(op string, a, b x64Operand) { rows = append(rows, decoded{at, x64Instruction{op, a, b}}) }
 		switch {
+		case op == 0x90:
+			// NOP has no source-semantic effect. Keep it as a machine operation so
+			// provenance/cursor accounting remains lossless; the semantic lifter
+			// deliberately ignores it.
+			add("nop", x64Operand{}, x64Operand{})
+		case op == 0xcc:
+			// INT3 is commonly alignment/padding in residual .text bytes. It is
+			// retained as a non-semantic machine classification and never guessed
+			// into a source operation by the lifter.
+			add("int3", x64Operand{}, x64Operand{})
+		case op == 0xeb || op >= 0x70 && op <= 0x7f:
+			if err := need(i, 1); err != nil {
+				return x64Program{}, err
+			}
+			d := int(int8(b[i]))
+			i++
+			if op == 0xeb {
+				add("jmp", xl(label(i+d)), x64Operand{})
+				break
+			}
+			names := map[byte]string{0x70: "jo", 0x71: "jno", 0x72: "jb", 0x73: "jae", 0x74: "je", 0x75: "jne", 0x76: "jbe", 0x77: "ja", 0x78: "js", 0x79: "jns", 0x7a: "jp", 0x7b: "jnp", 0x7c: "jl", 0x7d: "jge", 0x7e: "jle", 0x7f: "jg"}
+			add(names[op], xl(label(i+d)), x64Operand{})
 		case op >= 0xb8 && op <= 0xbf && rex&8 != 0:
 			if err := need(i, 8); err != nil {
 				return x64Program{}, err
@@ -675,21 +789,45 @@ func decodeX64(b []byte, base uint64) (x64Program, error) {
 				return x64Program{}, fmt.Errorf("x64: unsupported d3 group %d", r&7)
 			}
 			add(n, x, x64Operand{})
-		case op == 0x81:
-			if err := need(i, 5); err != nil {
+		case op == 0x80 || op == 0x81 || op == 0x83:
+			// Group-1 immediate arithmetic.  The native encoder uses the
+			// imm32 form (0x81), while normal assemblers commonly select the
+			// sign-extended imm8 form (0x83), e.g. 48 83 EC 20 for
+			// `sub rsp, 32`.  Decode both forms structurally and retain the
+			// signed immediate value.
+			width := 4
+			if op == 0x80 || op == 0x83 {
+				width = 1
+			}
+			group, x, e := readRM()
+			if e != nil {
+				return x64Program{}, e
+			}
+			if err := need(i, width); err != nil {
 				return x64Program{}, err
 			}
-			m := b[i]
-			i++
-			if m != 0xec && m != 0xc4 {
-				return x64Program{}, fmt.Errorf("x64: unsupported 81 ModRM 0x%02x", m)
-			}
-			v := int64(int32(binary.LittleEndian.Uint32(b[i:])))
-			i += 4
-			if m == 0xec {
-				add("sub_sp", xi(v), x64Operand{})
+			var v int64
+			if width == 1 {
+				v = int64(int8(b[i]))
 			} else {
-				add("add_sp", xi(v), x64Operand{})
+				v = int64(int32(binary.LittleEndian.Uint32(b[i:])))
+			}
+			i += width
+			switch group & 7 {
+			case 0, 1, 4, 5, 6, 7:
+				names := map[byte]string{0: "add", 1: "or", 4: "and", 5: "sub", 6: "xor", 7: "cmp"}
+				name := names[group&7]
+				if x.Kind == 'r' && x.Reg == xRSP && (group&7 == 0 || group&7 == 5) {
+					if group&7 == 0 {
+						add("add_sp", xi(v), x64Operand{})
+					} else {
+						add("sub_sp", xi(v), x64Operand{})
+					}
+				} else {
+					add(name, x, xi(v))
+				}
+			default:
+				return x64Program{}, fmt.Errorf("x64: unsupported group1 operation /%d", group&7)
 			}
 		case op >= 0x50 && op <= 0x57:
 			add("push", xr(rmReg(op-0x50)), x64Operand{})
@@ -714,8 +852,84 @@ func decodeX64(b []byte, base uint64) (x64Program, error) {
 	for _, row := range rows {
 		if l := labels[row.at]; l != "" {
 			p.Instructions = append(p.Instructions, x64Instruction{"label", xl(l), x64Operand{}})
+			p.Offsets = append(p.Offsets, -1)
+			p.Classifications = append(p.Classifications, "label")
 		}
 		p.Instructions = append(p.Instructions, row.in)
+		p.Offsets = append(p.Offsets, row.at)
+		p.Classifications = append(p.Classifications, x64MachineClassification(row.in.Op))
 	}
+	classifyX64Reachability(&p)
 	return p, nil
+}
+
+// classifyX64Reachability keeps padding evidence separate from observable
+// traps. The decoder emits every byte as a structured instruction first; only
+// then do CFG edges decide whether an INT3 is unreachable residual padding or
+// an executable breakpoint/trap. This is representation evidence, never a
+// source-language inference.
+func classifyX64Reachability(p *x64Program) {
+	if p == nil || len(p.Instructions) == 0 {
+		return
+	}
+	labels := map[string]int{}
+	for i, in := range p.Instructions {
+		if in.Op == "label" && in.A.Kind == 'l' {
+			labels[in.A.Label] = i
+		}
+	}
+	successors := func(i int) []int {
+		in := p.Instructions[i]
+		next := func() []int {
+			if i+1 < len(p.Instructions) {
+				return []int{i + 1}
+			}
+			return nil
+		}
+		if in.Op == "label" {
+			return next()
+		}
+		if in.Op == "ret" || in.Op == "ud2" || in.Op == "int3" {
+			return nil
+		}
+		if in.Op == "jmp" {
+			if in.A.Kind == 'l' {
+				if target, ok := labels[in.A.Label]; ok {
+					return []int{target}
+				}
+			}
+			return nil
+		}
+		if x64MachineClassification(in.Op) == "conditional_branch" {
+			out := next()
+			if in.A.Kind == 'l' {
+				if target, ok := labels[in.A.Label]; ok {
+					out = append(out, target)
+				}
+			}
+			return out
+		}
+		return next()
+	}
+	reachable := make([]bool, len(p.Instructions))
+	queue := []int{0}
+	for len(queue) > 0 {
+		i := queue[0]
+		queue = queue[1:]
+		if i < 0 || i >= len(p.Instructions) || reachable[i] {
+			continue
+		}
+		reachable[i] = true
+		queue = append(queue, successors(i)...)
+	}
+	for i, in := range p.Instructions {
+		if in.Op != "int3" {
+			continue
+		}
+		if reachable[i] {
+			p.Classifications[i] = "trap_int3"
+		} else {
+			p.Classifications[i] = "padding_int3"
+		}
+	}
 }

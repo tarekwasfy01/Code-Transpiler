@@ -1,1 +1,0 @@
-This schema construction uses no priority vector, ranking, top-k feature selection, or implementation order.

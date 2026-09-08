@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // DirectLoweringContract is a checked product-path registration. It stores no

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 const integerCppPrelude = `
@@ -17,7 +18,7 @@ static RValue r_exact(const std::string&name,int bits,bool sign,const std::strin
  if(name=="integer.less")return RValue(less);if(name=="integer.less_equal")return RValue(less||x==y);
  if(name=="integer.greater")return RValue(!less&&x!=y);if(name=="integer.greater_equal")return RValue(!less);
  uint64_t result=0;
- if(name=="integer.add")result=x+y;else if(name=="integer.subtract")result=x-y;else if(name=="integer.multiply")result=x*y;
+ if(name=="integer.add")result=x+y;else if(name=="integer.subtract")result=x-y;else if(name=="integer.multiply")result=x*y;else if(name=="integer.divide"){if(y==0)throw std::runtime_error("integer.divide by zero");result=sign?static_cast<uint64_t>(static_cast<int64_t>(x)/static_cast<int64_t>(y)):x/y;}
  else if(name=="integer.and")result=x&y;else if(name=="integer.or")result=x|y;else if(name=="integer.xor")result=x^y;else if(name=="integer.and_not")result=x&~y;else throw std::runtime_error("unknown integer operation");
  return r_int_value(result,bits,sign);
 }

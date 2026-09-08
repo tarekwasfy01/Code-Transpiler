@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // canonical-witness-matrix executes the backend matrix from generated
 // Canonical UAST witnesses. Unlike source replay, an absent frontend source
 // witness never suppresses Primitive x Target validation.

@@ -1,9 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,158554041d80602d84565fe6c11eb9c1568fd164caa04711dcde1bd1c236d374,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_assembly,"binary frontend: semantic lifting unavailable for instruction ""push"""
-Q0002,158554041d80602d84565fe6c11eb9c1568fd164caa04711dcde1bd1c236d374,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_executable,"binary frontend: semantic lifting unavailable for instruction ""push"""
-Q0003,158554041d80602d84565fe6c11eb9c1568fd164caa04711dcde1bd1c236d374,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_machine_code,"binary frontend: semantic lifting unavailable for instruction ""push"""
-Q0004,158554041d80602d84565fe6c11eb9c1568fd164caa04711dcde1bd1c236d374,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_object,"binary frontend: semantic lifting unavailable for instruction ""push"""
-Q0005,f92a11dfb4b06ee982dbb8ea002a2b5afbe6625385c531abdaba8b29af74f5d3,NATIVE,UNKNOWN_FAILURE,assembly,"native call ""listOf"" requires linked implementation"
-Q0006,f92a11dfb4b06ee982dbb8ea002a2b5afbe6625385c531abdaba8b29af74f5d3,NATIVE,UNKNOWN_FAILURE,executable,"native call ""listOf"" requires linked implementation"
-Q0007,f92a11dfb4b06ee982dbb8ea002a2b5afbe6625385c531abdaba8b29af74f5d3,NATIVE,UNKNOWN_FAILURE,machine_code,"native call ""listOf"" requires linked implementation"
-Q0008,f92a11dfb4b06ee982dbb8ea002a2b5afbe6625385c531abdaba8b29af74f5d3,NATIVE,UNKNOWN_FAILURE,object,"native call ""listOf"" requires linked implementation"

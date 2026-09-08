@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -36,10 +37,11 @@ func resolveSyntaxTool(tool string) (string, bool) {
 // mode. Checked=false means the local toolchain is unavailable; it is not a
 // positive syntax proof and is kept separate in reports.
 type TargetSyntaxCheck struct {
-	Checked bool   `json:"checked"`
-	Valid   bool   `json:"valid"`
-	Tool    string `json:"tool,omitempty"`
-	Failure string `json:"failure,omitempty"`
+	Checked             bool   `json:"checked"`
+	Valid               bool   `json:"valid"`
+	Tool                string `json:"tool,omitempty"`
+	Failure             string `json:"failure,omitempty"`
+	SemanticDiagnostics bool   `json:"semantic_diagnostics,omitempty"`
 }
 
 // SyntaxFailureSignature groups actual target diagnostics into the stable
@@ -105,9 +107,47 @@ func CheckTargetSyntax(target, source string) TargetSyntaxCheck {
 	output, runErr := cmd.CombinedOutput()
 	if runErr != nil {
 		diagnostic := strings.TrimSpace(string(output))
+		// Most installed target tools are compilers, not parser-only APIs. Their
+		// name/type resolution failures must not demote structurally valid emitted
+		// source to the compatibility runtime. Keep that evidence on the result,
+		// but reserve Valid=false for an actual syntax diagnostic.
+		if syntaxIsBlockedOnlyBySemanticResolution(diagnostic) {
+			return TargetSyntaxCheck{Checked: true, Valid: true, Tool: tool, Failure: diagnostic, SemanticDiagnostics: true}
+		}
 		return TargetSyntaxCheck{Checked: true, Tool: tool, Failure: SyntaxFailureSignature(diagnostic) + ": " + diagnostic}
 	}
 	return TargetSyntaxCheck{Checked: true, Valid: true, Tool: tool}
+}
+
+// syntaxIsBlockedOnlyBySemanticResolution separates the part of a compiler
+// diagnostic that belongs to later target compilation from source grammar.
+// It is deliberately conservative: any known syntactic marker wins, and a
+// result is accepted only when a known resolution marker is also present.
+func syntaxIsBlockedOnlyBySemanticResolution(diagnostic string) bool {
+	d := strings.ToLower(diagnostic)
+	for _, marker := range []string{
+		"syntax error", "expected ", "unexpected ", "unterminated", "unclosed",
+		"mismatched input", "illegal start", "not a statement", "reached end",
+		"invalid token", "missing delimiter", "parse error",
+	} {
+		if strings.Contains(d, marker) {
+			return false
+		}
+	}
+	for _, marker := range []string{
+		"undeclared", "not declared", "cannot find value", "cannot find function",
+		"cannot find type", "cannot find symbol", "failed to resolve", "unknown type name",
+		"implicit declaration", "unresolved reference", "not found in this scope",
+		// Tool diagnostics follow the host locale. These are the stable German
+		// equivalents emitted by javac/csc on the supported Windows hosts.
+		"symbol nicht gefunden", "variable nicht gefunden", "klasse nicht gefunden",
+		"typ nicht gefunden", "bezeichner nicht gefunden",
+	} {
+		if strings.Contains(d, marker) {
+			return true
+		}
+	}
+	return false
 }
 
 func syntaxCommand(target, file string) (string, []string) {

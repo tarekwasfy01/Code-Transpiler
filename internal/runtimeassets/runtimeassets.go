@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // Package runtimeassets exposes the runtime source already compiled into the
 // executable. No separately installed compiler is represented as bundled.
 package runtimeassets

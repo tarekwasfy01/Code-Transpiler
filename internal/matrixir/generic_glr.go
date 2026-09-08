@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 import (
@@ -262,7 +263,7 @@ func reduceGLRVersion(v *glrVersion, a ParseAction, p *GenericParserEngine, t Re
 	n := &ParseNode{
 		SymbolID: a.LhsSymbolID, ProductionID: a.ProductionID,
 		ParserState: baseState, DynamicPrecedence: a.DynamicPrecedence,
-		Children: children, Fields: map[int][]int{},
+		Children: children, Fields: map[int][]int{}, FieldChildren: map[int][]int{},
 	}
 	if len(children) > 0 {
 		n.Start = children[0].Start
@@ -278,6 +279,7 @@ func reduceGLRVersion(v *glrVersion, a ParseAction, p *GenericParserEngine, t Re
 	for _, fm := range fieldMap {
 		if fm.Language == language && fm.ChildIndex >= 0 && fm.ChildIndex < len(children) {
 			n.Fields[fm.FieldID] = append(n.Fields[fm.FieldID], children[fm.ChildIndex].SymbolID)
+			n.FieldChildren[fm.FieldID] = append(n.FieldChildren[fm.FieldID], fm.ChildIndex)
 		}
 	}
 
@@ -713,9 +715,11 @@ func (e *GenericLexerLREngine) parseRealNodesGLRContext(ctx context.Context, sou
 	lexer := NewGenericLexerEngine(e.Language)
 	var rootScanner externalScannerRuntime
 	if t.ExternalScanners != nil {
-		if scanner, scanErr := newCGOExternalScanner(e.Language); scanErr == nil {
-			rootScanner = scanner
+		scanner, scanErr := newExternalScannerRuntime(e.Language)
+		if scanErr != nil {
+			return nil, ParseStats{}, false, fmt.Errorf("external scanner required for %s: %w", e.Language, scanErr)
 		}
+		rootScanner = scanner
 	}
 	versions := []*glrVersion{{ID: 0, Entries: []glrEntry{{State: initial}}, ExternalScanner: rootScanner}}
 	nextVersionID := 1

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // automatic-repair-synthesizer turns the frozen V6 residuals into a small,
 // deterministic repair basis.  It consumes only structured root-cause rows and
 // existing backend authorities; it never classifies diagnostics or rewrites

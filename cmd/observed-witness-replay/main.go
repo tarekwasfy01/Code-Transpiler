@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // observed-witness-replay executes only source operations that have already
 // been observed in a Canonical-UAST sidecar.  It deliberately emits an
 // explicit SOURCE_WITNESS_MISSING row for evidence-only primitives instead of

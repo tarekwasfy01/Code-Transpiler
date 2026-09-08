@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -261,6 +262,25 @@ func EmitSemantic(target string, p *SemanticProgram) (string, error) {
 		return "", fmt.Errorf("unknown target %q", target)
 	}
 	return generateTargetFromUniversal(u.Evaluation, target, graph)
+}
+
+// EmitSemanticCompatibility is the explicit document-level fallback used by
+// the source-to-target pipeline after strict native and matrix-lowered
+// projections have been exhausted. It still consumes the canonical UAST;
+// compatibility rendering never reparses source text or invokes a legacy
+// frontend.
+func EmitSemanticCompatibility(target string, p *SemanticProgram) (string, error) {
+	if err := ValidateSemanticProgram(p); err != nil {
+		return "", err
+	}
+	if err := validateExecutableDialects(p); err != nil {
+		return "", err
+	}
+	u, err := canonicalUniversalAST(p)
+	if err != nil {
+		return "", err
+	}
+	return (UniversalTargetProjector{}).Emit(u, target)
 }
 
 // EmitSemanticPreserveOriginal is the explicit same-language surface-plane

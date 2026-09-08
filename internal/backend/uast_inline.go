@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -50,6 +51,24 @@ func uastFunctionContainsLoop(graph *uastExecutionGraph, id int) bool {
 	for _, roles := range graph.children[id] {
 		for _, child := range roles {
 			if uastFunctionContainsLoop(graph, child.ID) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// uastFunctionHasExplicitReturn is used by compatibility closure renderers
+// whose target compilers reject a trailing return after a guaranteed return
+// in the generated body (notably Java).  The answer comes from the UAST graph,
+// never from rendered source text.
+func uastFunctionHasExplicitReturn(graph *uastExecutionGraph, id int) bool {
+	if graph.common[id].Kind == "return" {
+		return true
+	}
+	for _, roles := range graph.children[id] {
+		for _, child := range roles {
+			if !child.Meta.Missing && uastFunctionHasExplicitReturn(graph, child.ID) {
 				return true
 			}
 		}
@@ -218,6 +237,8 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 			return fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target c closure captures require runtime")
 		}
 		switch g.target {
+		case "r":
+			g.line(name + " <- function(" + strings.Join(names, ", ") + ") {")
 		case "python":
 			g.line("def " + name + "(" + strings.Join(names, ", ") + "):")
 			g.indent++
@@ -305,6 +326,7 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		g.bindings = savedBindings
 		return err
 	}
+	hasReturn := uastFunctionHasExplicitReturn(graph, id)
 	switch g.target {
 	case "python":
 		g.line("def " + name + "(*__args):")
@@ -344,6 +366,10 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		g.line("return nil")
 		g.indent--
 		g.line("}")
+		// Go rejects an unused local function value.  Keeping the binding is
+		// semantically required even when the source never calls it, so mark the
+		// structured value as intentionally retained.
+		g.line("_ = " + name)
 	case "rust":
 		g.line("let mut " + name + " = |__args: Vec<RValue>| -> RValue {")
 		g.indent++
@@ -370,6 +396,66 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		g.line("return RValue::null();")
 		g.indent--
 		g.line("};")
+	case "java":
+		g.line("java.util.function.Function<Object[], Object> " + name + " = (__args) -> {")
+		g.indent++
+		for i, p := range params {
+			pc := graph.common[p.ID]
+			g.line(fmt.Sprintf("Object %s = __args.length > %d ? __args[%d] : %s;", g.name(pc.Name), i, i, defaultText(p.ID)))
+		}
+		if err := emitBody(); err != nil {
+			return err
+		}
+		if !hasReturn {
+			g.line("return null;")
+		}
+		g.indent--
+		g.line("};")
+	case "csharp":
+		g.line("System.Func<object[], object> " + name + " = (__args) => {")
+		g.indent++
+		for i, p := range params {
+			pc := graph.common[p.ID]
+			g.line(fmt.Sprintf("dynamic %s = __args.Length > %d ? __args[%d] : %s;", g.name(pc.Name), i, i, defaultText(p.ID)))
+		}
+		if err := emitBody(); err != nil {
+			return err
+		}
+		if !hasReturn {
+			g.line("return null;")
+		}
+		g.indent--
+		g.line("};")
+	case "kotlin":
+		g.line("val " + name + ": (Array<Any?>) -> Any? = { __args ->")
+		g.indent++
+		for i, p := range params {
+			pc := graph.common[p.ID]
+			g.line(fmt.Sprintf("val %s = if (__args.size > %d) __args[%d] else %s", g.name(pc.Name), i, i, defaultText(p.ID)))
+		}
+		if err := emitBody(); err != nil {
+			return err
+		}
+		if !hasReturn {
+			g.line("null")
+		}
+		g.indent--
+		g.line("}")
+	case "swift":
+		g.line("let " + name + ": ([Any]) -> Any = { __args in")
+		g.indent++
+		for i, p := range params {
+			pc := graph.common[p.ID]
+			g.line(fmt.Sprintf("let %s: Any = __args.count > %d ? __args[%d] : %s", g.name(pc.Name), i, i, defaultText(p.ID)))
+		}
+		if err := emitBody(); err != nil {
+			return err
+		}
+		if !hasReturn {
+			g.line("return NSNull()")
+		}
+		g.indent--
+		g.line("}")
 	case "c":
 		// C keeps the function symbol in the direct UAST call path.  The
 		// surrounding generated translation unit may provide the native

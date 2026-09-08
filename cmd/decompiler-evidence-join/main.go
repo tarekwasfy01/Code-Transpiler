@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // decompiler-evidence-join joins the prepared external binary/decompiler
 // evidence with the existing Primitive Compiler authority. It is deliberately
 // evidence-only: no raw opcode or project name can create a primitive by name.

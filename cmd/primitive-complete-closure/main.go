@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // primitive-complete-closure runs the existing primitive compiler against
 // structured UAST demand evidence.  It deliberately does not read diagnostic
 // text: a case without a canonical demand vector remains an evidence gap.

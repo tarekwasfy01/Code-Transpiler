@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // signature-bind exposes the shared binder for differential matrix verification.
 package main
 

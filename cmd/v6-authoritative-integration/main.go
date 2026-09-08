@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // v6-authoritative-integration compiles the structured v6 evidence into the
 // existing matrix reports. It never creates a second IR or registry: semantic
 // equivalents are mapped to the current canonical contracts, while donor and

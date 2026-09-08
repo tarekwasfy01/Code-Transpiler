@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -68,14 +69,42 @@ func (g *targetGen) nativeAssignment(name, expression string) string {
 // truth conversion before this emitter is reached.
 func (g *targetGen) nativeCondition(expression string) string { return expression }
 
-func (g *targetGen) nativeExpressionStatement(expression string) string {
+// condition renders a condition for the selected lowering mode.  Native
+// targets only reach this point after the UAST has proved a boolean value, so
+// they can consume the expression directly.  Compatibility lowering carries
+// tagged runtime values and must use the target's shared truth conversion;
+// emitting the value itself produces invalid constructs such as `if (any)` in
+// Go or `if (RValue)` in C++.
+func (g *targetGen) condition(expression string) string {
+	if g.nativeDirect {
+		return g.nativeCondition(expression)
+	}
+	return truthCall(g.target, expression)
+}
+
+// nativeExpressionStatement legalizes a value-producing UAST expression in
+// statement position. Java and C# only permit a restricted subset of
+// expressions as statements (notably calls and assignments). A structured
+// discard binding preserves evaluation for every other expression without
+// treating an emitted token sequence as semantic input.
+func (g *targetGen) nativeExpressionStatement(expression string, producesValue bool) string {
 	switch g.target {
 	case "go":
 		if strings.HasPrefix(expression, "fmt.Print") {
 			return expression + ";"
 		}
 		return "_ = " + expression
-	case "rust", "csharp", "java", "cpp", "c":
+	case "java":
+		if producesValue {
+			return "Object " + g.freshName("discard") + " = " + expression + ";"
+		}
+		return expression + ";"
+	case "csharp":
+		if producesValue {
+			return "object " + g.freshName("discard") + " = " + expression + ";"
+		}
+		return expression + ";"
+	case "rust", "cpp", "c":
 		if strings.HasSuffix(expression, ";") {
 			return expression
 		}
@@ -160,7 +189,10 @@ func (g *targetGen) nativeDispatch(name string, args []string) (string, error) {
 		if rendered, ok := nativeBinaryExpression(g.target, op, args[0], args[1]); ok {
 			return rendered, nil
 		}
-		if op == "^" || op == "**" {
+		// POWER reaches this boundary as the canonical `**` operator. `^` is
+		// reserved for the separately proved bitwise-XOR operation; source
+		// frontends that spell power with `^` normalize it before UAST creation.
+		if op == "**" {
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: exponentiation requires a target math contract")
 		}
 		return "(" + args[0] + " " + op + " " + args[1] + ")", nil
@@ -182,35 +214,52 @@ func (g *targetGen) nativeDispatch(name string, args []string) (string, error) {
 		return directNativeCall(g.target, "c", args), nil
 	}
 	if name == "[" || name == "[[" {
-		if len(args) != 2 {
+		if len(args) < 2 {
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: index arity")
 		}
-		index := args[1]
-		switch g.target {
-		case "python", "nim":
-			return args[0] + "[int(" + index + ") - 1]", nil
-		case "rust":
-			return args[0] + "[" + index + " as usize - 1]", nil
-		case "cpp":
-			return args[0] + "[static_cast<size_t>(" + index + " - 1)]", nil
-		case "csharp":
-			return args[0] + "[(int)" + index + " - 1]", nil
-		case "java":
-			return args[0] + "[(int)(" + index + " - 1)]", nil
-		case "c":
-			return args[0] + "[(size_t)((int)" + index + " - 1)]", nil
-		case "kotlin", "swift", "zig":
-			return args[0] + "[int(" + index + ") - 1]", nil
-		case "go":
-			return args[0] + "[int(" + index + ") - 1]", nil
-		case "julia":
-			return args[0] + "[Int(" + index + ")]", nil
+		value := args[0]
+		for _, index := range args[1:] {
+			var ok bool
+			value, ok = nativeIndexExpression(g.target, value, index)
+			if !ok {
+				return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: index representation for target %q", g.target)
+			}
 		}
+		return value, nil
 	}
 	if direct := directNativeCall(g.target, name, args); direct != "" {
 		return direct, nil
 	}
 	return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: call %q has no native contract for target %q (arguments: %s)", name, g.target, strings.Join(args, ", "))
+}
+
+// nativeIndexExpression is the shared target representation for one
+// structured index edge. Multi-dimensional/index-chain nodes are folded by
+// nativeDispatch, preserving operand order without reconstructing source text.
+func nativeIndexExpression(target, base, index string) (string, bool) {
+	switch target {
+	case "python", "nim":
+		return base + "[int(" + index + ") - 1]", true
+	case "rust":
+		return base + "[" + index + " as usize - 1]", true
+	case "cpp":
+		return base + "[static_cast<size_t>(" + index + " - 1)]", true
+	case "csharp":
+		return base + "[(int)" + index + " - 1]", true
+	case "java":
+		return base + "[(int)(" + index + " - 1)]", true
+	case "c":
+		return base + "[(size_t)((int)" + index + " - 1)]", true
+	case "kotlin", "swift", "zig":
+		return base + "[int(" + index + ") - 1]", true
+	case "go":
+		return base + "[int(" + index + ") - 1]", true
+	case "julia":
+		return base + "[Int(" + index + ")]", true
+	case "r":
+		return base + "[" + index + "]", true
+	}
+	return "", false
 }
 
 // nativeBinaryExpression is the target-legalization relation for canonical
@@ -219,24 +268,58 @@ func (g *targetGen) nativeDispatch(name string, args []string) (string, error) {
 // never take part in this decision.
 func nativeBinaryExpression(target, op, left, right string) (string, bool) {
 	switch op {
+	case "**":
+		// POWER is a canonical operation, not an infix spelling shared by all
+		// targets. Keep `^` available to C-family/Go callers as bitwise XOR and
+		// legalize only the canonical power form here.
+		switch target {
+		case "r", "julia":
+			return "(" + left + " ^ " + right + ")", true
+		case "python":
+			return "(" + left + " ** " + right + ")", true
+		case "go":
+			return "math.Pow(" + left + ", " + right + ")", true
+		case "rust":
+			return "(" + left + ").powf(" + right + ")", true
+		case "cpp":
+			return "std::pow(" + left + ", " + right + ")", true
+		case "c":
+			return "pow(" + left + ", " + right + ")", true
+		case "csharp":
+			return "Math.Pow(" + left + ", " + right + ")", true
+		case "java":
+			return "Math.pow(" + left + ", " + right + ")", true
+		case "kotlin":
+			return "Math.pow(" + left + ", " + right + ")", true
+		case "nim", "swift":
+			return "pow(" + left + ", " + right + ")", true
+		case "zig":
+			return "std.math.pow(f64, " + left + ", " + right + ")", true
+		}
 	case "%%":
 		switch target {
 		case "go":
-			return "math.Mod(" + left + ", " + right + ")", true
-		case "rust", "python", "csharp", "java", "kotlin":
+			return "(" + left + " - math.Floor(" + left + "/" + right + ")*" + right + ")", true
+		case "python":
 			return "(" + left + " % " + right + ")", true
+		case "rust":
+			return "((" + left + " as f64) - ((" + left + " as f64)/(" + right + " as f64)).floor()*(" + right + " as f64))", true
 		case "cpp":
-			return "std::fmod(" + left + ", " + right + ")", true
+			return "(" + left + " - std::floor(" + left + "/" + right + ")*" + right + ")", true
 		case "c":
-			return "fmod(" + left + ", " + right + ")", true
+			return "(" + left + " - floor(" + left + "/" + right + ")*" + right + ")", true
+		case "csharp", "java", "kotlin":
+			return "(" + left + " - Math.floor(" + left + "/" + right + ")*" + right + ")", true
 		case "julia":
 			return "mod(" + left + ", " + right + ")", true
 		case "nim":
-			return "(" + left + " mod " + right + ")", true
+			return "(" + left + " - floor(" + left + "/" + right + ")*" + right + ")", true
 		case "swift":
-			return left + ".truncatingRemainder(dividingBy: " + right + ")", true
+			return "(" + left + " - floor(" + left + "/" + right + ")*" + right + ")", true
 		case "zig":
-			return "@mod(" + left + ", " + right + ")", true
+			return "(" + left + " - @floor(" + left + "/" + right + ")*" + right + ")", true
+		case "r":
+			return "(" + left + " %% " + right + ")", true
 		}
 	case "%/%":
 		switch target {
@@ -278,6 +361,8 @@ func nativeSumExpression(target, value string) (string, string) {
 		return "sum(" + value + ")", ""
 	case "julia":
 		return "sum(" + value + ")", ""
+	case "r":
+		return "sum(" + value + ")", ""
 	case "nim":
 		return "sum(" + value + ")", ""
 	case "kotlin":
@@ -310,6 +395,8 @@ func nativeLengthExpression(target, value string) (string, bool) {
 	switch target {
 	case "go":
 		return "float64(len(" + value + "))", true
+	case "r":
+		return "length(" + value + ")", true
 	case "python":
 		return "len(" + value + ")", true
 	case "julia":
@@ -395,6 +482,23 @@ func (g *targetGen) uastMemberExpression(graph *uastExecutionGraph, id int) (str
 	if member == "" {
 		member = strings.TrimSpace(graph.common[id].Operation.Text)
 	}
+	// MatrixIR represents selectors as a base/member relation.  When the
+	// grammar places the member name in that child rather than in the parent
+	// field, consume the proved SymbolRef directly. This is a relation-driven
+	// projection, not a source-text reconstruction.
+	if member == "" {
+		memberID, hasMember, memberErr := graph.firstChild(id, "member", "property", "field", "selector")
+		if memberErr != nil {
+			return "", memberErr
+		}
+		if hasMember {
+			candidate := graph.common[memberID]
+			if candidate.Kind != "identifier" || strings.TrimSpace(candidate.Name) == "" {
+				return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: member node %d has no structured identifier member", id)
+			}
+			member = candidate.Name
+		}
+	}
 	if member == "" {
 		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: member node %d lacks a structured member name", id)
 	}
@@ -433,16 +537,27 @@ func (g *targetGen) uastSliceExpression(graph *uastExecutionGraph, id int) (stri
 	if err != nil {
 		return "", err
 	}
-	_, hasStep, err := part("step")
+	step, hasStep, err := part("step")
 	if err != nil {
 		return "", err
-	}
-	if hasStep {
-		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: slice step requires a target slice adapter")
 	}
 	// The UAST slice relation is zero-based once it reaches this target form;
 	// target spelling alone differs.  Omitted bounds remain omitted rather than
 	// being guessed from the source language.
+	if hasStep {
+		switch g.target {
+		case "python":
+			return value + "[" + start + ":" + end + ":" + step + "]", nil
+		case "julia":
+			return value + "[" + start + ":" + step + ":" + end + "]", nil
+		case "r":
+			return value + "[seq(" + start + ", " + end + ", by=" + step + ")]", nil
+		case "rust":
+			return value + "[" + start + ".." + end + "].iter().step_by(" + step + " as usize).copied().collect::<Vec<_>>()", nil
+		default:
+			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s requires a stepped-slice representation adapter", g.target)
+		}
+	}
 	switch g.target {
 	case "python", "julia", "go", "zig":
 		return value + "[" + start + ":" + end + "]", nil
@@ -808,7 +923,7 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 		// discard expression until a binding adapter is available.
 		if strings.TrimSpace(c.Name) == "" {
 			if g.nativeDirect {
-				g.line(g.nativeExpressionStatement(value))
+				g.line(g.nativeExpressionStatement(value, graph.common[expression].Kind != "call"))
 			} else {
 				g.line(exprStmt(g.target, value))
 			}
@@ -841,6 +956,15 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 		} else {
 			g.line(g.assignment(n, value))
 		}
+	case "function":
+		if strings.TrimSpace(c.Name) == "" {
+			// An anonymous closure used as a standalone expression has no
+			// declaration target. Evaluating it for side effects is a valid
+			// structured no-op at statement position; retain it in the UAST and
+			// avoid inventing a target binding.
+			return nil
+		}
+		return g.uastFunctionAssign(graph, g.name(c.Name), id)
 	case "expression":
 		expression, found, err := graph.firstChild(id, "expression", "value", "operand", "base", "receiver", "object")
 		if err != nil {
@@ -857,7 +981,7 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 			return err
 		}
 		if g.nativeDirect {
-			g.line(g.nativeExpressionStatement(value))
+			g.line(g.nativeExpressionStatement(value, graph.common[expression].Kind != "call"))
 		} else {
 			g.line(exprStmt(g.target, value))
 		}
@@ -878,9 +1002,7 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 		if err != nil {
 			return err
 		}
-		if g.nativeDirect {
-			conditionText = g.nativeCondition(conditionText)
-		}
+		conditionText = g.condition(conditionText)
 		switch g.target {
 		case "python":
 			g.line("if " + conditionText + ":")
@@ -926,14 +1048,17 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 				g.indent--
 			}
 		default:
-			g.line("if (" + g.nativeCondition(conditionText) + ") {")
+			// conditionText is normalized once above.  Wrapping it again would
+			// produce nested truth conversions (for example r_truth(&r_truth(...)))
+			// and is ill-typed for targets whose truth helper expects RValue.
+			g.line("if (" + conditionText + ") {")
 			g.indent++
 			if err = g.uastStatementBody(graph, then); err != nil {
 				return err
 			}
 			g.indent--
 			if hasElse {
-				if g.target == "go" {
+				if g.target == "go" || g.target == "r" {
 					g.line("} else {")
 				} else {
 					g.line("}")
@@ -961,14 +1086,14 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 			return err
 		}
 		if g.target == "python" {
-			g.line("while " + g.nativeCondition(conditionText) + ":")
+			g.line("while " + g.condition(conditionText) + ":")
 			g.indent++
 			err = g.uastStatementBody(graph, body)
 			g.indent--
 			return err
 		}
 		if g.target == "julia" {
-			g.line("while " + g.nativeCondition(conditionText))
+			g.line("while " + g.condition(conditionText))
 			g.indent++
 			err = g.uastStatementBody(graph, body)
 			g.indent--
@@ -976,16 +1101,16 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 			return err
 		}
 		if g.target == "nim" {
-			g.line("while " + g.nativeCondition(conditionText) + ":")
+			g.line("while " + g.condition(conditionText) + ":")
 			g.indent++
 			err = g.uastStatementBody(graph, body)
 			g.indent--
 			return err
 		}
 		if g.target == "go" {
-			g.line("for " + g.nativeCondition(conditionText) + " {")
+			g.line("for " + g.condition(conditionText) + " {")
 		} else {
-			g.line("while (" + g.nativeCondition(conditionText) + ") {")
+			g.line("while (" + g.condition(conditionText) + ") {")
 		}
 		g.indent++
 		err = g.uastStatementBody(graph, body)
@@ -1125,7 +1250,7 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 		} else {
 			g.line("continue;")
 		}
-	case "identifier", "literal", "function", "tuple", "binding", "parameter", "module":
+	case "identifier", "literal", "tuple", "binding", "parameter", "module":
 		// Shared UAST graphs may expose a declaration/assignment target as a
 		// statement child as well as through its target relation. It carries no
 		// standalone executable statement, so consume it without emitting code.
@@ -1142,7 +1267,11 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 		if err != nil {
 			return err
 		}
-		g.line(expr + stmtEnd(g.target))
+		if g.nativeDirect {
+			g.line(g.nativeExpressionStatement(expr, c.Kind != "call"))
+		} else {
+			g.line(expr + stmtEnd(g.target))
+		}
 		return nil
 	default:
 		return fmt.Errorf("universal node %d kind %q has no direct statement lowering", id, c.Kind)
@@ -1285,6 +1414,17 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 		}
 		return g.lowerUnary(c.Operation.Operator, text)
 	case "binary":
+		semanticOp := c.Operation.Operator
+		if c.Operation.SemanticID != "" {
+			switch c.Operation.SemanticID {
+			case "numeric.div.floor":
+				semanticOp = "%/%"
+			case "numeric.mod.floor":
+				semanticOp = "%%"
+			case "numeric.rem.trunc":
+				semanticOp = "%"
+			}
+		}
 		operands, err := graph.relationNodes(id, "data.operand")
 		if err != nil || len(operands) != 2 {
 			if err != nil {
@@ -1300,8 +1440,14 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 		if err != nil {
 			return "", err
 		}
-		if operands[0] != left || operands[1] != right {
-			return "", fmt.Errorf("binary node %d operand relation disagrees with syntax fields", id)
+		// Relation insertion order is not semantic: canonical UAST producers
+		// may emit edges while walking fields or while closing derived facts.
+		// The structured left/right child roles are authoritative for binary
+		// operand order; accept either relation order only when it contains
+		// exactly those two endpoints.
+		if !((operands[0] == left && operands[1] == right) ||
+			(operands[0] == right && operands[1] == left)) {
+			return "", fmt.Errorf("binary node %d operand relation endpoints disagree with syntax fields", id)
 		}
 		a, err := g.uastExpression(graph, left)
 		if err != nil {
@@ -1311,8 +1457,8 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 		if err != nil {
 			return "", err
 		}
-		if g.nativeDirect && (c.Operation.Operator == "&&" || c.Operation.Operator == "||") {
-			op := c.Operation.Operator
+		if g.nativeDirect && (semanticOp == "&&" || semanticOp == "||") {
+			op := semanticOp
 			if g.target == "python" || g.target == "nim" || g.target == "zig" {
 				if op == "&&" {
 					op = "and"
@@ -1324,30 +1470,30 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 		}
 		if g.nativeDirect {
 			if g.target == "cpp" || g.target == "c" || g.target == "go" || g.target == "rust" {
-				switch c.Operation.Operator {
+				switch semanticOp {
 				case "+", "-", "*", "/", "%", "==", "!=", "<", "<=", ">", ">=":
-					return "(" + a + " " + c.Operation.Operator + " " + b + ")", nil
+					return "(" + a + " " + semanticOp + " " + b + ")", nil
 				}
 			}
 		}
-		if c.Operation.Operator == "&&" || c.Operation.Operator == "||" {
-			return g.lowerLogical(c.Operation.Operator, a, b), nil
+		if semanticOp == "&&" || semanticOp == "||" {
+			return g.lowerLogical(semanticOp, a, b), nil
 		}
 		if g.nativeDirect && g.directVectors[g.name(graph.common[left].Name)] {
-			if direct, ok := directVectorBinary(g.target, a, b, c.Operation.Operator); ok {
+			if direct, ok := directVectorBinary(g.target, a, b, semanticOp); ok {
 				return direct, nil
 			}
 		}
 		if !g.uastEffectFree(graph, left) || !g.uastEffectFree(graph, right) {
 			leftName, rightName := g.freshName("left"), g.freshName("right")
 			g.cValues[leftName], g.cValues[rightName] = true, true
-			value, err := g.nativeDispatch("__binary_"+c.Operation.Operator, []string{leftName, rightName})
+			value, err := g.nativeDispatch("__binary_"+semanticOp, []string{leftName, rightName})
 			if err != nil {
 				return "", err
 			}
 			return g.letExpression([]valueBinding{{leftName, a}, {rightName, b}}, value), nil
 		}
-		return g.nativeDispatch("__binary_"+c.Operation.Operator, []string{a, b})
+		return g.nativeDispatch("__binary_"+semanticOp, []string{a, b})
 	case "typed_operation":
 		return g.uastTypedOperation(graph, id)
 	case "index":
@@ -1520,7 +1666,68 @@ func canonicalOperationOperator(operator, semantic string) string {
 		"not_equal": "!=", "less_than": "<", "less_or_equal": "<=",
 		"greater_than": ">", "greater_or_equal": ">=", "logical_and": "&&",
 		"logical_or": "||", "logical_not": "!", "negate": "-", "identity": "+",
+		"power": "**", "numeric.power": "**", "bit_and": "&", "bit_or": "|", "bit_xor": "^",
+		"shift_left": "<<", "shift_right": ">>",
 	}[strings.ToLower(strings.TrimSpace(semantic))]
+}
+
+func isNativeUnaryMath(name string) bool {
+	switch name {
+	case "abs", "sqrt", "exp", "log", "log10", "sin", "cos", "tan", "floor", "ceiling", "round", "trunc":
+		return true
+	default:
+		return false
+	}
+}
+
+func exportedMathName(name string) string {
+	if name == "ceiling" {
+		return "Ceil"
+	}
+	if name == "trunc" {
+		return "Trunc"
+	}
+	return strings.ToUpper(name[:1]) + name[1:]
+}
+
+func rustMathMethod(name string) string {
+	if name == "ceiling" {
+		return "ceil"
+	}
+	return name
+}
+
+func cMathName(name string) string {
+	if name == "abs" {
+		return "fabs"
+	}
+	if name == "ceiling" {
+		return "ceil"
+	}
+	return name
+}
+
+func swiftMathName(name string) string {
+	if name == "ceiling" {
+		return "ceil"
+	}
+	if name == "trunc" {
+		return "trunc"
+	}
+	return name
+}
+
+func zigMathName(name string) string {
+	if name == "abs" {
+		return "@abs"
+	}
+	if name == "ceiling" {
+		return "std.math.ceil"
+	}
+	if name == "trunc" {
+		return "std.math.trunc"
+	}
+	return "std.math." + name
 }
 
 func directNativeCall(target, name string, args []string) string {
@@ -1584,6 +1791,32 @@ func directNativeCall(target, name string, args []string) string {
 	if name == "length" && len(args) == 1 {
 		if rendered, ok := nativeLengthExpression(target, args[0]); ok {
 			return rendered
+		}
+	}
+	// Numeric unary primitives use one shared operation contract.  The
+	// frontend has already established arity and operand structure; only the
+	// target spelling is selected here.  Keeping this in the common dispatch
+	// table makes ABS/SQRT available to every frontend without builtin-specific
+	// parser or lowering branches.
+	if isNativeUnaryMath(name) && len(args) == 1 {
+		value := args[0]
+		switch target {
+		case "go":
+			return "math." + exportedMathName(name) + "(" + value + ")"
+		case "python", "r", "julia", "nim":
+			return name + "(" + value + ")"
+		case "rust":
+			return "(" + value + ")." + rustMathMethod(name) + "()"
+		case "cpp", "c":
+			return cMathName(name) + "(" + value + ")"
+		case "csharp":
+			return "Math." + exportedMathName(name) + "(" + value + ")"
+		case "java", "kotlin":
+			return "Math." + name + "(" + value + ")"
+		case "swift":
+			return swiftMathName(name) + "(" + value + ")"
+		case "zig":
+			return zigMathName(name) + "(" + value + ")"
 		}
 	}
 	// A native call is valid only when its already-rendered arguments contain
@@ -1697,6 +1930,14 @@ func directNativeCall(target, name string, args []string) string {
 		if name == "print" || name == "show" || name == "cat" {
 			return "println(" + joined + ")"
 		}
+	case "r":
+		if name == "c" {
+			return "c(" + joined + ")"
+		}
+		if name == "print" || name == "show" || name == "cat" {
+			return "print(" + joined + ")"
+		}
+		return name + "(" + joined + ")"
 	}
 	return ""
 }
@@ -1745,8 +1986,63 @@ func (g *targetGen) uastTypedOperation(graph *uastExecutionGraph, id int) (strin
 	if err := operation.validate(len(args)); err != nil {
 		return "", err
 	}
+	if !g.nativeDirect {
+		// Compatibility targets execute typed operations through the shared
+		// runtime dispatcher. Their target-native integer adapter matrix is not a
+		// prerequisite for a legal fallback document; rejecting here made the
+		// documented last-resort route fail before it could emit its runtime
+		// prelude. Operands remain structured UAST children.
+		values := make([]string, 0, len(args))
+		for _, arg := range args {
+			if arg.Meta.Missing || arg.Meta.Name != "" {
+				return "", fmt.Errorf("typed operation node %d has non-positional or missing operand", id)
+			}
+			value, err := g.uastExpression(graph, arg.ID)
+			if err != nil {
+				return "", err
+			}
+			values = append(values, value)
+		}
+		return g.dispatch(operation.Name, values)
+	}
+	// R is a registered target with native scalar arithmetic.  Its numeric
+	// representation is already the canonical double contract, so the
+	// fixed-width integer operation family can be rendered as ordinary R
+	// operators without introducing a runtime dispatcher or a target-specific
+	// semantic path.
+	if g.target == "r" {
+		values := make([]string, 0, len(args))
+		for _, arg := range args {
+			if arg.Meta.Missing || arg.Meta.Name != "" {
+				return "", fmt.Errorf("typed operation node %d has non-positional or missing operand", id)
+			}
+			value, err := g.uastExpression(graph, arg.ID)
+			if err != nil {
+				return "", err
+			}
+			values = append(values, value)
+		}
+		switch operation.Name {
+		case "integer.literal":
+			return nativeLiteral("r", "integer", operation.Text), nil
+		case "integer.value", "integer.convert":
+			if len(values) == 1 {
+				return values[0], nil
+			}
+		case "integer.negate":
+			if len(values) == 1 {
+				return "(-" + values[0] + ")", nil
+			}
+		case "integer.add", "integer.subtract", "integer.multiply", "integer.divide", "integer.equal", "integer.not_equal", "integer.less", "integer.less_equal", "integer.greater", "integer.greater_equal":
+			if len(values) == 2 {
+				op := map[string]string{"integer.add": "+", "integer.subtract": "-", "integer.multiply": "*", "integer.divide": "/", "integer.equal": "==", "integer.not_equal": "!=", "integer.less": "<", "integer.less_equal": "<=", "integer.greater": ">", "integer.greater_equal": ">="}[operation.Name]
+				return "(" + values[0] + " " + op + " " + values[1] + ")", nil
+			}
+		}
+		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: R typed operation %q arity", operation.Name)
+	}
 	if err := TypedImplementationMatrix().Check([]string{operation.Name}, "target."+g.target); err != nil {
-		return "", err
+		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: %w", err)
 	}
 	bindings, values := []valueBinding{}, []string{}
 	for _, arg := range args {

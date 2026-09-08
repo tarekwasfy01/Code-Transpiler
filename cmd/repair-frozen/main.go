@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // repair-frozen consumes the immutable raw miner output and creates the
 // separate repair quotient. It never mutates raw/ and never groups by
 // diagnostic wording.

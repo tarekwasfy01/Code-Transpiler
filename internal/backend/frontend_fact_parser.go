@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // This file is the productive matrix frontend parser.  It intentionally uses
@@ -120,6 +121,7 @@ type factParser struct {
 	t         []token
 	i         int
 	sink      FrontendFactSink
+	language  string
 	scope     int
 	nextScope int
 }
@@ -141,7 +143,7 @@ func parseFrontendFacts(language, code string, sink FrontendFactSink) (FrontendS
 	if err != nil {
 		return FrontendSemanticFacts{}, err
 	}
-	p := &factParser{t: ts, sink: sink, nextScope: 1}
+	p := &factParser{t: ts, sink: sink, language: NormalizeLanguage(language), nextScope: 1}
 	root, err := p.program()
 	if err != nil {
 		return FrontendSemanticFacts{}, err
@@ -591,17 +593,25 @@ func (p *factParser) expression(min int) (ParsedNode, error) {
 			break
 		}
 		p.next()
+		// The parser records canonical semantics, not an ambiguous source token.
+		// R `^` denotes exponentiation; C-family `^` remains bitwise XOR.  The
+		// common POWER form is `**`, which the target legalizer already maps to
+		// each target's native math representation.
+		canonicalOp := op
+		if p.language == "r" && op == "^" {
+			canonicalOp = "**"
+		}
 		next := pr + 1
-		if op == "^" || op == "**" {
+		if canonicalOp == "^" || canonicalOp == "**" {
 			next = pr
 		}
 		r, e := p.expression(next)
 		if e != nil {
 			return l, e
 		}
-		sem := SemanticSemantics{Dispatch: "builtin", EvaluationOrder: "left_to_right", ShortCircuit: op == "&&" || op == "||"}
-		sem.Operation = map[string]string{"+": "add", "-": "subtract", "*": "multiply", "/": "divide", "%%": "remainder", "==": "equal", "!=": "not_equal", "<": "less_than", "<=": "less_or_equal", ">": "greater_than", ">=": "greater_or_equal", "&&": "logical_and", "||": "logical_or"}[op]
-		n, e := p.emit("OperationExpr", "binary", "", universalOperationRecord{Operator: op, Semantics: sem})
+		sem := SemanticSemantics{Dispatch: "builtin", EvaluationOrder: "left_to_right", ShortCircuit: canonicalOp == "&&" || canonicalOp == "||"}
+		sem.Operation = map[string]string{"+": "add", "-": "subtract", "*": "multiply", "/": "divide", "**": "power", "%%": "remainder", "==": "equal", "!=": "not_equal", "<": "less_than", "<=": "less_or_equal", ">": "greater_than", ">=": "greater_or_equal", "&&": "logical_and", "||": "logical_or"}[canonicalOp]
+		n, e := p.emit("OperationExpr", "binary", "", universalOperationRecord{Operator: canonicalOp, Semantics: sem})
 		if e != nil {
 			return l, e
 		}

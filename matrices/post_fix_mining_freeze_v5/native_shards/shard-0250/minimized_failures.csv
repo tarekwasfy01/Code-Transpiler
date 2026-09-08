@@ -1,6 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,f89632c565c55188252845c64cf36a06d36ae6f65a899538afb1c217a05a38cf,N0_SOURCE_PARSE,FRONTEND,native,unterminated string at 89
-Q0002,3e531b8594303528a4170d63b7af69b2614ac91094cea78dc1b6f244d4c9271b,NATIVE,UNKNOWN_FAILURE,assembly,"native unresolved binding ""mystruct.myfield"" node=1"
-Q0003,3e531b8594303528a4170d63b7af69b2614ac91094cea78dc1b6f244d4c9271b,NATIVE,UNKNOWN_FAILURE,executable,"native unresolved binding ""mystruct.myfield"" node=1"
-Q0004,3e531b8594303528a4170d63b7af69b2614ac91094cea78dc1b6f244d4c9271b,NATIVE,UNKNOWN_FAILURE,machine_code,"native unresolved binding ""mystruct.myfield"" node=1"
-Q0005,3e531b8594303528a4170d63b7af69b2614ac91094cea78dc1b6f244d4c9271b,NATIVE,UNKNOWN_FAILURE,object,"native unresolved binding ""mystruct.myfield"" node=1"

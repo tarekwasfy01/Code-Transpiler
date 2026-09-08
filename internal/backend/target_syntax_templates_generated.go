@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // Code generated from the checked-in direct-UAST renderer catalog; DO NOT EDIT.
 package backend
 

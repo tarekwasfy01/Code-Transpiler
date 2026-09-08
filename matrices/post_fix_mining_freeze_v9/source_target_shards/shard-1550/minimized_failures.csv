@@ -1,4 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,a10bc139fa5bd32689f360cc8bf2cbda238733b2e841639fe83e852655198442,V0_SOURCE_PARSE,FRONTEND,source_target,expected expression
-Q0002,1a96852970592f6ae4a9b210ff67dc7599b6ae3552d67547546fea9c7a2ee728,V4_NATIVE_EMISSION,BACKEND,source_target,DIRECT_NATIVE_UNAVAILABLE: target java emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-4194386007\Main.java:5: Fehler: Keine Anweisung (45 - 3); ^ 1 Fehler)
-Q0003,e2dd602e550da67d3083307631ee0f1eae3ba7b92811c73ce4aeccd4abbe6a10,V5_TARGET_REPARSE,TARGET_SYNTAX,source_target,expected expression

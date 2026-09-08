@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -16,28 +17,32 @@ import (
 // contract gap. A gap without an exact repository proof is deliberately kept
 // as INSUFFICIENT_EVIDENCE instead of being mislabeled as executable.
 type ContractGapClosureReport struct {
-	InitialGaps                   int      `json:"initial_contract_gaps"`
-	RecoveredExactContracts       []string `json:"recovered_exact_contracts"`
-	NewDerivedPrimitives          []string `json:"new_derived_primitives"`
-	NewGeneratedRecipes           []string `json:"new_generated_recipes"`
-	NewRecoveredExactRules        []string `json:"new_recovered_exact_rules"`
-	NewParameterizedAtomic        []string `json:"new_parameterized_atomic_primitives"`
-	TrueAtomicResidual            []string `json:"true_atomic_residual_primitives"`
-	RuntimeOnly                   []string `json:"runtime_only_reclassifications"`
-	TargetTerminal                []string `json:"target_terminal_reclassifications"`
-	ValidationOnly                []string `json:"validation_only_reclassifications"`
-	Aliases                       []string `json:"aliases"`
-	RemainingInsufficientEvidence []string `json:"remaining_insufficient_evidence"`
-	FinalContractGaps             []string `json:"final_contract_gaps"`
-	TotalGeneratedRecipes         int      `json:"total_generated_recipes"`
-	TotalClosureReachableRules    int      `json:"total_closure_reachable_rules"`
-	TotalExecutorReachableRules   int      `json:"total_executor_reachable_rules"`
-	GenericAtomicKernelClasses    []string `json:"generic_atomic_kernel_classes"`
-	MinimalMissingAtomicBasis     []string `json:"minimal_missing_atomic_basis"`
-	BasisHash                     string   `json:"basis_hash"`
-	ImplementationGraphRows       int      `json:"implementation_graph_rows"`
-	RecoveredEquivalenceRules     int      `json:"recovered_equivalence_rules"`
-	AtomicResidualCount           int      `json:"atomic_residual_count"`
+	InitialGaps                   int            `json:"initial_contract_gaps"`
+	RecoveredExactContracts       []string       `json:"recovered_exact_contracts"`
+	NewDerivedPrimitives          []string       `json:"new_derived_primitives"`
+	NewGeneratedRecipes           []string       `json:"new_generated_recipes"`
+	NewRecoveredExactRules        []string       `json:"new_recovered_exact_rules"`
+	NewParameterizedAtomic        []string       `json:"new_parameterized_atomic_primitives"`
+	TrueAtomicResidual            []string       `json:"true_atomic_residual_primitives"`
+	RuntimeOnly                   []string       `json:"runtime_only_reclassifications"`
+	TargetTerminal                []string       `json:"target_terminal_reclassifications"`
+	ValidationOnly                []string       `json:"validation_only_reclassifications"`
+	Aliases                       []string       `json:"aliases"`
+	RemainingInsufficientEvidence []string       `json:"remaining_insufficient_evidence"`
+	FinalContractGaps             []string       `json:"final_contract_gaps"`
+	TotalGeneratedRecipes         int            `json:"total_generated_recipes"`
+	TotalClosureReachableRules    int            `json:"total_closure_reachable_rules"`
+	TotalExecutorReachableRules   int            `json:"total_executor_reachable_rules"`
+	GenericAtomicKernelClasses    []string       `json:"generic_atomic_kernel_classes"`
+	MinimalMissingAtomicBasis     []string       `json:"minimal_missing_atomic_basis"`
+	BasisHash                     string         `json:"basis_hash"`
+	ImplementationGraphRows       int            `json:"implementation_graph_rows"`
+	RecoveredEquivalenceRules     int            `json:"recovered_equivalence_rules"`
+	AtomicResidualCount           int            `json:"atomic_residual_count"`
+	ProductiveFamilyContracts     int            `json:"productive_family_contracts"`
+	ValidationOnlyFamilyContracts int            `json:"validation_only_family_contracts"`
+	UnresolvedFamilyContracts     int            `json:"unresolved_family_contracts"`
+	FamilyCounts                  map[string]int `json:"family_counts,omitempty"`
 }
 
 func WriteContractGapClosureReport(out string) (*ContractGapClosureReport, error) {
@@ -75,12 +80,37 @@ func WriteContractGapClosureReport(out string) (*ContractGapClosureReport, error
 		}
 	}
 	sort.Slice(gaps, func(i, j int) bool { return gaps[i].ID < gaps[j].ID })
-	closure := &ContractGapClosureReport{InitialGaps: len(gaps), TotalGeneratedRecipes: len(report.Recipes), TotalClosureReachableRules: len(report.Recipes), TotalExecutorReachableRules: len(report.Recipes), GenericAtomicKernelClasses: append([]string(nil), report.KernelClasses...), BasisHash: report.BasisHash}
+	closure := &ContractGapClosureReport{InitialGaps: len(gaps), TotalGeneratedRecipes: len(report.Recipes), TotalClosureReachableRules: report.GeneratedClosureReachable, TotalExecutorReachableRules: report.GeneratedExecutorReachable, GenericAtomicKernelClasses: append([]string(nil), report.KernelClasses...), BasisHash: report.BasisHash, FamilyCounts: map[string]int{}}
 	graphRows := deriveImplementationGraph()
 	closure.ImplementationGraphRows = len(graphRows)
 	closure.RecoveredEquivalenceRules = len(report.RecoveredExactRecipes)
 	closure.AtomicResidualCount = 0
 	if err := write("implementation_primitive_graph.csv", []string{"implementation", "primitive", "operation", "order", "kernel_class", "evidence", "exact"}, graphRows); err != nil {
+		return nil, err
+	}
+	// The family quotient is an executable projection of the existing rules,
+	// not a second registry. Emit it for every known residual contract so the
+	// batch implementation remains auditable even when a contract is still
+	// intentionally fail-closed.
+	familyRows := [][]string{}
+	contractIDs := make([]string, 0, len(contractFamilyProjections))
+	for id := range contractFamilyProjections {
+		contractIDs = append(contractIDs, id)
+	}
+	sort.Strings(contractIDs)
+	for _, id := range contractIDs {
+		p := contractFamilyProjections[id]
+		status := "VALIDATION_ONLY"
+		if p.Executable {
+			status = "PRODUCTIVE_FAMILY"
+			closure.ProductiveFamilyContracts++
+		} else {
+			closure.ValidationOnlyFamilyContracts++
+		}
+		closure.FamilyCounts[p.Family]++
+		familyRows = append(familyRows, []string{id, p.Family, p.Kernel, p.CanonicalOp, fmt.Sprint(p.Executable), status})
+	}
+	if err := write("contract_primitive_family_matrix.csv", []string{"contract", "family", "kernel", "canonical_operation", "executable", "status"}, familyRows); err != nil {
 		return nil, err
 	}
 	for _, rec := range gaps {

@@ -1,9 +1,12 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -19,6 +22,17 @@ func MatrixFrontendLanguages() []string {
 // matrix-recognised source language. Parser-specific facts remain transient;
 // the returned SemanticProgram owns only the canonical UAST.
 func LowerMatrixLanguage(language, source string) (*SemanticProgram, error) {
+	// Hosts that package execution-ready grammar tables can promote the
+	// neutral ParseNode machine without changing the frontend API. An explicit
+	// environment path wins; otherwise discover the repository's bundled
+	// execution-ready directory. A failed/incomplete table partition falls
+	// through to the existing bootstrap path so source-only deployments remain
+	// usable and missing data is never guessed.
+	if bundle, resolveErr := matrixir.ResolveExecutionReadyBundle(os.Getenv("CODE_TRANSPILER_EXECUTION_READY_DIR"), executionReadyCandidates()...); resolveErr == nil {
+		if program, tableErr := LowerMatrixLanguageFromTables(language, source, bundle.Dir); tableErr == nil && program != nil {
+			return program, nil
+		}
+	}
 	canonical, err := matrixir.NewGenericLexerLREngine(language).Parse(source)
 	if err != nil {
 		return nil, err
@@ -53,6 +67,10 @@ func LowerMatrixLanguage(language, source string) (*SemanticProgram, error) {
 	// facts remain the only semantic input; this payload is used solely by an
 	// explicit same-language preservation emission.
 	u.Surface = NewUniversalASTSurface(language, source)
+	if u.Metadata == nil {
+		u.Metadata = map[string]string{}
+	}
+	u.Metadata["frontend_route"] = "CANONICALIZE_ONLY"
 	// The frontend facts and its temporary compatibility projection are now
 	// discarded. SemanticProgram owns only the canonical UAST.
 	return &SemanticProgram{
@@ -70,6 +88,98 @@ func LowerMatrixLanguage(language, source string) (*SemanticProgram, error) {
 		UniversalAST:     u,
 		Evidence:         u.Evidence,
 	}, nil
+}
+
+func executionReadyCandidates() []string {
+	var out []string
+	if cwd, err := os.Getwd(); err == nil {
+		for dir := cwd; ; dir = filepath.Dir(dir) {
+			out = append(out,
+				filepath.Join(dir, "matrices", "REAL_TS_MATRIX", "execution_ready"),
+				filepath.Join(dir, ".cache", "execution-ready-in", "matrix_execution_ready"),
+			)
+			parent := filepath.Dir(dir)
+			if parent == dir {
+				break
+			}
+		}
+	}
+	return out
+}
+
+// LowerMatrixLanguageFromTables is the explicit production entry for an
+// execution-ready grammar partition.  It keeps the same downstream
+// FrontendSemanticFacts/UAST contract as LowerMatrixLanguage while replacing
+// the bootstrap source canonicalizer with ParseNode facts from the generic
+// lexer/LR/GLR machine.  The table directory is supplied by the host/package
+// loader, so the frontend remains independent of repository layout.
+func LowerMatrixLanguageFromTables(language, source, tableDir string) (*SemanticProgram, error) {
+	engine := matrixir.NewGenericLexerLREngine(language)
+	root, _, ok, err := engine.ParseRealNodes(source, tableDir)
+	if err != nil {
+		return nil, err
+	}
+	if !ok || root == nil {
+		return nil, fmt.Errorf("table-driven frontend did not produce a parse node for %s", language)
+	}
+	bundle, _ := matrixir.ResolveExecutionReadyBundle(tableDir)
+	// The producer is the semantic boundary for table parses.  Load the same
+	// immutable partition used by the parser and materialize its structured
+	// events directly into FrontendSemanticFacts.  Older bundles may lack
+	// symbol metadata; in that case the established structural ParseNode
+	// projection remains a safe compatibility path.
+	if tables, tableErr := matrixir.LoadExecutionReadyTables(tableDir, language); tableErr == nil {
+		events := matrixir.NewGenericProducerEngine().ProduceParseNode(language, tables, root)
+		if len(events) > 0 {
+			builder := &FrontendFactsBuilder{}
+			if factErr := materializeStructuredMatrixFacts(language, events, builder); factErr == nil {
+				if u, uErr := BuildCanonicalUniversalASTFromFrontendFacts(builder.Facts); uErr == nil && u != nil && len(u.Nodes) > 1 {
+					attachMatrixSemanticProfile(language, u)
+					if u.Metadata == nil {
+						u.Metadata = map[string]string{}
+					}
+					u.Metadata["frontend_route"] = "TABLE_PLUS_GENERIC_PRODUCER"
+					u.Metadata["frontend_table_bundle_hash"] = bundle.Hash
+					u.Metadata["frontend_table_bundle_language"] = language
+					u.Surface = NewUniversalASTSurface(language, source)
+					return &SemanticProgram{Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Metadata: u.Metadata, Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects, SemanticFeatures: u.SemanticFeatures, UniversalAST: u, Evidence: u.Evidence}, nil
+				}
+			}
+		}
+	}
+	u, err := BuildCanonicalUniversalASTFromParseNode(language, root)
+	if err != nil {
+		return nil, fmt.Errorf("parse node to canonical UAST: %w", err)
+	}
+	u.Surface = NewUniversalASTSurface(language, source)
+	attachMatrixSemanticProfile(language, u)
+	if u.Metadata == nil {
+		u.Metadata = map[string]string{}
+	}
+	u.Metadata["frontend_table_bundle_hash"] = bundle.Hash
+	u.Metadata["frontend_table_bundle_language"] = language
+	u.Metadata["frontend_route"] = "TABLE_PARSE_NODE_PROJECTION"
+	return &SemanticProgram{
+		Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase,
+		Types: u.Types, Origin: u.Origin, Metadata: u.Metadata,
+		Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects,
+		SemanticFeatures: u.SemanticFeatures, UniversalAST: u, Evidence: u.Evidence,
+	}, nil
+}
+
+// attachMatrixSemanticProfile applies the already embedded language-feature
+// matrix to a table-produced UAST. It is deliberately best-effort: an
+// incomplete historical profile must not fabricate semantic facts, while a
+// complete profile is carried into the same canonical document used by every
+// source language.
+func attachMatrixSemanticProfile(language string, u *UniversalASTDocument) {
+	if u == nil {
+		return
+	}
+	p := NewSemanticProgram(&BlockStmt{}, u.Evaluation)
+	if err := p.AttachSemanticFeatureProfile(language); err == nil {
+		u.SemanticFeatures = p.SemanticFeatures
+	}
 }
 
 func hasStructuredFamilies(events []matrixir.CanonicalSemanticEvent) bool {
@@ -371,7 +481,21 @@ func materializeStructuredMatrixFacts(language string, events []matrixir.Canonic
 			}
 		}
 		if event != nil {
-			if name := event.Fields["name"]; name != "" && containsString(mask, "name") {
+			// Names are parser-produced structured fields.  Several grammars call
+			// the member half of a selector `member`, `property`, or `field`
+			// instead of `name`; retain that common semantic datum at the UAST
+			// boundary rather than making the target renderer rediscover it from
+			// source spelling.
+			name := event.Fields["name"]
+			if name == "" && strings.EqualFold(event.StructureKind, "member") {
+				for _, key := range []string{"member", "property", "field", "selector"} {
+					if event.Fields[key] != "" {
+						name = event.Fields[key]
+						break
+					}
+				}
+			}
+			if name != "" && containsString(mask, "name") {
 				raw, _ := json.Marshal(name)
 				n.Fields["name"] = raw
 			}
@@ -385,8 +509,15 @@ func materializeStructuredMatrixFacts(language string, events []matrixir.Canonic
 				raw, _ := json.Marshal(indexBinding)
 				n.Attributes["iteration.index_binding"] = raw
 			}
-			op := universalOperationRecord{Operator: event.Fields["operator"], LiteralKind: event.Fields["literal_kind"], Text: event.Fields["value"]}
-			if op.Operator != "" || op.LiteralKind != "" || op.Text != "" {
+			op := universalOperationRecord{SemanticID: event.Fields["operation_id"], Operator: event.Fields["operator"], LiteralKind: event.Fields["literal_kind"], Text: event.Fields["value"]}
+			if op.SemanticID == "" {
+				op.SemanticID = semanticOperationID(op.Operator)
+			}
+			op.Semantics = matrixOperationSemantics(op.SemanticID, op.Operator)
+			if strings.EqualFold(executableKindForEvent(event.StructureKind), "function") {
+				op.FunctionBinding = event.Fields["name"]
+			}
+			if op.SemanticID != "" || op.Operator != "" || op.LiteralKind != "" || op.Text != "" || op.Semantics.Operation != "" {
 				if raw, err := json.Marshal(op); err == nil && containsString(mask, "operation") {
 					n.Fields["operation"] = raw
 				}
@@ -854,6 +985,31 @@ func materializeStructuredMatrixFacts(language string, events []matrixir.Canonic
 	return nil
 }
 
+// matrixOperationSemantics is the semantic crosswalk for already structured
+// MatrixIR operator facts. It consumes neither Event.Text nor target syntax:
+// the operator/semantic-id pair is an input selected by the parser grammar.
+func matrixOperationSemantics(semanticID, operator string) SemanticSemantics {
+	operation := map[string]string{
+		"numeric.div.floor": "floor_divide",
+		"numeric.mod.floor": "remainder",
+		"numeric.rem.trunc": "remainder",
+		"numeric.power":     "power",
+	}[semanticID]
+	if operation == "" {
+		operation = map[string]string{
+			"+": "add", "-": "subtract", "*": "multiply", "/": "divide",
+			"%": "remainder", "==": "equal", "!=": "not_equal",
+			"<": "less_than", "<=": "less_or_equal", ">": "greater_than", ">=": "greater_or_equal",
+			"&&": "logical_and", "||": "logical_or", "!": "logical_not",
+			"&": "bit_and", "|": "bit_or", "^": "bit_xor", "<<": "shift_left", ">>": "shift_right",
+		}[operator]
+	}
+	if operation == "" {
+		return SemanticSemantics{}
+	}
+	return SemanticSemantics{Operation: operation, Dispatch: "builtin", EvaluationOrder: "left_to_right", Confidence: "exact"}
+}
+
 // LowerMatrixEventsWithFactSink is an explicit compatibility bridge for
 // callers that still provide event text. It is never called by LowerSource or
 // the product TranspileCore path. New frontends must use
@@ -873,6 +1029,10 @@ func LowerMatrixEventsWithFactSink(language string, events []matrixir.CanonicalE
 	if err != nil {
 		return nil, err
 	}
+	if u.Metadata == nil {
+		u.Metadata = map[string]string{}
+	}
+	u.Metadata["frontend_route"] = "COMPATIBILITY_REPARSE"
 	return &SemanticProgram{Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Metadata: u.Metadata, Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects, SemanticFeatures: u.SemanticFeatures, UniversalAST: u, Evidence: u.Evidence}, nil
 }
 

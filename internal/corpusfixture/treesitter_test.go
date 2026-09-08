@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package corpusfixture
 
 import "testing"

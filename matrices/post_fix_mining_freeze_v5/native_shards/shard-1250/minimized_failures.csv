@@ -1,5 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,2a94d180bf3f6ba76914b887db091d9f4da89a69649a49d6c2989eb2fa4c2bbb,NATIVE,UNKNOWN_FAILURE,assembly,"native function y: native unresolved binding ""in"" node=10"
-Q0002,2a94d180bf3f6ba76914b887db091d9f4da89a69649a49d6c2989eb2fa4c2bbb,NATIVE,UNKNOWN_FAILURE,executable,"native function y: native unresolved binding ""in"" node=10"
-Q0003,2a94d180bf3f6ba76914b887db091d9f4da89a69649a49d6c2989eb2fa4c2bbb,NATIVE,UNKNOWN_FAILURE,machine_code,"native function y: native unresolved binding ""in"" node=10"
-Q0004,2a94d180bf3f6ba76914b887db091d9f4da89a69649a49d6c2989eb2fa4c2bbb,NATIVE,UNKNOWN_FAILURE,object,"native function y: native unresolved binding ""in"" node=10"

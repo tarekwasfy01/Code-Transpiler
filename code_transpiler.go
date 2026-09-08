@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // Package codetranspiler exposes the stable many-to-many Code Transpiler API.
 //
 // Import path: github.com/tarekwasfy01/Code-Transpiler
@@ -6,6 +7,7 @@ package codetranspiler
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
@@ -26,6 +28,7 @@ type CompileOptions = backend.CompileOptions
 type CompileResult = backend.CompileResult
 type CompileOutputKind = backend.CompileOutputKind
 type CompileInputKind = backend.CompileInputKind
+type SemanticProgram = backend.SemanticProgram
 
 const (
 	InputSource     CompileInputKind = backend.CompileInputSource
@@ -48,6 +51,44 @@ const (
 func Compile(source string, options CompileOptions) (CompileResult, error) {
 	if options.InputKind != "" && options.InputKind != InputSource {
 		return backend.CompileBinaryInput([]byte(source), options)
+	}
+	// SemanticProgram JSON is an official source representation.  Reuse the
+	// same parser/validator/native pipeline as in-memory semantic programs;
+	// never route it through a textual language frontend.
+	if strings.EqualFold(options.SourceLanguage, "semantic") || strings.EqualFold(options.SourceLanguage, "uast") || strings.EqualFold(options.SourceLanguage, "sp") {
+		var program *backend.SemanticProgram
+		var err error
+		if strings.EqualFold(options.SourceLanguage, "sp") {
+			if len(source) >= 4 && source[:4] == "SPZ2" {
+				program, err = backend.ParseSemanticSPZ([]byte(source))
+			} else {
+				program, err = backend.ParseSemanticSP([]byte(source))
+			}
+		} else {
+			program, err = backend.ParseSemanticJSON([]byte(source))
+		}
+		if err != nil {
+			return CompileResult{}, err
+		}
+		if options.OutputKind == Source {
+			text, err := backend.EmitSemanticCompatibility(options.TargetLanguage, program)
+			return CompileResult{Text: text, OutputKind: Source}, err
+		}
+		return backend.CompileMachine(program, options)
+	}
+	// Go has a structured native frontend for the executable subset.  Prefer it
+	// here so the public compiler API does not silently route Go source through
+	// the generic textual frontend (which cannot preserve native declarations,
+	// fixed-width types, or entry-point metadata).  Unsupported native constructs
+	// still use the established ModernFrontend as a compatibility path.
+	if strings.EqualFold(options.SourceLanguage, "go") {
+		if native, nativeErr := backend.LowerNativeGo("input.go", source); nativeErr == nil {
+			if options.OutputKind == Source {
+				text, err := backend.EmitSemanticCompatibility(options.TargetLanguage, native)
+				return CompileResult{Text: text, OutputKind: Source}, err
+			}
+			return backend.CompileMachine(native, options)
+		}
 	}
 	p, err := manytomany.Parse(options.SourceLanguage, source)
 	if err != nil {
@@ -94,6 +135,40 @@ func SemanticJSON(source, code string) ([]byte, error) {
 	}
 	return program.Semantic.MarshalSemanticJSON()
 }
+
+// SemanticSP exports a source program as the readable, lossless Semantic
+// Programming transport format.
+func SemanticSP(source, code string) ([]byte, error) {
+	return manytomany.SemanticSP(source, code)
+}
+
+// TranspileSemanticSP imports the canonical SP transport and emits a target
+// through the same UAST backend used by JSON and source APIs.
+func TranspileSemanticSP(target string, data []byte) (string, error) {
+	return manytomany.TranspileSemanticSP(target, data)
+}
+
+// ParseSemanticSP imports a readable SP document into the canonical program.
+func ParseSemanticSP(data []byte) (*SemanticProgram, error) { return backend.ParseSemanticSP(data) }
+
+// MarshalSemanticSP serializes a canonical program as readable SP.
+func MarshalSemanticSP(program *SemanticProgram) ([]byte, error) {
+	if program == nil {
+		return nil, fmt.Errorf("nil semantic program")
+	}
+	return program.MarshalSemanticSP()
+}
+
+// MarshalSemanticSPZ returns the optional compressed SP transport.
+func MarshalSemanticSPZ(program *SemanticProgram) ([]byte, error) {
+	if program == nil {
+		return nil, fmt.Errorf("nil semantic program")
+	}
+	return program.MarshalSemanticSPZ()
+}
+
+// ParseSemanticSPZ imports the optional compressed SP transport.
+func ParseSemanticSPZ(data []byte) (*SemanticProgram, error) { return backend.ParseSemanticSPZ(data) }
 
 func TranspileSemanticJSON(target string, data []byte) (string, error) {
 	program, err := manytomany.ParseDocument(data)
@@ -148,4 +223,26 @@ func NativeSemanticJSON(source, filename, code string) ([]byte, error) {
 		return nil, err
 	}
 	return program.MarshalSemanticJSON()
+}
+
+// BinarySemanticJSON lifts an x86-64 assembly, machine-code, COFF, or PE32+
+// input through the structured machine frontend and returns the same
+// SemanticProgram JSON used by source-language inputs. Unsupported or
+// ambiguous instructions fail closed instead of being guessed as source.
+func BinarySemanticJSON(data []byte, options CompileOptions) ([]byte, error) {
+	if options.InputKind == InputSource || options.InputKind == "" {
+		return nil, fmt.Errorf("binary semantic JSON requires assembly, machine, object, or executable input")
+	}
+	program, err := backend.LiftBinaryInput(data, options)
+	if err != nil {
+		return nil, err
+	}
+	return program.MarshalSemanticJSON()
+}
+
+// DecompileSemanticJSON is the public decompilation entry point for binary
+// and assembly inputs. It returns the canonical SemanticProgram JSON emitted
+// by the structured machine frontend, without routing through a source parser.
+func DecompileSemanticJSON(data []byte, options CompileOptions) ([]byte, error) {
+	return BinarySemanticJSON(data, options)
 }

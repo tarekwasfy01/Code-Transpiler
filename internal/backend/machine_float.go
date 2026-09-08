@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import "fmt"
@@ -37,7 +38,17 @@ func (s *x64Selector) floatKind(id int, seen map[int]bool) bool {
 	if c.Kind == "call" {
 		callee, e := s.child(id, "value", "callee")
 		if e == nil {
+			name := s.g.common[callee].Name
+			if name == "sqrt" || name == "rms" || (name == "reduce_and" && s.g.document != nil && s.g.document.Metadata["lowering.builtin"] == "rms") {
+				return true
+			}
 			if fn, ok := s.functions[s.g.common[callee].Name]; ok {
+				return s.functionFloatSeen(fn, seen)
+			}
+			if fn, ok := s.functionValueTargets[s.binding(callee)]; ok {
+				return s.functionFloatSeen(fn, seen)
+			}
+			if fn, ok := s.functionValueTargets[s.g.common[callee].Name]; ok {
 				return s.functionFloatSeen(fn, seen)
 			}
 		}

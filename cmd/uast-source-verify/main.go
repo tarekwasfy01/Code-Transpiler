@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package main
 
 // uast-source-verify records the evidence status of UAST cells.  An empirical

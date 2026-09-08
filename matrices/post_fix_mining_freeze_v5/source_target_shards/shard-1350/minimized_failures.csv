@@ -1,2 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,f92a11dfb4b06ee982dbb8ea002a2b5afbe6625385c531abdaba8b29af74f5d3,V4_NATIVE_EMISSION,BACKEND,source_target,"universal node 7 lacks required ""expression"" child"

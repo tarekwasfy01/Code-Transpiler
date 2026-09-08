@@ -1,7 +1,9 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
 	"fmt"
+	"math/big"
 	"strconv"
 )
 
@@ -90,6 +92,27 @@ func exactIntegerOperation(name string, bits int, signed bool, text string, valu
 		return r.normalized(), nil
 	}
 	b := operands[1]
+	if name == "integer.divide" {
+		if b.raw == 0 {
+			return nil, fmt.Errorf("integer.divide by zero")
+		}
+		var x, y big.Int
+		if a.signed {
+			x.SetInt64(a.signedValue())
+			y.SetInt64(b.signedValue())
+		} else {
+			x.SetUint64(a.raw)
+			y.SetUint64(b.raw)
+		}
+		var q big.Int
+		q.Quo(&x, &y)
+		if a.signed {
+			r.raw = uint64(q.Int64())
+		} else {
+			r.raw = q.Uint64()
+		}
+		return r.normalized(), nil
+	}
 	less := a.raw < b.raw
 	if a.signed {
 		less = a.signedValue() < b.signedValue()

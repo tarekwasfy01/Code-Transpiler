@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // SemanticVisitor provides deterministic pre-order traversal of a complete

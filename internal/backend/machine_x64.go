@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // This is a target instruction representation, not a semantic IR. Both text
@@ -5,14 +6,24 @@ package backend
 import (
 	"encoding/binary"
 	"fmt"
+	"sort"
 	"strings"
 )
 
 type x64Operand struct {
 	Kind  byte
-	Reg   byte
-	Value int64
+	Reg   byte  // base register for memory operands
+	Value int64 // displacement or immediate
 	Label string
+	// The decoder keeps the complete x86 addressing form.  HasIndex/HasBase
+	// distinguish an absent SIB component from register zero (RAX), while
+	// RIPRelative records the architectural next-instruction base explicitly.
+	Index       byte
+	Scale       byte
+	HasIndex    bool
+	HasBase     bool
+	RIPRelative bool
+	Absolute    bool
 }
 type x64Instruction struct {
 	Op   string
@@ -24,13 +35,28 @@ type x64Function struct {
 }
 type x64Program struct {
 	Instructions []x64Instruction
-	Functions    []x64Function
+	// Data is immutable literal storage emitted after the selected text.  It is
+	// part of the target image, not a semantic IR; labels are resolved by the
+	// same encoder fixup pass as control-flow labels.
+	Data      map[string][]byte
+	Functions []x64Function
+	// Offsets and Classifications are decoder provenance. They are parallel to
+	// Instructions (labels use offset -1) and are intentionally ignored by the
+	// encoder, so source/machine round-trips retain representation facts without
+	// changing the semantic instruction model.
+	Offsets         []int
+	Classifications []string
 }
 
-func xr(r byte) x64Operand          { return x64Operand{Kind: 'r', Reg: r} }
-func xi(v int64) x64Operand         { return x64Operand{Kind: 'i', Value: v} }
-func xm(r byte, off int) x64Operand { return x64Operand{Kind: 'm', Reg: r, Value: int64(off)} }
-func xl(s string) x64Operand        { return x64Operand{Kind: 'l', Label: s} }
+func xr(r byte) x64Operand  { return x64Operand{Kind: 'r', Reg: r} }
+func xi(v int64) x64Operand { return x64Operand{Kind: 'i', Value: v} }
+func xm(r byte, off int) x64Operand {
+	return x64Operand{Kind: 'm', Reg: r, Value: int64(off), HasBase: true}
+}
+func xmIndexed(base, index, scale byte, off int64) x64Operand {
+	return x64Operand{Kind: 'm', Reg: base, Index: index, Scale: scale, Value: off, HasBase: true, HasIndex: true}
+}
+func xl(s string) x64Operand { return x64Operand{Kind: 'l', Label: s} }
 
 const (
 	xRAX byte = 0
@@ -41,12 +67,13 @@ const (
 	xR8  byte = 8
 	xR9  byte = 9
 	xR10 byte = 10
+	xR11 byte = 11
 )
 
 // M_ENC: form -> opcode and ModRM group. Operand placement is shared by all
 // source languages. No parser or source text participates in encoding.
 var x64BinaryOpcodes = map[string]byte{"add": 0x03, "sub": 0x2b, "and": 0x23, "or": 0x0b, "xor": 0x33, "cmp": 0x3b, "test": 0x85}
-var x64Conditions = map[string]byte{"je": 4, "jne": 5, "jl": 12, "jle": 14, "jg": 15, "jge": 13, "jb": 2, "jbe": 6, "ja": 7, "jae": 3, "jp": 10}
+var x64Conditions = map[string]byte{"jo": 0, "jno": 1, "jb": 2, "jae": 3, "je": 4, "jne": 5, "jbe": 6, "ja": 7, "js": 8, "jns": 9, "jp": 10, "jnp": 11, "jl": 12, "jge": 13, "jle": 14, "jg": 15}
 
 func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 	var out []byte
@@ -61,12 +88,16 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 		binary.LittleEndian.PutUint32(b[:], uint32(v))
 		out = append(out, b[:]...)
 	}
+	// REX.X belongs to the SIB index register, not to the ModRM rm/base
+	// register. Keep it as per-instruction encoder state so every existing
+	// instruction form gets the same correct extended-index handling.
+	var rexIndex byte
 	rex := func(w bool, r, b byte) {
 		x := byte(0x40)
 		if w {
 			x |= 8
 		}
-		x |= (r>>3)<<2 | b>>3
+		x |= (r>>3)<<2 | (rexIndex>>3)<<1 | b>>3
 		if x != 0x40 {
 			out = append(out, x)
 		}
@@ -79,15 +110,69 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 		if b.Kind != 'm' {
 			return fmt.Errorf("x64: expected register/memory")
 		}
-		out = append(out, 0x80|(r&7)<<3|b.Reg&7)
-		if b.Reg&7 == 4 {
-			out = append(out, 0x24)
+		// Keep the structured decoder's addressing facts encodable whenever the
+		// form is representable by the existing instruction subset.  RIP-relative
+		// and absolute SIB forms use mod=00; base+disp8 uses mod=01.
+		if b.RIPRelative || b.Absolute || !b.HasBase {
+			if b.HasIndex {
+				return fmt.Errorf("x64: indexed absolute addressing is not encodable")
+			}
+			out = append(out, (r&7)<<3|5)
+			put32(b.Value)
+			return nil
 		}
-		put32(b.Value)
+		mod := byte(2)
+		if b.Value >= -128 && b.Value <= 127 {
+			mod = 1
+		}
+		rm := b.Reg & 7
+		if b.HasIndex || rm == 4 {
+			rm = 4
+		}
+		out = append(out, mod<<6|(r&7)<<3|rm)
+		if rm == 4 {
+			// A SIB scale field of zero encodes a factor of one.  Memory
+			// operands using RSP/R12 as the base require a SIB even without an
+			// index; the structured operand constructors leave Scale at zero in
+			// that case, which is the architectural default rather than an
+			// invalid scale.
+			if !b.HasIndex && b.Scale == 0 {
+				b.Scale = 1
+			}
+			scale := byte(0)
+			switch b.Scale {
+			case 1:
+				scale = 0
+			case 2:
+				scale = 1
+			case 4:
+				scale = 2
+			case 8:
+				scale = 3
+			default:
+				return fmt.Errorf("x64: invalid SIB scale %d", b.Scale)
+			}
+			idx := byte(4)
+			if b.HasIndex {
+				idx = b.Index & 7
+			}
+			out = append(out, scale<<6|idx<<3|(b.Reg&7))
+		}
+		if mod == 1 {
+			out = append(out, byte(int8(b.Value)))
+		} else {
+			put32(b.Value)
+		}
 		return nil
 	}
 	for _, in := range p.Instructions {
 		a, b := in.A, in.B
+		rexIndex = 0
+		if a.Kind == 'm' && a.HasIndex {
+			rexIndex = a.Index
+		} else if b.Kind == 'm' && b.HasIndex {
+			rexIndex = b.Index
+		}
 		if in.Op == "label" {
 			if _, ok := labels[a.Label]; ok {
 				return nil, nil, fmt.Errorf("duplicate label %s", a.Label)
@@ -96,6 +181,32 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 			continue
 		}
 		if opcode, ok := x64BinaryOpcodes[in.Op]; ok {
+			// Group-1 immediate forms are emitted by independent assemblers for
+			// ordinary arithmetic (for example `add rax, -5` and `cmp rax, -1`).
+			// Keep these as structured operations instead of rejecting the
+			// immediate as a non register/memory operand.
+			if b.Kind == 'i' {
+				if b.Value < -2147483648 || b.Value > 2147483647 {
+					return nil, nil, fmt.Errorf("x64: immediate out of signed dword range")
+				}
+				groups := map[string]byte{"add": 0, "and": 4, "sub": 5, "xor": 6, "cmp": 7, "or": 1}
+				group, exists := groups[in.Op]
+				if !exists || a.Kind != 'r' && a.Kind != 'm' {
+					return nil, nil, fmt.Errorf("x64: invalid immediate %s operands", in.Op)
+				}
+				rex(true, 0, func() byte {
+					if a.Kind == 'r' {
+						return a.Reg
+					}
+					return a.Reg
+				}())
+				out = append(out, 0x81)
+				if err := rm(group, a); err != nil {
+					return nil, nil, err
+				}
+				put32(b.Value)
+				continue
+			}
 			if a.Kind != 'r' {
 				return nil, nil, fmt.Errorf("%s destination must be register", in.Op)
 			}
@@ -139,14 +250,15 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 					return nil, nil, err
 				}
 			}
-		case "addsd", "subsd", "mulsd", "divsd", "ucomisd":
+		case "addsd", "subsd", "mulsd", "divsd", "ucomisd", "sqrtsd":
 			prefix := byte(0xf2)
 			if in.Op == "ucomisd" {
 				prefix = 0x66
 			}
 			out = append(out, prefix)
 			rex(false, a.Reg, b.Reg)
-			out = append(out, 0x0f, map[string]byte{"addsd": 0x58, "subsd": 0x5c, "mulsd": 0x59, "divsd": 0x5e, "ucomisd": 0x2e}[in.Op])
+			opcode := map[string]byte{"addsd": 0x58, "subsd": 0x5c, "mulsd": 0x59, "divsd": 0x5e, "ucomisd": 0x2e, "sqrtsd": 0x51}[in.Op]
+			out = append(out, 0x0f, opcode)
 			if err := rm(a.Reg, b); err != nil {
 				return nil, nil, err
 			}
@@ -183,7 +295,37 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 					return nil, nil, err
 				}
 			} else {
-				return nil, nil, fmt.Errorf("invalid mov operands")
+				return nil, nil, fmt.Errorf("invalid mov operands a=%+v b=%+v", a, b)
+			}
+		case "mov_byte":
+			if a.Kind != 'm' || (b.Kind != 'r' && b.Kind != 'i') {
+				return nil, nil, fmt.Errorf("invalid mov_byte operands a=%+v b=%+v", a, b)
+			}
+			if b.Kind == 'i' {
+				if b.Value < 0 || b.Value > 255 {
+					return nil, nil, fmt.Errorf("mov_byte immediate out of range")
+				}
+				rex(false, 0, a.Reg)
+				out = append(out, 0xc6)
+				if err := rm(0, a); err != nil {
+					return nil, nil, err
+				}
+				out = append(out, byte(b.Value))
+			} else {
+				rex(false, b.Reg, a.Reg)
+				out = append(out, 0x88)
+				if err := rm(b.Reg, a); err != nil {
+					return nil, nil, err
+				}
+			}
+		case "movzx_byte":
+			if a.Kind != 'r' || b.Kind != 'm' {
+				return nil, nil, fmt.Errorf("invalid movzx_byte operands a=%+v b=%+v", a, b)
+			}
+			rex(true, a.Reg, b.Reg)
+			out = append(out, 0x0f, 0xb6)
+			if err := rm(a.Reg, b); err != nil {
+				return nil, nil, err
 			}
 		case "lea":
 			rex(true, a.Reg, b.Reg)
@@ -238,6 +380,15 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 			out = append(out, op)
 			fixes = append(fixes, fix{len(out), a.Label})
 			put32(0)
+		case "call_indirect":
+			if a.Kind != 'r' && a.Kind != 'm' {
+				return nil, nil, fmt.Errorf("x64: indirect call requires register/memory")
+			}
+			rex(true, 2, a.Reg)
+			out = append(out, 0xff)
+			if err := rm(2, a); err != nil {
+				return nil, nil, err
+			}
 		case "ret":
 			out = append(out, 0xc3)
 		case "cqo":
@@ -247,6 +398,20 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 		default:
 			return nil, nil, fmt.Errorf("x64 encoding unavailable: %s", in.Op)
 		}
+	}
+	// Literal data is placed after text so RIP-relative LEA fixups remain
+	// self-contained and the PE writer can keep its existing section layout.
+	dataNames := make([]string, 0, len(p.Data))
+	for name := range p.Data {
+		dataNames = append(dataNames, name)
+	}
+	sort.Strings(dataNames)
+	for _, name := range dataNames {
+		if _, exists := labels[name]; exists {
+			return nil, nil, fmt.Errorf("duplicate data label %s", name)
+		}
+		labels[name] = len(out)
+		out = append(out, p.Data[name]...)
 	}
 	for _, f := range fixes {
 		dest, ok := labels[f.label]
@@ -273,7 +438,27 @@ func renderX64(p x64Program) string {
 		case 'l':
 			return a.Label
 		case 'm':
-			return fmt.Sprintf("qword [dword %s%+d]", names[a.Reg], a.Value)
+			var b strings.Builder
+			b.WriteString("qword [dword ")
+			if a.RIPRelative {
+				b.WriteString("rel ")
+			} else if a.HasBase {
+				b.WriteString(names[a.Reg])
+			}
+			if a.HasIndex {
+				if a.HasBase {
+					b.WriteByte('+')
+				}
+				b.WriteString(names[a.Index])
+				if a.Scale > 1 {
+					fmt.Fprintf(&b, "*%d", a.Scale)
+				}
+			}
+			if a.Value != 0 || (!a.HasBase && !a.RIPRelative) {
+				fmt.Fprintf(&b, "%+d", a.Value)
+			}
+			b.WriteByte(']')
+			return b.String()
 		}
 		return ""
 	}
@@ -296,12 +481,24 @@ func renderX64(p x64Program) string {
 			fmt.Fprintf(&out, "    movq %s, xmm%d\n", operand(in.A), in.B.Reg)
 			continue
 		}
+		if in.Op == "mov_byte" {
+			fmt.Fprintf(&out, "    mov %s, %s\n", strings.Replace(operand(in.A), "qword", "byte", 1), operand(in.B))
+			continue
+		}
+		if in.Op == "movzx_byte" {
+			fmt.Fprintf(&out, "    movzx %s, byte %s\n", operand(in.A), operand(in.B))
+			continue
+		}
 		if in.Op == "cvtsi2sd" {
 			fmt.Fprintf(&out, "    cvtsi2sd xmm%d, %s\n", in.A.Reg, operand(in.B))
 			continue
 		}
 		if in.Op == "addsd" || in.Op == "subsd" || in.Op == "mulsd" || in.Op == "divsd" || in.Op == "ucomisd" {
 			fmt.Fprintf(&out, "    %s xmm%d, xmm%d\n", in.Op, in.A.Reg, in.B.Reg)
+			continue
+		}
+		if in.Op == "sqrtsd" {
+			fmt.Fprintf(&out, "    sqrtsd xmm%d, xmm%d\n", in.A.Reg, in.B.Reg)
 			continue
 		}
 		fmt.Fprintf(&out, "    %s", in.Op)
@@ -321,6 +518,24 @@ func renderX64(p x64Program) string {
 			out.WriteString(", cl")
 		}
 		out.WriteByte('\n')
+	}
+	dataNames := make([]string, 0, len(p.Data))
+	for name := range p.Data {
+		dataNames = append(dataNames, name)
+	}
+	sort.Strings(dataNames)
+	if len(dataNames) > 0 {
+		out.WriteString("section .data\n")
+		for _, name := range dataNames {
+			fmt.Fprintf(&out, "%s: db ", name)
+			for i, b := range p.Data[name] {
+				if i > 0 {
+					out.WriteString(", ")
+				}
+				fmt.Fprintf(&out, "%d", b)
+			}
+			out.WriteByte('\n')
+		}
 	}
 	return out.String()
 }

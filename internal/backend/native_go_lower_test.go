@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -29,6 +30,54 @@ if text != "different" {fmt.Println("different")}
 	source.WriteString("}\n")
 	return source.String(), want.String()
 }
+
+func TestNativeGoPackageAndImportFacts(t *testing.T) {
+	source := `package library
+import "fmt"
+func Emit() { fmt.Println(1) }
+`
+	p, err := LowerNativeGo("library.go", source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := p.Metadata["package"]; got != "library" {
+		t.Fatalf("package fact lost: %q", got)
+	}
+	if len(p.Origin.Modules) != 1 || p.Origin.Modules[0] != "fmt" {
+		t.Fatalf("import facts lost: %#v", p.Origin.Modules)
+	}
+	entries, ok := p.Extensions["function_entry_bindings"].(map[string]string)
+	if !ok || entries["Emit"] == "" {
+		t.Fatalf("library function facts were not lowered: %#v", p.Extensions["function_entry_bindings"])
+	}
+}
+
+func TestNativeGoPackageContextLowersSiblingImplementations(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module example.test\n\ngo 1.23\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "helper.go"), []byte("package main\n\nvar Shared int64 = 7\nfunc helper(v int64) int64 { return v + Shared }\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	mainPath := filepath.Join(dir, "main.go")
+	source := "package main\nfunc main() { helper(1) }\n"
+	if err := os.WriteFile(mainPath, []byte(source), 0600); err != nil {
+		t.Fatal(err)
+	}
+	p, err := LowerNativeGo(mainPath, source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	entries, ok := p.Extensions["function_entry_bindings"].(map[string]string)
+	if !ok || entries["helper"] == "" {
+		t.Fatalf("sibling function was not lowered into the package SemanticProgram: %#v", p.Extensions["function_entry_bindings"])
+	}
+	if p.Extensions["native_type_table"] == nil {
+		t.Fatal("package type declarations were not retained as structured facts")
+	}
+}
+
 func TestNativeGoExecutableRoundtrip(t *testing.T) {
 	source, want := nativeScalarCorpus()
 	p, err := LowerNativeGo("native.go", source)

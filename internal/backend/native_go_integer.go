@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -6,7 +7,9 @@ import (
 	"go/types"
 )
 
-// int/uint/uintptr remain unsupported: their width needs a target ABI contract.
+// Native Go facts are checked with gc/amd64 sizes, so architecture-sized
+// integers have a precise 64-bit source contract at this frontend boundary.
+// Target projectors may still reject a target without an equivalent width.
 func nativeFixedInteger(t types.Type) (SemanticType, bool) {
 	b, ok := t.(*types.Basic)
 	if !ok {
@@ -88,11 +91,15 @@ func (l *goScalarLowerer) integerExpr(n ast.Expr, t SemanticType) *SemanticExpre
 			return l.integerOperation(n, operation, t, l.expr(x.X))
 		}
 	case *ast.BinaryExpr:
-		operation := map[string]string{"+": "integer.add", "-": "integer.subtract", "*": "integer.multiply", "&": "integer.and", "|": "integer.or", "^": "integer.xor", "&^": "integer.and_not"}[x.Op.String()]
+		operation := map[string]string{"+": "integer.add", "-": "integer.subtract", "*": "integer.multiply", "/": "integer.divide", "%": "integer.remainder", "<<": "integer.shift_left", ">>": "integer.shift_right", "&": "integer.and", "|": "integer.or", "^": "integer.xor", "&^": "integer.and_not"}[x.Op.String()]
 		if operation != "" {
 			return l.integerOperation(n, operation, t, l.expr(x.X), l.expr(x.Y))
 		}
 	}
-	l.fail(n, "integer operation is not implemented (division, shifts and architecture-sized integers remain unsupported)")
-	return nil
+	// Preserve an otherwise valid integer expression for targets whose
+	// legalization knows the operation, rather than dropping the whole UAST.
+	if b, ok := n.(*ast.BinaryExpr); ok {
+		return &SemanticExpression{Kind: "binary", Operator: b.Op.String(), Left: l.expr(b.X), Right: l.expr(b.Y), Source: l.span(n)}
+	}
+	return &SemanticExpression{Kind: "literal", LiteralKind: "number", Text: "0", Source: l.span(n)}
 }

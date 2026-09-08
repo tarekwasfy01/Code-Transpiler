@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // primitive-discovery computes an evidence-backed semantic demand and
 // primitive reduction view.  It consumes only structured UAST/semantic sidecars
 // and existing primitive authorities; diagnostics and source text are never

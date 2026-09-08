@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // universal-truth-miner derives a small, evidence-backed implication basis
 // from structured PASS/UAST data.  It never reads diagnostics as semantics and
 // never reconstructs values, names, or operands from source text.

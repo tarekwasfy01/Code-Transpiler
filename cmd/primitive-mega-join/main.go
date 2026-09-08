@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // primitive-mega-join joins the universal primitive evidence pack with the
 // existing semantic authority. It is deliberately conservative: syntax,
 // compiler-internal, recovery, representation and target-only evidence never

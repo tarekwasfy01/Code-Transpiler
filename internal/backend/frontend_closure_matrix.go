@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // Generated frontend closure matrices. The axes are derived from the

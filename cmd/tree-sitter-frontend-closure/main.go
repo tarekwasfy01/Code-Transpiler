@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // tree-sitter-frontend-closure derives the conservative, reproducible
 // Tree-sitter CST -> current frontend coverage matrices.  It intentionally
 // does not promote a grammar rule to semantic/UAST support: only a real

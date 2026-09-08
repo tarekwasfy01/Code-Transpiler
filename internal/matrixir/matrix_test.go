@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 import (
@@ -218,6 +219,26 @@ func TestCanonicalPythonSemicolonsAndPassUseStatementMatrix(t *testing.T) {
 	}
 }
 
+func TestCanonicalPythonWhilePreservesConditionFact(t *testing.T) {
+	program, err := Canonicalize("python", "x = 0\nwhile x < 3:\n    x = x + 1\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, event := range program.SemanticEvents {
+		if event.StructureKind == "while" && event.FactFamily == ParsedIteration {
+			for _, role := range event.Roles {
+				if role.Role == "condition" {
+					found = true
+				}
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("Python while condition was not emitted as a structured fact: %+v", program.SemanticEvents)
+	}
+}
+
 func TestCanonicalPythonElifUsesNestedElseIfContract(t *testing.T) {
 	program, err := Canonicalize("python", "if x < 0:\n    print(x)\nelif x < 2:\n    print(x)\nelse:\n    print(x)\n")
 	if err != nil {
@@ -235,6 +256,53 @@ func TestCanonicalPythonSimpleLambdaUsesClosureContract(t *testing.T) {
 	}
 	if !strings.Contains(program.R, "identity <- function(value) { return(value) }") {
 		t.Fatalf("Python lambda did not use closure contract:\n%s", program.R)
+	}
+}
+
+func TestCanonicalPythonFunctionDeclarationKeepsBindingFact(t *testing.T) {
+	program, err := Canonicalize("python", "def add(a, b):\n    return a + b\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, event := range program.SemanticEvents {
+		if event.StructureKind == "closure" && event.Fields["name"] == "add" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("Python function binding was not preserved: %+v", program.SemanticEvents)
+	}
+}
+
+func TestCanonicalPythonFloorDivisionAndRemainderRemainStructured(t *testing.T) {
+	for _, tc := range []struct {
+		expression string
+		operator   string
+	}{{"17 // 5", "%/%"}, {"17 % 5", "%%"}, {"-7 // 3", "%/%"}, {"-7 % 3", "%%"}} {
+		events, err := AnalyzeSemanticExpression("python", tc.expression)
+		if err != nil {
+			t.Fatalf("%q: %v", tc.expression, err)
+		}
+		found := false
+		for _, event := range events {
+			if event.StructureKind == "binary" && event.Fields["operator"] == tc.operator {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("%q lost structured operator %q: %+v", tc.expression, tc.operator, events)
+		}
+	}
+	program, err := Canonicalize("python", "quotient = 17 // 5\nremainder = 17 % 5\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"quotient <- 17 %/% 5", "remainder <- 17 %% 5"} {
+		if !strings.Contains(program.R, want) {
+			t.Fatalf("canonical Python missing %q:\n%s", want, program.R)
+		}
 	}
 }
 

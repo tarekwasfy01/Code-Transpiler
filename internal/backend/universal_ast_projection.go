@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -11,8 +12,12 @@ import (
 )
 
 type universalOperationRecord struct {
-	Semantics         SemanticSemantics       `json:"semantics,omitempty"`
-	Typed             *SemanticOperation      `json:"typed,omitempty"`
+	Semantics SemanticSemantics  `json:"semantics,omitempty"`
+	Typed     *SemanticOperation `json:"typed,omitempty"`
+	// SemanticID is the canonical operation identity. Operator is retained as
+	// source/display metadata, but execution and target legalization may use
+	// this field to preserve language-independent division/modulo semantics.
+	SemanticID        string                  `json:"semantic_id,omitempty"`
 	Operator          string                  `json:"operator,omitempty"`
 	LiteralKind       string                  `json:"literal_kind,omitempty"`
 	Text              string                  `json:"text,omitempty"`
@@ -118,6 +123,23 @@ func semanticExpressionStructuralKind(e *SemanticExpression) string {
 	}
 }
 
+// semanticOperationID gives the small set of non-portable arithmetic forms a
+// stable identity.  The surface operator remains available for diagnostics
+// and compatibility rendering, while execution can dispatch on this
+// language-neutral contract.
+func semanticOperationID(operator string) string {
+	switch operator {
+	case "%/%":
+		return "numeric.div.floor"
+	case "%%":
+		return "numeric.mod.floor"
+	case "%":
+		return "numeric.rem.trunc"
+	default:
+		return ""
+	}
+}
+
 // ProjectSemanticDocumentToUniversal is the compatibility crosswalk. Facets
 // come only from supplied structural seed rows; no unseeded facet is guessed.
 func ProjectSemanticDocumentToUniversal(doc SemanticDocument) (*UniversalASTDocument, error) {
@@ -203,7 +225,7 @@ func ProjectSemanticDocumentToUniversal(doc SemanticDocument) (*UniversalASTDocu
 		if e == nil {
 			return -1, nil
 		}
-		op := universalOperationRecord{Typed: e.Operation, Operator: e.Operator, LiteralKind: e.LiteralKind, Text: e.Text, DoubleIndex: e.DoubleIndex, CallResolution: e.Resolution}
+		op := universalOperationRecord{Typed: e.Operation, SemanticID: semanticOperationID(e.Operator), Operator: e.Operator, LiteralKind: e.LiteralKind, Text: e.Text, DoubleIndex: e.DoubleIndex, CallResolution: e.Resolution}
 		if e.Function != nil {
 			op.FunctionBinding = e.Function.Binding
 			op.DefaultEvaluation = e.Function.DefaultEvaluation
@@ -327,7 +349,24 @@ func ProjectSemanticDocumentToUniversal(doc SemanticDocument) (*UniversalASTDocu
 		return nil, err
 	}
 	appendUniversalEvidenceRelations(u, semanticIDs, doc.Evidence)
+	// Seed the required projection identity so the structural closure and
+	// compatibility importer can validate the document while it is completed.
 	u.SemanticDocumentSHA256 = semanticDocumentDigest(doc)
+	// The compatibility crosswalk must expose the same executable binding,
+	// scope, ordering, and control relations as the modern frontend path. Build
+	// that shared structural closure before validating/returning the document so
+	// direct consumers receive a complete canonical graph on first use.
+	if err := appendFrontendStructuralClosure(u); err != nil {
+		return nil, err
+	}
+	// Scope/relationship closure is part of the canonical projection. Compute
+	// the digest from the compatibility view after that closure so the stored
+	// identity remains stable across SemanticDocument round trips.
+	if projected, err := SemanticDocumentFromUniversalAST(u); err == nil {
+		u.SemanticDocumentSHA256 = semanticDocumentDigest(projected)
+	} else {
+		return nil, err
+	}
 	if err = validateUniversalASTDocument(u); err != nil {
 		return nil, err
 	}
@@ -695,22 +734,30 @@ type universalDecodedCommon struct {
 func decodeUniversalCommon(n *UniversalASTNode) (universalDecodedCommon, error) {
 	c := universalDecodedCommon{}
 	if err := decodeUniversalField(n, "kind", &c.Kind); err != nil {
-		return c, err
+		return c, fmt.Errorf("node %d field kind: %w", n.ID, err)
 	}
 	if c.Kind == "" {
 		return c, fmt.Errorf("universal node %d lacks semantic kind crosswalk", n.ID)
 	}
-	decodeUniversalField(n, "id", &c.ID)
-	decodeUniversalField(n, "scope_id", &c.Scope)
-	decodeUniversalField(n, "type_ref", &c.Type)
-	decodeUniversalField(n, "type_origin", &c.TypeOrigin)
-	decodeUniversalField(n, "effects", &c.Effects)
-	decodeUniversalField(n, "name", &c.Name)
-	decodeUniversalField(n, "operation", &c.Operation)
+	decode := func(field string, target any) error {
+		raw := n.Fields[field]
+		if len(raw) == 0 {
+			return nil
+		}
+		if err := json.Unmarshal(raw, target); err != nil {
+			return fmt.Errorf("node %d field %s: %w", n.ID, field, err)
+		}
+		return nil
+	}
+	for field, target := range map[string]any{"id": &c.ID, "scope_id": &c.Scope, "type_ref": &c.Type, "type_origin": &c.TypeOrigin, "effects": &c.Effects, "name": &c.Name, "operation": &c.Operation} {
+		if err := decode(field, target); err != nil {
+			return c, err
+		}
+	}
 	c.Semantics = c.Operation.Semantics
 	var refs []int
 	if err := decodeUniversalField(n, "binding_refs", &refs); err != nil {
-		return c, err
+		return c, fmt.Errorf("node %d field binding_refs: %w", n.ID, err)
 	}
 	if len(refs) > 1 {
 		return c, fmt.Errorf("node %d has multiple executable binding references", n.ID)

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -58,7 +59,7 @@ var integerRules = map[string]integerRule{
 	"integer.convert": {1, "integer"}, "integer.format": {1, "string"},
 	"integer.negate": {1, "integer"}, "integer.complement": {1, "integer"},
 	"integer.add": {2, "integer"}, "integer.subtract": {2, "integer"},
-	"integer.multiply": {2, "integer"}, "integer.and": {2, "integer"},
+	"integer.multiply": {2, "integer"}, "integer.divide": {2, "integer"}, "integer.and": {2, "integer"},
 	"integer.or": {2, "integer"}, "integer.xor": {2, "integer"}, "integer.and_not": {2, "integer"},
 	"integer.equal": {2, "boolean"}, "integer.not_equal": {2, "boolean"},
 	"integer.less": {2, "boolean"}, "integer.less_equal": {2, "boolean"},

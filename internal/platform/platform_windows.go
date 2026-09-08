@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 //go:build windows
 
 package platform
@@ -17,6 +18,18 @@ const (
 	attachParentProcess       = uintptr(0xFFFFFFFF)
 	threadPriorityAboveNormal = uintptr(1)
 )
+
+// SetPath elevates once and adds the executable directory to the machine PATH.
+func SetPath(exe string) error {
+	dir, err := filepath.Abs(filepath.Dir(exe))
+	if err != nil {
+		return err
+	}
+	q := strings.ReplaceAll(dir, "'", "''")
+	script := "$d='" + q + "';$p=[Environment]::GetEnvironmentVariable('Path','Machine');if(-not (($p -split ';') -contains $d)){[Environment]::SetEnvironmentVariable('Path',(($p.TrimEnd(';')+';'+$d).Trim(';')),'Machine')}"
+	arg := "-NoProfile -Command \"" + strings.ReplaceAll(script, "\"", "\\\"") + "\""
+	return exec.Command("powershell.exe", "-NoProfile", "-Command", "Start-Process powershell.exe -Verb RunAs -ArgumentList '"+strings.ReplaceAll(arg, "'", "''")+"'").Run()
+}
 
 var (
 	kernel32              = syscall.NewLazyDLL("kernel32.dll")
@@ -58,43 +71,16 @@ func OpenCMD(exe string) error {
 	}
 	dir := filepath.Dir(exe)
 
-	// Build a tiny batch bootstrap. cmd.exe is started with /K so it remains
-	// interactive after the help command has completed.
-	f, err := os.CreateTemp("", "uct-cli-*.cmd")
-	if err != nil {
-		return fmt.Errorf("create CLI bootstrap: %w", err)
-	}
-	scriptPath := f.Name()
-	script := "@echo off\r\n" +
-		"cd /d \"" + dir + "\"\r\n" +
-		"title Code Transpiler CLI\r\n" +
-		"echo.\r\n" +
-		"start \"\" /wait /b \"" + exe + "\" help\r\n" +
-		"echo.\r\n" +
-		"echo Code Transpiler CLI ready.\r\n" +
-		"echo Current directory: %CD%\r\n" +
-		"echo Type CodeTranspiler.exe help to show the commands again.\r\n"
-	if _, err := f.WriteString(script); err != nil {
-		_ = f.Close()
-		_ = os.Remove(scriptPath)
-		return fmt.Errorf("write CLI bootstrap: %w", err)
-	}
-	if err := f.Close(); err != nil {
-		_ = os.Remove(scriptPath)
-		return fmt.Errorf("close CLI bootstrap: %w", err)
-	}
-
-	command := `call "` + scriptPath + `"`
-	cmd := exec.Command(comspec, "/D", "/K", command)
+	// Start cmd directly with a quoted command line. The launcher used the same
+	// pattern successfully; no temporary batch or nested START process is
+	// needed, so the GUI's button reliably opens the intended CLI executable.
+	command := `"` + exe + `" sp help`
+	cmd := exec.Command(comspec, "/K", command)
 	cmd.Dir = dir
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		CreationFlags: 0x00000010, // CREATE_NEW_CONSOLE
+		CreationFlags: 0x00000010, // CREATE_NEW_CONSOLE; bootstrap stays hidden
 	}
-	if err := cmd.Start(); err != nil {
-		_ = os.Remove(scriptPath)
-		return err
-	}
-	return nil
+	return cmd.Start()
 }
 func SaveSourceFileDialog(defaultName, ext, label string) (string, error) {
 	if defaultName == "" {

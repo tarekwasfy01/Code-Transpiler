@@ -72,6 +72,21 @@ Go package names cannot contain `-`, so the module and repository are named
 `Code-Transpiler`, while the identifier used in Go source is
 `codetranspiler`.
 
+### Run the API example directly
+
+The list-languages example is its own ready-to-run Go module. No manual
+`go mod init` or `go get` step is required:
+
+```text
+cd examples/list-languages
+go run .
+```
+
+On Windows, `examples\list-languages\run.cmd` performs dependency tidying and
+runs the example automatically. The importable library supports pure-Go builds
+with `CGO_ENABLED=0`; the optional external grammar scanner reports a capability
+error only when a grammar that actually requires it is used.
+
 The compiler lowers supported constructs into `SemanticProgram`, whose
 canonical state is the matrix-derived Universal AST. The old recursive
 statement/expression tree is retained only as a generated compatibility view.

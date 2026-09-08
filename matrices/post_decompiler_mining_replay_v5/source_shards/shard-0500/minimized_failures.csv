@@ -1,3 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,54b4e7b97358f6dde34f632985c68b333a47c8da28c7aeb4ad93548194a082c4,V0_SOURCE_PARSE,FRONTEND,source_target,"c range matrix: counting-loop step "" e"" requires explicit lowering"
-Q0002,8e3c50fdb255dd6830589b2e1ef429f8c8eaf11d5129f1d9dfd5105ec1d163ac,V4_NATIVE_EMISSION,BACKEND,source_target,"execution primitive ""call"": CALL_ARGUMENT: node 10 argument 9 has no structured value contract"

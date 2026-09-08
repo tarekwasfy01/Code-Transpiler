@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 // ExternalScannerAdapter is the language-neutral representation of the
@@ -32,4 +33,11 @@ type externalScannerRuntime interface {
 	Restore(state []byte)
 	Clone(state []byte) (externalScannerRuntime, error)
 	Close()
+}
+
+// newExternalScannerRuntime is the build-independent factory used by the GLR
+// parser. Platform-specific files only implement the optional scanner backend;
+// normal parser code never references a cgo-only concrete type or symbol.
+func newExternalScannerRuntime(language string) (externalScannerRuntime, error) {
+	return newPlatformExternalScanner(language)
 }

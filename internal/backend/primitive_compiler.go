@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // The primitive compiler turns a small, declarative semantic vocabulary into
@@ -30,6 +31,9 @@ type SemanticPrimitiveSpec struct {
 	Class   string   `json:"class"`
 	Rewrite string   `json:"rewrite"`
 	Guards  []string `json:"guards,omitempty"`
+	// Family is the matrix-derived semantic family. It is metadata on the
+	// existing primitive spec, never a second IR or registry.
+	Family string `json:"family,omitempty"`
 }
 
 type loweringFormula struct {
@@ -132,45 +136,46 @@ var primitiveTargetSyntaxTemplateCache struct {
 // productive generic handlers instead of misclassifying known UAST operations
 // as missing merely because they do not have a derived recipe.
 var genericAtomicKernels = map[string]string{
-	"ADD":        "BINARY",
-	"SUB":        "BINARY",
-	"MUL":        "BINARY",
-	"DIV":        "BINARY",
-	"REM":        "BINARY",
-	"POW":        "BINARY",
-	"FLOOR_DIV":  "BINARY",
-	"@":          "BINARY",
-	"BIT_AND":    "BINARY",
-	"BIT_OR":     "BINARY",
-	"BIT_XOR":    "BINARY",
-	"SHL":        "SHIFT",
-	"SHR":        "SHIFT",
-	"EQ":         "COMPARE",
-	"NE":         "COMPARE",
-	"LT":         "COMPARE",
-	"LE":         "COMPARE",
-	"GT":         "COMPARE",
-	"GE":         "COMPARE",
-	"AND":        "LOGICAL_BINARY",
-	"OR":         "LOGICAL_BINARY",
-	"NOT":        "LOGICAL_UNARY",
-	"LITERAL":    "LITERAL",
-	"LOAD":       "BINDING",
-	"ASSIGNMENT": "BINDING",
-	"RETURN":     "CONTROL",
-	"ITERATION":  "ITERATION",
-	"SUM":        "REDUCE",
-	"LENGTH":     "REDUCE",
-	"SQRT":       "REDUCE",
-	"REDUCE_AND": "REDUCE",
-	"CALL":       "CALL",
-	"APPEND":     "COLLECTION",
-	"EMPTY_LIKE": "COLLECTION",
-	"IF":         "CONTROL",
-	"FOREACH":    "CONTROL",
-	"LET":        "CONTROL",
-	"RESULT":     "CONTROL",
-	"CONST":      "CONSTANT",
+	"ADD":         "BINARY",
+	"SUB":         "BINARY",
+	"MUL":         "BINARY",
+	"DIV":         "BINARY",
+	"REM":         "BINARY",
+	"POW":         "BINARY",
+	"FLOOR_DIV":   "BINARY",
+	"@":           "BINARY",
+	"BIT_AND":     "BINARY",
+	"BIT_OR":      "BINARY",
+	"BIT_XOR":     "BINARY",
+	"BIT_AND_NOT": "BINARY",
+	"SHL":         "SHIFT",
+	"SHR":         "SHIFT",
+	"EQ":          "COMPARE",
+	"NE":          "COMPARE",
+	"LT":          "COMPARE",
+	"LE":          "COMPARE",
+	"GT":          "COMPARE",
+	"GE":          "COMPARE",
+	"AND":         "LOGICAL_BINARY",
+	"OR":          "LOGICAL_BINARY",
+	"NOT":         "LOGICAL_UNARY",
+	"LITERAL":     "LITERAL",
+	"LOAD":        "BINDING",
+	"ASSIGNMENT":  "BINDING",
+	"RETURN":      "CONTROL",
+	"ITERATION":   "ITERATION",
+	"SUM":         "REDUCE",
+	"LENGTH":      "REDUCE",
+	"SQRT":        "REDUCE",
+	"REDUCE_AND":  "REDUCE",
+	"CALL":        "CALL",
+	"APPEND":      "COLLECTION",
+	"EMPTY_LIKE":  "COLLECTION",
+	"IF":          "CONTROL",
+	"FOREACH":     "CONTROL",
+	"LET":         "CONTROL",
+	"RESULT":      "CONTROL",
+	"CONST":       "CONSTANT",
 	// Empirical language-implementation families. The colon form preserves
 	// the harvester's parameterized identity while sharing the same kernel.
 	"BINARY:ADD": "BINARY", "BINARY:SUB": "BINARY", "BINARY:MUL": "BINARY", "BINARY:DIV": "BINARY", "BINARY:REM": "BINARY", "BINARY:POW": "BINARY",
@@ -181,6 +186,82 @@ var genericAtomicKernels = map[string]string{
 	"ALLOCATION": "ALLOCATION", "DEALLOCATION": "ALLOCATION", "INDEX_READ": "INDEX", "INDEX_SLICE": "INDEX",
 	"MEMBER_ACCESS": "MEMBER", "STORE": "BINDING", "SELECT": "CONTROL", "PHI": "CONTROL", "LOOP": "CONTROL", "CONTROL_FLOW": "CONTROL", "CONTROL_TRANSFER": "CONTROL",
 	"MODULE": "MODULE", "AWAIT": "CONTROL", "YIELD": "CONTROL", "CATCH": "EXCEPTION", "FINALLY": "EXCEPTION", "THROW": "EXCEPTION", "RECOVER": "EXCEPTION", "POP": "COLLECTION", "CONVERT": "CONVERSION",
+}
+
+// contractFamilyProjection is the quotient of the residual lowering
+// contracts by their existing canonical machine/UAST family. The table is
+// keyed by semantic contract id (never by source language) and is consumed by
+// the existing UniversalLoweringRules registry below.
+//
+// Executable is true only where the family has a target-neutral canonical
+// operation that the existing UAST projector already understands. Analysis,
+// toolchain and ABI contracts remain visible but are not promoted to a
+// semantic rewrite without a real UAST witness.
+type contractFamilyProjection struct {
+	Family      string
+	Kernel      string
+	CanonicalOp string
+	Executable  bool
+}
+
+var contractFamilyProjections = map[string]contractFamilyProjection{
+	"control.goto":                    {"CONTROL_FLOW", "CONTROL", "control", true},
+	"control.short_circuit":           {"CONTROL_FLOW", "CONTROL", "if", true},
+	"control.switch_cfg":              {"CONTROL_FLOW", "CONTROL", "control", true},
+	"control.defer":                   {"CLEANUP", "CONTROL", "cleanup", true},
+	"iteration.range_sequence":        {"ITERATION", "ITERATION", "iteration", true},
+	"iteration.range_map":             {"ITERATION", "ITERATION", "iteration", true},
+	"iteration.range_string":          {"ITERATION", "ITERATION", "iteration", true},
+	"iteration.range_integer":         {"ITERATION", "ITERATION", "iteration", true},
+	"iteration.range_channel":         {"ITERATION", "ITERATION", "iteration", true},
+	"memory.calloc_typed":             {"MEMORY", "ALLOCATION", "allocate", true},
+	"pointer.array_decay":             {"POINTER", "BINDING", "address_of", true},
+	"pointer.null_zero":               {"POINTER", "COMPARE", "compare", true},
+	"reference.cell":                  {"REFERENCE", "BINDING", "load", true},
+	"cast.numeric_width":              {"CONVERSION", "CONVERSION", "cast", true},
+	"cast.function_signature":         {"CONVERSION", "CALL", "call", true},
+	"truthiness.pointer":              {"TRUTHINESS", "COMPARE", "compare", true},
+	"truthiness.scalar":               {"TRUTHINESS", "COMPARE", "compare", true},
+	"value.struct_copy":               {"VALUE", "BINDING", "copy", true},
+	"function.multi_return":           {"CALL", "CALL", "call", true},
+	"numeric.int64_exact":             {"NUMERIC", "CONVERSION", "cast", true},
+	"numeric.mul32_exact":             {"NUMERIC", "BINARY", "*", true},
+	"numeric.float32_round":           {"NUMERIC", "CONVERSION", "cast", true},
+	"dispatch.interface":              {"DISPATCH", "CALL", "call", true},
+	"generic.dictionary":              {"DISPATCH", "CALL", "call", true},
+	"normalize.temp_extract":          {"NORMALIZATION", "CONTROL", "sequence", true},
+	"normalize.side_effect_isolation": {"NORMALIZATION", "CONTROL", "sequence", true},
+	"cleanup.try_finally":             {"CLEANUP", "EXCEPTION", "try", true},
+	"exception.panic_recover":         {"EXCEPTION", "EXCEPTION", "raise", true},
+	"semantic.internal_function":      {"CALL", "CALL", "call", true},
+	"simplify.statement_insertion":    {"NORMALIZATION", "CONTROL", "sequence", true},
+	// Analysis/toolchain contracts are quotiented for reporting and kernel
+	// lookup, but deliberately have no executable rewrite until a structured
+	// target-neutral UAST witness exists.
+	"analysis.async_propagation": {"ANALYSIS", "CONTROL", "", false},
+	"analysis.cfg":               {"ANALYSIS", "CONTROL", "", false},
+	"analysis.phi_merge":         {"ANALYSIS", "CONTROL", "", false},
+	"analysis.ssa_versions":      {"ANALYSIS", "CONTROL", "", false},
+	"backend.machine_pattern":    {"MACHINE", "", "", false},
+	"stdlib.semantic_override":   {"LIBRARY", "CALL", "", false},
+	"library.override_registry":  {"LIBRARY", "CALL", "", false},
+	"memory.layout_edgecases":    {"MEMORY", "ALLOCATION", "", false},
+	"memory.unsafe":              {"MEMORY", "BINDING", "", false},
+}
+
+// PrimitiveFamilyForContract returns the exact residual quotient family for
+// a contract id. It is shared by reports and the productive rule binder.
+func PrimitiveFamilyForContract(id string) (string, bool) {
+	p, ok := contractFamilyProjections[strings.ToLower(strings.TrimSpace(id))]
+	if !ok {
+		return "", false
+	}
+	return p.Family, true
+}
+
+func contractProjection(id string) (contractFamilyProjection, bool) {
+	p, ok := contractFamilyProjections[strings.ToLower(strings.TrimSpace(id))]
+	return p, ok
 }
 
 // Derived recipes still need a minimal canonical witness shape when the
@@ -211,6 +292,11 @@ func genericAtomicPrimitiveIDs() []string {
 func GenericAtomicKernel(primitive string) (string, bool) {
 	id := strings.ToUpper(strings.TrimSpace(primitive))
 	kernel, ok := genericAtomicKernels[id]
+	if !ok {
+		if projection, found := contractProjection(id); found && projection.Kernel != "" {
+			kernel, ok = projection.Kernel, true
+		}
+	}
 	if !ok {
 		kernel, ok = derivedPrimitiveWitnessKernels[id]
 	}
@@ -383,11 +469,9 @@ func UniversalLoweringRegistry() []UniversalLoweringRule {
 }
 
 // ApplyPrimitiveClosure is the productive bridge from canonical UAST to the
-// generated recipe executor. A recipe is applied only when the document has a
-// matching canonical operation. Non-matches are already validated when the
-// compiler constructs the recipe, so cloning the complete UAST for every
-// unrelated recipe would add quadratic work without strengthening the
-// productive contract.
+// bounded transactional rewrite driver.  Generated recipes are never treated
+// as executable merely because they parse: only recipes with a registered
+// structural handler can alter the graph, and each alteration carries proof.
 func ApplyPrimitiveClosure(original *UniversalASTDocument, target string) (*UniversalASTDocument, []string, error) {
 	report, err := CompileUniversalPrimitiveSpecs()
 	if err != nil {
@@ -400,25 +484,14 @@ func ApplyPrimitiveClosure(original *UniversalASTDocument, target string) (*Univ
 	if err := validateUniversalASTDocument(u); err != nil {
 		return nil, nil, err
 	}
-	applied := []string{}
-	for _, recipe := range report.Recipes {
-		match := false
-		for i := range u.Nodes {
-			var op universalOperationRecord
-			if decodeUniversalField(&u.Nodes[i], "operation", &op) == nil {
-				if strings.EqualFold(op.Semantics.Operation, strings.ToLower(recipe.Primitive)) || strings.EqualFold(op.Operator, recipe.Primitive) {
-					match = true
-					break
-				}
-			}
-		}
-		if match {
-			u, err = ExecuteLoweringRecipe(u, recipe, target)
-			if err != nil {
-				return nil, nil, err
-			}
-			applied = append(applied, recipe.ID)
-		}
+	fixed, err := RewriteNativeFixedPoint(semanticProgramFromUAST(u), report.Recipes, target, len(u.Nodes)+1)
+	if err != nil {
+		return nil, nil, err
+	}
+	u = fixed.Program.UniversalAST
+	applied := make([]string, 0, len(fixed.Proofs))
+	for _, proof := range fixed.Proofs {
+		applied = append(applied, proof.RecipeID)
 	}
 	if u.Metadata == nil {
 		u.Metadata = map[string]string{}
@@ -495,7 +568,8 @@ func parsePrimitiveSpecs() ([]SemanticPrimitiveSpec, error) {
 				return nil, fmt.Errorf("primitive %s: %w", id, e)
 			}
 		}
-		out = append(out, SemanticPrimitiveSpec{ID: id, Arity: arity, Class: class, Rewrite: formula, Guards: guards})
+		family, _ := PrimitiveFamilyForContract(id)
+		out = append(out, SemanticPrimitiveSpec{ID: id, Arity: arity, Class: class, Rewrite: formula, Guards: guards, Family: family})
 	}
 	// The canonical atomics are the product's pre-existing semantic authority.
 	// Include them in the compiler inventory as terminal recipes, so the
@@ -508,7 +582,11 @@ func parsePrimitiveSpecs() ([]SemanticPrimitiveSpec, error) {
 		if seen[id] {
 			continue
 		}
-		out = append(out, SemanticPrimitiveSpec{ID: id, Arity: -1, Class: "ATOMIC", Guards: []string{"canonical.uast"}})
+		family := ""
+		if kernel, ok := GenericAtomicKernel(id); ok {
+			family = kernel
+		}
+		out = append(out, SemanticPrimitiveSpec{ID: id, Arity: -1, Class: "ATOMIC", Guards: []string{"canonical.uast"}, Family: family})
 		seen[id] = true
 	}
 	// Generated v6 source-observable evidence is parameterized through the
@@ -527,6 +605,18 @@ func parsePrimitiveSpecs() ([]SemanticPrimitiveSpec, error) {
 		if !seen[spec.ID] {
 			out = append(out, spec)
 			seen[spec.ID] = true
+		}
+	}
+	for i := range out {
+		if out[i].Family != "" {
+			continue
+		}
+		if projection, ok := contractProjection(out[i].ID); ok {
+			out[i].Family = projection.Family
+			continue
+		}
+		if kernel, ok := GenericAtomicKernel(out[i].ID); ok {
+			out[i].Family = kernel
 		}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
@@ -703,6 +793,13 @@ func compilePrimitiveRecipes(specs []SemanticPrimitiveSpec) ([]GeneratedLowering
 		if s.Class == "DERIVED" {
 			state = "CLOSURE_REACHABLE"
 		}
+		// A generated formula becomes exact only when the native structural
+		// handler recognizes its complete shape.  This is intentionally based on
+		// the recipe data rather than a primitive-name allowlist.
+		candidate := GeneratedLoweringRecipe{ID: "recipe." + strings.ToLower(s.ID), Primitive: s.ID, Class: s.Class, Dependencies: d, Guards: s.Guards, Steps: steps, BasisHash: basis, ProofState: "EXACT"}
+		if nativeRecipeHasStructuralHandler(candidate) {
+			state = "EXACT"
+		}
 		recipes = append(recipes, GeneratedLoweringRecipe{ID: "recipe." + strings.ToLower(s.ID), Primitive: s.ID, Class: s.Class, Dependencies: d, Guards: s.Guards, Steps: steps, BasisHash: basis, ProofState: state})
 	}
 	return recipes, nil
@@ -868,11 +965,13 @@ func classifyPrimitiveInventory(report *PrimitiveCompilerReport) {
 			record.RecipeGenerated = ok && recipes[id].ID != ""
 			record.RuleRegistered = record.RecipeGenerated
 			record.ClosureReachable = record.RecipeGenerated
-			record.ExecutorReachable = record.RecipeGenerated
-			record.TargetTerminalReachable = record.RecipeGenerated
-			record.SpecializedHandlerRequired = false
+			record.ExecutorReachable = record.RecipeGenerated && nativeRecipeHasStructuralHandler(recipes[id])
+			record.TargetTerminalReachable = record.ExecutorReachable
+			record.SpecializedHandlerRequired = record.RecipeGenerated && !record.ExecutorReachable
 			if !ok {
 				record.Status, record.Class, record.Reason = "CONTRACT_GAP", "CONTRACT_GAP", "specification missing"
+			} else if spec.Class == "DERIVED" && !record.ExecutorReachable {
+				record.Status, record.Class, record.Reason = "CONTRACT_GAP", "CONTRACT_GAP", "generated recipe has no verified structural graph handler"
 			} else {
 				record.Status = "DERIVED_EXECUTABLE"
 				if spec.Class == "ATOMIC" {
@@ -884,11 +983,14 @@ func classifyPrimitiveInventory(report *PrimitiveCompilerReport) {
 			rule, ok := rules[id]
 			record.Class = "DERIVED"
 			record.RuleRegistered = ok
-			record.ClosureReachable = ok && rule.Implemented
+			record.ClosureReachable = ok && rule.Implemented && !rule.ValidationOnly
 			record.ExecutorReachable = record.ClosureReachable
 			record.TargetTerminalReachable = record.ClosureReachable
 			record.SpecializedHandlerRequired = ok && rule.Applier != nil
-			if ok && rule.Implemented {
+			if ok && rule.ValidationOnly {
+				record.Class, record.Status = "VALIDATION_ONLY", "VALIDATION_ONLY"
+				record.Reason = "evidence contract is closed as non-executable validation"
+			} else if ok && rule.Implemented {
 				record.Status = "DIRECT"
 			} else {
 				record.Status, record.Class, record.Reason = "CONTRACT_GAP", "CONTRACT_GAP", "no exact generated recipe or implemented rule"
@@ -936,8 +1038,11 @@ func classifyPrimitiveInventory(report *PrimitiveCompilerReport) {
 	}
 	report.GeneratedRulesRegistered = len(report.Recipes)
 	report.GeneratedClosureReachable = len(report.Recipes)
-	report.GeneratedExecutorReachable = len(report.Recipes)
+	report.GeneratedExecutorReachable = 0
 	for _, rec := range report.InventoryRecords {
+		if rec.Source == "spec" && rec.ExecutorReachable {
+			report.GeneratedExecutorReachable++
+		}
 		if rec.Source == "spec" && rec.Class == "DERIVED" && rec.SpecializedHandlerRequired {
 			report.DerivedWithHandlers++
 		}
@@ -1013,21 +1118,19 @@ func ExecuteLoweringRecipe(original *UniversalASTDocument, recipe GeneratedLower
 }
 
 func applyGeneratedRecipe(u *UniversalASTDocument, recipe GeneratedLoweringRecipe) error {
-	// Materialize each generated operation as an ordinary canonical UAST
-	// OperationExpr. Attributes carry only recipe provenance and operand slots;
-	// executable semantics remain in the existing UAST operation contract.
-	for _, step := range recipe.Steps {
-		attrs := map[string]json.RawMessage{}
-		op, _ := json.Marshal(step.Operation)
-		in, _ := json.Marshal(step.Inputs)
-		ord, _ := json.Marshal(step.Order)
-		attrs["lowering.operation"] = op
-		attrs["lowering.inputs"] = in
-		attrs["lowering.order"] = ord
-		if _, err := u.AddNode("OperationExpr", defaultUniversalFacets("OperationExpr"), nil); err != nil {
-			return err
+	// A recipe step is not executable merely because it can be serialized as
+	// an OperationExpr.  Appending disconnected nodes would silently preserve
+	// the old program and falsely claim a rewrite. Until a recipe has a
+	// verified operand/control/effect replacement, fail closed instead.
+	if len(recipe.Steps) != 0 {
+		// RESULT($0) is the one structural no-op that is safe: it explicitly
+		// preserves the matched value and therefore needs no new node or edge.
+		// It is still provenance-bearing and must have exactly that shape.
+		if len(recipe.Steps) == 1 && strings.EqualFold(recipe.Steps[0].Operation, "RESULT") &&
+			len(recipe.Steps[0].Inputs) == 1 && recipe.Steps[0].Inputs[0] == "$0" {
+			return validateUniversalASTDocument(u)
 		}
-		u.Nodes[len(u.Nodes)-1].Attributes = attrs
+		return fmt.Errorf("recipe %q requires a verified graph rewrite; disconnected recipe nodes are forbidden", recipe.ID)
 	}
 	return validateUniversalASTDocument(u)
 }

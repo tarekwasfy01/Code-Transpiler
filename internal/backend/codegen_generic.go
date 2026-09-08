@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -92,7 +93,7 @@ func generateTargetFromMode(source, target string, ast *BlockStmt, nativeDirect 
 		}
 		body := g.b.String()
 		if nativeDirect {
-			return nativeTargetPrefix(target) + strings.Join(g.requiredHelperSources(), "\n") + "\n" + body, nil
+			return nativeTargetPrefixForBody(target, body, g.requiredHelperSources()) + strings.Join(g.requiredHelperSources(), "\n") + "\n" + body, nil
 		}
 		return targetPrelude(target) + "\n" + strings.Join(g.helpers, "\n") + "\n" + body, nil
 	default:
@@ -114,7 +115,7 @@ func generateTargetFromMode(source, target string, ast *BlockStmt, nativeDirect 
 		g.line(mainClose(target))
 		body := g.b.String()
 		if nativeDirect {
-			return nativeTargetPrefix(target) + strings.Join(g.requiredHelperSources(), "\n") + "\n" + body, nil
+			return nativeTargetPrefixForBody(target, body, g.requiredHelperSources()) + strings.Join(g.requiredHelperSources(), "\n") + "\n" + body, nil
 		}
 		return targetPrelude(target) + "\n" + strings.Join(g.helpers, "\n") + "\n" + body, nil
 	}
@@ -859,6 +860,20 @@ func callUser(t, n string, args []string) string {
 		return n + "(vec![" + a + "])"
 	case "cpp":
 		return n + "({" + a + "})"
+	case "c":
+		// C compatibility closures are represented by the shared runtime call
+		// boundary.  Calling the generated identifier directly would require a
+		// nested function (not part of ISO C) and leaves an undeclared symbol when
+		// the source function is a first-class value.
+		return fmt.Sprintf("r_call(\"function\", %q, (RValue[]){%s}, %d)", n, a, len(args))
+	case "java":
+		return n + ".apply(new Object[]{" + a + "})"
+	case "csharp":
+		return n + "(new object[]{" + a + "})"
+	case "kotlin":
+		return n + "(arrayOf(" + a + "))"
+	case "swift":
+		return n + "([" + a + "])"
 	default:
 		return n + "(" + a + ")"
 	}

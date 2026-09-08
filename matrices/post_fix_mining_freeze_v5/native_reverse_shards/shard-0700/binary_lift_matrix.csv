@@ -1,5 +1,0 @@
-case_id,source_language,input_kind,status,input_bytes,uast_hash,diagnostic
-a97c4090077c5131729ab3d93c5025fca11f84b07e7c31b53ed944eb4b4f3ce3,julia,assembly,FAIL,349,,"binary frontend: semantic lifting unavailable for instruction ""push"""
-a97c4090077c5131729ab3d93c5025fca11f84b07e7c31b53ed944eb4b4f3ce3,julia,machine_code,FAIL,86,,"binary frontend: semantic lifting unavailable for instruction ""push"""
-a97c4090077c5131729ab3d93c5025fca11f84b07e7c31b53ed944eb4b4f3ce3,julia,object,FAIL,181,,"binary frontend: semantic lifting unavailable for instruction ""push"""
-a97c4090077c5131729ab3d93c5025fca11f84b07e7c31b53ed944eb4b4f3ce3,julia,executable,FAIL,2048,,"binary frontend: semantic lifting unavailable for instruction ""push"""

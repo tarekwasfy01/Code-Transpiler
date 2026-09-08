@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -36,24 +37,29 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 	// Function IDs and inline eligibility come directly from UAST flow matrices.
 	for _, item := range graph.many(graph.root, "statement") {
 		assignment := graph.common[item.ID]
-		if assignment.Kind != "assign" {
+		functionID, name := -1, ""
+		if assignment.Kind == "function" && assignment.Name != "" {
+			functionID, name = item.ID, generator.name(assignment.Name)
+		} else if assignment.Kind == "assign" {
+			expression, ok, err := graph.one(item.ID, "expression", false)
+			if err != nil {
+				return "", err
+			}
+			if !ok || graph.common[expression].Kind != "function" {
+				continue
+			}
+			functionID, name = expression, generator.name(assignment.Name)
+		}
+		if functionID < 0 || name == "" {
 			continue
 		}
-		expression, ok, err := graph.one(item.ID, "expression", false)
-		if err != nil {
-			return "", err
-		}
-		if !ok || graph.common[expression].Kind != "function" {
-			continue
-		}
-		name := generator.name(assignment.Name)
 		generator.funcs[name] = true
-		generator.uastFunctions[name] = expression
-		_, flowErr := buildUASTFunctionFlow(graph, expression)
+		generator.uastFunctions[name] = functionID
+		_, flowErr := buildUASTFunctionFlow(graph, functionID)
 		if flowErr != nil && strings.Contains(flowErr.Error(), "before definite assignment") {
 			return "", flowErr
 		}
-		if flowErr == nil && !uastFunctionContainsLoop(graph, expression) {
+		if flowErr == nil && !uastFunctionContainsLoop(graph, functionID) {
 			generator.uastInline[name] = true
 		}
 	}
@@ -66,16 +72,30 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 		return nil
 	}
 	switch target {
-	case "python", "julia", "nim", "swift":
+	case "r", "python", "julia", "nim", "swift":
+		// C/C++ and similar source frontends commonly carry a top-level
+		// return from their entry function. Interpreted targets have no
+		// statement-level return, so preserve the structured control fact by
+		// placing the complete root body in one generated entry function. This
+		// is a target form choice; no source text or diagnostic is inspected.
+		wrapped := target == "python" && graphHasRootReturn(graph)
+		if wrapped {
+			generator.line("def main():")
+			generator.indent++
+		}
 		if err := emit(); err != nil {
 			return "", err
+		}
+		if wrapped {
+			generator.indent--
+			generator.line("main()")
 		}
 		body := generator.b.String()
 		if generator.hybridFallback && generator.runtimeUsed {
 			return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 		}
 		if nativeSourceWithoutRuntime(target, body, generator.requiredHelperSources()) {
-			return nativeTargetPrefix(target) + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
+			return nativeTargetPrefixForBody(target, body, generator.requiredHelperSources()) + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 		}
 		if generator.nativeDirect {
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", target, nativeRuntimeMarker(body, generator.requiredHelperSources()))
@@ -100,13 +120,25 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 			return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 		}
 		if nativeSourceWithoutRuntime(target, body, generator.requiredHelperSources()) {
-			return nativeTargetPrefix(target) + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
+			return nativeTargetPrefixForBody(target, body, generator.requiredHelperSources()) + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 		}
 		if generator.nativeDirect {
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", target, nativeRuntimeMarker(body, generator.requiredHelperSources()))
 		}
 		return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 	}
+}
+
+func graphHasRootReturn(graph *uastExecutionGraph) bool {
+	if graph == nil || graph.root < 0 {
+		return false
+	}
+	for _, item := range graph.many(graph.root, "statement") {
+		if strings.EqualFold(graph.common[item.ID].Kind, "return") {
+			return true
+		}
+	}
+	return false
 }
 
 func nativeSourceWithoutRuntime(_ string, body string, helpers []string) bool {
@@ -177,4 +209,14 @@ static void uast_print(const Values&... values) {
 	default:
 		return ""
 	}
+}
+
+// nativeTargetPrefixForBody keeps imports tied to actually emitted target
+// forms. Go rejects an unused import, so math is added only when a generated
+// expression/helper references it.
+func nativeTargetPrefixForBody(target, body string, helpers []string) string {
+	if target == "go" && !strings.Contains(body+strings.Join(helpers, "\n"), "math.") {
+		return "package main\n\nimport (\n    \"fmt\"\n)\n\n"
+	}
+	return nativeTargetPrefix(target)
 }

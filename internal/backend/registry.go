@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import "strings"
@@ -151,6 +152,14 @@ func BackendCapability(feature, backend string) CapabilityResult {
 		// runtime permission; unavailable native syntax still fails at the
 		// canonical DIRECT_NATIVE_UNAVAILABLE boundary.
 		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityLowering, Reason: "shared native scalar UAST lowering"}
+	}
+	if feature == "native.call.receiver.v1" || feature == "native.call.ordered_product.v1" || feature == "native.init.order.v1" {
+		// The three call contracts are canonical UAST facts.  Every registered
+		// target reaches the same selector/projector lowering boundary; target
+		// syntax that cannot represent a particular constructed program still
+		// fails there with a concrete preservation or emission error instead of
+		// being rejected before its existing lowering is considered.
+		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityLowering, Reason: "shared canonical call and initialization contract lowering"}
 	}
 	if SupportsCapability(BackendCapabilities(backend), feature) {
 		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityNative}

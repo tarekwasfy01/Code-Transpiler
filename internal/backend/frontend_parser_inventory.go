@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // Source-parser inventory. This reads the checked-in Tree-sitter node schema

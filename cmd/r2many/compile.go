@@ -1,11 +1,15 @@
+// Copyright (c) 2026 Tarek Wasfy
 package main
 
 import (
 	"encoding/hex"
 	"flag"
 	"fmt"
-	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
 	"os"
+	"path/filepath"
+	"strings"
+
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
 )
 
 func compileNative(args []string) error {
@@ -25,7 +29,17 @@ func compileNative(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: compile -source <language> -target native-x86_64-windows input -o program.exe")
+		return fmt.Errorf("usage: compile [ -source <language> ] input.sp|input.json -o program.exe")
+	}
+	// Semantic transport files are self-describing.  Keep the compact public
+	// command independent of frontend flags while preserving explicit support
+	// for ordinary source languages and all existing binary input modes.
+	inputPath := fs.Arg(0)
+	switch strings.ToLower(filepath.Ext(inputPath)) {
+	case ".sp", ".spz":
+		*source = "sp"
+	case ".json":
+		*source = "semantic"
 	}
 	kinds := map[string]codetranspiler.CompileOutputKind{"native-x86_64-windows": codetranspiler.Executable, "object-x86_64-windows": codetranspiler.Object, "machine-x86_64": codetranspiler.MachineCode, "asm-x86_64": codetranspiler.Assembly}
 	kind, ok := kinds[*target]

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // This file contains the single structural closure shared by every MatrixIR
@@ -20,6 +21,19 @@ type frontendBindingDefinition struct {
 func appendFrontendStructuralClosure(u *UniversalASTDocument) error {
 	if u == nil {
 		return nil
+	}
+	// Scope-parent edges are derived from the current containment tree. Remove
+	// any previously materialized copies before recomputing them so repeated
+	// canonicalization (for example after a JSON round trip) cannot retain stale
+	// parents or accumulate duplicate scope edges.
+	if len(u.Relations) != 0 {
+		filtered := u.Relations[:0]
+		for _, relation := range u.Relations {
+			if relation.Kind != "scope.parent" {
+				filtered = append(filtered, relation)
+			}
+		}
+		u.Relations = filtered
 	}
 	children, err := universalChildrenByRole(u)
 	if err != nil {
@@ -57,7 +71,10 @@ func appendFrontendStructuralClosure(u *UniversalASTDocument) error {
 		}
 	}
 	scope := make(map[int]int, len(u.Nodes))
-	parentScope := map[int]int{root: -1}
+	// Scope identities are compact, document-local lexical IDs. They are
+	// deliberately independent of UAST node IDs so the canonical UAST and its
+	// SemanticDocument compatibility view use the same stable scope graph.
+	parentScope := map[int]int{0: -1}
 	visited := map[int]bool{}
 	var walk func(int, int)
 	walk = func(id, currentScope int) {
@@ -66,14 +83,29 @@ func appendFrontendStructuralClosure(u *UniversalASTDocument) error {
 		}
 		visited[id] = true
 		if common[id].Kind == "block" {
-			if id != root {
-				parentScope[id] = currentScope
+			// Preserve the scope identity already carried by the canonical
+			// node.  Only a block whose structured scope differs from its
+			// containing scope introduces a new lexical scope (function bodies
+			// are the common case); ordinary branch/loop blocks stay in the
+			// surrounding scope.
+			if id == root {
+				currentScope = 0
+			} else if common[id].Scope >= 0 && common[id].Scope != currentScope {
+				parentScope[common[id].Scope] = currentScope
+				currentScope = common[id].Scope
 			}
-			currentScope = id
+			if id == root {
+				currentScope = 0
+			}
 		}
 		scope[id] = currentScope
-		for _, role := range children[id] {
-			for _, child := range role {
+		roles := make([]string, 0, len(children[id]))
+		for role := range children[id] {
+			roles = append(roles, role)
+		}
+		sort.Strings(roles)
+		for _, role := range roles {
+			for _, child := range children[id][role] {
 				walk(child.ID, currentScope)
 			}
 		}
@@ -87,7 +119,56 @@ func appendFrontendStructuralClosure(u *UniversalASTDocument) error {
 			scope[id] = root
 		}
 	}
-
+	// Parameters and their defaults are evaluated in the function lexical
+	// scope, represented by the function body block's compact scope ID.
+	var assignFunctionScope func(int, int)
+	assignFunctionScope = func(id, scopeID int) {
+		if _, ok := nodes[id]; !ok {
+			return
+		}
+		scope[id] = scopeID
+		roles := make([]string, 0, len(children[id]))
+		for role := range children[id] {
+			roles = append(roles, role)
+		}
+		sort.Strings(roles)
+		for _, role := range roles {
+			for _, child := range children[id][role] {
+				if common[child.ID].Kind == "block" {
+					continue
+				}
+				assignFunctionScope(child.ID, scopeID)
+			}
+		}
+	}
+	for id := range nodes {
+		if common[id].Kind != "function" {
+			continue
+		}
+		body := children[id]["body"]
+		if len(body) != 1 || common[body[0].ID].Kind != "block" {
+			continue
+		}
+		defaultScope := scope[body[0].ID]
+		if common[id].Operation.DefaultEvaluation == "definition" {
+			defaultScope = scope[id]
+		}
+		for _, parameter := range children[id]["parameter"] {
+			scope[parameter.ID] = scope[body[0].ID]
+			roles := make([]string, 0, len(children[parameter.ID]))
+			for role := range children[parameter.ID] {
+				roles = append(roles, role)
+			}
+			sort.Strings(roles)
+			for _, role := range roles {
+				for _, child := range children[parameter.ID][role] {
+					if common[child.ID].Kind != "block" {
+						assignFunctionScope(child.ID, defaultScope)
+					}
+				}
+			}
+		}
+	}
 	putScope := func(id, scopeID int) error {
 		n := nodes[id]
 		if n == nil || !containsString(n.FieldMask, "scope_id") {
@@ -124,24 +205,44 @@ func appendFrontendStructuralClosure(u *UniversalASTDocument) error {
 	}
 
 	seen := map[string]bool{}
+	// Evidence projection may already provide the canonical binding target
+	// (including its stable binding-domain id).  In that case the structural
+	// closure must not add a second node-id-derived target for the same source
+	// node.  Keep the closure productive for UASTs without evidence, while
+	// preserving the authoritative relation that was already projected.
+	bindingRelationPresent := map[string]bool{}
 	for _, r := range u.Relations {
 		seen[r.Kind+"\x00"+strconv.Itoa(r.From)+"\x00"+r.To.Domain+"\x00"+r.To.ID] = true
+		if (r.Kind == "binding.declares" || r.Kind == "binding.refers" || r.Kind == "name.resolves") && r.To.Domain == "binding" {
+			bindingRelationPresent[r.Kind+"\x00"+strconv.Itoa(r.From)] = true
+		}
+	}
+	existingRelationKinds := map[string]bool{}
+	for _, r := range u.Relations {
+		existingRelationKinds[r.Kind] = true
 	}
 	addNodeRelation := func(kind string, from, to int) {
 		n := nodes[from]
-		if n == nil || nodes[to] == nil || !universalRelationAllowed(n, kind) {
+		if n == nil || (kind != "scope.parent" && nodes[to] == nil) || !universalRelationAllowed(n, kind) {
 			return
 		}
-		key := kind + "\x00" + strconv.Itoa(from) + "\x00node\x00" + strconv.Itoa(to)
+		domain := "node"
+		if kind == "scope.parent" {
+			domain = "scope"
+		}
+		key := kind + "\x00" + strconv.Itoa(from) + "\x00" + domain + "\x00" + strconv.Itoa(to)
 		if seen[key] {
 			return
 		}
 		seen[key] = true
-		u.Relations = append(u.Relations, UniversalASTRelation{Kind: kind, From: from, To: UniversalASTReference{Domain: "node", ID: strconv.Itoa(to)}})
+		u.Relations = append(u.Relations, UniversalASTRelation{Kind: kind, From: from, To: UniversalASTReference{Domain: domain, ID: strconv.Itoa(to)}})
 	}
 	addBindingRelation := func(kind string, from, bindingID int) {
 		n := nodes[from]
 		if n == nil || !universalRelationAllowed(n, kind) {
+			return
+		}
+		if bindingRelationPresent[kind+"\x00"+strconv.Itoa(from)] {
 			return
 		}
 		key := kind + "\x00" + strconv.Itoa(from) + "\x00binding\x00" + strconv.Itoa(bindingID)
@@ -150,6 +251,7 @@ func appendFrontendStructuralClosure(u *UniversalASTDocument) error {
 		}
 		seen[key] = true
 		u.Relations = append(u.Relations, UniversalASTRelation{Kind: kind, From: from, To: UniversalASTReference{Domain: "binding", ID: strconv.Itoa(bindingID)}})
+		bindingRelationPresent[kind+"\x00"+strconv.Itoa(from)] = true
 	}
 
 	// Default structural relations. They are guarded by the existing UAST
@@ -157,8 +259,10 @@ func appendFrontendStructuralClosure(u *UniversalASTDocument) error {
 	// that its current canonical contract does not permit.
 	for _, parent := range ids {
 		statements := children[parent]["statement"]
-		for i := 0; i+1 < len(statements); i++ {
-			addNodeRelation("evaluation.before", statements[i].ID, statements[i+1].ID)
+		if !existingRelationKinds["evaluation.before"] {
+			for i := 0; i+1 < len(statements); i++ {
+				addNodeRelation("evaluation.before", statements[i].ID, statements[i+1].ID)
+			}
 		}
 		// Expression operands have a canonical, role-defined evaluation order.
 		// This is shared structure, not source-language syntax: all arguments in
@@ -178,8 +282,10 @@ func appendFrontendStructuralClosure(u *UniversalASTDocument) error {
 			ordered = append(ordered, children[parent]["argument"]...)
 			ordered = append(ordered, children[parent]["expression"]...)
 		}
-		for i := 0; i+1 < len(ordered); i++ {
-			addNodeRelation("evaluation.before", ordered[i].ID, ordered[i+1].ID)
+		if !existingRelationKinds["evaluation.before"] {
+			for i := 0; i+1 < len(ordered); i++ {
+				addNodeRelation("evaluation.before", ordered[i].ID, ordered[i+1].ID)
+			}
 		}
 		for _, child := range children[parent]["then"] {
 			addNodeRelation("control.true", parent, child.ID)
@@ -193,7 +299,9 @@ func appendFrontendStructuralClosure(u *UniversalASTDocument) error {
 			}
 		}
 		if common[parent].Kind == "block" && parent != root {
-			addNodeRelation("scope.parent", parent, parentScope[parent])
+			if parentID, ok := parentScope[scope[parent]]; ok && parentID >= 0 {
+				addNodeRelation("scope.parent", parent, parentID)
+			}
 		}
 	}
 
@@ -306,5 +414,21 @@ func appendFrontendStructuralClosure(u *UniversalASTDocument) error {
 	for _, definition := range definitions {
 		addBindingRelation("binding.declares", definition.node, definition.node)
 	}
+	// Relation order is part of the canonical JSON digest. Normalize it after
+	// closure so repeated imports and compatibility projections are byte-stable
+	// even when intermediate role maps were populated in different orders.
+	sort.SliceStable(u.Relations, func(i, j int) bool {
+		a, b := u.Relations[i], u.Relations[j]
+		if a.Kind != b.Kind {
+			return a.Kind < b.Kind
+		}
+		if a.From != b.From {
+			return a.From < b.From
+		}
+		if a.To.Domain != b.To.Domain {
+			return a.To.Domain < b.To.Domain
+		}
+		return a.To.ID < b.To.ID
+	})
 	return nil
 }

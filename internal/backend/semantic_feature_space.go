@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -63,10 +64,12 @@ func loadSemanticFeatureBasis() error {
 
 func semanticProfileLanguage(source string) string {
 	switch strings.ToLower(strings.TrimSpace(source)) {
-	case "go", "python", "r", "rust", "kotlin", "java":
+	case "go", "python", "r", "rust", "kotlin", "java", "julia", "nim", "swift":
 		return strings.ToLower(strings.TrimSpace(source))
-	case "c", "cpp", "c++", "clang", "clang_cpp":
+	case "cpp", "c++", "clang", "clang_cpp":
 		return "clang_cpp"
+	case "c":
+		return "c"
 	case "c#", "cs", "csharp":
 		return "csharp"
 	default:

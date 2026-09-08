@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // Canonical UAST semantic sidecar support for the ecosystem miner.  This file

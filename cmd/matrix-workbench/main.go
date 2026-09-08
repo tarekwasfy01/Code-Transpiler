@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // matrix-workbench computes current implementation gaps without modifying source.
 package main
 

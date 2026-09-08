@@ -1,9 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,c89c03f1ddb7cd841fa6fcd252d9c195140e6a85a969048f0862f9c6ce680408,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_assembly,"binary frontend: semantic lifting unavailable for instruction ""push"""
-Q0002,c89c03f1ddb7cd841fa6fcd252d9c195140e6a85a969048f0862f9c6ce680408,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_executable,"binary frontend: semantic lifting unavailable for instruction ""push"""
-Q0003,c89c03f1ddb7cd841fa6fcd252d9c195140e6a85a969048f0862f9c6ce680408,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_machine_code,"binary frontend: semantic lifting unavailable for instruction ""push"""
-Q0004,c89c03f1ddb7cd841fa6fcd252d9c195140e6a85a969048f0862f9c6ce680408,BINARY_LIFT,UNKNOWN_FAILURE,binary_lift_object,"binary frontend: semantic lifting unavailable for instruction ""push"""
-Q0005,2a94d180bf3f6ba76914b887db091d9f4da89a69649a49d6c2989eb2fa4c2bbb,NATIVE,UNKNOWN_FAILURE,assembly,"native function y: native unresolved binding ""in"" node=10"
-Q0006,2a94d180bf3f6ba76914b887db091d9f4da89a69649a49d6c2989eb2fa4c2bbb,NATIVE,UNKNOWN_FAILURE,executable,"native function y: native unresolved binding ""in"" node=10"
-Q0007,2a94d180bf3f6ba76914b887db091d9f4da89a69649a49d6c2989eb2fa4c2bbb,NATIVE,UNKNOWN_FAILURE,machine_code,"native function y: native unresolved binding ""in"" node=10"
-Q0008,2a94d180bf3f6ba76914b887db091d9f4da89a69649a49d6c2989eb2fa4c2bbb,NATIVE,UNKNOWN_FAILURE,object,"native function y: native unresolved binding ""in"" node=10"

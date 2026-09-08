@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -19,14 +20,16 @@ func pe64Image(code []byte, labels map[string]int, functions []x64Function) ([]b
 		flags    uint32
 		rva, raw int
 	}
-	// Emit unwind information for every generated fixed-frame function.
+	// Emit unwind information for every generated fixed-frame function. The
+	// selector probes large frames page-by-page; UWOP_ALLOC_LARGE represents the
+	// complete aligned frame size in the PE unwind record.
 	var xdata, pdata []byte
 	sorted := append([]x64Function(nil), functions...)
 	sort.Slice(sorted, func(i, j int) bool { return labels[sorted[i].Label] < labels[sorted[j].Label] })
 	textRVA := 0x1000
 	xRVA := machineAlign(textRVA+len(code), 0x1000)
 	for _, f := range sorted {
-		if f.Frame <= 0 || f.Frame%16 != 0 || f.Frame >= 4096 {
+		if f.Frame <= 0 || f.Frame%16 != 0 || f.Frame/8 > 0xffff {
 			return nil, fmt.Errorf("unsupported Win64 frame %d", f.Frame)
 		}
 		off := len(xdata)

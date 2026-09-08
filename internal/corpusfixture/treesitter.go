@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // Package corpusfixture decodes Tree-sitter corpus fixture containers.
 // It deliberately knows nothing about any source language; it only separates
 // the executable source field from a following expected S-expression.

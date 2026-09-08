@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // real-source-validation runs the existing compiler API over the checked-in
 // real-source corpus. It is a streaming evidence miner: source-to-source and
 // native output kinds are recorded separately, and it never invents semantic
@@ -235,6 +236,15 @@ func main() {
 	if e = os.MkdirAll(*out, 0755); e != nil {
 		panic(e)
 	}
+	// Root-cause replay must be able to reconstruct the exact canonical UAST
+	// from the source that this run consumed. Corpus paths are not stable across
+	// frozen shards and external witness CSVs, so preserve a byte-exact local
+	// snapshot per case instead of falling back to diagnostics or a guessed
+	// corpus row during later factorization.
+	witnessSourceDir := filepath.Join(*out, "source_witnesses")
+	if e = os.MkdirAll(witnessSourceDir, 0755); e != nil {
+		panic(e)
+	}
 	langs := manytomany.Languages
 	inventory := backend.ActualFrontendParserInventory()
 	caseW, caseF, _ := writer(filepath.Join(*out, "source_cases.csv"), []string{"case_id", "source_language", "source_path", "source_hash", "source_bytes", "classification", "parser_forms", "semantic_features", "relation_patterns", "dependency_features", "phase_features", "preserved_source_forms"})
@@ -260,273 +270,292 @@ func main() {
 	}
 	var c counters
 	var failures []failureRecord
+	// The replay can be long. Preserve every completed source case so a host
+	// interruption never turns already measured all-to-all cells into lost data.
+	flushCheckpoint := func() {
+		writers := []*csv.Writer{caseW, valW, stW, nvW, asmW, acW, mcW, mdW, dvW, obW, exW, blW, failW, ffW, frW, fdW, nfW}
+		files := []*os.File{caseF, valF, stF, nvF, asmF, acF, mcF, mdF, dvF, obF, exF, blF, failF, ffF, frF, fdF, nfF}
+		for i, w := range writers {
+			w.Flush()
+			_ = files[i].Sync()
+		}
+	}
 	for _, cc := range cases {
-		c.Cases++
-		forms := strings.Join(inventory.PerLanguage[cc.Language], ";")
-		preserved := []string{}
-		for _, e := range inventory.Evidence {
-			if e.Language == cc.Language && e.Coverage == "LANGUAGE_SPECIFIC_PRESERVED" {
-				preserved = append(preserved, e.Form)
+		func() {
+			defer flushCheckpoint()
+			c.Cases++
+			if writeErr := os.WriteFile(filepath.Join(witnessSourceDir, cc.ID+".source"), []byte(cc.Source), 0600); writeErr != nil {
+				panic(writeErr)
 			}
-		}
-		_ = caseW.Write([]string{cc.ID, cc.Language, cc.File, cc.Hash, fmt.Sprint(len(cc.Source)), cc.Classification, forms, "", "", "", "", strings.Join(preserved, ";")})
-		if cc.Classification != "VALID_SOURCE" {
-			// Expected-error fixtures are valid parser recovery evidence, but are
-			// not executable source programs. Keep all 13 cells observable without
-			// reporting a synthetic frontend failure or attempting native lowering.
-			for _, target := range langs {
-				c.ExpectedInvalidCells++
-				_ = valW.Write([]string{cc.ID, cc.Language, target, "V0_SOURCE_PARSE", "EXPECTED_INVALID", cc.Hash, "", "", "", "tree-sitter expected recovery/error fixture"})
-				_ = stW.Write([]string{cc.ID, cc.Language, target, "EXPECTED_INVALID", "SKIP", "SKIP", "SKIP", "SKIP", "SKIP", "SKIP", "SKIP", "SKIP", "", "tree-sitter expected recovery/error fixture"})
+			forms := strings.Join(inventory.PerLanguage[cc.Language], ";")
+			preserved := []string{}
+			for _, e := range inventory.Evidence {
+				if e.Language == cc.Language && e.Coverage == "LANGUAGE_SPECIFIC_PRESERVED" {
+					preserved = append(preserved, e.Form)
+				}
 			}
-			continue
-		}
-		// Parse once per source witness for direct validation. This keeps the
-		// replay faithful to the productive Source -> UAST boundary while
-		// deliberately excluding intermediate/runtime fallback from the direct
-		// repair metric.
-		// Parse exactly once and retain the actual pipeline boundary for every
-		// route. This is also the sole authority for V0/V1 attribution; a later
-		// target-emission error may never be relabelled as a source parse error.
-		directProgram, directParseErr := manytomany.Parse(cc.Language, cc.Source)
-		directUASTHash := ""
-		if directParseErr == nil && directProgram.Semantic != nil {
-			if wire, e := directProgram.Semantic.MarshalSemanticJSON(); e == nil {
-				directUASTHash = hash(string(wire))
+			_ = caseW.Write([]string{cc.ID, cc.Language, cc.File, cc.Hash, fmt.Sprint(len(cc.Source)), cc.Classification, forms, "", "", "", "", strings.Join(preserved, ";")})
+			if cc.Classification != "VALID_SOURCE" {
+				// Expected-error fixtures are valid parser recovery evidence, but are
+				// not executable source programs. Keep all 13 cells observable without
+				// reporting a synthetic frontend failure or attempting native lowering.
+				for _, target := range langs {
+					c.ExpectedInvalidCells++
+					_ = valW.Write([]string{cc.ID, cc.Language, target, "V0_SOURCE_PARSE", "EXPECTED_INVALID", cc.Hash, "", "", "", "tree-sitter expected recovery/error fixture"})
+					_ = stW.Write([]string{cc.ID, cc.Language, target, "EXPECTED_INVALID", "SKIP", "SKIP", "SKIP", "SKIP", "SKIP", "SKIP", "SKIP", "SKIP", "", "tree-sitter expected recovery/error fixture"})
+				}
+				return
 			}
-		}
-		if !*skipSourceTarget {
-			for _, target := range langs {
-				var code, route, uastHash string
-				var err error
-				if *directOnly {
-					route, uastHash = "DIRECT", directUASTHash
-					if directParseErr != nil {
-						err = directParseErr
+			// Parse once per source witness for direct validation. This keeps the
+			// replay faithful to the productive Source -> UAST boundary while
+			// deliberately excluding intermediate/runtime fallback from the direct
+			// repair metric.
+			// Parse exactly once and retain the actual pipeline boundary for every
+			// route. This is also the sole authority for V0/V1 attribution; a later
+			// target-emission error may never be relabelled as a source parse error.
+			directProgram, directParseErr := manytomany.Parse(cc.Language, cc.Source)
+			directUASTHash := ""
+			if directParseErr == nil && directProgram.Semantic != nil {
+				if wire, e := directProgram.Semantic.MarshalSemanticJSON(); e == nil {
+					directUASTHash = hash(string(wire))
+				}
+			}
+			if !*skipSourceTarget {
+				for _, target := range langs {
+					var code, route, uastHash string
+					var err error
+					if *directOnly {
+						route, uastHash = "DIRECT", directUASTHash
+						if directParseErr != nil {
+							err = directParseErr
+						} else {
+							code, err = manytomany.EmitDirect(target, directProgram)
+						}
 					} else {
-						code, err = manytomany.EmitDirect(target, directProgram)
+						res, coreErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: cc.Source, SourceLanguage: cc.Language, TargetLanguage: target, EntryPoint: "real-source-miner"})
+						code, err = res.Code, coreErr
+						route, uastHash = res.Trace.ProjectionMode, res.Trace.UASTSHA256
 					}
-				} else {
-					res, coreErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: cc.Source, SourceLanguage: cc.Language, TargetLanguage: target, EntryPoint: "real-source-miner"})
-					code, err = res.Code, coreErr
-					route, uastHash = res.Trace.ProjectionMode, res.Trace.UASTSHA256
-				}
-				// A source parse, UAST construction, target emission and target
-				// reparse are distinct causal stages.  Keeping the earliest failing
-				// stage here is what makes the replay quotient usable for generic
-				// repairs; an emitter gap must never be recorded as SOURCE_PARSE.
-				status, failureStage, failureClass := "PASS", "", ""
-				if directParseErr != nil {
-					status, failureStage, failureClass = "FAIL", "V0_SOURCE_PARSE", "FRONTEND"
-				} else if directProgram.Semantic == nil || directProgram.Semantic.UniversalAST == nil {
-					status, failureStage, failureClass = "FAIL", "V1_SOURCE_TO_UAST", "FRONTEND"
-				} else if err != nil {
-					status, failureStage, failureClass = "FAIL", "V4_NATIVE_EMISSION", "BACKEND"
-				}
-				if route == "" {
-					route = "DIRECT"
-				}
-				th := ""
-				if err == nil {
-					th = hash(code)
-				}
-				v0, v1, v2, v3, v4, v5 := "PASS", "PASS", "PASS", "PASS", "PASS", "SKIP"
-				if directParseErr != nil {
-					v0, v1, v2, v3, v4 = "FAIL", "SKIP", "SKIP", "SKIP", "SKIP"
-				} else if directProgram.Semantic == nil || directProgram.Semantic.UniversalAST == nil {
-					v1, v2, v3, v4 = "FAIL", "SKIP", "SKIP", "SKIP"
-				} else if err != nil {
-					v4 = "FAIL"
-				} else if _, pe := manytomany.Parse(target, code); pe == nil {
-					v5 = "PASS"
-				} else {
-					status, failureStage, failureClass = "FAIL", "V5_TARGET_REPARSE", "TARGET_SYNTAX"
-					err, v5 = pe, "FAIL"
-				}
-				stageForRow := "V4_NATIVE_EMISSION"
-				if failureStage != "" {
-					stageForRow = failureStage
-				}
-				_ = valW.Write([]string{cc.ID, cc.Language, target, stageForRow, status, cc.Hash, th, uastHash, route, diag(err)})
-				_ = stW.Write([]string{cc.ID, cc.Language, target, v0, v1, v2, v3, v4, v5, "SKIP", "SKIP", "SKIP", route, diag(err)})
-				if status == "FAIL" {
-					c.SourceFail++
-					fr := failureRecord{ID: hash(cc.ID + "|" + target + "|" + failureStage), CaseID: cc.ID, Language: cc.Language, Target: target, Kind: "source_target", Stage: failureStage, Class: failureClass, Diagnostic: diag(err)}
-					failures = append(failures, fr)
-					_ = failW.Write([]string{fr.ID, fr.CaseID, fr.Language, fr.Target, fr.Kind, fr.Stage, fr.Class, fr.Diagnostic})
-					_ = ffW.Write([]string{fr.ID, fr.CaseID, "stage", fr.Stage})
-					_ = ffW.Write([]string{fr.ID, fr.CaseID, "class", fr.Class})
-				} else {
-					c.SourcePass++
+					// A source parse, UAST construction, target emission and target
+					// reparse are distinct causal stages.  Keeping the earliest failing
+					// stage here is what makes the replay quotient usable for generic
+					// repairs; an emitter gap must never be recorded as SOURCE_PARSE.
+					status, failureStage, failureClass := "PASS", "", ""
+					if directParseErr != nil {
+						status, failureStage, failureClass = "FAIL", "V0_SOURCE_PARSE", "FRONTEND"
+					} else if directProgram.Semantic == nil || directProgram.Semantic.UniversalAST == nil {
+						status, failureStage, failureClass = "FAIL", "V1_SOURCE_TO_UAST", "FRONTEND"
+					} else if err != nil {
+						status, failureStage, failureClass = "FAIL", "V4_NATIVE_EMISSION", "BACKEND"
+					}
+					if route == "" {
+						route = "DIRECT"
+					}
+					th := ""
+					if err == nil {
+						th = hash(code)
+					}
+					v0, v1, v2, v3, v4, v5 := "PASS", "PASS", "PASS", "PASS", "PASS", "SKIP"
+					if directParseErr != nil {
+						v0, v1, v2, v3, v4 = "FAIL", "SKIP", "SKIP", "SKIP", "SKIP"
+					} else if directProgram.Semantic == nil || directProgram.Semantic.UniversalAST == nil {
+						v1, v2, v3, v4 = "FAIL", "SKIP", "SKIP", "SKIP"
+					} else if err != nil {
+						v4 = "FAIL"
+					} else if syntax := backend.CheckTargetSyntax(target, code); !syntax.Checked || syntax.Valid {
+						// A target reparse is a grammar observation. Re-lowering through
+						// manytomany.Parse would incorrectly turn unresolved free symbols
+						// in a minimal semantic witness into a frontend failure.
+						v5 = "PASS"
+					} else {
+						status, failureStage, failureClass = "FAIL", "V5_TARGET_REPARSE", "TARGET_SYNTAX"
+						err, v5 = fmt.Errorf("target syntax failed: %s", syntax.Failure), "FAIL"
+					}
+					stageForRow := "V4_NATIVE_EMISSION"
+					if failureStage != "" {
+						stageForRow = failureStage
+					}
+					_ = valW.Write([]string{cc.ID, cc.Language, target, stageForRow, status, cc.Hash, th, uastHash, route, diag(err)})
+					_ = stW.Write([]string{cc.ID, cc.Language, target, v0, v1, v2, v3, v4, v5, "SKIP", "SKIP", "SKIP", route, diag(err)})
+					if status == "FAIL" {
+						c.SourceFail++
+						fr := failureRecord{ID: hash(cc.ID + "|" + target + "|" + failureStage), CaseID: cc.ID, Language: cc.Language, Target: target, Kind: "source_target", Stage: failureStage, Class: failureClass, Diagnostic: diag(err)}
+						failures = append(failures, fr)
+						_ = failW.Write([]string{fr.ID, fr.CaseID, fr.Language, fr.Target, fr.Kind, fr.Stage, fr.Class, fr.Diagnostic})
+						_ = ffW.Write([]string{fr.ID, fr.CaseID, "stage", fr.Stage})
+						_ = ffW.Write([]string{fr.ID, fr.CaseID, "class", fr.Class})
+					} else {
+						c.SourcePass++
+					}
 				}
 			}
-		}
-		if *skipNative || (*nativeLimit > 0 && c.NativeAssembly >= *nativeLimit) {
-			continue
-		}
-		p, pe := manytomany.Parse(cc.Language, cc.Source)
-		if pe != nil {
-			fid := hash(cc.ID + "|parse")
-			failures = append(failures, failureRecord{ID: fid, CaseID: cc.ID, Language: cc.Language, Kind: "native", Stage: "N0_SOURCE_PARSE", Class: "FRONTEND", Diagnostic: diag(pe)})
-			_ = failW.Write([]string{fid, cc.ID, cc.Language, "", "native", "N0_SOURCE_PARSE", "FRONTEND", diag(pe)})
-			_ = ffW.Write([]string{fid, cc.ID, "source_parse", "FAIL"})
-			continue
-		}
-		opts := codetranspiler.CompileOptions{SourceLanguage: cc.Language, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64", EntryPoint: ""}
-		for _, kind := range []codetranspiler.CompileOutputKind{codetranspiler.Assembly, codetranspiler.MachineCode, codetranspiler.Object, codetranspiler.Executable} {
-			opts.OutputKind = kind
-			start := time.Now()
-			_ = start
-			got, ce := backend.CompileMachine(p.Semantic, opts)
-			status := "PASS"
-			if ce != nil {
-				status = "FAIL"
-				fid := hash(cc.ID + "|" + string(kind))
-				failures = append(failures, failureRecord{ID: fid, CaseID: cc.ID, Language: cc.Language, Kind: string(kind), Stage: "NATIVE", Class: string(backend.FailureClassOf(ce)), Diagnostic: diag(ce)})
-				_ = failW.Write([]string{fid, cc.ID, cc.Language, "", string(kind), "NATIVE", string(backend.FailureClassOf(ce)), diag(ce)})
-				_ = nfW.Write([]string{fid, cc.ID, "output_kind", string(kind)})
+			if *skipNative || (*nativeLimit > 0 && c.NativeAssembly >= *nativeLimit) {
+				return
 			}
-			_ = nvW.Write([]string{cc.ID, cc.Language, "x86_64", "windows", "win64", string(kind), "NATIVE", status, fmt.Sprint(len(got.Bytes) + len(got.Text)), diag(ce)})
-			// Reverse validation is deliberately immediate and artifact-based: the
-			// exact bytes/text produced above are lifted by the binary frontend. It
-			// never reparses the original source or reuses a legacy frontend.
-			if ce == nil {
-				var inputKind backend.CompileInputKind
-				var artifact []byte
+			p, pe := manytomany.Parse(cc.Language, cc.Source)
+			if pe != nil {
+				fid := hash(cc.ID + "|parse")
+				failures = append(failures, failureRecord{ID: fid, CaseID: cc.ID, Language: cc.Language, Kind: "native", Stage: "N0_SOURCE_PARSE", Class: "FRONTEND", Diagnostic: diag(pe)})
+				_ = failW.Write([]string{fid, cc.ID, cc.Language, "", "native", "N0_SOURCE_PARSE", "FRONTEND", diag(pe)})
+				_ = ffW.Write([]string{fid, cc.ID, "source_parse", "FAIL"})
+				return
+			}
+			opts := codetranspiler.CompileOptions{SourceLanguage: cc.Language, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64", EntryPoint: ""}
+			for _, kind := range []codetranspiler.CompileOutputKind{codetranspiler.Assembly, codetranspiler.MachineCode, codetranspiler.Object, codetranspiler.Executable} {
+				opts.OutputKind = kind
+				start := time.Now()
+				_ = start
+				got, ce := backend.CompileMachine(p.Semantic, opts)
+				status := "PASS"
+				if ce != nil {
+					status = "FAIL"
+					fid := hash(cc.ID + "|" + string(kind))
+					failures = append(failures, failureRecord{ID: fid, CaseID: cc.ID, Language: cc.Language, Kind: string(kind), Stage: "NATIVE", Class: string(backend.FailureClassOf(ce)), Diagnostic: diag(ce)})
+					_ = failW.Write([]string{fid, cc.ID, cc.Language, "", string(kind), "NATIVE", string(backend.FailureClassOf(ce)), diag(ce)})
+					_ = nfW.Write([]string{fid, cc.ID, "output_kind", string(kind)})
+				}
+				_ = nvW.Write([]string{cc.ID, cc.Language, "x86_64", "windows", "win64", string(kind), "NATIVE", status, fmt.Sprint(len(got.Bytes) + len(got.Text)), diag(ce)})
+				// Reverse validation is deliberately immediate and artifact-based: the
+				// exact bytes/text produced above are lifted by the binary frontend. It
+				// never reparses the original source or reuses a legacy frontend.
+				if ce == nil {
+					var inputKind backend.CompileInputKind
+					var artifact []byte
+					switch kind {
+					case codetranspiler.Assembly:
+						inputKind, artifact = backend.CompileInputAssembly, []byte(got.Text)
+					case codetranspiler.MachineCode:
+						inputKind, artifact = backend.CompileInputMachine, got.Bytes
+					case codetranspiler.Object:
+						inputKind, artifact = backend.CompileInputObject, got.Bytes
+					case codetranspiler.Executable:
+						inputKind, artifact = backend.CompileInputExecutable, got.Bytes
+					}
+					c.BinaryLiftAttempts++
+					lifted, le := backend.LiftBinaryInput(artifact, codetranspiler.CompileOptions{InputKind: inputKind, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64"})
+					liftHash := ""
+					if le == nil && lifted != nil && lifted.UniversalAST != nil {
+						if wire, e := lifted.MarshalSemanticJSON(); e == nil {
+							liftHash = hash(string(wire))
+						}
+					}
+					liftStatus, earliest, class := "PASS", "PASS", ""
+					formatOK, decodeOK, cfgOK, dataflowOK, abiOK, uastOK := "PASS", "PASS", "PASS", "PASS", "PASS", "PASS"
+					cmp := binarySemanticComparison{}
+					if le != nil || liftHash == "" {
+						liftStatus, earliest = "FAIL", "B5_UAST_LIFT"
+						c.BinaryLiftFail++
+						// LiftBinaryInput currently exposes its structured result only at
+						// the UAST boundary. Do not guess an earlier substage from text.
+						formatOK, decodeOK, cfgOK, dataflowOK, abiOK, uastOK = "NOT_OBSERVED", "NOT_OBSERVED", "NOT_OBSERVED", "NOT_OBSERVED", "NOT_OBSERVED", "FAIL"
+						if le == nil {
+							le = fmt.Errorf("binary lift produced no canonical UAST")
+						}
+						class = string(backend.FailureClassOf(le))
+						fid := hash(cc.ID + "|binary_lift|" + string(kind))
+						failures = append(failures, failureRecord{ID: fid, CaseID: cc.ID, Language: cc.Language, Kind: "binary_lift_" + string(kind), Stage: earliest, Class: class, Diagnostic: diag(le)})
+						_ = failW.Write([]string{fid, cc.ID, cc.Language, "", "binary_lift_" + string(kind), earliest, class, diag(le)})
+					} else {
+						c.BinaryLiftPass++
+						cmp = compareBinarySemanticProjection(p.Semantic.UniversalAST, lifted.UniversalAST)
+					}
+					_ = blW.Write([]string{cc.ID, cc.Language, string(inputKind), string(kind), liftStatus, "true", formatOK, decodeOK, cfgOK, dataflowOK, abiOK, uastOK, directUASTHash, liftHash, fmt.Sprint(cmp.Operation), fmt.Sprint(cmp.Relation), fmt.Sprint(cmp.ControlFlow), fmt.Sprint(cmp.Call), fmt.Sprint(cmp.Dataflow), fmt.Sprint(cmp.Memory), fmt.Sprint(cmp.ABI), fmt.Sprint(cmp.Equal), earliest, class, diag(le)})
+				}
 				switch kind {
 				case codetranspiler.Assembly:
-					inputKind, artifact = backend.CompileInputAssembly, []byte(got.Text)
-				case codetranspiler.MachineCode:
-					inputKind, artifact = backend.CompileInputMachine, got.Bytes
-				case codetranspiler.Object:
-					inputKind, artifact = backend.CompileInputObject, got.Bytes
-				case codetranspiler.Executable:
-					inputKind, artifact = backend.CompileInputExecutable, got.Bytes
-				}
-				c.BinaryLiftAttempts++
-				lifted, le := backend.LiftBinaryInput(artifact, codetranspiler.CompileOptions{InputKind: inputKind, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64"})
-				liftHash := ""
-				if le == nil && lifted != nil && lifted.UniversalAST != nil {
-					if wire, e := lifted.MarshalSemanticJSON(); e == nil {
-						liftHash = hash(string(wire))
-					}
-				}
-				liftStatus, earliest, class := "PASS", "PASS", ""
-				formatOK, decodeOK, cfgOK, dataflowOK, abiOK, uastOK := "PASS", "PASS", "PASS", "PASS", "PASS", "PASS"
-				cmp := binarySemanticComparison{}
-				if le != nil || liftHash == "" {
-					liftStatus, earliest = "FAIL", "B5_UAST_LIFT"
-					c.BinaryLiftFail++
-					// LiftBinaryInput currently exposes its structured result only at
-					// the UAST boundary. Do not guess an earlier substage from text.
-					formatOK, decodeOK, cfgOK, dataflowOK, abiOK, uastOK = "NOT_OBSERVED", "NOT_OBSERVED", "NOT_OBSERVED", "NOT_OBSERVED", "NOT_OBSERVED", "FAIL"
-					if le == nil {
-						le = fmt.Errorf("binary lift produced no canonical UAST")
-					}
-					class = string(backend.FailureClassOf(le))
-					fid := hash(cc.ID + "|binary_lift|" + string(kind))
-					failures = append(failures, failureRecord{ID: fid, CaseID: cc.ID, Language: cc.Language, Kind: "binary_lift_" + string(kind), Stage: earliest, Class: class, Diagnostic: diag(le)})
-					_ = failW.Write([]string{fid, cc.ID, cc.Language, "", "binary_lift_" + string(kind), earliest, class, diag(le)})
-				} else {
-					c.BinaryLiftPass++
-					cmp = compareBinarySemanticProjection(p.Semantic.UniversalAST, lifted.UniversalAST)
-				}
-				_ = blW.Write([]string{cc.ID, cc.Language, string(inputKind), string(kind), liftStatus, "true", formatOK, decodeOK, cfgOK, dataflowOK, abiOK, uastOK, directUASTHash, liftHash, fmt.Sprint(cmp.Operation), fmt.Sprint(cmp.Relation), fmt.Sprint(cmp.ControlFlow), fmt.Sprint(cmp.Call), fmt.Sprint(cmp.Dataflow), fmt.Sprint(cmp.Memory), fmt.Sprint(cmp.ABI), fmt.Sprint(cmp.Equal), earliest, class, diag(le)})
-			}
-			switch kind {
-			case codetranspiler.Assembly:
-				c.NativeAssembly++
-				if ce == nil {
-					c.NativeAssemblyPass++
-				} else {
-					c.NativeAssemblyFail++
-				}
-				_ = asmW.Write([]string{cc.ID, cc.Language, status, fmt.Sprint(len(got.Text)), fmt.Sprint(got.InstructionCount), diag(ce)})
-				if ce == nil {
-					direct, directErr := backend.CompileBinaryInput([]byte(got.Text), codetranspiler.CompileOptions{InputKind: backend.CompileInputAssembly, OutputKind: codetranspiler.MachineCode, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64"})
-					directBytes := direct.Bytes
-					tmp := filepath.Join(os.TempDir(), "uast-real-"+cc.ID+".asm")
-					_ = os.WriteFile(tmp, []byte(got.Text), 0600)
-					_, ne := exec.LookPath("nasm")
-					if ne != nil {
-						_ = acW.Write([]string{cc.ID, "SKIP", "nasm", fmt.Sprint(len(directBytes)), "", "false", "false", "", "not installed"})
-						_ = dvW.Write([]string{cc.ID, "SKIP", hash(string(directBytes)), "", "false", "false", "", "nasm not installed"})
+					c.NativeAssembly++
+					if ce == nil {
+						c.NativeAssemblyPass++
 					} else {
-						cmd := exec.Command("nasm", "-O0", "-f", "bin", "-o", tmp+".bin", tmp)
-						ae := cmd.Run()
-						if ae != nil {
-							_ = acW.Write([]string{cc.ID, "FAIL", "nasm", fmt.Sprint(len(directBytes)), "", "false", "false", "", diag(ae)})
-							_ = dvW.Write([]string{cc.ID, "FAIL", hash(string(directBytes)), "", "false", "false", "", diag(ae)})
+						c.NativeAssemblyFail++
+					}
+					_ = asmW.Write([]string{cc.ID, cc.Language, status, fmt.Sprint(len(got.Text)), fmt.Sprint(got.InstructionCount), diag(ce)})
+					if ce == nil {
+						direct, directErr := backend.CompileBinaryInput([]byte(got.Text), codetranspiler.CompileOptions{InputKind: backend.CompileInputAssembly, OutputKind: codetranspiler.MachineCode, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64"})
+						directBytes := direct.Bytes
+						tmp := filepath.Join(os.TempDir(), "uast-real-"+cc.ID+".asm")
+						_ = os.WriteFile(tmp, []byte(got.Text), 0600)
+						_, ne := exec.LookPath("nasm")
+						if ne != nil {
+							_ = acW.Write([]string{cc.ID, "SKIP", "nasm", fmt.Sprint(len(directBytes)), "", "false", "false", "", "not installed"})
+							_ = dvW.Write([]string{cc.ID, "SKIP", hash(string(directBytes)), "", "false", "false", "", "nasm not installed"})
 						} else {
-							b, _ := os.ReadFile(tmp + ".bin")
-							mismatch := firstByteMismatch(directBytes, b)
-							byteEqual := directErr == nil && mismatch < 0
-							semanticEqual := byteEqual
-							status := "PASS"
-							if !byteEqual {
-								status = "FAIL"
+							cmd := exec.Command("nasm", "-O0", "-f", "bin", "-o", tmp+".bin", tmp)
+							ae := cmd.Run()
+							if ae != nil {
+								_ = acW.Write([]string{cc.ID, "FAIL", "nasm", fmt.Sprint(len(directBytes)), "", "false", "false", "", diag(ae)})
+								_ = dvW.Write([]string{cc.ID, "FAIL", hash(string(directBytes)), "", "false", "false", "", diag(ae)})
+							} else {
+								b, _ := os.ReadFile(tmp + ".bin")
+								mismatch := firstByteMismatch(directBytes, b)
+								byteEqual := directErr == nil && mismatch < 0
+								semanticEqual := byteEqual
+								status := "PASS"
+								if !byteEqual {
+									status = "FAIL"
+								}
+								_ = acW.Write([]string{cc.ID, status, "nasm", fmt.Sprint(len(directBytes)), fmt.Sprint(len(b)), fmt.Sprint(byteEqual), fmt.Sprint(semanticEqual), fmt.Sprint(mismatch), diag(directErr)})
+								_ = dvW.Write([]string{cc.ID, status, hash(string(directBytes)), hash(string(b)), fmt.Sprint(byteEqual), fmt.Sprint(semanticEqual), fmt.Sprint(mismatch), diag(directErr)})
 							}
-							_ = acW.Write([]string{cc.ID, status, "nasm", fmt.Sprint(len(directBytes)), fmt.Sprint(len(b)), fmt.Sprint(byteEqual), fmt.Sprint(semanticEqual), fmt.Sprint(mismatch), diag(directErr)})
-							_ = dvW.Write([]string{cc.ID, status, hash(string(directBytes)), hash(string(b)), fmt.Sprint(byteEqual), fmt.Sprint(semanticEqual), fmt.Sprint(mismatch), diag(directErr)})
+							_ = os.Remove(tmp)
+							_ = os.Remove(tmp + ".bin")
+						}
+					}
+				case codetranspiler.MachineCode:
+					c.NativeMachine++
+					if ce == nil {
+						c.NativeMachinePass++
+					} else {
+						c.NativeMachineFail++
+					}
+					_ = mcW.Write([]string{cc.ID, cc.Language, status, fmt.Sprint(len(got.Bytes)), fmt.Sprint(got.InstructionCount), diag(ce)})
+					if ce == nil {
+						_ = mdW.Write([]string{cc.ID, "SKIP", "none", "false", "no disassembler configured"})
+					}
+				case codetranspiler.Object:
+					c.NativeObject++
+					if ce == nil {
+						c.NativeObjectPass++
+					} else {
+						c.NativeObjectFail++
+					}
+					format := ""
+					if ce == nil {
+						if pf, e := peFile(got.Bytes); e == nil {
+							format = pf
+						}
+					}
+					_ = obW.Write([]string{cc.ID, cc.Language, status, fmt.Sprint(len(got.Bytes)), format, diag(ce)})
+				case codetranspiler.Executable:
+					c.NativeExecutable++
+					if ce == nil {
+						c.NativeExecutablePass++
+					} else {
+						c.NativeExecutableFail++
+					}
+					format := "PE32+"
+					executed := "false"
+					exitCode := ""
+					if ce == nil && *execute {
+						tmp := filepath.Join(os.TempDir(), "uast-real-"+cc.ID+".exe")
+						_ = os.WriteFile(tmp, got.Bytes, 0700)
+						ctx, cancel := context.WithTimeout(context.Background(), *executionTimeout)
+						run := exec.CommandContext(ctx, tmp)
+						re := run.Run()
+						if ctx.Err() == context.DeadlineExceeded {
+							re = fmt.Errorf("EXECUTION_TIMEOUT after %s", executionTimeout.String())
+						}
+						cancel()
+						executed = "true"
+						if re != nil {
+							exitCode = diag(re)
 						}
 						_ = os.Remove(tmp)
-						_ = os.Remove(tmp + ".bin")
 					}
+					_ = exW.Write([]string{cc.ID, cc.Language, status, fmt.Sprint(len(got.Bytes)), format, executed, exitCode, diag(ce)})
 				}
-			case codetranspiler.MachineCode:
-				c.NativeMachine++
-				if ce == nil {
-					c.NativeMachinePass++
-				} else {
-					c.NativeMachineFail++
-				}
-				_ = mcW.Write([]string{cc.ID, cc.Language, status, fmt.Sprint(len(got.Bytes)), fmt.Sprint(got.InstructionCount), diag(ce)})
-				if ce == nil {
-					_ = mdW.Write([]string{cc.ID, "SKIP", "none", "false", "no disassembler configured"})
-				}
-			case codetranspiler.Object:
-				c.NativeObject++
-				if ce == nil {
-					c.NativeObjectPass++
-				} else {
-					c.NativeObjectFail++
-				}
-				format := ""
-				if ce == nil {
-					if pf, e := peFile(got.Bytes); e == nil {
-						format = pf
-					}
-				}
-				_ = obW.Write([]string{cc.ID, cc.Language, status, fmt.Sprint(len(got.Bytes)), format, diag(ce)})
-			case codetranspiler.Executable:
-				c.NativeExecutable++
-				if ce == nil {
-					c.NativeExecutablePass++
-				} else {
-					c.NativeExecutableFail++
-				}
-				format := "PE32+"
-				executed := "false"
-				exitCode := ""
-				if ce == nil && *execute {
-					tmp := filepath.Join(os.TempDir(), "uast-real-"+cc.ID+".exe")
-					_ = os.WriteFile(tmp, got.Bytes, 0700)
-					ctx, cancel := context.WithTimeout(context.Background(), *executionTimeout)
-					run := exec.CommandContext(ctx, tmp)
-					re := run.Run()
-					if ctx.Err() == context.DeadlineExceeded {
-						re = fmt.Errorf("EXECUTION_TIMEOUT after %s", executionTimeout.String())
-					}
-					cancel()
-					executed = "true"
-					if re != nil {
-						exitCode = diag(re)
-					}
-					_ = os.Remove(tmp)
-				}
-				_ = exW.Write([]string{cc.ID, cc.Language, status, fmt.Sprint(len(got.Bytes)), format, executed, exitCode, diag(ce)})
 			}
-		}
+		}()
 	}
 	closeWriter(caseW, caseF)
 	closeWriter(valW, valF)

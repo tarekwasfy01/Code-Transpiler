@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import "testing"
@@ -126,5 +127,132 @@ func TestAssemblyFrontendAcceptsOwnRenderer(t *testing.T) {
 	}
 	if _, _, err = encodeX64(parsed); err != nil {
 		t.Fatalf("encode parsed renderer output: %v\n%s", err, renderX64(p))
+	}
+}
+
+func TestAssemblyFrontendPreservesSignedImmediatesAndFrames(t *testing.T) {
+	asm := "bits 64\ndefault rel\nsection .text\nglobal native_entry\nnative_entry:\n" +
+		"    sub rsp, strict dword 80\n" +
+		"    mov rax, -1\n" +
+		"    add rax, -5\n" +
+		"    sub rax, -8\n" +
+		"    cmp rax, -1\n" +
+		"    add rsp, strict dword 80\n" +
+		"    ret\n"
+	p, err := parseX64Assembly(asm)
+	if err != nil {
+		t.Fatalf("parse signed immediates: %v", err)
+	}
+	if len(p.Instructions) != 8 {
+		t.Fatalf("instruction count = %d, want 8", len(p.Instructions))
+	}
+	if p.Instructions[1].Op != "sub_sp" || p.Instructions[1].A.Value != 80 {
+		t.Fatalf("stack frame parsed as %#v", p.Instructions[1])
+	}
+	if p.Instructions[2].B.Value != -1 || p.Instructions[3].B.Value != -5 || p.Instructions[4].B.Value != -8 || p.Instructions[5].B.Value != -1 {
+		t.Fatalf("signed immediates were not preserved: %#v", p.Instructions)
+	}
+	if p.Instructions[6].Op != "add_sp" || p.Instructions[6].A.Value != 80 {
+		t.Fatalf("stack frame teardown parsed as %#v", p.Instructions[6])
+	}
+	if _, _, err = encodeX64(p); err != nil {
+		t.Fatalf("encode parsed signed immediates: %v", err)
+	}
+	if got := inferredX64Frame(p.Instructions); got != 80 {
+		t.Fatalf("inferred frame = %d, want 80", got)
+	}
+}
+
+func TestX64DecoderAcceptsSignExtendedGroup1Immediate(t *testing.T) {
+	// clang/nasm commonly encode `sub rsp, 32` as 48 83 EC 20.
+	p, err := decodeX64([]byte{0x48, 0x83, 0xec, 0x20, 0xc3}, 0)
+	if err != nil {
+		t.Fatalf("decode 0x83 stack adjustment: %v", err)
+	}
+	if len(p.Instructions) != 2 || p.Instructions[0].Op != "sub_sp" || p.Instructions[0].A.Value != 32 {
+		t.Fatalf("decoded instructions = %#v", p.Instructions)
+	}
+}
+
+func TestX64DecoderMachineAddressingFormsAndShortBranches(t *testing.T) {
+	tests := []struct {
+		name  string
+		code  []byte
+		check func(*testing.T, x64Program)
+	}{
+		{"disp8", []byte{0x48, 0x8b, 0x45, 0x08, 0xc3}, func(t *testing.T, p x64Program) {
+			if len(p.Instructions) != 2 || p.Instructions[0].A.Kind != 'r' || p.Instructions[0].B.Kind != 'm' || p.Instructions[0].B.Reg != xRBP || p.Instructions[0].B.Value != 8 || !p.Instructions[0].B.HasBase {
+				t.Fatalf("disp8 decode = %#v", p.Instructions)
+			}
+		}},
+		{"sib-index", []byte{0x48, 0x8b, 0x44, 0x88, 0x08, 0xc3}, func(t *testing.T, p x64Program) {
+			m := p.Instructions[0].B
+			if m.Kind != 'm' || !m.HasBase || m.Reg != xRAX || !m.HasIndex || m.Index != xRCX || m.Scale != 4 || m.Value != 8 {
+				t.Fatalf("SIB decode = %#v", m)
+			}
+		}},
+		{"rip-relative", []byte{0x48, 0x8b, 0x05, 0x78, 0x56, 0x34, 0x12, 0xc3}, func(t *testing.T, p x64Program) {
+			m := p.Instructions[0].B
+			if m.Kind != 'm' || !m.RIPRelative || m.Value != 0x12345678 || m.HasBase {
+				t.Fatalf("RIP-relative decode = %#v", m)
+			}
+		}},
+		{"group1-disp8", []byte{0x48, 0x83, 0x6d, 0x08, 0xfb, 0xc3}, func(t *testing.T, p x64Program) {
+			if p.Instructions[0].Op != "sub" || p.Instructions[0].A.Kind != 'm' || p.Instructions[0].A.Value != 8 || p.Instructions[0].B.Value != -5 {
+				t.Fatalf("group1 disp8 decode = %#v", p.Instructions)
+			}
+		}},
+		{"short-branch-reachable-trap", []byte{0x74, 0x02, 0x90, 0xcc, 0xc3}, func(t *testing.T, p x64Program) {
+			if p.Instructions[0].Op != "je" || p.Instructions[1].Op != "nop" || p.Instructions[2].Op != "int3" {
+				t.Fatalf("short branch/padding = %#v", p.Instructions)
+			}
+			if p.Classifications[2] != "trap_int3" {
+				t.Fatalf("reachable INT3 classification = %q", p.Classifications[2])
+			}
+		}},
+		{"short-jump-unreachable-padding", []byte{0xeb, 0x01, 0xcc, 0xc3}, func(t *testing.T, p x64Program) {
+			if p.Instructions[0].Op != "jmp" || p.Classifications[1] != "padding_int3" {
+				t.Fatalf("short jump/padding = %#v classifications=%#v", p.Instructions, p.Classifications)
+			}
+		}},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			p, err := decodeX64(tc.code, 0x1000)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tc.check(t, p)
+		})
+	}
+}
+
+func TestDecodeMachineIRPreservesAddressingAndCFG(t *testing.T) {
+	ir, err := DecodeMachineIR([]byte{0x74, 0x02, 0x90, 0xcc, 0xc3}, CompileOptions{InputKind: CompileInputMachine, BaseAddress: 0x1000})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ir.Instructions) != 5 || len(ir.CFG) == 0 {
+		t.Fatalf("machine IR = %#v", ir)
+	}
+	if ir.Instructions[1].Classification != "padding_nop" || ir.Instructions[2].Classification != "trap_int3" {
+		t.Fatalf("provenance lost: %#v", ir.Instructions)
+	}
+}
+
+func TestX64INT3ReachabilitySeparatesPaddingFromTrapLift(t *testing.T) {
+	// The short jump makes the intervening INT3 unreachable. It is residual
+	// padding. Structured branch lifting is intentionally still fail-closed;
+	// this test proves the decoder classification boundary only.
+	padding := []byte{0xeb, 0x01, 0xcc, 0x48, 0xb8, 42, 0, 0, 0, 0, 0, 0, 0, 0xc3}
+	p, err := decodeX64(padding, 0)
+	if err != nil || p.Classifications[1] != "padding_int3" {
+		t.Fatalf("unreachable INT3 padding classification: err=%v program=%#v", err, p)
+	}
+	// On the fallthrough path the same byte is executable and therefore an
+	// observable trap. The lifter must reject rather than erase it.
+	trap := []byte{0x48, 0xb8, 42, 0, 0, 0, 0, 0, 0, 0, 0xcc, 0xc3}
+	if _, err := LiftBinaryInput(trap, CompileOptions{InputKind: CompileInputMachine}); err == nil {
+		t.Fatal("reachable INT3 trap was silently discarded")
 	}
 }

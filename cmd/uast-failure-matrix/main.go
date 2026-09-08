@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // uast-failure-matrix consolidates source-free corpus results into one
 // normalized failure quotient. It stores evidence about failures, not program
 // semantics, and therefore is not an intermediate representation.

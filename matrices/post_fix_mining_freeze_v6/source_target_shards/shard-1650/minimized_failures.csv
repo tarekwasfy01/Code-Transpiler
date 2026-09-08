@@ -1,3 +1,0 @@
-quotient_id,representative_case_id,stage,class,kind,diagnostic
-Q0001,b4e860066dd9f90cf61bdf78c4203773bdc0003cd21b91181bda8b0f360fc555,V0_SOURCE_PARSE,FRONTEND,source_target,expected expression
-Q0002,dfd7ec3faea785c1724a366e0181198b83c23c0f4566848755141e493dab31a1,V4_NATIVE_EMISSION,BACKEND,source_target,"DIRECT_NATIVE_UNAVAILABLE: target go emitted invalid syntax (other: C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-239011358\program.go:10:10: expected '(', found ':=' C:\Users\tarek\AppData\Local\Temp\codetranspiler-syntax-2390113"
