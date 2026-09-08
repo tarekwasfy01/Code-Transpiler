@@ -166,26 +166,42 @@ func removeDuplicateFunctionRootFragments(u *UniversalASTDocument) error {
 			removed := map[int]bool{}
 			var mark func(int)
 			mark = func(id int) {
-				if removed[id] { return }
+				if removed[id] {
+					return
+				}
 				removed[id] = true
 				for _, child := range children[id] {
-					if childID, err := strconv.Atoi(child.To.ID); err == nil { mark(childID) }
+					if childID, err := strconv.Atoi(child.To.ID); err == nil {
+						mark(childID)
+					}
 				}
 			}
 			for _, r := range u.Relations {
-				if r.Kind != "syntax.child" || r.From != 0 || r.To.Domain != "node" { continue }
+				if r.Kind != "syntax.child" || r.From != 0 || r.To.Domain != "node" {
+					continue
+				}
 				id, err := strconv.Atoi(r.To.ID)
-				if err == nil && nodes[id] != nil && strings.EqualFold(nodes[id].StructuralKind, "Scope") { mark(id) }
+				if err == nil && nodes[id] != nil && strings.EqualFold(nodes[id].StructuralKind, "Scope") {
+					mark(id)
+				}
 			}
-			if len(removed) == 0 { return nil }
+			if len(removed) == 0 {
+				return nil
+			}
 			keptNodes := make([]UniversalASTNode, 0, len(u.Nodes)-len(removed))
-			for _, n := range u.Nodes { if !removed[n.ID] { keptNodes = append(keptNodes, n) } }
+			for _, n := range u.Nodes {
+				if !removed[n.ID] {
+					keptNodes = append(keptNodes, n)
+				}
+			}
 			u.Nodes = keptNodes
 			filtered := make([]UniversalASTRelation, 0, len(u.Relations))
 			for _, r := range u.Relations {
 				remove := removed[r.From]
 				if !remove && r.To.Domain == "node" {
-					if id, err := strconv.Atoi(r.To.ID); err == nil { remove = removed[id] }
+					if id, err := strconv.Atoi(r.To.ID); err == nil {
+						remove = removed[id]
+					}
 				}
 				if !remove {
 					filtered = append(filtered, r)

@@ -114,7 +114,7 @@ func New() *App {
 	}
 	th := material.NewTheme()
 	w := &app.Window{}
-	w.Option(app.Title("Code Transpiler"), app.Size(unit.Dp(1280), unit.Dp(760)), app.MinSize(unit.Dp(900), unit.Dp(560)))
+	w.Option(app.Title("Semantic Programming Language"), app.Size(unit.Dp(1280), unit.Dp(760)), app.MinSize(unit.Dp(900), unit.Dp(560)))
 	a := &App{
 		window: w, theme: th, status: "Ready",
 		convertResults:  make(chan conversionResult, 4),
@@ -818,7 +818,7 @@ func smallButton(gtx layout.Context, th *material.Theme, click *widget.Clickable
 	return btn.Layout(gtx)
 }
 
-const cliHelp = `Code Transpiler CLI - complete command reference
+const cliHelp = `Semantic Programming Language CLI - complete command reference
 
 COMMAND ALIASES (EXACTLY EQUIVALENT)
   sp <command> [options]     ==    CodeTranspiler.exe <command> [options]

@@ -1,0 +1,1 @@
+cmd/r2many/semantic-bundles/*.se filter=lfs diff=lfs merge=lfs -text

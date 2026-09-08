@@ -49,7 +49,7 @@ func main() {
 	case "help", "--help", "-h":
 		fmt.Print(helpText)
 	case "version", "--version":
-		fmt.Printf("Code Transpiler %s\ncommit=%s\nbuild_date=%s\nengine=TranspileCore/UAST\n", version, commit, buildDate)
+		fmt.Printf("Semantic Programming Language %s\ncommit=%s\nbuild_date=%s\nengine=TranspileCore/UAST\n", version, commit, buildDate)
 	case "licenses", "licences", "--licenses", "--licences":
 		fmt.Println("Tree-sitter (MIT License)")
 		fmt.Println(thirdpartylicenses.TreeSitter)
@@ -66,6 +66,16 @@ func main() {
 				continue
 			}
 			fmt.Printf("%s\t%d embedded runtime source files (external compiler required)\n", t, len(files))
+		}
+	case "bundle-info", "bundle-verify":
+		if err := semanticBundleInfoCommand(); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
+	case "bundle-extract":
+		if err := semanticBundleExtractCommand(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
 		}
 	case "run":
 		if err := runSource(os.Args[2:]); err != nil {
@@ -652,7 +662,7 @@ func transpileBatch() error {
 	return json.NewEncoder(os.Stdout).Encode(responses)
 }
 
-const helpText = `Code Transpiler v1.0 - SemanticProgram v1
+const helpText = `Semantic Programming Language - SemanticProgram v1
 
 COMMAND ALIASES (EXACTLY EQUIVALENT)
   sp <command> [options]     ==    CodeTranspiler.exe <command> [options]
@@ -689,7 +699,7 @@ GENERAL
 
   CodeTranspiler.exe version
   CodeTranspiler.exe --version
-      Show the Code Transpiler version.
+      Show the Semantic Programming Language version.
 
   CodeTranspiler.exe targets
       List all target-language IDs.
@@ -762,6 +772,13 @@ GENERAL
 
   CodeTranspiler.exe runtimes
       List the runtime bundles embedded directly in CodeTranspiler.exe.
+
+  CodeTranspiler.exe bundle-info
+  CodeTranspiler.exe bundle-verify
+      Verify and report the embedded frontend, UAST, and backend Semantic bundles.
+
+  CodeTranspiler.exe bundle-extract <directory>
+      Verify and extract all three complete embedded Semantic bundles.
 
   CodeTranspiler.exe licenses
       Show embedded third-party license notices (including Tree-sitter).

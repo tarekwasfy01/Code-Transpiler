@@ -26,9 +26,10 @@ func deriveNominalRelations(table []SemanticTypeDefinition) (*SemanticNominalRel
 		if t.Reference && t.Identity == "" {
 			return nil, fmt.Errorf("type reference %d has no identity", entry.ID)
 		}
-		if t.Reference && len(semanticTypeChildren(&t)) != 0 {
-			return nil, fmt.Errorf("type reference %d contains a definition", entry.ID)
-		}
+		// A frontend may retain instantiated shape details on a reference
+		// (notably for isolated Go files).  Nominal resolution is identity-only;
+		// those details belong to the structural type plane and must not turn a
+		// valid reference into a rejected definition.
 		if t.Identity != "" {
 			set[t.Identity] = true
 		}

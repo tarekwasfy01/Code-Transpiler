@@ -183,6 +183,11 @@ func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*Se
 				if index < len(valueSpec.Values) {
 					stmt.Expression = l.expr(valueSpec.Values[index])
 				} else {
+					// In a per-file GUI closure pass the package type checker may
+					// intentionally leave a declaration unresolved.  A missing
+					// object is still a valid UAST declaration fact; lower its zero
+					// value through the same unknown-type contract instead of
+					// dereferencing the absent checker object.
 					if object != nil {
 						stmt.Expression = nativeGoZeroExpression(object.Type(), *l.span(valueSpec))
 					} else {
