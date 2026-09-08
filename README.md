@@ -126,7 +126,7 @@ Aliases include `py`, `rs`, `c++` and `c#`. The registry therefore exposes
 ## Install the Go package
 
 ```bash
-go get github.com/tarekwasfy01/Code-Transpiler@v1.2.9
+go get github.com/tarekwasfy01/Code-Transpiler@v1.2.10
 ```
 
 Import it:
