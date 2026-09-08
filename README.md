@@ -1,76 +1,53 @@
-# Code-Transpiler
+# Code Transpiler
 
-## Local development additions (not yet released)
+<p align="center">
+  <img width="256" height="256" alt="code-transpiler-logo" src="https://github.com/user-attachments/assets/88fbf224-6e52-426e-a124-5482df814b75" />
+</p>
 
-Native Go analysis is available through
-`NativeAnalysisJSON("go", "input.go", source)` and the CLI command
-`native-analysis -source go input.go -o analysis.json`.
-It uses Go's parser and type checker, preserving literal spelling, structured
-types, source spans, and lexical symbol relations. Imports are currently rejected.
-The output is an **analysis artifact, not an executable SemanticProgram**.
+<p align="center">
+  <a href="https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler">
+    <img src="https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg" alt="Go Reference" />
+  </a>
+  &nbsp;
+  <a href="https://get.microsoft.com/installer/download/9n1kb1kxxtmn?referrer=appbadge">
+    <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200" alt="Get it from Microsoft" />
+  </a>
+</p>
 
-The separate `NativeSemanticJSON("go", "input.go", source)` API and
-`semantic-export -native -source go input.go -o program.json` CLI path now
-produce an **executable SemanticProgram** for a bounded Go scalar/control
-subset. They preserve block shadowing and source mapping, and reject unsupported
-input without falling back to the old parser. Its Go target and embedded runtime
-are verified alongside Python, Rust, C and C++ for the bounded subset; other targets
-are gated by the `native.go.scalar` capability.
-Native helper functions support bool/string/fixed-width integer parameters, zero or one return
-value, direct calls and conditional returns. Their sparse caller-to-callee matrix
-orders declarations and rejects recursion. The additional `native.go.functions`
-capability enables the embedded runtime and Go/Python/Rust/C/C++ emission.
-Argument order, argument side effects and boolean short-circuit behavior are
-checked against original Go execution after a deterministic JSON roundtrip.
-Void fallthrough becomes an explicit semantic return. Empty functions, loop
-returns and ordered effectful operands are included in the executable fixture
-`internal/backend/testdata/native_functions.go`. C is also tested with `-O2`.
-Architecture-sized integers, floating-point native operations, general imports,
-recursive functions and Unicode are not yet part
-of this strict executable subset. Existing default translation remains legacy.
+## Semantic Programming Language
 
-`CapabilityMatrixJSON(features)` and `capability-matrix [feature ...]` expose
-feature-by-target status matrices. Required capabilities now gate emission;
-unknown dialect operations gate execution and emission.
+The **Semantic Programming Language (`.sp`) originated from Code Transpiler** and its language-independent `SemanticProgram / Universal AST`.
 
-`ImplementationMatrixJSON()` and `implementation-matrix` expose 19 typed integer
-operations across JSON, runtime, all 13 source adapters and all 13 target adapters
-(19 x 28). This matrix gates emission directly from the actual operation nodes;
-removing a document's optional requirement strings cannot bypass it. Its route
-matrix describes declared availability, not execution-test evidence.
+Code Transpiler remains the associated **Go package, reference implementation and bootstrap compiler**.
 
-The new `tagged_exact_scalars_v1` value contract preserves int8/16/32/64 and
-uint8/16/32/64 without binary64 conversion. Typed core nodes encode literals,
-loads, addition/subtraction/multiplication, bit operations, comparisons,
-formatting, and explicit integer conversions with modular wrap semantics.
-Division, remainder and shifts are not implemented in this subset. Integer
-parameter types and value-passing semantics survive the executable JSON codec.
-The 1,472-case integer matrix uses boundaries and seeded values across all
-eight domains, with an independent big.Int oracle and optional external runs.
+Semantic Programming Language:
 
-Implemented native input is currently **Go**. Exact integer target adapters are
-**Go, Python, Rust, C, C++, Java and C#**. Other native frontends and exact target adapters
-remain explicit unsupported matrix entries, not claimed implementations.
+https://github.com/tarekwasfy01/Semantic-Programming-Language
 
-See [frontend migration status](docs/SEMANTIC_FRONTEND_V2.md) and the complete
-[development instructions](docs/SEMANTIC_DEVELOPMENT.md) for implemented boundaries,
-the 1,024-case arithmetic differential test, and remaining compiler work.
+---
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg)](https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler)
+## About
 
-Code-Transpiler is a matrix-driven many-to-many compiler for 13 programming
-languages. It is available as a Windows application, a command-line program
-and an importable Go package.
+Code Transpiler is a matrix-driven many-to-many compiler and transpiler for 13 programming languages.
+
+It provides:
+
+* Go package
+* Windows application
+* command-line interface
+* SemanticProgram / UAST
+* source-to-source transpilation
+* native x86-64 compilation
+* assembly, machine-code, object and executable processing
+* binary-to-Semantic lifting
 
 ```text
-Go module:   github.com/tarekwasfy01/Code-Transpiler
-Go package:  codetranspiler
-Executable:  CodeTranspiler.exe
+Go module:  github.com/tarekwasfy01/Code-Transpiler
+Go package: codetranspiler
+Executable: CodeTranspiler.exe
 ```
 
-Go package names cannot contain `-`, so the module and repository are named
-`Code-Transpiler`, while the identifier used in Go source is
-`codetranspiler`.
+
 
 ### Run the API example directly
 
