@@ -18,10 +18,13 @@ $files = @(
     '.gitignore', 'LICENSE', 'README.md',
     'THIRD_PARTY_NOTICES.md', 'THIRD_PARTY_NOTICES.txt',
     'go.mod', 'go.sum', 'code_transpiler.go', 'code_transpiler_test.go',
-    'build-onefile.ps1', 'build-code-transpiler.bat', 'build-universal-code-transpiler.bat',
     'export-github.ps1'
 )
 foreach ($file in $files) { Copy-Item -LiteralPath $file -Destination (Join-Path $exportRoot $file) }
+New-Item -ItemType Directory -Path (Join-Path $exportRoot 'build') -Force | Out-Null
+foreach ($buildFile in @('build-onefile.ps1','build-code-transpiler.bat','build-universal-code-transpiler.bat')) {
+    Copy-Item -LiteralPath (Join-Path 'build' $buildFile) -Destination (Join-Path $exportRoot ('build\' + $buildFile))
+}
 $docDir = Join-Path $exportRoot 'docs'
 New-Item -ItemType Directory -Path $docDir -Force | Out-Null
 foreach ($doc in @('SEMANTIC_PROGRAM.md','CROSSTL_DESIGN.md','SEMANTIC_FRONTEND_V2.md','SEMANTIC_DEVELOPMENT.md','FRONTEND_UAST_CONTRACT.md','IMPLEMENTATION_MATRIX.md','UAST_MIGRATION_STATUS.md')) {

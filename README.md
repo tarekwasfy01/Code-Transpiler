@@ -873,7 +873,7 @@ Requirements:
 Build:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build-onefile.ps1
+powershell -ExecutionPolicy Bypass -File .\build\build-onefile.ps1
 ```
 
 Output:
