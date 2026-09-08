@@ -1,0 +1,187 @@
+// Copyright (c) 2026 Tarek Wasfy
+package backend
+
+import (
+	"context"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
+)
+
+type syntaxToolPath struct {
+	path string
+	ok   bool
+}
+
+// Tool discovery is invariant for a process. Caching it avoids repeatedly
+// traversing a potentially very large Windows PATH for every UAST cell while
+// retaining the exact same syntax-checking behaviour.
+var syntaxToolPaths sync.Map // map[string]syntaxToolPath
+
+func resolveSyntaxTool(tool string) (string, bool) {
+	if cached, ok := syntaxToolPaths.Load(tool); ok {
+		v := cached.(syntaxToolPath)
+		return v.path, v.ok
+	}
+	path, err := exec.LookPath(tool)
+	v := syntaxToolPath{path: path, ok: err == nil}
+	actual, _ := syntaxToolPaths.LoadOrStore(tool, v)
+	v = actual.(syntaxToolPath)
+	return v.path, v.ok
+}
+
+// TargetSyntaxCheck is an observation of a parser/compiler in syntax-only
+// mode. Checked=false means the local toolchain is unavailable; it is not a
+// positive syntax proof and is kept separate in reports.
+type TargetSyntaxCheck struct {
+	Checked             bool   `json:"checked"`
+	Valid               bool   `json:"valid"`
+	Tool                string `json:"tool,omitempty"`
+	Failure             string `json:"failure,omitempty"`
+	SemanticDiagnostics bool   `json:"semantic_diagnostics,omitempty"`
+}
+
+// SyntaxFailureSignature groups actual target diagnostics into the stable
+// matrix vocabulary. It does not infer a cause; unrecognised diagnostics are
+// preserved as "other" for review.
+func SyntaxFailureSignature(diagnostic string) string {
+	d := strings.ToLower(diagnostic)
+	for _, item := range []struct{ needle, signature string }{
+		{"expected expression", "expected expression"},
+		{"expected statement", "expected statement"},
+		{"unexpected token", "unexpected token"},
+		{"expected ';'", "missing delimiter"},
+		{"expected `;`", "missing delimiter"},
+		{"invalid operator", "invalid operator"},
+		{"invalid call", "invalid call"},
+		{"invalid index", "invalid index"},
+		{"invalid declaration", "invalid declaration"},
+		{"invalid assignment", "invalid assignment target"},
+	} {
+		if strings.Contains(d, item.needle) {
+			return item.signature
+		}
+	}
+	if strings.TrimSpace(d) == "" {
+		return ""
+	}
+	return "other"
+}
+
+// CheckTargetSyntax parses generated source without executing it. Native
+// output that fails an available target parser is ineligible for DIRECT and
+// will reach the central compatibility fallback.
+func CheckTargetSyntax(target, source string) TargetSyntaxCheck {
+	extension := map[string]string{"go": ".go", "python": ".py", "rust": ".rs", "c": ".c", "cpp": ".cpp", "zig": ".zig", "julia": ".jl", "nim": ".nim", "csharp": ".cs", "java": ".java", "kotlin": ".kt", "swift": ".swift", "r": ".R"}[target]
+	if extension == "" {
+		return TargetSyntaxCheck{Failure: "unknown target"}
+	}
+	dir, err := os.MkdirTemp("", "codetranspiler-syntax-")
+	if err != nil {
+		return TargetSyntaxCheck{Failure: err.Error()}
+	}
+	defer os.RemoveAll(dir)
+	base := "program"
+	if target == "java" {
+		base = "Main"
+	}
+	file := filepath.Join(dir, base+extension)
+	if err := os.WriteFile(file, []byte(source), 0o600); err != nil {
+		return TargetSyntaxCheck{Failure: err.Error()}
+	}
+	tool, args := syntaxCommand(target, file)
+	if tool == "" {
+		return TargetSyntaxCheck{Failure: "no syntax checker configured"}
+	}
+	path, found := resolveSyntaxTool(tool)
+	if !found {
+		return TargetSyntaxCheck{Tool: tool, Failure: "tool unavailable"}
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, path, args...)
+	cmd.Dir = dir
+	output, runErr := cmd.CombinedOutput()
+	if runErr != nil {
+		diagnostic := strings.TrimSpace(string(output))
+		// Most installed target tools are compilers, not parser-only APIs. Their
+		// name/type resolution failures must not demote structurally valid emitted
+		// source to the compatibility runtime. Keep that evidence on the result,
+		// but reserve Valid=false for an actual syntax diagnostic.
+		if syntaxIsBlockedOnlyBySemanticResolution(diagnostic) {
+			return TargetSyntaxCheck{Checked: true, Valid: true, Tool: tool, Failure: diagnostic, SemanticDiagnostics: true}
+		}
+		return TargetSyntaxCheck{Checked: true, Tool: tool, Failure: SyntaxFailureSignature(diagnostic) + ": " + diagnostic}
+	}
+	return TargetSyntaxCheck{Checked: true, Valid: true, Tool: tool}
+}
+
+// syntaxIsBlockedOnlyBySemanticResolution separates the part of a compiler
+// diagnostic that belongs to later target compilation from source grammar.
+// It is deliberately conservative: any known syntactic marker wins, and a
+// result is accepted only when a known resolution marker is also present.
+func syntaxIsBlockedOnlyBySemanticResolution(diagnostic string) bool {
+	d := strings.ToLower(diagnostic)
+	for _, marker := range []string{
+		"syntax error", "expected ", "unexpected ", "unterminated", "unclosed",
+		"mismatched input", "illegal start", "not a statement", "reached end",
+		"invalid token", "missing delimiter", "parse error",
+	} {
+		if strings.Contains(d, marker) {
+			return false
+		}
+	}
+	for _, marker := range []string{
+		"undeclared", "not declared", "cannot find value", "cannot find function",
+		"cannot find type", "cannot find symbol", "failed to resolve", "unknown type name",
+		"implicit declaration", "unresolved reference", "not found in this scope",
+		// Tool diagnostics follow the host locale. These are the stable German
+		// equivalents emitted by javac/csc on the supported Windows hosts.
+		"symbol nicht gefunden", "variable nicht gefunden", "klasse nicht gefunden",
+		"typ nicht gefunden", "bezeichner nicht gefunden",
+	} {
+		if strings.Contains(d, marker) {
+			return true
+		}
+	}
+	return false
+}
+
+func syntaxCommand(target, file string) (string, []string) {
+	switch target {
+	case "go":
+		// gofmt -d writes a diff and is not a validator contract: an ordinary
+		// formatting diff must not demote valid Go to the runtime fallback.
+		// Formatting a private temporary file still parses the complete source
+		// and returns non-zero on syntax errors.
+		return "gofmt", []string{"-w", file}
+	case "python":
+		return "python", []string{"-m", "py_compile", file}
+	case "rust":
+		return "rustc", []string{"--emit=metadata", file}
+	case "c":
+		return "gcc", []string{"-std=c11", "-fsyntax-only", file}
+	case "cpp":
+		return "g++", []string{"-std=c++17", "-fsyntax-only", file}
+	case "zig":
+		return "zig", []string{"ast-check", file}
+	case "julia":
+		return "julia", []string{"-e", "Meta.parse(read(ARGS[1], String))", file}
+	case "nim":
+		return "nim", []string{"check", "--hints:off", "--verbosity:0", file}
+	case "csharp":
+		return "csc", []string{"/nologo", "/target:library", file}
+	case "java":
+		return "javac", []string{"-d", filepath.Dir(file), file}
+	case "kotlin":
+		return "kotlinc", []string{file, "-d", filepath.Join(filepath.Dir(file), "check.jar")}
+	case "swift":
+		return "swiftc", []string{"-parse", file}
+	case "r":
+		return "Rscript", []string{"--vanilla", "-e", "parse(file=commandArgs(trailingOnly=TRUE)[1])", file}
+	}
+	return "", nil
+}

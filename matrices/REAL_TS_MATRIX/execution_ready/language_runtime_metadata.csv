@@ -1,0 +1,14 @@
+﻿language,parser_c_present,has_keyword_lexer,keyword_capture_symbol_name,keyword_capture_symbol_id,repository,commit,source_status
+r,true,true,sym_identifier,1,r-lib/tree-sitter-r,58a22794466c0fc15b0d3b40531db751593721e8,downloaded
+go,true,true,sym_identifier,1,tree-sitter/tree-sitter-go,2346a3ab1bb3857b48b29d779a1ef9799a248cd7,downloaded
+rust,true,true,sym_identifier,1,tree-sitter/tree-sitter-rust,77a3747266f4d621d0757825e6b11edcbf991ca5,downloaded
+cpp,true,true,sym_identifier,1,tree-sitter/tree-sitter-cpp,8b5b49eb196bec7040441bee33b2c9a4838d6967,downloaded
+c,true,true,sym_identifier,1,tree-sitter/tree-sitter-c,b780e47fc780ddc8da13afa35a3f4ed5c157823d,downloaded
+python,true,true,sym_identifier,1,tree-sitter/tree-sitter-python,26855eabccb19c6abf499fbc5b8dc7cc9ab8bc64,downloaded
+zig,true,true,sym__identifier,1,tree-sitter-grammars/tree-sitter-zig,6479aa13f32f701c383083d8b28360ebd682fb7d,downloaded
+julia,true,true,sym__word_identifier,1,tree-sitter/tree-sitter-julia,e0f9dcd180fdcfcfa8d79a3531e11d99e79321d3,downloaded
+nim,true,true,sym_identifier,1,alaviss/tree-sitter-nim,ac72ba30d16edf0be021588a9301ede4accd6cf4,downloaded
+csharp,true,true,sym__identifier_token,1,tree-sitter/tree-sitter-c-sharp,9150f7d56bb47f1a809fa23623f1ba1413e93fa9,downloaded
+java,true,true,sym_identifier,1,tree-sitter/tree-sitter-java,e10607b45ff745f5f876bfa3e94fbcc6b44bdc11,downloaded
+kotlin,true,true,sym__alpha_identifier,1,fwcd/tree-sitter-kotlin,1852ea17b7f60fb3f9d84e0b1555d56b46b39fb1,downloaded
+swift,false,,,,alex-pinkus/tree-sitter-swift,73c7923ac17ba6b9ebc0a2688bbddd0b75b725d6,download_error:HTTPError

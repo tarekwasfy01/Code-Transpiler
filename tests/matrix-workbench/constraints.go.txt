@@ -1,0 +1,6 @@
+package probe
+
+type Number interface { ~int32 | ~int64 }
+type Reader interface { Read() string }
+type Box[T Number] struct { Value T }
+var Value Box[int64]

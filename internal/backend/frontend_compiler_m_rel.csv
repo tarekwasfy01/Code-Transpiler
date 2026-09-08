@@ -1,0 +1,22 @@
+﻿RelationID,LeftFeature,Relation,RightFeature,Language,EvidenceClass,EvidenceID,Rationale,ProductiveUse
+R0001,RESOURCE_SCOPE,SCOPE_CONTAINS,CLEANUP_ACTION,Python,EMPIRICALLY_PROVEN,E0005,Nuitka async/sync with lowering,Seed M_REL; quotient only when guards/effects/order match.
+R0002,RESOURCE_SCOPE,EXCEPTION_EDGE,CLEANUP_ACTION,Python,EMPIRICALLY_PROVEN,E0005,Nuitka with exception path,Seed M_REL; quotient only when guards/effects/order match.
+R0003,ASYNC_ENTER_EXIT,SUSPENSION_EDGE,AWAIT,Python,EMPIRICALLY_PROVEN,E0005,Nuitka async with,Seed M_REL; quotient only when guards/effects/order match.
+R0004,EXPRESSION,SEQUENCE_BEFORE,TEMPORARY,Go,EMPIRICALLY_PROVEN,E0010,evaluation-order rewrite,Seed M_REL; quotient only when guards/effects/order match.
+R0005,MAP_INDEX,DATA_DEPENDENCY,TEMPORARY,Go,EMPIRICALLY_PROVEN,E0010,addressability/order rewrite,Seed M_REL; quotient only when guards/effects/order match.
+R0006,CHANNEL_RECEIVE,SEQUENCE_BEFORE,ASSIGNMENT,Go,EMPIRICALLY_PROVEN,E0010,receive normalization,Seed M_REL; quotient only when guards/effects/order match.
+R0007,RANGE_ITERATION,LOOP_BACKEDGE,BODY,Go,EMPIRICALLY_PROVEN,E0012,range lowering,Seed M_REL; quotient only when guards/effects/order match.
+R0008,ASYNC_FUNCTION,SUSPENSION_EDGE,RESUME,Rust,EMPIRICALLY_PROVEN,E0015,AST→HIR async desugaring,Seed M_REL; quotient only when guards/effects/order match.
+R0009,LOOP_SUGAR,CONTROL_EDGE,CANONICAL_LOOP,Rust,EMPIRICALLY_PROVEN,E0015,AST→HIR loop desugaring,Seed M_REL; quotient only when guards/effects/order match.
+R0010,LAMBDA,CAPTURE,OUTER_BINDING,C++,EMPIRICALLY_PROVEN,E0021,Clang LambdaCapture,Seed M_REL; quotient only when guards/effects/order match.
+R0011,LAMBDA,CAPTURE,OUTER_BINDING,C#,EMPIRICALLY_PROVEN,E0026,Roslyn bound lambda lowering,Seed M_REL; quotient only when guards/effects/order match.
+R0012,ENUM_SWITCH,CONTROL_EDGE,SWITCH,Java,EMPIRICALLY_PROVEN,E0029,javac Lower enum mapping,Seed M_REL; quotient only when guards/effects/order match.
+R0013,DECLARATION,SYMBOL_DEPENDENCY,SYMBOL,Kotlin,EMPIRICALLY_PROVEN,E0032,FIR declaration symbol,Seed M_REL; quotient only when guards/effects/order match.
+R0014,EXPRESSION,TYPE_DEPENDENCY,TYPE_REF,Kotlin,EMPIRICALLY_PROVEN,E0032,FIR expression typeRef,Seed M_REL; quotient only when guards/effects/order match.
+R0015,EXPECT_DECL,SYMBOL_DEPENDENCY,ACTUAL_DECL,Kotlin,EMPIRICALLY_PROVEN,E0033,expect/actual binding,Seed M_REL; quotient only when guards/effects/order match.
+R0016,SURFACE_FORM,SEQUENCE_BEFORE,LOWERED_FORM,Julia,EMPIRICALLY_PROVEN,E0039,Julia lowering,Seed M_REL; quotient only when guards/effects/order match.
+R0017,MACRO_CALL,PHASE_BEFORE,LOWERED_SEMANTICS,Julia,EMPIRICALLY_PROVEN,E0038,macro expansion before lowering,Seed M_REL; quotient only when guards/effects/order match.
+R0018,DOT_CALL_SURFACE,DATA_DEPENDENCY,CALL_RECEIVER,Nim,EMPIRICALLY_PROVEN,E0042,parser call rewrite,Seed M_REL; quotient only when guards/effects/order match.
+R0019,PIPE_LHS,SEQUENCE_BEFORE,PIPE_RHS_CALL,R,EMPIRICALLY_PROVEN,E0045,grammar pipe form,Seed M_REL; quotient only when guards/effects/order match.
+R0020,NAMESPACE_REF,MODULE_DEPENDENCY,PACKAGE,R,EMPIRICALLY_PROVEN,E0045,grammar namespace operator,Seed M_REL; quotient only when guards/effects/order match.
+R0021,AST_NODE,PHASE_BEFORE,ZIR_FORM,Zig,EMPIRICALLY_PROVEN,E0048,AstGen/ZIR frontend stages,Seed M_REL; quotient only when guards/effects/order match.

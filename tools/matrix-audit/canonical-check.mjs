@@ -1,0 +1,11 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {spawn} from 'node:child_process';
+const root=process.cwd(),fixtures=JSON.parse(await fs.readFile('outputs/transpiler-audit-2026-08-30/fixtures.json'));
+const adapter=path.resolve('.audit-cache/matrix-audit.exe');
+const requests=fixtures.map((fixture,i)=>({id:String(i),source:fixture.source,code:fixture.code,mode:'canonical'}));
+const result=await new Promise(resolve=>{let stdout='',stderr='';const p=spawn(adapter,[],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});p.stdout.on('data',b=>stdout+=b);p.stderr.on('data',b=>stderr+=b);p.on('close',exit=>resolve({exit,stdout,stderr}));p.stdin.end(JSON.stringify(requests));});
+if(result.exit!==0)throw new Error(result.stderr);const responses=JSON.parse(result.stdout);
+const rows=responses.map((response,i)=>({source:fixtures[i].source,feature:fixtures[i].feature,error:response.error??'',canonical:response.code??''}));
+await fs.writeFile('outputs/transpiler-audit-2026-08-30/canonical_matrix.json',JSON.stringify(rows,null,2));
+const errors=rows.filter(row=>row.error);console.log(JSON.stringify({fixtures:rows.length,errors:errors.length,error_rows:errors.slice(0,30)},null,2));

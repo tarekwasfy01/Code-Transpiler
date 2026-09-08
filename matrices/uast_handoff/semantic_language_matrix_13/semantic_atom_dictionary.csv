@@ -1,0 +1,52 @@
+﻿atom_id,description
+EXTSEM_STATIC_TYPING,Core language is statically typed
+EXTSEM_DYNAMIC_TYPING,Core language is dynamically typed
+EXTSEM_NOMINAL_TYPE_IDENTITY,Nominal type identity/subtyping is a core mechanism
+EXTSEM_STRUCTURAL_CONFORMANCE,Structural/duck/concept-style conformance is a core mechanism
+EXTSEM_PARAMETRIC_POLYMORPHISM,Parametric polymorphism/generics is supported
+EXTSEM_TYPE_INFERENCE,Compiler/runtime provides language-defined type inference
+EXTSEM_FLOW_SENSITIVE_TYPING,Flow-sensitive typing/smart-cast style semantics
+EXTSEM_TYPE_LEVEL_NULL_SAFETY,Nullable/optional absence is distinguished at the type level
+EXTSEM_VALUE_TYPES,Language has explicit/core value-semantics types
+EXTSEM_REFERENCE_TYPES,Language has explicit/core reference-semantics types
+EXTSEM_EXPLICIT_POINTER_REFERENCE,Explicit pointer/reference types exist
+EXTSEM_LEXICAL_SCOPING,Lexical scoping is a core rule
+EXTSEM_FIRST_CLASS_FUNCTIONS,Functions/closures are first-class values
+EXTSEM_CLOSURES,Closures capture lexical environment
+EXTSEM_LAZY_ARGUMENTS,Ordinary function arguments can be lazy/promises by language semantics
+EXTSEM_LEFT_TO_RIGHT_GENERAL_EVAL,General operand/argument evaluation is specified left-to-right
+EXTSEM_PARTIAL_UNSPECIFIED_EVAL,Important evaluation order remains unspecified/partial
+EXTSEM_SHORT_CIRCUIT_BOOL,Boolean conjunction/disjunction short-circuit
+EXTSEM_PASS_BY_VALUE_CORE,Core parameter passing is value passing
+EXTSEM_BYREF_PARAMETER_FORM,Dedicated by-reference/inout/var parameter form exists
+EXTSEM_SINGLE_RECEIVER_DYNAMIC_DISPATCH,Single-receiver dynamic method dispatch exists
+EXTSEM_MULTIPLE_DISPATCH,Runtime multiple dispatch on multiple argument types exists
+EXTSEM_STRUCTURAL_INTERFACE_CONFORMANCE,Interface/trait/concept satisfaction can be structural
+EXTSEM_NOMINAL_INHERITANCE,Nominal inheritance/subtyping hierarchy exists
+EXTSEM_OPERATOR_OVERLOADING,User-defined operator overloading/conventions exist
+EXTSEM_GENERICS,Generic/parametric declarations exist
+EXTSEM_PATTERN_MATCHING,General/powerful pattern matching exists
+EXTSEM_EXCEPTIONS,Exception/throw/catch mechanism exists
+EXTSEM_CHECKED_ERROR_EFFECT,Compiler tracks declared/checked exception/error effect
+EXTSEM_ERROR_VALUES_UNIONS,Recoverable errors are represented directly as values/error unions in core idioms
+EXTSEM_STRUCTURED_CLEANUP,defer/finally/with/using/on.exit style structured cleanup exists
+EXTSEM_RAII_DESTRUCTORS,Scope/lifetime-driven deterministic destructor semantics is core
+EXTSEM_GARBAGE_COLLECTION,Managed garbage collection is a normal implementation/runtime model
+EXTSEM_REFERENCE_COUNTING,Automatic reference counting is a normal/core memory model
+EXTSEM_OWNERSHIP_BORROWING,Ownership/borrowing is enforced by the language/type system
+EXTSEM_MANUAL_MEMORY,Manual allocation/free is a core normal memory model
+EXTSEM_UNSAFE_ESCAPE,Language exposes explicit unsafe/low-level escape mechanisms
+EXTSEM_CONCURRENCY_PRIMITIVES,Standard/core concurrency primitives are defined
+EXTSEM_ATOMICS_MEMORY_MODEL,Language/runtime defines atomics and memory-order semantics
+EXTSEM_CHANNELS,Channels/message-passing primitive is core/standard
+EXTSEM_ASYNC_AWAIT,async/await or equivalent suspension syntax is core
+EXTSEM_ACTORS,Actor isolation is a core language concurrency abstraction
+EXTSEM_STRUCTURED_CONCURRENCY,Structured concurrency is a core language abstraction
+EXTSEM_MACROS,Token/AST macro facility is core
+EXTSEM_COMPILETIME_META,Compile-time metaprogramming beyond ordinary constants exists
+EXTSEM_RUNTIME_REFLECTION,General runtime reflection/introspection is available
+EXTSEM_FFI,Foreign-function interface is standardized/core-supported
+EXTSEM_MODULE_SYSTEM,Module/package/namespace system is a language-level concept
+EXTSEM_UNDEFINED_BEHAVIOR,The language explicitly relies on a substantial undefined-behavior model
+EXTSEM_ITERATORS_GENERATORS,Iterator/generator/coroutine protocol or syntax is core
+EXTSEM_SUM_VARIANTS,Native tagged union/algebraic sum/associated-value enum semantics exist

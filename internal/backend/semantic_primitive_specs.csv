@@ -1,0 +1,7 @@
+id,arity,class,rewrite,guards
+MEAN,1,DERIVED,"DIV(SUM($0),LENGTH($0))","numeric;ordered"
+ALL,1,DERIVED,"REDUCE_AND($0)","truth_contract"
+FILTER,2,DERIVED,"SEQ(LET($out,EMPTY_LIKE($0)),FOREACH($item,$0,IF(CALL($1,$item),APPEND($out,$item))),RESULT($out))","effects;binding;ordered"
+RMS,1,DERIVED,"SQRT(DIV(SUM(MUL($0,$0)),LENGTH($0)))","numeric;ordered"
+DOUBLE,1,DERIVED,"ADD($0,$0)","numeric"
+AVERAGE2,2,DERIVED,"DIV(ADD($0,$1),CONST(2))","numeric;ordered"

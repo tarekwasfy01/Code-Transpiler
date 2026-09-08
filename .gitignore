@@ -1,0 +1,6 @@
+.audit-cache/
+outputs/
+github-release/
+dist/*.previous-*.exe
+dist/*.new.exe
+*.tmp

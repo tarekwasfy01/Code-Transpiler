@@ -1,0 +1,9 @@
+package probe
+
+type Node[T any] struct {
+	Value T
+	Next *Node[T]
+}
+
+var Numbers Node[int64]
+var Words Node[string]

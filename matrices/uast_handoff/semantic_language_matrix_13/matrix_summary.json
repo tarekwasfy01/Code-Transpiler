@@ -1,0 +1,17 @@
+{
+  "languages": 13,
+  "semantic_profile_axes": 30,
+  "semantic_atoms": 51,
+  "evidence_rows": 390,
+  "sources": 39,
+  "matrix_contract": {
+    "VALUE": "1 = present, 0 = absent ONLY where KNOWN=1",
+    "KNOWN": "1 = source set establishes PRESENT or ABSENT, 0 = unresolved",
+    "STATUS": [
+      "PRESENT",
+      "ABSENT",
+      "UNRESOLVED"
+    ],
+    "important": "Absence of evidence is never negative evidence. EXTSEM atoms are an external basis and are not identical to the project's 334 UASF."
+  }
+}

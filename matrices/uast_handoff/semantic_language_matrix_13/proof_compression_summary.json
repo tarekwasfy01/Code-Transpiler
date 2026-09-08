@@ -1,0 +1,11 @@
+{
+  "package_sha256": "f0e86738241821e643b521a2fcc2aa2b532f552974e4d824bd69596c705c6833",
+  "sha256_verified": true,
+  "source_features": 808,
+  "uasf_capabilities": 334,
+  "basis_dimensions": 67,
+  "exact_crosswalk_rows": 808,
+  "present_language_cells": 1017,
+  "basis_supported_cells": 3150,
+  "direct_basis_cells": 718
+}

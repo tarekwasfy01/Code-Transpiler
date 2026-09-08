@@ -1,0 +1,987 @@
+// Copyright (c) 2026 Tarek Wasfy
+package backend
+
+import (
+	"encoding/json"
+	"fmt"
+	"sort"
+	"strconv"
+	"strings"
+
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+)
+
+// FrontendSemanticFacts is the short-lived, language-neutral hand-off from a
+// frontend analyser to the Universal AST builder. It is deliberately not an
+// intermediate representation: it contains only facts proved by one frontend
+// and is discarded once the canonical UniversalASTDocument is built.
+//
+// Nodes and relations use the public UAST schema types so that the schema,
+// field-mask and relation-matrix validators remain the single authority.
+type FrontendSemanticFacts struct {
+	SchemaVersion          int
+	BasisSHA256            string
+	SemanticDocumentSHA256 string
+	LanguageProfile        string
+	LanguageFacet          []float64
+	Projection             string
+	Evaluation             string
+	ValueModel             string
+	IndexBase              int
+	Types                  SemanticTypeContract
+	Origin                 SemanticOrigin
+	Metadata               map[string]string
+	Extensions             map[string]any
+	Contracts              SemanticContracts
+	Dialects               []SemanticDialect
+	SemanticFeatures       *SemanticFeatureModel
+	TypeTable              []SemanticTypeDefinition
+	TypeGraph              matrixir.SparseMatrix
+	TypeRelations          *SemanticTypeRelations
+	Surface                *UniversalASTSurface
+
+	Nodes     []UniversalASTNode
+	Fields    []FrontendFieldFact
+	Sources   []FrontendSourceFact
+	TypesFact []FrontendTypeFact
+	Symbols   []FrontendSymbolFact
+	Bindings  []FrontendRelationFact
+	Relations []FrontendRelationFact
+	Returns   []FrontendReturnFact
+	Evidence  SemanticEvidence
+
+	// LanguageFacts is reserved for frontend-local, proved data. It is never
+	// emitted unless it is represented by a permitted UAST field, facet or
+	// relation above.
+	LanguageFacts map[string]json.RawMessage
+}
+
+type FrontendFieldFact struct {
+	NodeID int
+	Name   string
+	Value  json.RawMessage
+}
+
+type FrontendSourceFact struct {
+	NodeID int
+	Span   SemanticSourceSpan
+}
+
+type FrontendTypeFact struct {
+	NodeID int
+	Type   SemanticType
+}
+
+type FrontendSymbolFact struct {
+	NodeID int
+	Name   string
+	Kind   string
+}
+
+type FrontendRelationFact struct {
+	Kind        string
+	From        int
+	To          UniversalASTReference
+	Role        string
+	Ordinal     int
+	EvidenceRef int
+	Attributes  map[string]json.RawMessage
+}
+
+type FrontendReturnFact struct {
+	ReturnNodeID   int
+	FunctionNodeID int
+	ValueNodeID    int
+	Type           SemanticType
+}
+
+// FrontendFactSink is the language-neutral output boundary for a parser core.
+// It records only proved frontend facts; it never owns a second AST.
+type FrontendFactSink interface {
+	AddNode(UniversalASTNode)
+	AddField(FrontendFieldFact)
+	AddSource(FrontendSourceFact)
+	AddRole(FrontendRelationFact)
+	AddOperand(FrontendRelationFact)
+	AddSymbol(FrontendSymbolFact)
+	AddBinding(FrontendRelationFact)
+	AddRelation(FrontendRelationFact)
+}
+
+// FrontendFactsBuilder is the default in-memory sink used only until the
+// shared facts-to-UAST builder consumes the collected frontend output.
+type FrontendFactsBuilder struct{ Facts FrontendSemanticFacts }
+
+func (b *FrontendFactsBuilder) AddNode(v UniversalASTNode) { b.Facts.Nodes = append(b.Facts.Nodes, v) }
+func (b *FrontendFactsBuilder) AddField(v FrontendFieldFact) {
+	b.Facts.Fields = append(b.Facts.Fields, v)
+}
+func (b *FrontendFactsBuilder) AddSource(v FrontendSourceFact) {
+	b.Facts.Sources = append(b.Facts.Sources, v)
+}
+func (b *FrontendFactsBuilder) AddRole(v FrontendRelationFact) {
+	b.Facts.Relations = append(b.Facts.Relations, v)
+}
+func (b *FrontendFactsBuilder) AddOperand(v FrontendRelationFact) {
+	b.Facts.Relations = append(b.Facts.Relations, v)
+}
+func (b *FrontendFactsBuilder) AddSymbol(v FrontendSymbolFact) {
+	b.Facts.Symbols = append(b.Facts.Symbols, v)
+}
+func (b *FrontendFactsBuilder) AddBinding(v FrontendRelationFact) {
+	b.Facts.Bindings = append(b.Facts.Bindings, v)
+	b.Facts.Relations = append(b.Facts.Relations, v)
+}
+func (b *FrontendFactsBuilder) AddRelation(v FrontendRelationFact) {
+	b.Facts.Relations = append(b.Facts.Relations, v)
+}
+
+// BuildRawUniversalASTFromFrontendFacts materializes exactly the facts that a
+// frontend proved. It does not infer fields, facets, relations or evidence.
+func BuildRawUniversalASTFromFrontendFacts(f FrontendSemanticFacts) (*UniversalASTDocument, error) {
+	if len(f.Nodes) == 0 {
+		return nil, fmt.Errorf("frontend semantic facts contain no nodes")
+	}
+	if f.LanguageProfile == "" {
+		return nil, fmt.Errorf("frontend semantic facts have no language profile")
+	}
+	if err := validateFrontendFactIDs(f); err != nil {
+		return nil, err
+	}
+	u := &UniversalASTDocument{
+		SchemaVersion: f.SchemaVersion, BasisSHA256: f.BasisSHA256, SemanticDocumentSHA256: f.SemanticDocumentSHA256,
+		LanguageProfile: f.LanguageProfile, LanguageFacet: append([]float64(nil), f.LanguageFacet...),
+		Projection: f.Projection, Evaluation: f.Evaluation, ValueModel: f.ValueModel,
+		IndexBase: f.IndexBase, Types: f.Types, Origin: f.Origin,
+		Metadata: cloneStringMap(f.Metadata), Extensions: cloneAnyMap(f.Extensions),
+		Contracts: f.Contracts, Dialects: append([]SemanticDialect(nil), f.Dialects...),
+		SemanticFeatures: f.SemanticFeatures, TypeTable: append([]SemanticTypeDefinition(nil), f.TypeTable...),
+		TypeGraph: f.TypeGraph, TypeRelations: f.TypeRelations, Evidence: f.Evidence,
+		Surface: cloneUniversalASTSurface(f.Surface),
+	}
+	if err := cloneFrontendFactValue(f.Nodes, &u.Nodes); err != nil {
+		return nil, err
+	}
+	if err := cloneFrontendFactValue(f.Relations, &u.Relations); err != nil {
+		return nil, err
+	}
+	// Type facts are a first-class frontend contract.  Materialize them before
+	// any inference pass so literal and declaration types survive the facts
+	// boundary and the later fixpoint can propagate them through bindings.
+	for _, fact := range f.TypesFact {
+		for i := range u.Nodes {
+			if u.Nodes[i].ID != fact.NodeID || fact.Type.Kind == "" || fact.Type.Kind == "unknown" {
+				continue
+			}
+			if !containsString(u.Nodes[i].FieldMask, "type_ref") {
+				continue
+			}
+			rawType, marshalErr := json.Marshal(fact.Type)
+			if marshalErr != nil {
+				return nil, marshalErr
+			}
+			if u.Nodes[i].Fields == nil {
+				u.Nodes[i].Fields = map[string]json.RawMessage{}
+			}
+			u.Nodes[i].Fields["type_ref"] = rawType
+			if containsString(u.Nodes[i].FieldMask, "type_origin") {
+				rawOrigin, _ := json.Marshal(fact.Type.TypeOrigin)
+				u.Nodes[i].Fields["type_origin"] = rawOrigin
+			}
+		}
+	}
+	return u, nil
+}
+
+// BuildCanonicalUniversalASTFromFrontendFacts is the single generic frontend
+// route. Evidence is always derived by AnalyzeUniversalEvidence; the frontend
+// cannot add guessed evidence through this builder.
+func BuildCanonicalUniversalASTFromFrontendFacts(f FrontendSemanticFacts) (*UniversalASTDocument, error) {
+	raw, err := BuildRawUniversalASTFromFrontendFacts(f)
+	if err != nil {
+		return nil, fmt.Errorf("raw UAST materialization: %w", err)
+	}
+	if err := EnrichUniversalAST(raw); err != nil {
+		return nil, fmt.Errorf("UAST enrichment: %w", err)
+	}
+	evidence, err := AnalyzeUniversalEvidence(raw)
+	if err != nil {
+		return nil, fmt.Errorf("UAST evidence: %w", err)
+	}
+	raw.Evidence = evidence
+	if err := materializeUniversalEvidenceFields(raw, evidence); err != nil {
+		return nil, fmt.Errorf("UAST evidence fields: %w", err)
+	}
+	// Relations outside syntax.child are canonical projections of evidence and
+	// matrix facts. Rebuild them here so a frontend cannot retain a stale
+	// compatibility relation view beside the shared evidence result.
+	syntaxRelations := raw.Relations[:0]
+	for _, relation := range raw.Relations {
+		if relation.Kind == "syntax.child" {
+			syntaxRelations = append(syntaxRelations, relation)
+		}
+	}
+	raw.Relations = syntaxRelations
+	semanticIDs := make(map[int]int, len(raw.Nodes))
+	for i := range raw.Nodes {
+		common, err := decodeUniversalCommon(&raw.Nodes[i])
+		if err != nil {
+			return nil, err
+		}
+		if common.ID >= 0 {
+			semanticIDs[common.ID] = raw.Nodes[i].ID
+		}
+	}
+	appendUniversalEvidenceRelations(raw, semanticIDs, evidence)
+	// Evidence materialization intentionally rebuilds the relation view, but
+	// the executable binding/scope graph is a structural fact derived from the
+	// canonical syntax tree.  Re-run that closure after the evidence relation
+	// rebuild so binding.declares/refers, name.resolves and scope edges remain
+	// available to the runtime and emitters.  This is still the same UAST
+	// graph; no compatibility parser or second IR is involved.
+	if err := appendFrontendStructuralClosure(raw); err != nil {
+		return nil, fmt.Errorf("frontend structural closure: %w", err)
+	}
+	// Type inference depends on the binding relations above.  Solving again is
+	// idempotent for already-known types and propagates declaration types to
+	// identifier loads that were not resolvable during the first enrichment.
+	if err := inferUniversalTypes(raw); err != nil {
+		return nil, fmt.Errorf("UAST type inference: %w", err)
+	}
+	// Apply the cached language/relation/composition/dependency closure on the
+	// canonical document itself.  This is a validation/metadata pass over the
+	// existing UAST graph; it does not introduce another IR or registry.
+	if err := ApplySemanticClosure(raw); err != nil {
+		return nil, fmt.Errorf("semantic closure: %w", err)
+	}
+	if err := deriveUniversalTypeTable(raw); err != nil {
+		return nil, fmt.Errorf("UAST type derivation: %w", err)
+	}
+	u, err := NormalizeUniversalAST(raw)
+	if err != nil {
+		return nil, fmt.Errorf("UAST normalization: %w", err)
+	}
+	return u, nil
+}
+
+// EnrichUniversalAST is the shared, UAST-only semantic enrichment pass. It
+// materializes only facts that follow from schema crosswalks and explicit
+// syntax roles; frontend-specific parsers and SemanticDocument are absent.
+func EnrichUniversalAST(u *UniversalASTDocument) error {
+	if err := materializeUniversalCrosswalkFields(u); err != nil {
+		return err
+	}
+	// Derive scope, definition/reference, ordered-sequence and control facts
+	// directly from the structured UAST roles. This is the common frontend
+	// closure for every language and runs before evidence analysis so the
+	// resulting matrices and executable runtime observe the same graph.
+	if err := appendFrontendStructuralClosure(u); err != nil {
+		return err
+	}
+	// Operand edges are structural facts consumed by the single evidence pass.
+	materializeUniversalOperandFacts(u)
+	// Apply the empirically mined presence implications.  This only projects
+	// already explicit syntax children into the existing operand relation; it
+	// never reconstructs unknown semantic payload.
+	ApplyUniversalTruthClosure(u)
+	// Apply the generated residual-repair closure after operand projection. The
+	// closure only promotes an existing, unambiguous data.operand edge to the
+	// canonical syntax role required by the executor; it does not infer values
+	// or parse source text.
+	ApplyAutomaticSemanticRepairClosure(u)
+	// The legacy decoration oracle proves that executable blocks and control
+	// constructs transfer control to each of their syntax children. Materialize
+	// that exact contract on UAST so the shared evidence pass has no dependency
+	// on a Legacy Stmt tree.
+	materializeUniversalControlFacts(u)
+	// Type information is a data-flow fact, not a decoration inferred from a
+	// diagnostic or from source spelling.  Solve the small canonical UAST type
+	// lattice after all syntax/data edges exist so assignments and identifier
+	// loads retain the type of their value transitively.
+	if err := inferUniversalTypes(u); err != nil {
+		return err
+	}
+	return nil
+}
+
+// inferUniversalTypes computes the least type fixpoint over the canonical UAST
+// graph.  Frontends may provide an explicit type_ref; those values are never
+// overwritten.  Unknown values acquire a type only when it follows from an
+// existing literal, operand, binding, aggregate or function shape.
+func inferUniversalTypes(u *UniversalASTDocument) error {
+	children, err := universalChildrenByRole(u)
+	if err != nil {
+		return fmt.Errorf("type inference syntax graph: %w", err)
+	}
+	nodes := make(map[int]*UniversalASTNode, len(u.Nodes))
+	for i := range u.Nodes {
+		nodes[u.Nodes[i].ID] = &u.Nodes[i]
+	}
+	// A binding declaration is represented by binding.declares(from=node,
+	// to=binding). Keep that relation as the canonical definition lookup.
+	declarations := map[int]int{}
+	identifierBindings := map[int]int{}
+	for _, r := range u.Relations {
+		if (r.Kind != "binding.declares" && r.Kind != "binding.refers" && r.Kind != "name.resolves") || r.To.Domain != "binding" {
+			continue
+		}
+		var bindingID int
+		if _, scanErr := fmt.Sscan(r.To.ID, &bindingID); scanErr == nil {
+			if r.Kind == "binding.declares" {
+				declarations[bindingID] = r.From
+			} else if _, exists := identifierBindings[r.From]; !exists {
+				// binding.refers is the structured use-site edge.  Keep the
+				// first proven binding only; shadowing is already resolved by
+				// appendFrontendStructuralClosure before this pass.
+				identifierBindings[r.From] = bindingID
+			}
+		}
+	}
+	typeOf := func(id int) (SemanticType, bool) {
+		n := nodes[id]
+		if n == nil {
+			return SemanticType{}, false
+		}
+		c, decodeErr := decodeUniversalCommon(n)
+		if decodeErr != nil {
+			return SemanticType{}, false
+		}
+		if c.Type.Kind == "" || c.Type.Kind == "unknown" {
+			return SemanticType{}, false
+		}
+		return c.Type, true
+	}
+	childType := func(owner int, roles ...string) (SemanticType, bool) {
+		for _, role := range roles {
+			for _, child := range children[owner][role] {
+				if child.Meta.Missing {
+					continue
+				}
+				if typ, ok := typeOf(child.ID); ok {
+					return typ, true
+				}
+			}
+		}
+		return SemanticType{}, false
+	}
+	isNumeric := func(t SemanticType) bool {
+		return t.Kind == "integer" || t.Kind == "float" || t.Kind == "number"
+	}
+	joinNumeric := func(a, b SemanticType) SemanticType {
+		if a.Kind == "float" || b.Kind == "float" || a.Kind == "number" || b.Kind == "number" {
+			bits := a.Bits
+			if b.Bits > bits {
+				bits = b.Bits
+			}
+			if bits == 0 {
+				bits = 64
+			}
+			return SemanticType{Kind: "float", Bits: bits, IEEE754: true, TypeOrigin: "inferred"}
+		}
+		if a.Bits >= b.Bits {
+			return a
+		}
+		return b
+	}
+	putType := func(n *UniversalASTNode, typ SemanticType) (bool, error) {
+		if typ.Kind == "" || typ.Kind == "unknown" || !containsString(n.FieldMask, "type_ref") {
+			return false, nil
+		}
+		c, decodeErr := decodeUniversalCommon(n)
+		if decodeErr != nil {
+			return false, fmt.Errorf("type inference annotation node %d: %w", n.ID, decodeErr)
+		}
+		if c.Type.Kind != "" && c.Type.Kind != "unknown" {
+			return false, nil
+		}
+		raw, marshalErr := json.Marshal(typ)
+		if marshalErr != nil {
+			return false, marshalErr
+		}
+		if n.Fields == nil {
+			n.Fields = map[string]json.RawMessage{}
+		}
+		n.Fields["type_ref"] = raw
+		if containsString(n.FieldMask, "type_origin") {
+			origin, _ := json.Marshal(typ.TypeOrigin)
+			n.Fields["type_origin"] = origin
+		}
+		return true, nil
+	}
+	// The graph is finite and each iteration only changes unknown -> known,
+	// therefore at most |nodes| rounds can add information. A final no-change
+	// round makes the fixpoint explicit and guards malformed cyclic graphs.
+	for round := 0; round <= len(nodes); round++ {
+		changed := false
+		for id, n := range nodes {
+			c, decodeErr := decodeUniversalCommon(n)
+			if decodeErr != nil {
+				return fmt.Errorf("type inference node %d: %w", id, decodeErr)
+			}
+			if c.Type.Kind != "" && c.Type.Kind != "unknown" {
+				continue
+			}
+			var inferred SemanticType
+			switch c.Kind {
+			case "literal":
+				literalKind := c.Operation.LiteralKind
+				if literalKind == "" && c.Operation.Text != "" {
+					if _, parseErr := strconv.ParseFloat(strings.TrimSpace(c.Operation.Text), 64); parseErr == nil {
+						literalKind = "number"
+					}
+				}
+				if literalKind == "" {
+					// Matrix producers may carry a proved literal value without the
+					// optional spelling tag. The canonical literal node remains a
+					// numeric value unless its explicit tag proves another domain.
+					literalKind = "number"
+				}
+				switch literalKind {
+				case "number":
+					inferred = SemanticType{Kind: "float", Bits: 64, IEEE754: true, TypeOrigin: "inferred"}
+				case "string":
+					inferred = SemanticType{Kind: "string", TypeOrigin: "inferred"}
+				case "boolean":
+					inferred = SemanticType{Kind: "boolean", TypeOrigin: "inferred"}
+				}
+			case "assign":
+				inferred, _ = childType(id, "value", "expression")
+				// The assignment node and its target binding are both part of
+				// the canonical graph. Propagate a proven initializer type to
+				// the target declaration as well, so later loads can resolve
+				// transitively instead of retaining an avoidable unknown type.
+				if inferred.Kind != "" && inferred.Kind != "unknown" {
+					for _, target := range children[id]["target"] {
+						if didChange, putErr := putType(nodes[target.ID], inferred); putErr != nil {
+							return putErr
+						} else if didChange {
+							changed = true
+						}
+					}
+				}
+			case "return":
+				inferred, _ = childType(id, "value", "expression")
+			case "expression":
+				inferred, _ = childType(id, "expression", "value", "operand")
+			case "operationexpr":
+				inferred, _ = childType(id, "expression", "value", "operand", "left", "right")
+				if inferred.Kind == "" || inferred.Kind == "unknown" {
+					left, lok := childType(id, "left")
+					right, rok := childType(id, "right")
+					if lok && rok && isNumeric(left) && isNumeric(right) {
+						inferred = joinNumeric(left, right)
+					} else if lok {
+						inferred = left
+					} else if rok {
+						inferred = right
+					}
+				}
+			case "identifier":
+				bindingID, bound := identifierBindings[id]
+				if c.Binding != nil {
+					bindingID, bound = *c.Binding, true
+				}
+				if bound {
+					if declaration, ok := declarations[bindingID]; ok {
+						inferred, _ = typeOf(declaration)
+					}
+				}
+			case "binary":
+				left, lok := childType(id, "left")
+				right, rok := childType(id, "right")
+				if c.Operation.Operator == "==" || c.Operation.Operator == "!=" || c.Operation.Operator == "<" || c.Operation.Operator == "<=" || c.Operation.Operator == ">" || c.Operation.Operator == ">=" {
+					inferred = SemanticType{Kind: "boolean", TypeOrigin: "inferred"}
+				} else if lok && rok && isNumeric(left) && isNumeric(right) {
+					inferred = joinNumeric(left, right)
+				} else if lok {
+					inferred = left
+				} else if rok {
+					inferred = right
+				}
+			case "unary":
+				inferred, _ = childType(id, "value", "operand")
+			case "index", "slice":
+				base, ok := childType(id, "value", "base")
+				if ok && base.Element != nil {
+					inferred = *base.Element
+				}
+			case "function", "closure":
+				inferred = SemanticType{Kind: "function", TypeOrigin: "inferred"}
+			case "aggregate", "tuple":
+				if element, ok := childType(id, "argument", "element"); ok {
+					inferred = SemanticType{Kind: "slice", Element: &element, TypeOrigin: "inferred"}
+				}
+			}
+			if didChange, putErr := putType(n, inferred); putErr != nil {
+				return putErr
+			} else if didChange {
+				changed = true
+			}
+		}
+		if !changed {
+			break
+		}
+	}
+	return nil
+}
+
+func materializeUniversalControlFacts(u *UniversalASTDocument) {
+	// Exact mapping table extracted by the Legacy decorator oracle. This is not
+	// a structural-kind ranking: absent kinds do not acquire control semantics.
+	legacyControlTransferKinds := map[string]bool{
+		"block": true, "if": true, "while": true, "for": true, "repeat": true,
+	}
+	seen := map[string]bool{}
+	for _, relation := range u.Relations {
+		seen[relation.Kind+":"+strconv.Itoa(relation.From)+":"+relation.To.Domain+":"+relation.To.ID] = true
+	}
+	controlParent := map[int]*UniversalASTNode{}
+	for i := range u.Nodes {
+		common, err := decodeUniversalCommon(&u.Nodes[i])
+		if err != nil {
+			continue
+		}
+		if legacyControlTransferKinds[common.Kind] {
+			controlParent[u.Nodes[i].ID] = &u.Nodes[i]
+		}
+	}
+	for _, relation := range append([]UniversalASTRelation(nil), u.Relations...) {
+		parent := controlParent[relation.From]
+		if relation.Kind != "syntax.child" || relation.To.Domain != "node" || parent == nil || !universalRelationAllowed(parent, "control.next") {
+			continue
+		}
+		key := "control.next:" + strconv.Itoa(relation.From) + ":node:" + relation.To.ID
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		u.Relations = append(u.Relations, UniversalASTRelation{
+			Kind: "control.next", From: relation.From, To: relation.To,
+		})
+	}
+}
+
+func materializeUniversalOperandFacts(u *UniversalASTDocument) {
+	children, err := universalChildrenByRole(u)
+	if err != nil {
+		return
+	}
+	seen := map[string]bool{}
+	for _, r := range u.Relations {
+		seen[r.Kind+":"+strconv.Itoa(r.From)+":"+r.To.ID] = true
+	}
+	for _, n := range u.Nodes {
+		common, err := decodeUniversalCommon(&n)
+		if err != nil {
+			continue
+		}
+		roles := []string{}
+		switch common.Kind {
+		case "assign":
+			roles = []string{"expression", "value"}
+		case "expression":
+			roles = []string{"expression", "operand", "argument", "value"}
+		case "for":
+			roles = []string{"sequence"}
+		case "binary":
+			roles = []string{"left", "right"}
+		case "unary":
+			roles = []string{"value"}
+		case "index", "slice":
+			roles = []string{"value", "argument"}
+		case "call":
+			roles = []string{"value", "argument"}
+		case "aggregate", "tuple":
+			roles = []string{"argument"}
+		case "return":
+			roles = []string{"expression"}
+		}
+		for _, role := range roles {
+			for _, child := range children[n.ID][role] {
+				key := "data.operand:" + strconv.Itoa(n.ID) + ":" + strconv.Itoa(child.ID)
+				if !seen[key] {
+					seen[key] = true
+					u.Relations = append(u.Relations, UniversalASTRelation{Kind: "data.operand", From: n.ID, To: UniversalASTReference{Domain: "node", ID: strconv.Itoa(child.ID)}})
+				}
+			}
+		}
+	}
+}
+
+func materializeUniversalEvidenceFields(u *UniversalASTDocument, e SemanticEvidence) error {
+	semanticIDs := map[int]int{}
+	for i := range u.Nodes {
+		c, err := decodeUniversalCommon(&u.Nodes[i])
+		if err != nil {
+			return err
+		}
+		semanticIDs[c.ID] = i
+	}
+	put := func(n *UniversalASTNode, key string, value any) error {
+		if !containsString(n.FieldMask, key) {
+			return nil
+		}
+		data, err := json.Marshal(value)
+		if err != nil {
+			return err
+		}
+		if n.Fields == nil {
+			n.Fields = map[string]json.RawMessage{}
+		}
+		n.Fields[key] = data
+		return nil
+	}
+	for semanticID, nodeIndex := range semanticIDs {
+		if semanticID < 0 || semanticID >= len(e.Nodes) {
+			continue
+		}
+		n := &u.Nodes[nodeIndex]
+		c, err := decodeUniversalCommon(n)
+		if err != nil {
+			return err
+		}
+		// Frontend-proved types are stronger than the common evidence axes. The
+		// latter fill an absent/unknown type but must never erase an exact native
+		// integer, parameter, return or aggregate contract.
+		typ := c.Type
+		if typ.Kind == "" || typ.Kind == "unknown" {
+			typ = SemanticType{Kind: "unknown", TypeOrigin: "unknown"}
+			for col, axis := range e.TypeAxes {
+				if e.Types.At(semanticID, col) != 0 {
+					typ = semanticTypeForAxis(axis)
+					break
+				}
+			}
+		}
+		if c.Kind == "literal" {
+			switch c.Operation.LiteralKind {
+			case "number":
+				typ = SemanticType{Kind: "float", Bits: 64, IEEE754: true, TypeOrigin: "inferred"}
+			case "string":
+				typ = SemanticType{Kind: "string", TypeOrigin: "inferred"}
+			case "boolean":
+				typ = SemanticType{Kind: "boolean", TypeOrigin: "inferred"}
+			}
+		}
+		if err = put(n, "type_ref", typ); err != nil {
+			return err
+		}
+		if err = put(n, "type_origin", typ.TypeOrigin); err != nil {
+			return err
+		}
+		effects := []string{}
+		for col, axis := range e.EffectAxes {
+			if e.Effects.At(semanticID, col) != 0 {
+				effects = append(effects, axis)
+			}
+		}
+		if len(effects) > 0 {
+			if err = put(n, "effects", effects); err != nil {
+				return err
+			}
+		}
+		refs := []int{}
+		for col := range e.Bindings {
+			if e.Binding.At(semanticID, col) != 0 {
+				refs = append(refs, col)
+			}
+		}
+		if len(refs) > 0 {
+			if err = put(n, "binding_refs", refs); err != nil {
+				return err
+			}
+		}
+		op := c.Operation
+		op.Semantics.Confidence = "exact"
+		if c.Kind == "parameter" && op.ParameterPassing == "" {
+			op.ParameterPassing = "unknown"
+		}
+		if err = put(n, "operation", op); err != nil {
+			return err
+		}
+		if c.Kind == "parameter" && op.ParameterPassing != "" {
+			if err = put(n, "ownership", universalOwnershipField{ParameterPassing: op.ParameterPassing, TypeOwnership: typ.Ownership}); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func deriveUniversalTypeTable(u *UniversalASTDocument) error {
+	types := map[string]SemanticType{}
+	// Preserve frontend-proved nominal/package types even when no executable
+	// node directly carries the declaration. Their recursive children are
+	// inserted as well so the canonical type graph remains closed.
+	var addType func(SemanticType)
+	addType = func(typ SemanticType) {
+		if typ.Kind == "" {
+			return
+		}
+		raw, err := json.Marshal(typ)
+		if err == nil {
+			types[string(raw)] = typ
+		}
+		for _, child := range semanticTypeChildrenForType(typ) {
+			if child != nil {
+				addType(*child)
+			}
+		}
+	}
+	for _, entry := range u.TypeTable {
+		addType(entry.Type)
+	}
+	for i := range u.Nodes {
+		c, err := decodeUniversalCommon(&u.Nodes[i])
+		if err != nil {
+			return err
+		}
+		if c.Type.Kind == "" {
+			continue
+		}
+		raw, err := json.Marshal(c.Type)
+		if err != nil {
+			return err
+		}
+		types[string(raw)] = c.Type
+	}
+	keys := make([]string, 0, len(types))
+	for key := range types {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	u.TypeTable = make([]SemanticTypeDefinition, len(keys))
+	for i, key := range keys {
+		u.TypeTable[i] = SemanticTypeDefinition{ID: i, Type: types[key]}
+	}
+	u.TypeGraph = matrixir.NewSparseMatrix(len(keys), len(keys))
+	ids := map[string]int{}
+	for i, key := range keys {
+		ids[key] = i
+	}
+	// SemanticTypeRelations' JSON occurrence paths are a legacy document view
+	// (class C). The parent/child type incidence is canonical (class A) and is
+	// represented once in the UAST TypeGraph.
+	typeEdges := []SemanticTypeEdge{}
+	typeParents, typeChildren := []int{}, []int{}
+	for parent, entry := range u.TypeTable {
+		for _, child := range semanticTypeChildren(&entry.Type) {
+			encoded, err := json.Marshal(*child.Type)
+			if err != nil {
+				return err
+			}
+			childID, ok := ids[string(encoded)]
+			if !ok {
+				// Partial Go packages can expose recursive or unresolved child
+				// types that are not materialized as top-level definitions. Keep the
+				// parent type and omit only this non-resolvable graph edge; rejecting
+				// the whole UAST would discard otherwise valid semantic facts.
+				continue
+			}
+			u.TypeGraph.Set(parent, childID, 1)
+			typeEdges = append(typeEdges, child.SemanticTypeEdge)
+			typeParents = append(typeParents, parent)
+			typeChildren = append(typeChildren, childID)
+		}
+	}
+	occurrences, useIDs := []string{}, []int{}
+	for _, n := range u.Nodes {
+		c, err := decodeUniversalCommon(&n)
+		if err != nil {
+			return err
+		}
+		if c.Type.Kind == "" {
+			continue
+		}
+		encoded, err := json.Marshal(c.Type)
+		if err != nil {
+			return err
+		}
+		id, ok := ids[string(encoded)]
+		if !ok {
+			return fmt.Errorf("UAST node type missing from type table")
+		}
+		occurrences = append(occurrences, "/nodes/"+strconv.Itoa(n.ID)+"/type")
+		useIDs = append(useIDs, id)
+	}
+	relations := &SemanticTypeRelations{Occurrences: occurrences, Edges: typeEdges, UsageCounts: make([]int, len(keys))}
+	relations.Uses = matrixir.NewSparseMatrix(len(useIDs), len(keys))
+	for row, id := range useIDs {
+		relations.Uses.Set(row, id, 1)
+		relations.UsageCounts[id]++
+	}
+	relations.Parents = matrixir.NewSparseMatrix(len(typeParents), len(keys))
+	relations.Children = matrixir.NewSparseMatrix(len(typeChildren), len(keys))
+	for row := range typeParents {
+		relations.Parents.Set(row, typeParents[row], 1)
+		relations.Children.Set(row, typeChildren[row], 1)
+	}
+	var err error
+	relations.Nominal, err = deriveNominalRelations(u.TypeTable)
+	if err != nil {
+		return err
+	}
+	relations.Equivalence, err = deriveTypeEquivalence(u.TypeTable)
+	if err != nil {
+		return err
+	}
+	u.TypeRelations = relations
+	return nil
+}
+
+func semanticTypeChildrenForType(typ SemanticType) []*SemanticType {
+	children := []*SemanticType{typ.Element, typ.Key, typ.Value, typ.Result, typ.Constraint}
+	for i := range typ.Parameters {
+		children = append(children, &typ.Parameters[i])
+	}
+	for i := range typ.Fields {
+		children = append(children, &typ.Fields[i].Type)
+	}
+	for i := range typ.Methods {
+		children = append(children, &typ.Methods[i].Type)
+	}
+	for i := range typ.TypeParameters {
+		children = append(children, &typ.TypeParameters[i])
+	}
+	for i := range typ.TypeArguments {
+		children = append(children, &typ.TypeArguments[i])
+	}
+	for i := range typ.Embedded {
+		children = append(children, &typ.Embedded[i])
+	}
+	for i := range typ.Terms {
+		children = append(children, &typ.Terms[i].Type)
+	}
+	return children
+}
+
+// frontendSemanticFactsFromUniversalAST converts a frontend's proved raw UAST
+// payload to the shared transient contract. This is an adapter at the
+// frontend boundary, not a second semantic representation.
+func frontendSemanticFactsFromUniversalAST(u *UniversalASTDocument, languageFacts map[string]json.RawMessage) (FrontendSemanticFacts, error) {
+	if u == nil {
+		return FrontendSemanticFacts{}, fmt.Errorf("frontend raw UAST is nil")
+	}
+	f := FrontendSemanticFacts{
+		SchemaVersion: u.SchemaVersion, BasisSHA256: u.BasisSHA256, SemanticDocumentSHA256: u.SemanticDocumentSHA256,
+		LanguageProfile: u.LanguageProfile, LanguageFacet: append([]float64(nil), u.LanguageFacet...),
+		Projection: u.Projection, Evaluation: u.Evaluation, ValueModel: u.ValueModel,
+		IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin,
+		Metadata: cloneStringMap(u.Metadata), Extensions: cloneAnyMap(u.Extensions),
+		Contracts: u.Contracts, Dialects: append([]SemanticDialect(nil), u.Dialects...),
+		SemanticFeatures: u.SemanticFeatures, TypeTable: append([]SemanticTypeDefinition(nil), u.TypeTable...),
+		TypeGraph: u.TypeGraph, TypeRelations: u.TypeRelations, Evidence: u.Evidence,
+		Surface:       cloneUniversalASTSurface(u.Surface),
+		LanguageFacts: cloneRawMessageMap(languageFacts),
+	}
+	if err := cloneFrontendFactValue(u.Nodes, &f.Nodes); err != nil {
+		return FrontendSemanticFacts{}, err
+	}
+	if err := cloneFrontendFactValue(u.Relations, &f.Relations); err != nil {
+		return FrontendSemanticFacts{}, err
+	}
+	for _, node := range f.Nodes {
+		if node.Source != nil {
+			f.Sources = append(f.Sources, FrontendSourceFact{NodeID: node.ID, Span: *node.Source})
+		}
+		keys := make([]string, 0, len(node.Fields))
+		for name := range node.Fields {
+			keys = append(keys, name)
+		}
+		sort.Strings(keys)
+		for _, name := range keys {
+			f.Fields = append(f.Fields, FrontendFieldFact{NodeID: node.ID, Name: name, Value: append(json.RawMessage(nil), node.Fields[name]...)})
+		}
+		common, err := decodeUniversalCommon(&node)
+		if err != nil {
+			return FrontendSemanticFacts{}, err
+		}
+		if common.Type.Kind != "" {
+			f.TypesFact = append(f.TypesFact, FrontendTypeFact{NodeID: node.ID, Type: common.Type})
+		}
+		if common.Name != "" {
+			f.Symbols = append(f.Symbols, FrontendSymbolFact{NodeID: node.ID, Name: common.Name, Kind: common.Kind})
+		}
+		if common.Kind == "return" {
+			f.Returns = append(f.Returns, FrontendReturnFact{ReturnNodeID: node.ID, Type: common.Type})
+		}
+	}
+	for _, relation := range f.Relations {
+		fact := FrontendRelationFact{Kind: relation.Kind, From: relation.From, To: relation.To, Attributes: cloneRawMessageMap(relation.Attributes)}
+		if relation.Kind == "binding.declares" || relation.Kind == "binding.refers" || relation.Kind == "name.resolves" {
+			f.Bindings = append(f.Bindings, fact)
+		}
+	}
+	return f, nil
+}
+
+func validateFrontendFactIDs(f FrontendSemanticFacts) error {
+	seen := make(map[int]bool, len(f.Nodes))
+	for _, node := range f.Nodes {
+		if node.ID < 0 || seen[node.ID] {
+			return fmt.Errorf("frontend semantic facts have an invalid or duplicate node ID %d", node.ID)
+		}
+		seen[node.ID] = true
+	}
+	for _, relation := range f.Relations {
+		if !seen[relation.From] {
+			return fmt.Errorf("frontend relation %q has unknown source node %d", relation.Kind, relation.From)
+		}
+		if relation.To.Domain == "node" {
+			target, err := strconv.Atoi(relation.To.ID)
+			if err != nil || !seen[target] {
+				return fmt.Errorf("frontend relation %q has unknown target node %q", relation.Kind, relation.To.ID)
+			}
+		}
+	}
+	return nil
+}
+
+func cloneFrontendFactValue(in, out any) error {
+	data, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, out)
+}
+
+func cloneStringMap(in map[string]string) map[string]string {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[string]string, len(in))
+	for key, value := range in {
+		out[key] = value
+	}
+	return out
+}
+
+func cloneAnyMap(in map[string]any) map[string]any {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[string]any, len(in))
+	for key, value := range in {
+		out[key] = value
+	}
+	return out
+}
+
+func cloneRawMessageMap(in map[string]json.RawMessage) map[string]json.RawMessage {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[string]json.RawMessage, len(in))
+	for key, value := range in {
+		out[key] = append(json.RawMessage(nil), value...)
+	}
+	return out
+}
+
+func cloneUniversalASTSurface(in *UniversalASTSurface) *UniversalASTSurface {
+	if in == nil {
+		return nil
+	}
+	out := *in
+	return &out
+}

@@ -1,0 +1,357 @@
+# Copyright (c) 2026 Tarek Wasfy
+
+# Semantic Fixed Point Compression (SFPC)
+
+SFPC is the transport and validation model for the canonical
+`SemanticProgram`/`UniversalASTDocument`. It compresses a semantic document by
+removing information that is already represented by the schema, canonical UAST
+relations, or deterministic defaults. It never changes semantic meaning and it
+does not introduce a second IR.
+
+The authority chain is:
+
+```text
+Source frontend
+  -> SemanticProgram
+  -> UniversalASTDocument
+  -> canonical semantic serialization
+  -> .se / .spz
+```
+
+`UniversalASTDocument` remains the semantic source of truth. `.se` and `.spz`
+are transport encodings; `.semantic.json` is the interchange/debug encoding.
+
+## Fixed-point model
+
+For a semantic document `D`, SFPC computes a canonical representation `C(D)`.
+Encoding and decoding must satisfy:
+
+```text
+Decode(Encode(C(D))) = C(D)
+Encode(Decode(Encode(C(D)))) = Encode(C(D))
+```
+
+The second equation is the byte-level fixed point. Canonical JSON hashing uses
+stable object-key ordering and numeric preservation. The verifier additionally
+checks schema version, UAST basis hash, node identity, field masks, facets,
+relations, source spans, and dangling references.
+
+## `.se` representation
+
+`.se` is a UTF-8, line-oriented text format:
+
+```text
+# Copyright (c) 2026 Tarek Wasfy
+se 1
+program {
+schema=1
+f0="..."
+f9=[...]
+f12=[...]
+}
+```
+
+Stable SemanticProgram fields use compact `fN` slots. Unknown extension fields
+use `field.<name>`. Values are parsed by the typed SE value parser and then
+materialized into the canonical SemanticProgram. JSON is accepted only as an
+interchange/legacy input path; the `.se` envelope itself is not a JSON file.
+
+The field classifier is conservative:
+
+| Class | Meaning | Normal encoding |
+| --- | --- | --- |
+| `EXPLICIT` | Required semantic value | Stored |
+| `REFERENCED` | Value addressed by an existing ID/table | Stored as reference |
+| `DERIVED` | Deterministically recomputable value | Omitted where safe |
+| `DEFAULT` | Implied by schema/version | Omitted |
+| `DEBUG_ONLY` | Provenance/debug data | Omitted in semantic-only mode |
+
+Source bytes are `DEBUG_ONLY` for the compact semantic transport. The UAST,
+types, scopes, fields, facets, operations, effects, bindings, and relations are
+not debug data and remain present. `field_mask` is a schema-derived product:
+native `.se` omits it and the verifier reconstructs it from structural kind and
+facets before checking field applicability.
+
+The semantic Merkle `ProgramRoot` follows the same separation: the optional
+`UniversalASTDocument.Surface` provenance plane is excluded. Adding or removing
+source preservation therefore cannot change semantic identity or cache keys.
+
+## Source provenance modes
+
+The default CLI `.se` export is semantic-only and contains no original source
+payload. The explicit provenance mode stores source bytes gzip-compressed in a
+`bytes_gzip_base64` surface field. The decoder verifies decompression length
+and SHA-256 before exposing the bytes.
+
+```text
+CodeTranspiler.exe semantic-export -source go input.go -format se -o input.se
+CodeTranspiler.exe semantic-export -source go input.go -format se -preserve-source -o input.se
+```
+
+The Go API exposes both choices:
+
+```go
+p.MarshalSemanticSESemanticOnly()
+p.MarshalSemanticSE()              // compatibility-preserving form
+p.MarshalSemanticSEWithSource()    // compressed source provenance
+```
+
+## `.spz` representation
+
+`.spz` is a binary compression envelope around canonical SP text. It has a
+versioned `SPZ2` header and an internal bounded back-reference stream, so it
+has no external runtime dependency. The decompressed payload may contain either
+`sp 1` or `se 1`; parsing dispatches from that header.
+
+`.spz` is therefore lossless for the semantic document and, when the payload
+contains it, for the compressed source surface as well.
+
+## Verification and queries
+
+The verifier is fail-closed:
+
+```go
+result := backend.VerifySemanticSE(data, maxBytes)
+```
+
+It rejects malformed UTF-8, invalid headers, unsupported schema versions,
+modified UAST bases, duplicate node IDs, invalid field masks, dangling
+references, invalid source digests, and inputs exceeding `maxBytes`.
+
+For validated documents, `OpenSFPCQuery` provides deterministic access to
+nodes, types, relations, functions, bindings, effects, and domain-separated
+Merkle roots. These queries are views over the canonical UAST, not another
+stored representation.
+
+## Size evidence
+
+For the reproducible five-megabyte Go fixture:
+
+```text
+source.go                 5,242,880 bytes
+semantic.json             7,000,449 bytes
+semantic-only.se              9,640 bytes
+source-preserving.se         34,082 bytes
+spz                         366,688 bytes
+```
+
+The large JSON size is dominated by the optional Base64 source surface. The
+semantic-only form removes it completely. The report is generated by
+`scripts/generate-sfpc-size-report.ps1` and written to
+`outputs/se-size-closure/`.
+
+## CLI roundtrip contract
+
+The following conversions are supported and validated:
+
+```text
+.se  -> .json
+.se  -> .spz
+.json -> .se
+.spz -> .se / .json
+```
+
+For semantic-only documents, equality means identical canonical UAST and
+SemanticProgram JSON after decoding. For source-preserving documents it also
+includes verified source bytes, byte length, encoding, and SHA-256.
+
+SFPC does not infer missing semantics, use diagnostics as semantic evidence,
+execute source code, or replace the frontend/lowering/backend architecture.
+
+## Mathematical compression model
+
+Let a semantic program be a finite typed attributed graph
+
+```text
+D = (V, E, A, T, S, B, C)
+```
+
+where `V` are UAST nodes, `E` are typed relations, `A` are node/edge
+attributes, `T` is the type table, `S` is the scope/binding graph, `B` is the
+semantic basis identifier, and `C` contains contracts and global settings.
+
+### Canonicalization
+
+The canonicalizer is a deterministic function
+
+```text
+K : D -> C(D)
+```
+
+with these normalization rules:
+
+1. Object members are ordered by their schema key order (unknown extension
+   keys are ordered lexicographically).
+2. Nodes, types, scopes, and relations retain stable integer identities.
+3. Numeric values are parsed without floating-point reformatting.
+4. Relation attributes are normalized recursively.
+5. The UAST basis hash is checked against the embedded basis.
+
+Two documents are semantically equivalent when
+
+```text
+D1 ~= D2  iff  K(D1) = K(D2)
+```
+
+The equality relation is semantic equality; source formatting, field order,
+and transport encoding are outside this relation.
+
+### Field partition
+
+For every field `x` the classifier computes one of five classes:
+
+```text
+EXPLICIT    x is required information not derivable from the document
+REFERENCED  x is represented by an existing stable ID or table entry
+DERIVED     x = g(C(D)) for a deterministic function g
+DEFAULT     x = g(schema, version) and has the schema default value
+DEBUG_ONLY  x is provenance or diagnostic data, not semantic execution data
+```
+
+For a chosen transport mode `m`, define the retained projection:
+
+```text
+P_m(D) = { x in D | class(x) = EXPLICIT or
+                     (class(x) = REFERENCED and m keeps references) or
+                     (class(x) = DEBUG_ONLY and m = preserve-source) }
+```
+
+The decoder reconstructs omitted values with a total derivation function
+
+```text
+R_m : P_m(D) -> D'
+```
+
+The semantic preservation obligation is:
+
+```text
+K(R_m(P_m(D))) = K(D)
+```
+
+If this equality cannot be established, the field is retained. SFPC is
+therefore fail-closed: compression never wins over semantic preservation.
+
+### Quotienting repeated values
+
+Let `q : X -> I` assign each repeated value in a finite pool `X` its first
+stable dictionary index. The encoded value is then the reference `q(x)` rather
+than the value `x` itself. The quotient is valid only when the dictionary is
+injective over the retained values:
+
+```text
+q(x1) = q(x2)  =>  x1 = x2
+```
+
+Fixed schema words are represented by compact slot identifiers (`f0`, `f1`,
+...). User-defined fields remain name-addressable, so extensions do not collide
+with schema slots.
+
+### Relations as sparse matrices
+
+A relation family with `r` source rows and `c` target columns is represented as
+
+```text
+M in {0,1}^{r x c}
+```
+
+and stored in coordinate form:
+
+```text
+M = {(i_k, j_k, v_k) | v_k != 0}
+```
+
+The dense cost is `r*c*cost(value)`. The sparse cost is approximately
+
+```text
+nnz(M) * (cost(i) + cost(j) + cost(v)) + header_cost
+```
+
+where `nnz(M)` is the number of non-zero entries. Sparse encoding is selected
+only when its measured cost is lower; the matrix dimensions and storage mode
+remain explicit, so reconstruction is exact.
+
+### Relation adjacency and graph reconstruction
+
+For each relation kind `k`, let `Adj_k(v)` be the ordered list of outgoing
+targets. The graph serializer stores one source ID plus an ordered target list.
+Reconstruction is:
+
+```text
+E_k = {(v, w, k) | w in Adj_k(v)}
+```
+
+The ordering key is `(from_id, relation_kind, ordinal, to_domain, to_id)`.
+Thus adjacency compression changes representation only; it does not merge
+distinct edges or discard ordinal/role attributes.
+
+### Bitset and range encoding
+
+For a feature vector `b in {0,1}^n`, define the set of set positions
+
+```text
+I(b) = { i | b_i = 1 }
+```
+
+Consecutive runs are replaced by closed intervals `[a,b]`. Decoding expands
+each interval to all integer positions in the range. The transformation is
+lossless because interval boundaries are inclusive and sorted, and adjacent
+intervals are coalesced deterministically.
+
+### Cost function
+
+For a byte encoding `e`, SFPC measures
+
+```text
+L(e) = header(e) + sum_i payload_cost(token_i)
+```
+
+The selected representation is
+
+```text
+e* = argmin_{e in E_valid} L(e)
+```
+
+where `E_valid` contains only encodings whose decoder satisfies the semantic
+preservation obligation. Source-preserving and semantic-only modes optimize
+different domains: the former includes provenance bytes, the latter does not.
+
+### Composition and closure
+
+Compression steps are composed as partial functions:
+
+```text
+E = E_matrix o E_reference o E_default o E_schema
+R = R_schema o R_default o R_reference o R_matrix
+```
+
+Each step is required to be injective over the retained semantic domain. The
+overall closure condition is:
+
+```text
+R(E(K(D))) = K(D)
+```
+
+The byte fixed point is reached when applying the canonical writer twice does
+not change the output:
+
+```text
+W(Parse(W(Parse(W(D))))) = W(Parse(W(D)))
+```
+
+In practice the implementation checks this by serializing, parsing, and
+serializing again and comparing bytes. Hashes and Merkle subroots provide
+additional domain-separated checks for nodes, types, relations, and contracts.
+
+### Information boundary
+
+SFPC may remove only information in the kernel of the semantic projection:
+
+```text
+ker(K) = { x | changing x does not change K(D) }
+```
+
+`DEBUG_ONLY` source bytes are in this kernel for semantic-only transport but
+are retained in source-preserving transport. UAST nodes, fields, types,
+relations, effects, bindings, ownership, evaluation order, and contracts are
+outside that kernel and therefore cannot be removed merely because they are
+repetitive.
