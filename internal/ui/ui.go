@@ -91,6 +91,7 @@ type App struct {
 
 	convertBtn, copyBtn, saveBtn, executableBtn, compilerBtn, nativeCompilerBtn, llvmCompilerBtn, gccCompilerBtn, msvcCompilerBtn, nasmCompilerBtn, masmCompilerBtn, cscCompilerBtn, goCompilerBtn, infoBtn, licensesBtn, copyInfoBtn, closeInfoBtn, openCMDBtn, setPathBtn, modulePathBtn, runBtn widget.Clickable
 	fileMenuBtn, editMenuBtn, runMenuBtn, cmdMenuBtn, settingsMenuBtn, modulesMenuBtn, helpMenuBtn                                                                                                                                                                                                 widget.Clickable
+	fontSmallBtn, fontNormalBtn, fontLargeBtn, threads4Btn, threads8Btn, threads16Btn                                                                                                                                                                                                              widget.Clickable
 	sourceBtn, targetBtn                                                                                                                                                                                                                                                                           widget.Clickable
 	sourceClicks, targetClicks                                                                                                                                                                                                                                                                     []widget.Clickable
 	sourceOpen, targetOpen                                                                                                                                                                                                                                                                         bool
@@ -107,6 +108,8 @@ type App struct {
 	saveCompiler     string
 	showCompilerMenu bool
 	activeRibbonMenu string
+	fontSize         unit.Sp
+	compileWorkers   int
 	embedModules     widget.Bool
 	copyLicenses     widget.Bool
 	treeVisible      bool
@@ -144,6 +147,8 @@ func New() *App {
 		infoText:        cliHelp,
 		embedModules:    widget.Bool{Value: true},
 		copyLicenses:    widget.Bool{Value: true},
+		fontSize:        unit.Sp(14),
+		compileWorkers:  runtime.GOMAXPROCS(0),
 	}
 	// Initialize the configured Semantic module store on GUI startup. A custom
 	// persisted base is honored; otherwise LOCALAPPDATA is used.
@@ -400,6 +405,33 @@ func (a *App) handleClicks(gtx layout.Context) {
 				a.infoText = cliHelp + "\n\nMANUAL\nFile: New, Load file, Save file, Save As.\nEdit: Undo, Redo, Cut, Copy, Paste, Find/Replace, refresh syntax highlighting.\nRun: Run or Run with console; Convert and Save Executable.\nCmd: open a terminal with the CLI and show command help.\nSettings: toggle runtime fallback, imported-module embedding, and package-license copying.\nModules: manage the Semantic module store, acquire packages, and update or reinstall them."
 			}
 		}
+	}
+	if a.fontSmallBtn.Clicked(gtx) {
+		a.fontSize = 12
+		a.status = "Font size: 12"
+	}
+	if a.fontNormalBtn.Clicked(gtx) {
+		a.fontSize = 14
+		a.status = "Font size: 14"
+	}
+	if a.fontLargeBtn.Clicked(gtx) {
+		a.fontSize = 17
+		a.status = "Font size: 17"
+	}
+	if a.threads4Btn.Clicked(gtx) {
+		a.compileWorkers = 4
+		runtime.GOMAXPROCS(4)
+		a.status = "Compile workers: 4"
+	}
+	if a.threads8Btn.Clicked(gtx) {
+		a.compileWorkers = 8
+		runtime.GOMAXPROCS(8)
+		a.status = "Compile workers: 8"
+	}
+	if a.threads16Btn.Clicked(gtx) {
+		a.compileWorkers = 16
+		runtime.GOMAXPROCS(16)
+		a.status = "Compile workers: 16"
 	}
 	if a.convertBtn.Clicked(gtx) {
 		a.startConvert()
@@ -941,12 +973,7 @@ func (a *App) layout(gtx layout.Context) layout.Dimensions {
 			layout.Rigid(a.layoutHeader),
 			layout.Rigid(a.layoutRibbonMenu),
 			layout.Rigid(a.layoutCompilerMenu),
-			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				if !a.sourceOpen && !a.targetOpen {
-					return layout.Spacer{Height: 10}.Layout(gtx)
-				}
-				return a.layoutLanguageMenu(gtx)
-			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 6}.Layout(gtx) }),
 			layout.Flexed(1, a.layoutMain),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				if !a.showRun {
@@ -992,6 +1019,35 @@ func (a *App) layoutRibbonMenu(gtx layout.Context) layout.Dimensions {
 	if a.activeRibbonMenu == "" {
 		return layout.Dimensions{}
 	}
+	if a.activeRibbonMenu == "settings" {
+		return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Top: 5, Bottom: 5, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return material.CheckBox(a.theme, &a.runtimeFallback, "Runtime fallback").Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return material.CheckBox(a.theme, &a.embedModules, "Embed modules").Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return material.CheckBox(a.theme, &a.copyLicenses, "Licenses").Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontSmallBtn, "A−") }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontNormalBtn, "A") }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontLargeBtn, "A+") }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return smallButton(gtx, a.theme, &a.threads4Btn, "4 threads")
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return smallButton(gtx, a.theme, &a.threads8Btn, "8 threads")
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return smallButton(gtx, a.theme, &a.threads16Btn, "16 threads")
+					}),
+				)
+			})
+		})
+	}
 	labels := map[string][]string{
 		"file":     {"New", "Load file", "Save file", "Save As"},
 		"edit":     {"Undo", "Redo", "Cut", "Copy", "Paste", "Find / Replace", "Refresh syntax highlighting"},
@@ -1030,7 +1086,17 @@ func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
 	runLabel := "Run " + a.currentSource().Name
 	return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return smallButton(gtx, a.theme, &a.sourceBtn, "Input: "+a.currentSource().Name+"  ▼")
+			return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					return smallButton(gtx, a.theme, &a.sourceBtn, "Input: "+a.currentSource().Name+"  ▼")
+				}),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					if a.sourceOpen {
+						return a.layoutInlineLanguageMenu(gtx, true)
+					}
+					return layout.Dimensions{}
+				}),
+			)
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -1038,7 +1104,17 @@ func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
 		}),
 		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{Size: gtx.Constraints.Min} }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return smallButton(gtx, a.theme, &a.targetBtn, "Output: "+a.currentTarget().Name+"  ▼")
+			return layout.Flex{Axis: layout.Vertical, Alignment: layout.End}.Layout(gtx,
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					return smallButton(gtx, a.theme, &a.targetBtn, "Output: "+a.currentTarget().Name+"  ▼")
+				}),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					if a.targetOpen {
+						return a.layoutInlineLanguageMenu(gtx, false)
+					}
+					return layout.Dimensions{}
+				}),
+			)
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -1127,6 +1203,28 @@ func (a *App) layoutLanguageMenu(gtx layout.Context) layout.Dimensions {
 					layout.Rigid(row(split, len(uiLanguages))),
 				)
 			})
+		})
+	})
+}
+
+func (a *App) layoutInlineLanguageMenu(gtx layout.Context, source bool) layout.Dimensions {
+	clicks := a.targetClicks
+	if source {
+		clicks = a.sourceClicks
+	}
+	children := make([]layout.FlexChild, 0, len(uiLanguages)*2)
+	for i := range uiLanguages {
+		idx := i
+		if i > 0 {
+			children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 2}.Layout(gtx) }))
+		}
+		children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return smallButton(gtx, a.theme, &clicks[idx], uiLanguages[idx].Name)
+		}))
+	}
+	return widget.Border{Color: color.NRGBA{R: 208, G: 215, B: 222, A: 255}, Width: 1, CornerRadius: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return layout.Inset{Top: 3, Bottom: 3, Left: 3, Right: 3}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Flex{Axis: layout.Vertical}.Layout(gtx, children...)
 		})
 	})
 }
