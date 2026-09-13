@@ -5,6 +5,7 @@ package backend
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -178,9 +179,11 @@ func nativeLegalityDecision(g *uastExecutionGraph, id int, basis NativeCapabilit
 		// evidence. Their native consumer is the layout/type contract, not a
 		// runtime instruction sequence.
 		return d
-	case "literal", "missing_argument", "identifier", "binary", "unary", "typed_operation":
+	case "literal", "missing_argument", "identifier", "binary", "unary", "typed_operation", "operationexpr":
 		d.Family = "scalar_type"
-	case "aggregate", "index", "slice":
+	case "aggregate", "tuple", "tuple_result", "index", "slice":
+		d.Family = "aggregate_place"
+	case "member":
 		d.Family = "aggregate_place"
 	case "address_of", "address", "deref":
 		d.Family = "address_place"
@@ -201,7 +204,7 @@ func nativeLegalityDecision(g *uastExecutionGraph, id int, basis NativeCapabilit
 	// the data-layout solver a real FULL-legality consumer rather than a report
 	// generator; unknown/dynamic representations fail before x64 selection.
 	if c.Type.Kind != "" && c.Type.Kind != "unknown" {
-		typ := c.Type
+		typ := resolveNativeType(g.document, c.Type)
 		// Matrix-exported CANONICALIZE_ONLY fragments can carry an integer type
 		// fact without a width when the source frontend has only inferred the
 		// machine value category. The native contract resolves that unspecified
@@ -252,13 +255,76 @@ func nativeLegalityDecision(g *uastExecutionGraph, id int, basis NativeCapabilit
 			d.Status, d.Reason = NativeIllegal, "call lacks callee relation"
 			return d
 		}
-		if g.common[callee].Kind != "identifier" && g.common[callee].Kind != "function" && g.common[callee].Kind != "deref" && g.common[callee].Kind != "index" && g.common[callee].Kind != "aggregate" && g.common[callee].Kind != "type" && !g.common[callee].Type.Reference && g.nodes[callee].StructuralKind != "SymbolRef" && g.nodes[callee].StructuralKind != "ClosureExpr" {
+		// A typed operation is also a first-class canonical call target.  The
+		// frontend uses this form for intrinsic/builtin calls whose operation
+		// contract (name, arity, type) is carried on the target node rather than
+		// in a source identifier.  It is legal only when the operation is present
+		// in the native basis; unknown typed operations remain fail-closed.
+		typedOperationTarget := false
+		if g.common[callee].Kind == "typed_operation" && g.common[callee].Operation.Typed != nil {
+			typedOperationTarget = basis.Operations[strings.ToUpper(g.common[callee].Operation.Typed.Name)]
+		}
+		if g.common[callee].Kind != "identifier" && g.common[callee].Kind != "function" && g.common[callee].Kind != "call" && g.common[callee].Kind != "deref" && g.common[callee].Kind != "index" && g.common[callee].Kind != "aggregate" && g.common[callee].Kind != "type" && g.common[callee].Kind != "member" && !g.common[callee].Type.Reference && g.nodes[callee].StructuralKind != "SymbolRef" && g.nodes[callee].StructuralKind != "ClosureExpr" && g.nodes[callee].StructuralKind != "MemberAccessExpr" && !typedOperationTarget {
 			d.Status, d.Reason = NativeUnresolved, fmt.Sprintf("call target lacks direct or function-reference contract target_node=%d structural=%q semantic=%q name=%q", callee, g.nodes[callee].StructuralKind, g.common[callee].Kind, g.common[callee].Name)
 			return d
 		}
 		d.Status, d.Predicate = NativeDynamicallyLegal, "linked-call-target"
 	}
 	return d
+}
+
+// resolveNativeType projects nominal/document-local type references onto the
+// structural type used by the target layout solver.  Semantic UASTs retain
+// named identities for source fidelity, but native legality must consume the
+// corresponding definition from the canonical type table.  Resolution is
+// bounded and cycle-safe so recursive nominal types remain address-like rather
+// than causing an infinite walk.
+func resolveNativeType(doc *UniversalASTDocument, typ SemanticType) SemanticType {
+	seen := map[string]bool{}
+	var resolve func(SemanticType) SemanticType
+	resolve = func(t SemanticType) SemanticType {
+		if strings.EqualFold(t.Kind, "named") || strings.EqualFold(t.Kind, "alias") {
+			if t.Element != nil {
+				return resolve(*t.Element)
+			}
+			key := t.Identity
+			if key == "" {
+				key = t.Name
+			}
+			if key != "" && !seen[key] && doc != nil {
+				seen[key] = true
+				for _, def := range doc.TypeTable {
+					d := def.Type
+					if d.Identity == key || d.Name == key || strings.EqualFold(d.Identity, key) || strings.EqualFold(d.Name, key) {
+						if d.Kind == "named" || d.Kind == "alias" {
+							if d.Element != nil {
+								return resolve(*d.Element)
+							}
+							continue
+						}
+						return d
+					}
+				}
+				// Some serialized producers retain only the document-local type
+				// number in a nominal identity (for example "type:17"). Resolve
+				// that spelling directly against the canonical table as well.
+				if strings.HasPrefix(strings.ToLower(key), "type:") {
+					if id, err := strconv.Atoi(strings.TrimPrefix(strings.ToLower(key), "type:")); err == nil {
+						for _, def := range doc.TypeTable {
+							if def.ID == id && def.Type.Element != nil {
+								return resolve(*def.Type.Element)
+							}
+							if def.ID == id && def.Type.Kind != "named" && def.Type.Kind != "alias" {
+								return def.Type
+							}
+						}
+					}
+				}
+			}
+		}
+		return t
+	}
+	return resolve(typ)
 }
 
 func nativeMetadataStructuralKind(kind string) bool {

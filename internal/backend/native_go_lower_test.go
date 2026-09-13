@@ -52,7 +52,105 @@ func Emit() { fmt.Println(1) }
 	}
 }
 
-func TestNativeGoPackageContextLowersSiblingImplementations(t *testing.T) {
+func TestNativeGoIntegerFieldSelectorDoesNotBecomeZero(t *testing.T) {
+	program, err := LowerNativeGo("integer-field.go", `package main
+type record struct { value int64 }
+func main() {
+	r := record{value: 37}
+	_ = r.value
+}
+`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded, err := program.MarshalSemanticJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(encoded, []byte(`"name":"value"`)) {
+		t.Fatal("integer field selector was lost from semantic output")
+	}
+	if !bytes.Contains(encoded, []byte(`"text":"37"`)) {
+		t.Fatal("integer field initializer was lost from semantic output")
+	}
+	if bytes.Contains(encoded, []byte(`"text":"0"`)) {
+		t.Fatal("unsupported integer expression was silently replaced by zero")
+	}
+}
+
+func TestNativeGoCompilerIROpCrosswalkUsesExistingIntegerContracts(t *testing.T) {
+	for _, tc := range []struct {
+		token, ir, semantic string
+	}{
+		{"+", "OADD", "integer.add"}, {"-", "OSUB", "integer.subtract"},
+		{"*", "OMUL", "integer.multiply"}, {"/", "ODIV", "integer.divide"},
+		{"%", "OMOD", "integer.remainder"}, {"<<", "OLSH", "integer.shift_left"},
+		{">>", "ORSH", "integer.shift_right"}, {"&", "OAND", "integer.and"},
+		{"|", "OOR", "integer.or"}, {"^", "OXOR", "integer.xor"},
+		{"&^", "OANDNOT", "integer.and_not"},
+	} {
+		if got := nativeGoIRIntegerOperation(tc.token, false); got != tc.semantic {
+			t.Errorf("token %s: got %q, want %q", tc.token, got, tc.semantic)
+		}
+		if got := nativeGoIRIntegerOperation(tc.ir, false); got != tc.semantic {
+			t.Errorf("IR opcode %s: got %q, want %q", tc.ir, got, tc.semantic)
+		}
+	}
+	for _, tc := range []struct{ token, ir, semantic string }{
+		{"==", "OEQ", "integer.equal"}, {"!=", "ONE", "integer.not_equal"},
+		{"<", "OLT", "integer.less"}, {"<=", "OLE", "integer.less_equal"},
+		{">", "OGT", "integer.greater"}, {">=", "OGE", "integer.greater_equal"},
+	} {
+		if a, b := nativeGoIRIntegerComparison(tc.token), nativeGoIRIntegerComparison(tc.ir); a != tc.semantic || b != tc.semantic {
+			t.Errorf("comparison %s/%s mapped to %q/%q, want %q", tc.token, tc.ir, a, b, tc.semantic)
+		}
+	}
+	for _, tc := range []struct{ token, ir, semantic string }{
+		{"+", "OPLUS", "integer.value"}, {"-", "ONEG", "integer.negate"}, {"^", "OBITNOT", "integer.complement"},
+	} {
+		if a, b := nativeGoIRIntegerOperation(tc.token, true), nativeGoIRIntegerOperation(tc.ir, true); a != tc.semantic || b != tc.semantic {
+			t.Errorf("unary %s/%s mapped to %q/%q, want %q", tc.token, tc.ir, a, b, tc.semantic)
+		}
+	}
+	if got := nativeGoIRIntegerOperation("OADDSTR", false); got != "" {
+		t.Fatalf("string addition was incorrectly classified as integer operation %q", got)
+	}
+}
+
+func TestSemanticOperationFromGoIRFailsClosedForCompilerOnlyOps(t *testing.T) {
+	typ := integerType(64, true)
+	op, ok := SemanticOperationFromGoIR("OADD", typ, false)
+	if !ok || op.Name != "integer.add" || op.Type.Kind != typ.Kind || op.Type.Bits != typ.Bits || op.Type.Signed != typ.Signed {
+		t.Fatalf("OADD adapter result = %#v, %v", op, ok)
+	}
+	if _, ok := SemanticOperationFromGoIR("OINLCALL", typ, false); ok {
+		t.Fatal("compiler-only inlining opcode was promoted to executable semantic operation")
+	}
+	if _, ok := SemanticOperationFromGoIR("OADDSTR", typ, false); ok {
+		t.Fatal("string addition was incorrectly accepted by integer adapter")
+	}
+}
+
+func TestGoIRNodeContractUsesCanonicalStructures(t *testing.T) {
+	for _, tc := range []struct{ opcode, structural, semantic string }{
+		{"OCALL", "CallExpr", "call"}, {"OAS", "AssignStmt", "assignment"},
+		{"OIF", "IfStmt", "if"}, {"OFOR", "LoopStmt", "for"},
+		{"ORANGE", "ForEachStmt", "range"}, {"OINDEX", "IndexExpr", "index"},
+		{"ORETURN", "ReturnStmt", "return"}, {"OBLOCK", "Scope", "block"},
+	} {
+		got, ok := GoIRNodeContractFor(tc.opcode)
+		if !ok || got.StructuralKind != tc.structural || got.SemanticKind != tc.semantic {
+			t.Errorf("%s: got %#v, %v", tc.opcode, got, ok)
+		}
+	}
+	for _, opcode := range []string{"OINLCALL", "ORESULT", "OJUMPTABLE", "OTAILCALL"} {
+		if _, ok := GoIRNodeContractFor(opcode); ok {
+			t.Errorf("compiler-only opcode %s was promoted", opcode)
+		}
+	}
+}
+
+func TestNativeGoPackageContextResolvesButDoesNotDuplicateSiblingImplementations(t *testing.T) {
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module example.test\n\ngo 1.23\n"), 0600); err != nil {
 		t.Fatal(err)
@@ -70,11 +168,50 @@ func TestNativeGoPackageContextLowersSiblingImplementations(t *testing.T) {
 		t.Fatal(err)
 	}
 	entries, ok := p.Extensions["function_entry_bindings"].(map[string]string)
-	if !ok || entries["helper"] == "" {
-		t.Fatalf("sibling function was not lowered into the package SemanticProgram: %#v", p.Extensions["function_entry_bindings"])
+	if !ok || entries["main"] == "" {
+		t.Fatalf("requested file function was not lowered: %#v", p.Extensions["function_entry_bindings"])
+	}
+	if entries["helper"] != "" {
+		t.Fatalf("sibling implementation was duplicated into the requested compilation unit: %#v", entries)
 	}
 	if p.Extensions["native_type_table"] == nil {
 		t.Fatal("package type declarations were not retained as structured facts")
+	}
+	context, _ := p.Extensions["native_package_context"].(map[string]any)
+	files, _ := context["files"].([]string)
+	if len(files) != 2 {
+		t.Fatalf("sibling resolver context was not retained: %#v", context)
+	}
+}
+
+func TestLowerNativeGoPackageSharesTypecheckAndKeepsPerFileBodies(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "helper.go"), []byte("package sample\nfunc helper(x int64) int64 { return x + 1 }\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	mainPath := filepath.Join(dir, "main.go")
+	if err := os.WriteFile(mainPath, []byte("package sample\nfunc main() { _ = helper(41) }\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	programs, err := LowerNativeGoPackage([]string{mainPath, filepath.Join(dir, "helper.go")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(programs) != 2 {
+		t.Fatalf("got %d per-file programs; want 2", len(programs))
+	}
+	for path, program := range programs {
+		if program == nil || program.Metadata["package"] != "sample" {
+			t.Fatalf("invalid package semantic for %s: %#v", path, program)
+		}
+	}
+	main := programs[mainPath]
+	if main == nil {
+		t.Fatalf("no independent unit for %s", mainPath)
+	}
+	entries, _ := main.Extensions["function_entry_bindings"].(map[string]string)
+	if entries["main"] == "" || entries["helper"] != "" {
+		t.Fatalf("unit bodies were merged or main body lost: %#v", entries)
 	}
 }
 
@@ -149,7 +286,7 @@ func TestNativeGoExecutableRoundtrip(t *testing.T) {
 	}
 }
 
-func TestNativeGoExecutableRejectsUnsupported(t *testing.T) {
+func TestNativeGoExecutableStructuralAcceptance(t *testing.T) {
 	cases := []string{
 		`package main; func main(){x:=uint64(9007199254740993);_ = x}`,
 		`package main; import "fmt"; func main(){fmt.Println("unicode: ä")}`,
@@ -160,10 +297,31 @@ func TestNativeGoExecutableRejectsUnsupported(t *testing.T) {
 	}
 	for i, source := range cases {
 		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			if _, err := LowerNativeGo("unsupported.go", source); err == nil {
-				t.Fatal("unsupported source silently accepted")
+			p, err := LowerNativeGo("structural.go", source)
+			if err != nil {
+				t.Fatalf("structurally valid source rejected: %v", err)
+			}
+			if p.UniversalAST == nil || len(p.UniversalAST.Nodes) == 0 {
+				t.Fatal("structurally valid source produced no canonical UAST")
 			}
 		})
+	}
+}
+
+func TestNativeGoAsyncStatementRunsThroughSemanticTaskContract(t *testing.T) {
+	p, err := LowerNativeGo("async.go", `package main
+var state int64
+func worker() { state = 1 }
+func main() { go worker() }
+`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.UniversalAST == nil || len(p.UniversalAST.Nodes) == 0 {
+		t.Fatal("async source produced no canonical UAST")
+	}
+	if _, err := RunSemantic(p); err != nil {
+		t.Fatalf("async semantic task contract failed: %v", err)
 	}
 }
 

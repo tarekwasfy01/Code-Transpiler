@@ -29,6 +29,7 @@ static RValue r_exact(const char*name,int bits,int sign,const char*text,RValue*v
  else if(!strcmp(name,"integer.subtract"))result=x-y;
  else if(!strcmp(name,"integer.multiply"))result=x*y;
  else if(!strcmp(name,"integer.divide")){if(y==0)r_int_error();if(sign&&x==(UINT64_C(1)<<(bits-1))&&y==UINT64_MAX)result=x;else result=sign?(uint64_t)((int64_t)x/(int64_t)y):x/y;}
+ else if(!strcmp(name,"integer.remainder")){if(y==0)r_int_error();if(sign&&x==(UINT64_C(1)<<(bits-1))&&y==UINT64_MAX)result=0;else result=sign?(uint64_t)((int64_t)x%(int64_t)y):x%y;}
  else if(!strcmp(name,"integer.and"))result=x&y;
  else if(!strcmp(name,"integer.or"))result=x|y;
  else if(!strcmp(name,"integer.xor"))result=x^y;
@@ -56,7 +57,7 @@ fn r_exact(name:&str,bits:u32,signed:bool,text:&str,values:Vec<RValue>)->RValue{
  "integer.equal"=>return RValue::Bool(x==y),"integer.not_equal"=>return RValue::Bool(x!=y),
  "integer.less"=>return RValue::Bool(less),"integer.less_equal"=>return RValue::Bool(less||x==y),
  "integer.greater"=>return RValue::Bool(!less&&x!=y),"integer.greater_equal"=>return RValue::Bool(!less),
- "integer.shift_left"=>if y>=bits{0}else{x<<y},"integer.shift_right"=>if y>=bits{if signed&&((x>>(bits-1))&1)!=0{u64::MAX}else{0}}else if signed{((x as i64)>>y) as u64}else{x>>y},"integer.add"=>x.wrapping_add(y),"integer.subtract"=>x.wrapping_sub(y),"integer.multiply"=>x.wrapping_mul(y),"integer.divide"=>if y==0{panic!("integer.divide by zero")}else if signed{x.wrapping_div(y)}else{x/y},
+ "integer.shift_left"=>if y>=bits{0}else{x<<y},"integer.shift_right"=>if y>=bits{if signed&&((x>>(bits-1))&1)!=0{u64::MAX}else{0}}else if signed{((x as i64)>>y) as u64}else{x>>y},"integer.add"=>x.wrapping_add(y),"integer.subtract"=>x.wrapping_sub(y),"integer.multiply"=>x.wrapping_mul(y),"integer.divide"=>if y==0{panic!("integer.divide by zero")}else if signed{x.wrapping_div(y)}else{x/y},"integer.remainder"=>if y==0{panic!("integer.remainder by zero")}else if signed{x.wrapping_rem(y)}else{x%y},
  "integer.and"=>x&y,"integer.or"=>x|y,"integer.xor"=>x^y,"integer.and_not"=>x&!y,_=>panic!("unsupported integer operation")};
  r_int_value(result,bits,signed)
 }

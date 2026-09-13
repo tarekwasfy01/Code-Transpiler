@@ -8,6 +8,42 @@ import (
 	"strings"
 )
 
+const cppFmtSprintfHelper = `static std::string uast_any_string(const std::any& value) {
+    if (value.type() == typeid(std::string)) return std::any_cast<std::string>(value);
+    if (value.type() == typeid(const char*)) return std::string(std::any_cast<const char*>(value));
+    if (value.type() == typeid(char*)) return std::string(std::any_cast<char*>(value));
+    if (value.type() == typeid(bool)) return std::any_cast<bool>(value) ? "true" : "false";
+    if (value.type() == typeid(int)) return std::to_string(std::any_cast<int>(value));
+    if (value.type() == typeid(unsigned int)) return std::to_string(std::any_cast<unsigned int>(value));
+    if (value.type() == typeid(long)) return std::to_string(std::any_cast<long>(value));
+    if (value.type() == typeid(unsigned long)) return std::to_string(std::any_cast<unsigned long>(value));
+    if (value.type() == typeid(long long)) return std::to_string(std::any_cast<long long>(value));
+    if (value.type() == typeid(unsigned long long)) return std::to_string(std::any_cast<unsigned long long>(value));
+    if (value.type() == typeid(float)) return std::to_string(std::any_cast<float>(value));
+    if (value.type() == typeid(double)) return std::to_string(std::any_cast<double>(value));
+    return "<unsupported>";
+}
+
+static std::string uast_fmt_sprintf(const std::string& format, const std::vector<std::any>& values) {
+    std::string out;
+    size_t arg = 0;
+    for (size_t i = 0; i < format.size(); ++i) {
+        if (format[i] != '%' || i + 1 >= format.size()) { out += format[i]; continue; }
+        if (format[i + 1] == '%') { out += '%'; ++i; continue; }
+        size_t verb = i + 1;
+        while (verb < format.size() && !std::isalpha(static_cast<unsigned char>(format[verb])) && format[verb] != 'q') ++verb;
+        if (verb >= format.size()) { out += format.substr(i); break; }
+        const char conversion = format[verb];
+        if (arg >= values.size()) { out += "%!"; out += conversion; ++i; continue; }
+        std::string value = uast_any_string(values[arg++]);
+        if (conversion == 'q') { std::ostringstream quoted; quoted << std::quoted(value); out += quoted.str(); }
+        else { out += value; }
+        i = verb;
+    }
+    return out;
+}
+`
+
 func directVectorBinary(target, left, right, op string) (string, bool) {
 	switch target {
 	case "go":
@@ -176,6 +212,14 @@ func nativeLiteral(target string, kind string, text string) string {
 // returns an explicit diagnostic.  Compatibility/oracle paths retain the
 // existing dispatcher below this boundary.
 func (g *targetGen) nativeDispatch(name string, args []string) (string, error) {
+	name = canonicalNativeSymbolName(name)
+	if g.target == "cpp" && strings.EqualFold(name, "fmt.Sprintf") && len(args) == 2 {
+		g.requireHelper("helper.native.cpp.fmt_sprintf.v1", cppFmtSprintfHelper)
+		return "uast_fmt_sprintf(" + args[0] + ", " + args[1] + ")", nil
+	}
+	if strings.EqualFold(name, "println") || strings.EqualFold(name, "printf") {
+		name = "print"
+	}
 	if !g.nativeDirect {
 		return emitDispatch(g.target, name, args), nil
 	}
@@ -554,6 +598,8 @@ func (g *targetGen) uastSliceExpression(graph *uastExecutionGraph, id int) (stri
 			return value + "[seq(" + start + ", " + end + ", by=" + step + ")]", nil
 		case "rust":
 			return value + "[" + start + ".." + end + "].iter().step_by(" + step + " as usize).copied().collect::<Vec<_>>()", nil
+		case "cpp":
+			return g.uastCppSteppedSlice(value, start, end, step, hasStart, hasEnd), nil
 		default:
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s requires a stepped-slice representation adapter", g.target)
 		}
@@ -581,6 +627,41 @@ func (g *targetGen) uastSliceExpression(graph *uastExecutionGraph, id int) (stri
 	default:
 		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s requires a slice representation adapter", g.target)
 	}
+}
+
+func (g *targetGen) uastCppSteppedSlice(value, start, end, step string, hasStart, hasEnd bool) string {
+	sourceName := g.freshName("slice_source")
+	resultName := g.freshName("slice_result")
+	lengthName := g.freshName("slice_length")
+	stepName := g.freshName("slice_step")
+	startName := g.freshName("slice_start")
+	endName := g.freshName("slice_end")
+	indexName := g.freshName("slice_index")
+
+	startValue := "0"
+	if hasStart {
+		startValue = "static_cast<long long>(" + start + ")"
+	}
+	endValue := "(" + stepName + " > 0 ? " + lengthName + " : -1)"
+	if hasEnd {
+		endValue = "static_cast<long long>(" + end + ")"
+	}
+
+	var body strings.Builder
+	fmt.Fprintf(&body, "([&]() { auto %s = (%s); auto %s = %s; %s.clear(); const long long %s = static_cast<long long>(%s.size()); const long long %s = static_cast<long long>(%s); if (%s == 0) throw std::invalid_argument(\"slice step cannot be zero\"); long long %s = %s; long long %s = %s; ",
+		sourceName, value, resultName, sourceName, resultName, lengthName, sourceName, stepName, step, stepName, startName, startValue, endName, endValue)
+	if hasStart {
+		fmt.Fprintf(&body, "if (%s < 0) %s += %s; ", startName, startName, lengthName)
+	}
+	if hasEnd {
+		fmt.Fprintf(&body, "if (%s < 0) %s += %s; ", endName, endName, lengthName)
+	}
+	fmt.Fprintf(&body, "if (%s > 0) { if (%s < 0) %s = 0; if (%s > %s) %s = %s; if (%s < 0) %s = 0; if (%s > %s) %s = %s; for (long long %s = %s; %s < %s; %s += %s) %s.push_back(%s[static_cast<size_t>(%s)]); } else { if (%s < 0) %s = -1; if (%s >= %s) %s = %s - 1; if (%s < -1) %s = -1; if (%s >= %s) %s = %s - 1; for (long long %s = %s; %s > %s; %s += %s) %s.push_back(%s[static_cast<size_t>(%s)]); } return %s; }())",
+		stepName, startName, startName, startName, lengthName, startName, lengthName, endName, endName, endName, lengthName, endName, lengthName,
+		indexName, startName, indexName, endName, indexName, stepName, resultName, sourceName, indexName,
+		startName, startName, startName, lengthName, startName, lengthName, endName, endName, endName, lengthName, endName, lengthName,
+		indexName, startName, indexName, endName, indexName, stepName, resultName, sourceName, indexName, resultName)
+	return body.String()
 }
 
 func (g *targetGen) uastPointerExpression(graph *uastExecutionGraph, id int, address bool) (string, error) {
@@ -685,6 +766,7 @@ type targetGenCheckpoint struct {
 	cValues            map[string]bool
 	directVectors      map[string]bool
 	uastActiveInline   map[int]bool
+	breakContexts      []bool
 	runtimeUsed        bool
 }
 
@@ -726,6 +808,7 @@ func (g *targetGen) checkpoint() targetGenCheckpoint {
 		helperSources:      cloneStringMapCopy(g.helperSources), usedNames: cloneBoolMap(g.usedNames),
 		cValues: cloneBoolMap(g.cValues), directVectors: cloneBoolMap(g.directVectors),
 		uastActiveInline: cloneIntBoolMap(g.uastActiveInline), runtimeUsed: g.runtimeUsed,
+		breakContexts: append([]bool(nil), g.breakContexts...),
 	}
 }
 
@@ -754,6 +837,7 @@ func (g *targetGen) restore(cp targetGenCheckpoint) {
 	g.helperSources, g.usedNames = cloneStringMapCopy(cp.helperSources), cloneBoolMap(cp.usedNames)
 	g.cValues, g.directVectors = cloneBoolMap(cp.cValues), cloneBoolMap(cp.directVectors)
 	g.uastActiveInline, g.runtimeUsed = cloneIntBoolMap(cp.uastActiveInline), cp.runtimeUsed
+	g.breakContexts = append([]bool(nil), cp.breakContexts...)
 }
 
 func hybridFallbackEligible(err error) bool {
@@ -886,6 +970,8 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 		}
 		g.indent--
 		g.line("}")
+	case "switch", "switchstmt", "SwitchMatchStmt":
+		return g.uastSwitchStatement(graph, id)
 	case "assign":
 		expression, ok, err := one("expression", false)
 		if err != nil {
@@ -937,7 +1023,7 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 			case "rust":
 				g.line("let mut " + n + " = " + value + ";")
 			case "cpp":
-				g.line("std::vector<double> " + n + " = " + value + ";")
+				g.line("RValue " + n + " = " + value + ";")
 			case "java":
 				g.line("var " + n + " = " + value + ";")
 			case "c":
@@ -1237,7 +1323,7 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 			g.line("end")
 		}
 		return err
-	case "return":
+	case "return", "ReturnStmt":
 		if expression, ok, err := one("expression", false); err != nil {
 			return err
 		} else if !ok {
@@ -1245,7 +1331,7 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 			// function. In a direct C++ entry projection the surrounding native
 			// main supplies the process status; emitting RValue::null() here would
 			// contaminate an otherwise runtime-free target document.
-			if g.nativeDirect && g.target == "cpp" {
+			if g.entryWrapper || (g.nativeDirect && (g.target == "cpp" || g.target == "c")) {
 				return nil
 			}
 			g.line(returnNull(g.target))
@@ -1257,6 +1343,9 @@ func (g *targetGen) uastStatementCore(graph *uastExecutionGraph, id int) error {
 			g.line(returnExpr(g.target, value))
 		}
 	case "break":
+		if len(g.breakContexts) > 0 && g.breakContexts[len(g.breakContexts)-1] {
+			return nil
+		}
 		g.line("break" + stmtEnd(g.target))
 	case "continue":
 		if g.target == "python" || g.target == "julia" || g.target == "nim" {
@@ -1305,9 +1394,163 @@ func (g *targetGen) uastStatementBody(graph *uastExecutionGraph, id int) error {
 	return g.uastStatement(graph, id)
 }
 
+// uastSwitchStatement emits the canonical selector/case/body contract. The
+// selector and every pattern are structured UAST expressions; no source text
+// or language-specific spelling is consulted.
+func (g *targetGen) uastSwitchStatement(graph *uastExecutionGraph, id int) error {
+	if g.target != "cpp" {
+		return fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s has no native switch-pattern template", g.target)
+	}
+	selectorID, ok, err := graph.firstChild(id, "condition", "value", "expression", "operand")
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("switch node %d lacks a structured selector", id)
+	}
+	selector, err := g.uastExpression(graph, selectorID)
+	if err != nil {
+		return err
+	}
+	clauses := make([]universalChild, 0)
+	var defaultClause *universalChild
+	for _, child := range graph.orderedChildren(id) {
+		if child.Meta.Role != "case" && child.Meta.Role != "branch" && child.Meta.Role != "default" {
+			continue
+		}
+		if child.Meta.Role == "default" || graph.common[child.ID].Kind == "default" || graph.common[child.ID].Kind == "default_case" {
+			copy := child
+			defaultClause = &copy
+			continue
+		}
+		clauses = append(clauses, child)
+	}
+	valueName := g.freshName("switch")
+	g.line("{")
+	g.indent++
+	g.line("auto " + valueName + " = " + selector + ";")
+	for i, clause := range clauses {
+		patterns := graph.many(clause.ID, "pattern")
+		if len(patterns) == 0 {
+			patternID, found, patternErr := graph.firstChild(clause.ID, "pattern", "condition", "value", "expression")
+			if patternErr != nil {
+				return patternErr
+			}
+			if found {
+				patterns = []universalChild{{ID: patternID, Meta: universalChildRecord{Role: "pattern"}}}
+			}
+		}
+		if len(patterns) == 0 {
+			return fmt.Errorf("switch case node %d lacks a structured pattern", clause.ID)
+		}
+		checks := make([]string, 0, len(patterns))
+		for _, pattern := range patterns {
+			if pattern.Meta.Missing {
+				continue
+			}
+			pv, patternErr := g.uastExpression(graph, pattern.ID)
+			if patternErr != nil {
+				return patternErr
+			}
+			checks = append(checks, "("+valueName+" == "+pv+")")
+		}
+		if len(checks) == 0 {
+			return fmt.Errorf("switch case node %d has no present pattern", clause.ID)
+		}
+		keyword := "if"
+		if i > 0 {
+			keyword = "else if"
+		}
+		g.line(keyword + " (" + strings.Join(checks, " || ") + ") {")
+		g.indent++
+		body, bodyOK, bodyErr := graph.one(clause.ID, "body", false)
+		if bodyErr != nil {
+			return bodyErr
+		}
+		if !bodyOK {
+			body, bodyOK, bodyErr = graph.one(clause.ID, "statement", false)
+		}
+		if bodyErr != nil {
+			return bodyErr
+		}
+		if !bodyOK {
+			return fmt.Errorf("switch case node %d lacks a structured body", clause.ID)
+		}
+		g.breakContexts = append(g.breakContexts, true)
+		bodyErr = g.uastStatementBody(graph, body)
+		g.breakContexts = g.breakContexts[:len(g.breakContexts)-1]
+		if bodyErr != nil {
+			return bodyErr
+		}
+		g.indent--
+		g.line("}")
+	}
+	if defaultClause != nil {
+		body, bodyOK, bodyErr := graph.one(defaultClause.ID, "body", false)
+		if bodyErr != nil {
+			return bodyErr
+		}
+		if !bodyOK {
+			body, bodyOK, bodyErr = graph.one(defaultClause.ID, "statement", false)
+		}
+		if bodyErr != nil {
+			return bodyErr
+		}
+		if !bodyOK {
+			return fmt.Errorf("switch default node %d lacks a structured body", defaultClause.ID)
+		}
+		if len(clauses) > 0 {
+			g.line("else {")
+			g.indent++
+		}
+		g.breakContexts = append(g.breakContexts, true)
+		bodyErr = g.uastStatementBody(graph, body)
+		g.breakContexts = g.breakContexts[:len(g.breakContexts)-1]
+		if bodyErr != nil {
+			return bodyErr
+		}
+		if len(clauses) > 0 {
+			g.indent--
+			g.line("}")
+		}
+	}
+	g.indent--
+	g.line("}")
+	return nil
+}
+
 func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, error) {
 	c := graph.common[id]
 	one := func(role string) (int, error) { value, _, err := graph.one(id, role, true); return value, err }
+	// ConvertExpr is a structural UAST operation.  C scalar conversions use
+	// the canonical type contract directly; no source spelling or diagnostic
+	// text is consulted.  Aggregate/function conversions remain on their
+	// declared representation adapter path.
+	if node := graph.nodes[id]; node != nil && node.StructuralKind == "ConvertExpr" && g.nativeDirect {
+		operand, found, err := graph.firstChild(id, "value", "operand", "expression", "base")
+		if err != nil {
+			return "", err
+		}
+		if !found {
+			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: conversion node %d lacks a structured operand", id)
+		}
+		value, err := g.uastExpression(graph, operand)
+		if err != nil {
+			return "", err
+		}
+		if g.target == "c" || g.target == "cpp" {
+			switch strings.ToLower(c.Type.Kind) {
+			case "integer":
+				return "((long long)(" + value + "))", nil
+			case "float", "number":
+				return "((double)(" + value + "))", nil
+			case "boolean":
+				return "((bool)(" + value + "))", nil
+			case "string":
+				return value, nil
+			}
+		}
+	}
 	if strings.HasPrefix(c.Operation.Operator, "unsupported.") {
 		return g.uastFallbackExpression(graph, id)
 	}
@@ -1334,6 +1577,13 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 		return g.uastAggregateExpression(graph, id)
 	}
 	switch c.Kind {
+	case "block":
+		items := graph.many(id, "statement")
+		if len(items) == 0 {
+			return targetNull(g.target), nil
+		}
+		last := items[len(items)-1].ID
+		return g.uastExpression(graph, last)
 	case "expression", "operationexpr":
 		// OperationExpr is a canonical envelope, not an opaque target syntax
 		// form. When its operation and ordered operands are structurally proved,
@@ -1402,6 +1652,16 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 		}
 		return targetNumber(g.target, strings.TrimSuffix(c.Operation.Text, "L")), nil
 	case "unary":
+		// Dereference and address-of are unary semantic operations, but they
+		// require place/pointer lowering rather than the numeric unary table.
+		// Keep them on the same structured pointer path used by explicit UAST
+		// Deref and AddressOf nodes.
+		switch strings.TrimSpace(c.Operation.Operator) {
+		case "*", "deref":
+			return g.uastPointerExpression(graph, id, false)
+		case "&", "address", "address_of":
+			return g.uastPointerExpression(graph, id, true)
+		}
 		value, ok, err := graph.one(id, "value", false)
 		if err != nil {
 			return "", err
@@ -1416,8 +1676,17 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 		if err != nil {
 			return "", err
 		}
+		if strings.TrimSpace(c.Operation.Operator) == "<-" || strings.TrimSpace(c.Operation.Operator) == "=" {
+			return text, nil
+		}
 		if g.nativeDirect {
 			switch c.Operation.Operator {
+			case "<-", "=":
+				// MatrixIR may retain a canonical binding operator as a unary
+				// envelope when its target relation is carried separately. The
+				// structured assignment edge performs the store; expression use
+				// evaluates to the assigned value.
+				return text, nil
 			case "+":
 				return text, nil
 			case "-":
@@ -1513,6 +1782,91 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 		return g.nativeDispatch("__binary_"+semanticOp, []string{a, b})
 	case "typed_operation":
 		return g.uastTypedOperation(graph, id)
+	case "assign":
+		// Assignment can occur as a value in expression-oriented frontends
+		// (for example a closure body lowered through a selector). Preserve the
+		// structured binding/value contract without invoking a text parser.
+		rhsID, found, err := graph.firstChild(id, "expression", "value", "initializer")
+		if err != nil {
+			return "", err
+		}
+		if !found {
+			return "", fmt.Errorf("assignment node %d lacks a structured value", id)
+		}
+		rhs, err := g.uastExpression(graph, rhsID)
+		if err != nil {
+			return "", err
+		}
+		name := g.name(c.Name)
+		if name == "" {
+			return "", fmt.Errorf("assignment node %d lacks a binding name", id)
+		}
+		if g.nativeDirect {
+			if g.target == "python" || g.target == "julia" || g.target == "nim" || g.target == "swift" {
+				return "(" + name + " = " + rhs + ")", nil
+			}
+			return "(" + name + " = " + rhs + ")", nil
+		}
+		return g.dispatch("assign", []string{name, rhs})
+	case "return":
+		// A return node may be retained as the value edge of a function-body
+		// expression by canonical projections. In expression context its proved
+		// value is the function result; statement emission still handles the
+		// control terminator separately.
+		valueID, found, err := graph.firstChild(id, "expression", "value", "result")
+		if err != nil {
+			return "", err
+		}
+		if !found {
+			return targetNull(g.target), nil
+		}
+		return g.uastExpression(graph, valueID)
+	case "if", "ifstmt", "IfStmt":
+		condID, condOK, err := graph.firstChild(id, "condition", "value", "expression")
+		if err != nil {
+			return "", err
+		}
+		if !condOK {
+			return "", fmt.Errorf("conditional node %d lacks condition", id)
+		}
+		cond, err := g.uastExpression(graph, condID)
+		if err != nil {
+			return "", err
+		}
+		yesID, yesOK, err := graph.oneRelationNode(id, "control.true", false)
+		if err != nil {
+			return "", err
+		}
+		if !yesOK {
+			yesID, yesOK, err = graph.firstChild(id, "then", "body")
+			if err != nil {
+				return "", err
+			}
+		}
+		if !yesOK {
+			return "", fmt.Errorf("conditional node %d lacks true branch", id)
+		}
+		yes, err := g.uastExpression(graph, yesID)
+		if err != nil {
+			return "", err
+		}
+		noID, noOK, err := graph.oneRelationNode(id, "control.false", false)
+		if err != nil {
+			return "", err
+		}
+		no := targetNull(g.target)
+		if noOK {
+			no, err = g.uastExpression(graph, noID)
+			if err != nil {
+				return "", err
+			}
+		}
+		return "(" + cond + " ? " + yes + " : " + no + ")", nil
+	case "continue", "ContinueStmt", "continue_stmt", "break", "BreakStmt", "break_stmt":
+		// Control markers can be retained as the final value of a structured
+		// block by compatibility projections. Their statement semantics are
+		// emitted by uastStatement; expression use has no value.
+		return targetNull(g.target), nil
 	case "index":
 		value, err := one("value")
 		if err != nil {
@@ -1530,9 +1884,10 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 		if c.Operation.DoubleIndex {
 			name = "[["
 		}
-		if g.nativeDirect && (g.target == "cpp" || g.target == "c") && len(args) == 1 && name == "[" {
-			return container + "[" + args[0] + "]", nil
-		}
+		// C uses the canonical one-based UAST index contract just like every
+		// other target.  Keep the conversion in the shared target form table;
+		// bypassing it here used to emit a zero-based access for the direct C
+		// path and made the same UAST mean different things by projection mode.
 		return g.nativeDispatch(name, append([]string{container}, args...))
 	case "call":
 		callee, _, err := graph.oneRelationNode(id, "call.calls", true)
@@ -1542,6 +1897,30 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 		args, err := g.uastArguments(graph, id)
 		if err != nil {
 			return "", err
+		}
+		// Member calls are represented structurally as receiver + member.  Keep
+		// them on the shared opaque-call contract instead of rendering a method
+		// invocation on the neutral RValue carrier (which is not a target object
+		// with arbitrary methods).  This preserves evaluation order and gives
+		// native targets a well-typed fallback for APIs unavailable in the target.
+		if graph.common[callee].Kind == "member" {
+			baseID, ok, baseErr := graph.firstChild(callee, "base", "receiver", "object", "value")
+			if baseErr != nil {
+				return "", baseErr
+			}
+			if ok {
+				receiver, recvErr := g.uastExpression(graph, baseID)
+				if recvErr != nil {
+					return "", recvErr
+				}
+				memberName := strings.TrimSpace(graph.common[callee].Name)
+				if memberName == "" {
+					memberName = strings.TrimSpace(graph.common[callee].Operation.Text)
+				}
+				if memberName != "" {
+					return g.nativeDispatch(memberName, append([]string{receiver}, args...))
+				}
+			}
 		}
 		// Function values, including immediately invoked closures, are already
 		// structured UAST nodes. Inline them through the shared function engine
@@ -1600,8 +1979,28 @@ func (g *targetGen) uastExpression(graph *uastExecutionGraph, id int) (string, e
 			return "", fmt.Errorf("unknown iteration intrinsic %q", c.Operation.Operator)
 		}
 	case "missing_argument":
-		return "", nil
+		// A missing argument is a structured placeholder, never an empty source
+		// fragment.  Emit the target's typed null so enclosing calls remain valid.
+		return targetNull(g.target), nil
 	case "function":
+		if g.target == "cpp" {
+			return g.uastLambdaValueExpression(graph, id)
+		}
+		if g.target == "c" {
+			params := graph.many(id, "parameter")
+			names := make([]string, len(params))
+			for i, p := range params {
+				names[i] = g.name(graph.common[p.ID].Name)
+			}
+			if !uastFunctionHasExternalCapture(graph, id, names) {
+				name := g.freshName("closure")
+				if err := g.uastFunctionAssign(graph, name, id); err != nil {
+					return "", err
+				}
+				return name, nil
+			}
+			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: C closure value captures an enclosing binding")
+		}
 		return "", fmt.Errorf("anonymous function must be assigned to a name")
 	default:
 		return "", fmt.Errorf("universal node %d kind %q has no direct expression lowering", id, c.Kind)
@@ -1754,6 +2153,10 @@ func directNativeCall(target, name string, args []string) string {
 	if dot := strings.LastIndex(name, "."); dot >= 0 {
 		name = name[dot+1:]
 	}
+	// Native frontends preserve symbol identity with a stable internal prefix.
+	// The call operation itself is target independent, so remove that binding
+	// namespace at this single semantic-to-native call boundary.
+	name = canonicalNativeSymbolName(name)
 	name = strings.ToLower(name)
 	if name == "println" || name == "printf" {
 		name = "print"
@@ -1775,7 +2178,7 @@ func directNativeCall(target, name string, args []string) string {
 		}
 		slot := args[0] + "[" + index + "]"
 		switch target {
-		case "go", "cpp", "csharp", "java", "kotlin", "swift", "zig", "nim", "python", "rust":
+		case "go", "cpp", "c", "csharp", "java", "kotlin", "swift", "zig", "nim", "python", "rust":
 			return "(" + slot + " = " + args[2] + ")"
 		case "julia":
 			return "(" + args[0] + "[Int(" + args[1] + ")] = " + args[2] + ")"
@@ -1886,6 +2289,30 @@ func directNativeCall(target, name string, args []string) string {
 		if name == "print" || name == "show" || name == "cat" {
 			return "echo " + joined
 		}
+	case "c":
+		if name == "c" {
+			if len(args) == 0 {
+				return "((double*)0)"
+			}
+			for _, arg := range args {
+				trimmed := strings.TrimSpace(arg)
+				if strings.HasPrefix(trimmed, "\"") || strings.HasPrefix(trimmed, "'") || trimmed == "true" || trimmed == "false" {
+					return ""
+				}
+			}
+			return "(double[]){" + joined + "}"
+		}
+		if name == "print" || name == "show" || name == "cat" {
+			if len(args) == 0 {
+				return "printf(\"\\n\")"
+			}
+			format := strings.TrimSuffix(strings.Repeat("%g ", len(args)), " ") + "\\n"
+			values := make([]string, 0, len(args))
+			for _, arg := range args {
+				values = append(values, "(double)("+arg+")")
+			}
+			return "printf(\"" + format + "\", " + strings.Join(values, ", ") + ")"
+		}
 	case "swift":
 		if name == "c" {
 			return "[" + joined + "]"
@@ -1902,22 +2329,12 @@ func directNativeCall(target, name string, args []string) string {
 		}
 	case "cpp":
 		if name == "c" {
-			return "std::vector<double>{" + joined + "}"
+			return "std::vector<RValue>{" + joined + "}"
 		}
 		if name == "print" || name == "show" || name == "cat" {
 			// Print is a semantic operation. Its arguments may be aggregates
 			// produced by any structured expression, so do not assume operator<<.
 			return "uast_print(" + joined + ")"
-		}
-	case "c":
-		if name == "c" {
-			if len(args) == 0 {
-				return "((double*)0)"
-			}
-			return "(double[]){" + joined + "}"
-		}
-		if name == "print" || name == "show" || name == "cat" {
-			return "printf(\"%g\\n\", (double)(" + joined + "))"
 		}
 	case "zig":
 		if name == "c" {
@@ -1957,6 +2374,13 @@ func directNativeCall(target, name string, args []string) string {
 		return name + "(" + joined + ")"
 	}
 	return ""
+}
+
+// canonicalNativeSymbolName removes only the frontend's explicit symbol-ID
+// namespace. It is not source-text parsing: native_symbol_<name> is the
+// structured binding identity stored in the Canonical UAST symbol contract.
+func canonicalNativeSymbolName(name string) string {
+	return strings.TrimPrefix(name, "native_symbol_")
 }
 
 func (g *targetGen) uastAggregateExpression(graph *uastExecutionGraph, id int) (string, error) {
@@ -2020,7 +2444,38 @@ func (g *targetGen) uastTypedOperation(graph *uastExecutionGraph, id int) (strin
 			}
 			values = append(values, value)
 		}
-		return g.dispatch(operation.Name, values)
+		// Exact typed operations have an existing target runtime ABI. Preserve
+		// their type, literal text and operands when compatibility emission is
+		// selected; sending only the operation name through the generic r_call
+		// dispatcher loses integer.literal's payload and evaluates to null.
+		spec, ok := targetSpec(g.target)
+		if !ok || spec.TypedOperations.Form == "unsupported" {
+			return "", fmt.Errorf("no typed operation specification for target %q", g.target)
+		}
+		adapter := spec.TypedOperations
+		signed := "false"
+		if operation.Type.Signed != nil && *operation.Type.Signed {
+			signed = "true"
+		}
+		switch adapter.Form {
+		case "c":
+			flag := 0
+			if operation.Type.Signed != nil && *operation.Type.Signed {
+				flag = 1
+			}
+			payload := "NULL"
+			if len(values) > 0 {
+				payload = "(RValue[]){" + strings.Join(values, ", ") + "}"
+			}
+			return fmt.Sprintf("%s(%q, %d, %d, %q, %s, %d)", adapter.Runtime, operation.Name, operation.Type.Bits, flag, operation.Text, payload, len(values)), nil
+		default:
+			if operation.Type.Signed != nil && *operation.Type.Signed {
+				signed = adapter.SignedTrue
+			} else {
+				signed = adapter.SignedFalse
+			}
+			return fmt.Sprintf("%s(%q, %d, %s, %q, %s%s%s)", adapter.Runtime, operation.Name, operation.Type.Bits, signed, operation.Text, adapter.ArgumentsOpen, strings.Join(values, ", "), adapter.ArgumentsClose), nil
+		}
 	}
 	// R is a registered target with native scalar arithmetic.  Its numeric
 	// representation is already the canonical double contract, so the
@@ -2058,11 +2513,11 @@ func (g *targetGen) uastTypedOperation(graph *uastExecutionGraph, id int) (strin
 		}
 		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: R typed operation %q arity", operation.Name)
 	}
-	// C++ direct projection uses native scalar expressions for the integer
-	// value/convert family. These operations are representation-preserving at
-	// this boundary; routing them through r_exact would contaminate otherwise
-	// native aggregate/loop expressions with the compatibility runtime.
-	if g.target == "cpp" {
+	// C-family direct projection uses the same matrix-driven scalar forms. The
+	// operation name selects a representation row; operands and ordering come
+	// exclusively from the UAST argument relation. This keeps basic typed
+	// values out of the compatibility runtime and gives MinGW/MSVC ordinary C.
+	if g.target == "cpp" || g.target == "c" {
 		values := make([]string, 0, len(args))
 		for _, arg := range args {
 			if arg.Meta.Missing || arg.Meta.Name != "" {
@@ -2074,6 +2529,11 @@ func (g *targetGen) uastTypedOperation(graph *uastExecutionGraph, id int) (strin
 			}
 			values = append(values, value)
 		}
+		cOps := map[string]string{
+			"integer.add": "+", "integer.subtract": "-", "integer.multiply": "*", "integer.divide": "/",
+			"integer.equal": "==", "integer.not_equal": "!=", "integer.less": "<", "integer.less_equal": "<=",
+			"integer.greater": ">", "integer.greater_equal": ">=",
+		}
 		switch operation.Name {
 		case "integer.literal":
 			return operation.Text, nil
@@ -2084,6 +2544,10 @@ func (g *targetGen) uastTypedOperation(graph *uastExecutionGraph, id int) (strin
 		case "integer.negate":
 			if len(values) == 1 {
 				return "(-" + values[0] + ")", nil
+			}
+		default:
+			if op, ok := cOps[operation.Name]; ok && len(values) == 2 {
+				return "(" + values[0] + " " + op + " " + values[1] + ")", nil
 			}
 		}
 	}

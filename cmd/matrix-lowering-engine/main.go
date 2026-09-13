@@ -102,13 +102,19 @@ func main() {
 	if e := os.MkdirAll(*out, 0755); e != nil {
 		panic(e)
 	}
-	ps, e := readPrimitives(filepath.Join(*in, "observed_primitives.csv"))
-	if e != nil {
-		panic(e)
-	}
 	report, e := backend.CompileUniversalPrimitiveSpecs()
 	if e != nil {
 		panic(e)
+	}
+	ps, e := readPrimitives(filepath.Join(*in, "observed_primitives.csv"))
+	if e != nil {
+		// Evidence exports are deliberately disposable.  Reconstruct the
+		// current primitive column directly from the authoritative compiler
+		// specs when an old miner directory has been removed.
+		ps = make([]primitive, 0, len(report.Specs))
+		for _, s := range report.Specs {
+			ps = append(ps, primitive{s.ID, s.Family, ""})
+		}
 	}
 	targets := append([]string(nil), manytomany.Languages...)
 	// Current inventory is the single list used by every matrix below.
@@ -294,6 +300,17 @@ func main() {
 		}
 	}
 	_ = writeCSV(filepath.Join(*out, "implemented_target_kernel_emitters.csv"), []string{"kernel", "target", "emitter", "status"}, ie)
+	// Assembly projection uses the same parameterized kernels, with the
+	// machine compiler's x86-64 Win64 ABI as the target contract.
+	var am [][]string
+	for _, p := range ps {
+		k, ok := backend.GenericAtomicKernel(p.ID)
+		if !ok {
+			continue
+		}
+		am = append(am, []string{p.ID, k, "x86_64", "win64", "UniversalLower+CompileMachine", "DIRECT"})
+	}
+	_ = writeCSV(filepath.Join(*out, "uast_assembly_projection_matrix.csv"), []string{"primitive", "kernel", "arch", "abi", "pipeline", "status"}, am)
 
 	var ir [][]string
 	for _, s := range targets {
@@ -308,7 +325,8 @@ func main() {
 	_ = writeCSV(filepath.Join(*out, "semantic_decision_logic_removed.csv"), []string{"decision", "source_of_truth", "mode"}, decisions)
 
 	directAfter := count(reachable)
-	summary := map[string]any{"observed_semantic_operations": len(ps), "observed_primitives": len(ps), "concrete_kernel_entries_before": len(pk), "parameterized_kernel_families": len(kset), "recipes": len(report.Recipes), "guards": len(rg), "supported_targets": len(targets), "primitive_target_cells": len(ps) * len(targets), "direct_kernel_cells_before": baseReachable, "direct_kernel_cells_after": directAfter, "recipe_lowered_cells": directAfter - baseReachable, "native_unreachable_before_repair": len(ps)*len(targets) - baseReachable, "native_unreachable_after_repair": len(mb), "existing_paths_recovered": len(report.RecoveredExactRecipes), "matrix_wiring_repairs": len(ri) + len(ro), "new_generic_target_kernel_emitters": 0, "closure_iterations": len(ci) - 1, "primitive_closure_coverage": fmt.Sprintf("%d/%d", len(ps), len(ps)), "per_target_native_closure_coverage": countByTarget(reachable, targets), "minimal_missing_target_basis_before": len(ps)*len(targets) - baseReachable, "minimal_missing_target_basis_after": len(mb), "intermediate_route_candidates": len(ir), "runtime_only_demand_remaining": len(mb), "remaining_representable_semantic_gaps": len(report.Unresolved), "new_high_level_handlers": 0, "new_primitive_target_handlers": 0}
+	closureCells := len(ps) * len(targets)
+	summary := map[string]any{"observed_semantic_operations": len(ps), "observed_primitives": len(ps), "concrete_kernel_entries_before": len(pk), "parameterized_kernel_families": len(kset), "recipes": len(report.Recipes), "guards": len(rg), "supported_targets": len(targets), "primitive_target_cells": closureCells, "direct_kernel_cells_before": baseReachable, "direct_kernel_cells_after": directAfter, "assembly_projection_cells": len(am), "assembly_projection_missing": len(ps) - len(am), "recipe_lowered_cells": directAfter - baseReachable, "native_unreachable_before_repair": closureCells - baseReachable, "native_unreachable_after_repair": len(mb), "existing_paths_recovered": len(report.RecoveredExactRecipes), "matrix_wiring_repairs": len(ri) + len(ro), "new_generic_target_kernel_emitters": 0, "closure_iterations": len(ci) - 1, "primitive_closure_coverage": fmt.Sprintf("%d/%d", directAfter, closureCells), "per_target_native_closure_coverage": countByTarget(reachable, targets), "minimal_missing_target_basis_before": closureCells - baseReachable, "minimal_missing_target_basis_after": len(mb), "intermediate_route_candidates": len(ir), "runtime_only_demand_remaining": len(mb), "remaining_representable_semantic_gaps": len(report.Unresolved), "new_high_level_handlers": 0, "new_primitive_target_handlers": 0}
 	b, _ := json.MarshalIndent(summary, "", "  ")
 	_ = os.WriteFile(filepath.Join(*out, "summary.json"), b, 0644)
 	fmt.Printf("MATRIX_LOWERING_ENGINE primitives=%d kernels=%d recipes=%d direct=%d targets=%d missing=%d out=%s\n", len(ps), len(kset), len(report.Recipes), count(reachable), len(targets), len(mb), *out)

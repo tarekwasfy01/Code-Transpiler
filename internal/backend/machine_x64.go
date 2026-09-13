@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend/x86encode"
 )
 
 type x64Operand struct {
@@ -40,6 +42,16 @@ type x64Program struct {
 	// same encoder fixup pass as control-flow labels.
 	Data      map[string][]byte
 	Functions []x64Function
+	// Imports is the explicit native ABI import contract consumed by the PE
+	// linker. Entries are deduplicated and laid out deterministically.
+	Imports []pe64ImportSpec
+	// ProjectSymbols maps stable linker labels back to canonical source-level
+	// function identities. It is linker metadata and is never encoded as text.
+	ProjectSymbols map[string]ProjectSymbol
+	// relocationSink is set only for unit-local project compilation. The
+	// encoder reports unresolved PC-relative fields without manufacturing
+	// placeholder labels or bytes; the project linker resolves them later.
+	relocationSink func(FragmentRelocation)
 	// Offsets and Classifications are decoder provenance. They are parallel to
 	// Instructions (labels use offset -1) and are intentionally ignored by the
 	// encoder, so source/machine round-trips retain representation facts without
@@ -76,11 +88,16 @@ var x64BinaryOpcodes = map[string]byte{"add": 0x03, "sub": 0x2b, "and": 0x23, "o
 var x64Conditions = map[string]byte{"jo": 0, "jno": 1, "jb": 2, "jae": 3, "je": 4, "jne": 5, "jbe": 6, "ja": 7, "js": 8, "jns": 9, "jp": 10, "jnp": 11, "jl": 12, "jge": 13, "jle": 14, "jg": 15}
 
 func encodeX64(p x64Program) ([]byte, map[string]int, error) {
+	if code, ok, err := encodeSharedRegisterSubset(p); ok {
+		return code, map[string]int{}, err
+	}
 	var out []byte
 	labels := map[string]int{}
 	type fix struct {
-		at    int
-		label string
+		at          int
+		label       string
+		op          string
+		instruction int
 	}
 	var fixes []fix
 	put32 := func(v int64) {
@@ -122,7 +139,12 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 			return nil
 		}
 		mod := byte(2)
-		if b.Value >= -128 && b.Value <= 127 {
+		// The machine lowering uses an explicit dword displacement for stack
+		// slots based on the frame pointer. Preserve that representation when
+		// comparing against NASM; rbp/r13 with a negative offset cannot use the
+		// implicit no-displacement encoding and must retain the full disp32.
+		forceFrameDisp32 := (b.Reg&7) == 5 && b.Value < 0
+		if !forceFrameDisp32 && b.Value >= -128 && b.Value <= 127 {
 			mod = 1
 		}
 		rm := b.Reg & 7
@@ -180,6 +202,10 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 			labels[a.Label] = len(out)
 			continue
 		}
+		if stencil, ok := lookupVerifiedX64Stencil(in.Op, a, b); ok {
+			out = append(out, stencil...)
+			continue
+		}
 		if opcode, ok := x64BinaryOpcodes[in.Op]; ok {
 			// Group-1 immediate forms are emitted by independent assemblers for
 			// ordinary arithmetic (for example `add rax, -5` and `cmp rax, -1`).
@@ -230,7 +256,7 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 		}
 		if cc, ok := x64Conditions[in.Op]; ok {
 			out = append(out, 0x0f, 0x80+cc)
-			fixes = append(fixes, fix{len(out), a.Label})
+			fixes = append(fixes, fix{at: len(out), label: a.Label, op: in.Op, instruction: len(fixes)})
 			put32(0)
 			continue
 		}
@@ -344,7 +370,7 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 			out = append(out, 0x8d)
 			if b.Kind == 'l' {
 				out = append(out, (a.Reg&7)<<3|5)
-				fixes = append(fixes, fix{len(out), b.Label})
+				fixes = append(fixes, fix{at: len(out), label: b.Label, op: in.Op, instruction: len(fixes)})
 				put32(0)
 			} else if err := rm(a.Reg, b); err != nil {
 				return nil, nil, err
@@ -390,8 +416,42 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 				op = 0xe8
 			}
 			out = append(out, op)
-			fixes = append(fixes, fix{len(out), a.Label})
+			fixes = append(fixes, fix{at: len(out), label: a.Label, op: in.Op, instruction: len(fixes)})
 			put32(0)
+		case "call_iat":
+			// FF /2 with RIP-relative ModRM: call qword ptr [rip+disp32].
+			// The import slot is represented as a normal label and is resolved by
+			// the PE image linker after section RVAs are known.
+			if a.Kind != 'l' {
+				return nil, nil, fmt.Errorf("x64: call_iat requires import label")
+			}
+			rex(true, 2, 0)
+			out = append(out, 0xff, 0x15)
+			fixes = append(fixes, fix{at: len(out), label: a.Label, op: in.Op, instruction: len(fixes)})
+			// Preserve the import identity in the relocatable instruction.  The
+			// PE image writer uses these private sentinels to patch each thunk;
+			// scanning every FF 15 and assigning the first import would alias
+			// multiple DLL calls.
+			sentinel := int64(0)
+			switch a.Label {
+			case "__iat_kernel32_LoadLibraryA":
+				sentinel = 0x11111111
+			case "__iat_kernel32_GetProcAddress":
+				sentinel = 0x22222222
+			case "__iat_msvcrt_printf":
+				sentinel = 0x33333333
+			case "__iat_kernel32_GetStdHandle":
+				sentinel = 0x44444444
+			case "__iat_kernel32_WriteFile":
+				sentinel = 0x55555555
+			case "__iat_kernel32_Sleep":
+				sentinel = 0x66666666
+			case "__iat_kernel32_FreeLibrary":
+				sentinel = 0x77777777
+			case "__iat_kernel32_ExitProcess":
+				sentinel = 0x88888888
+			}
+			put32(sentinel)
 		case "call_indirect":
 			if a.Kind != 'r' && a.Kind != 'm' {
 				return nil, nil, fmt.Errorf("x64: indirect call requires register/memory")
@@ -418,7 +478,30 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 		dataNames = append(dataNames, name)
 	}
 	sort.Strings(dataNames)
+	orderedDataNames := make([]string, 0, len(dataNames))
 	for _, name := range dataNames {
+		if strings.HasPrefix(name, "uast_") {
+			orderedDataNames = append(orderedDataNames, name)
+		}
+	}
+	for _, name := range dataNames {
+		if strings.HasPrefix(name, "__project_data_") {
+			orderedDataNames = append(orderedDataNames, name)
+		}
+	}
+	for _, name := range dataNames {
+		found := false
+		for _, ordered := range orderedDataNames {
+			if ordered == name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			orderedDataNames = append(orderedDataNames, name)
+		}
+	}
+	for _, name := range orderedDataNames {
 		if _, exists := labels[name]; exists {
 			return nil, nil, fmt.Errorf("duplicate data label %s", name)
 		}
@@ -428,7 +511,24 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 	for _, f := range fixes {
 		dest, ok := labels[f.label]
 		if !ok {
-			return nil, nil, fmt.Errorf("undefined machine label %q", f.label)
+			if f.op == "call_iat" {
+				// Import-slot RVAs are assigned by the PE image linker after all
+				// sections are laid out; the zero displacement is patched there.
+				continue
+			}
+			if p.relocationSink != nil {
+				kind := "relative_branch"
+				if f.op == "call" {
+					kind = "relative_call"
+				} else if f.op == "call_iat" {
+					kind = "import_iat"
+				} else if f.op == "lea" {
+					kind = "relative_data"
+				}
+				p.relocationSink(FragmentRelocation{Offset: uint32(f.at), Target: f.label, Kind: kind})
+				continue
+			}
+			return nil, nil, fmt.Errorf("undefined machine label %q referenced by %s fixup=%d", f.label, f.op, f.instruction)
 		}
 		delta := int64(dest - f.at - 4)
 		if delta < -2147483648 || delta > 2147483647 {
@@ -437,6 +537,55 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 		binary.LittleEndian.PutUint32(out[f.at:], uint32(delta))
 	}
 	return out, labels, nil
+}
+
+// encodeSharedRegisterSubset routes the unambiguous register-only subset
+// through the lightweight encoder used by NASM witnesses. Memory, immediate,
+// label and target-specific forms remain in the full encoder below until their
+// complete operand-width contract is available at this boundary.
+func encodeSharedRegisterSubset(p x64Program) ([]byte, bool, error) {
+	if len(p.Data) != 0 || len(p.Imports) != 0 || len(p.Functions) != 0 {
+		return nil, false, nil
+	}
+	regName := map[byte]string{0: "rax", 1: "rcx", 2: "rdx", 3: "rbx", 4: "rsp", 5: "rbp", 6: "rsi", 7: "rdi", 8: "r8", 9: "r9", 10: "r10", 11: "r11", 12: "r12", 13: "r13", 14: "r14", 15: "r15"}
+	ins := make([]x86encode.Instruction, 0, len(p.Instructions))
+	for _, current := range p.Instructions {
+		if current.Op == "ret" {
+			if current.A.Kind != 0 || current.B.Kind != 0 {
+				return nil, false, nil
+			}
+			ins = append(ins, x86encode.Instruction{Mnemonic: "ret"})
+			continue
+		}
+		if current.A.Kind != 'r' || current.B.Kind != 'r' {
+			return nil, false, nil
+		}
+		a, aok := regName[current.A.Reg]
+		b, bok := regName[current.B.Reg]
+		if !aok || !bok {
+			return nil, false, nil
+		}
+		switch current.Op {
+		case "add", "sub", "and", "or", "xor", "cmp", "test", "mov":
+		default:
+			return nil, false, nil
+		}
+		ins = append(ins, x86encode.Instruction{Mnemonic: current.Op, Operands: []x86encode.Operand{{Kind: "reg", Reg: a}, {Kind: "reg", Reg: b}}})
+	}
+	if len(ins) == 0 {
+		return nil, false, nil
+	}
+	code, err := x86encode.EncodeProgram(ins)
+	return code, true, err
+}
+
+// encodeX64Relocatable retains unresolved PC-relative targets as linker
+// records. It emits no placeholder labels or unreachable padding bytes.
+func encodeX64Relocatable(p x64Program) ([]byte, map[string]int, []FragmentRelocation, error) {
+	pending := make([]FragmentRelocation, 0)
+	p.relocationSink = func(rel FragmentRelocation) { pending = append(pending, rel) }
+	code, labels, err := encodeX64(p)
+	return code, labels, pending, err
 }
 
 func renderX64(p x64Program) string {
@@ -511,6 +660,19 @@ func renderX64(p x64Program) string {
 		}
 		if in.Op == "sqrtsd" {
 			fmt.Fprintf(&out, "    sqrtsd xmm%d, xmm%d\n", in.A.Reg, in.B.Reg)
+			continue
+		}
+		if in.Op == "call_iat" {
+			// Import calls are encoded as an indirect RIP-relative call. Keep the
+			// textual NASM form consistent with the encoder so the explicit
+			// via-assembly validation path can consume real import calls.
+			fmt.Fprintf(&out, "    call qword [rel %s]\n", in.A.Label)
+			continue
+		}
+		if in.Op == "call_indirect" {
+			// NASM uses the native CALL mnemonic for register/memory indirect calls;
+			// call_indirect is the internal machine IR opcode only.
+			fmt.Fprintf(&out, "    call %s\n", operand(in.A))
 			continue
 		}
 		fmt.Fprintf(&out, "    %s", in.Op)

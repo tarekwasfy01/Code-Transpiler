@@ -30,6 +30,44 @@ type universalOperationRecord struct {
 	CallResolution    *SemanticCallResolution `json:"call_resolution,omitempty"`
 }
 
+func semanticFunctionTypeFromStatement(s *SemanticStatement) (SemanticType, bool) {
+	if s == nil || s.Expression == nil || s.Expression.Function == nil {
+		return SemanticType{}, false
+	}
+	t := SemanticType{Kind: "function", TypeOrigin: "derived"}
+	for _, parameter := range s.Expression.Function.Parameters {
+		if isUnknownSemanticType(parameter.Type) {
+			return SemanticType{}, false
+		}
+		t.Parameters = append(t.Parameters, parameter.Type)
+	}
+	if s.Attributes != nil {
+		if raw, ok := s.Attributes["results"]; ok {
+			encoded, err := json.Marshal(raw)
+			if err == nil {
+				var results []struct {
+					Type SemanticType `json:"type"`
+				}
+				if json.Unmarshal(encoded, &results) == nil && len(results) > 0 {
+					if len(results) == 1 {
+						t.Result = &results[0].Type
+					} else {
+						product := SemanticType{Kind: "tuple", TypeOrigin: "derived"}
+						for _, result := range results {
+							product.Parameters = append(product.Parameters, result.Type)
+						}
+						t.Result = &product
+					}
+				}
+			}
+		}
+	}
+	if t.Result == nil {
+		return SemanticType{}, false
+	}
+	return t, true
+}
+
 type universalChildRecord struct {
 	Role    string `json:"role"`
 	Ordinal int    `json:"ordinal,omitempty"`
@@ -114,10 +152,24 @@ func semanticExpressionStructuralKind(e *SemanticExpression) string {
 		return "CallExpr"
 	case "index":
 		return "IndexExpr"
+	case "slice":
+		return "SliceExpr"
+	case "member":
+		return "MemberAccessExpr"
+	case "aggregate":
+		return "AggregateExpr"
+	case "tuple":
+		return "TupleExpr"
+	case "tuple_result":
+		return "TupleResult"
+	case "missing_argument":
+		return "LiteralExpr"
 	case "function":
 		return "ClosureExpr"
-	case "typed_operation", "binary", "unary", "iteration":
+	case "typed_operation", "binary", "unary", "iteration", "operationexpr":
 		return "OperationExpr"
+	case "parameter":
+		return "ParameterDecl"
 	default:
 		return "AggregateExpr"
 	}
@@ -157,7 +209,8 @@ func ProjectSemanticDocumentToUniversal(doc SemanticDocument) (*UniversalASTDocu
 		return nil, err
 	}
 	u.Projection, u.Evaluation, u.ValueModel, u.IndexBase, u.Types, u.Origin = "semantic_document.v1", doc.Evaluation, doc.ValueModel, doc.IndexBase, doc.Types, doc.Origin
-	u.Metadata, u.Extensions, u.Contracts, u.Dialects, u.SemanticFeatures = doc.Metadata, doc.Extensions, doc.Contracts, doc.Dialects, doc.SemanticFeatures
+	u.ContractSchema, u.Metadata, u.Extensions, u.Contracts, u.Dialects, u.SemanticFeatures = doc.ContractSchema, doc.Metadata, doc.Extensions, doc.Contracts, doc.Dialects, doc.SemanticFeatures
+	u.ContractTable, u.ContractRefs = doc.ContractTable, doc.ContractRefs
 	u.TypeTable, u.TypeGraph, u.TypeRelations, u.Evidence = doc.TypeTable, doc.TypeGraph, doc.TypeRelations, doc.Evidence
 	semanticIDs := map[int]int{}
 	var statement func(*SemanticStatement) (int, error)
@@ -317,7 +370,21 @@ func ProjectSemanticDocumentToUniversal(doc SemanticDocument) (*UniversalASTDocu
 			}
 			return e
 		}
-		if err = addExpr("expression", s.Expression); err != nil {
+		functionExpression := s.Expression
+		if s.Expression != nil && s.Expression.Function != nil {
+			// Function declarations carry their result contract on the
+			// enclosing semantic assignment in several frontend transports.
+			// Copy that contract onto the canonical function expression before
+			// projecting it, otherwise Semantic-Only .se drops callable ABI
+			// facts even though the frontend already computed them.
+			copyExpression := *s.Expression
+			if functionType, ok := semanticFunctionTypeFromStatement(s); ok {
+				copyExpression.Type = functionType
+				copyExpression.TypeOrigin = "derived"
+			}
+			functionExpression = &copyExpression
+		}
+		if err = addExpr("expression", functionExpression); err != nil {
 			return 0, err
 		}
 		if err = addExpr("condition", s.Condition); err != nil {
@@ -754,6 +821,16 @@ func decodeUniversalCommon(n *UniversalASTNode) (universalDecodedCommon, error) 
 			return c, err
 		}
 	}
+	// Some canonical Semantic exports use `symbol` for the literal spelling
+	// (and for identifier identity) when the normalized `name` field is absent.
+	// Preserve that existing UAST fact at the common decode boundary; dropping
+	// it would turn an explicit string literal such as "" into an unrelated
+	// integer default during backend lowering.
+	if c.Name == "" {
+		if err := decode("symbol", &c.Name); err != nil {
+			return c, err
+		}
+	}
 	c.Semantics = c.Operation.Semantics
 	var refs []int
 	if err := decodeUniversalField(n, "binding_refs", &refs); err != nil {
@@ -980,7 +1057,7 @@ func SemanticDocumentFromUniversalAST(u *UniversalASTDocument) (SemanticDocument
 	if err != nil {
 		return SemanticDocument{}, err
 	}
-	doc := SemanticDocument{SchemaVersion: SemanticDocumentVersion, Schema: SemanticDocumentSchema, Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Metadata: u.Metadata, Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects, SemanticFeatures: u.SemanticFeatures, TypeTable: u.TypeTable, TypeGraph: u.TypeGraph, TypeRelations: u.TypeRelations, Root: root, Evidence: u.Evidence}
+	doc := SemanticDocument{SchemaVersion: SemanticDocumentVersion, Schema: SemanticDocumentSchema, ContractSchema: u.ContractSchema, Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Metadata: u.Metadata, Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects, SemanticFeatures: u.SemanticFeatures, TypeTable: u.TypeTable, TypeGraph: u.TypeGraph, TypeRelations: u.TypeRelations, ContractTable: u.ContractTable, ContractRefs: u.ContractRefs, Root: root, Evidence: u.Evidence}
 	// Return a detached compatibility view.  The UAST pointer itself is
 	// intentionally shared and is the only canonical handle in the result.
 	doc, err = cloneSemanticDocumentValue(doc, false)

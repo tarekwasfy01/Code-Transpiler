@@ -1,5 +1,4 @@
 // Copyright (c) 2026 Tarek Wasfy
-
 package ui
 
 import (
@@ -8,6 +7,8 @@ import (
 	"image/color"
 	"io"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync/atomic"
@@ -33,6 +34,7 @@ import (
 	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/targetrun"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/thirdpartylicenses"
 )
 
 // GUITranspileExternalProcesses is deliberately false: normal Convert uses
@@ -67,12 +69,17 @@ var uiLanguages = func() []languageChoice {
 	for _, l := range backend.Languages {
 		out = append(out, languageChoice{ID: l.ID, Name: l.Name, Extension: l.Extension})
 	}
-	// Semantic Programming is a first-class transport input/output in the GUI.
-	out = append(out, languageChoice{ID: "sp", Name: "Semantic Program (.sp)", Extension: ".sp"})
-	out = append(out, languageChoice{ID: "spz", Name: "Semantic Program compressed (.spz)", Extension: ".spz"})
-	out = append(out, languageChoice{ID: "se", Name: "Semantic Program language (.se)", Extension: ".se"})
-	out = append(out, languageChoice{ID: "se", Name: "Semantic Exchange (.se)", Extension: ".se"})
-	out = append(out, languageChoice{ID: "semantic", Name: "Semantic JSON (.json)", Extension: ".json"})
+	// Assembly is a first-class machine-language input/output choice.  MASM
+	// uses the same lifting boundary; its syntax is accepted by the assembly
+	// frontend and is emitted through the NASM-backed native path.
+	out = append(out,
+		languageChoice{ID: "assembly", Name: "Assembly", Extension: ".asm"},
+		languageChoice{ID: "masm", Name: "MASM", Extension: ".asm"},
+	)
+	// Semantic is represented by one visible, readable language choice.  The
+	// parser remains transport-compatible with .sp, .spz and JSON by content,
+	// so hiding those legacy/container variants does not remove capability.
+	out = append(out, languageChoice{ID: "se", Name: "Semantic", Extension: ".se"})
 	return out
 }()
 
@@ -82,19 +89,24 @@ type App struct {
 	hl          *highlight.Service
 	left, right *gvcode.Editor
 
-	convertBtn, copyBtn, saveBtn, executableBtn, infoBtn, copyInfoBtn, closeInfoBtn, openCMDBtn, setPathBtn, runBtn widget.Clickable
-	sourceBtn, targetBtn                                                                                            widget.Clickable
-	sourceClicks, targetClicks                                                                                      []widget.Clickable
-	sourceOpen, targetOpen                                                                                          bool
-	source, target                                                                                                  int
+	convertBtn, copyBtn, saveBtn, executableBtn, compilerBtn, nativeCompilerBtn, llvmCompilerBtn, gccCompilerBtn, msvcCompilerBtn, nasmCompilerBtn, masmCompilerBtn, cscCompilerBtn, goCompilerBtn, infoBtn, licensesBtn, copyInfoBtn, closeInfoBtn, openCMDBtn, setPathBtn, modulePathBtn, runBtn widget.Clickable
+	sourceBtn, targetBtn                                                                                                                                                                                                                                                                           widget.Clickable
+	sourceClicks, targetClicks                                                                                                                                                                                                                                                                     []widget.Clickable
+	sourceOpen, targetOpen                                                                                                                                                                                                                                                                         bool
+	source, target                                                                                                                                                                                                                                                                                 int
 
-	showInfo        bool
-	infoScroll      widget.List
-	showRun         bool
-	runOutput       string
-	status          string
-	busy            bool
-	runtimeFallback widget.Bool
+	showInfo         bool
+	infoText         string
+	infoScroll       widget.List
+	showRun          bool
+	runOutput        string
+	status           string
+	busy             bool
+	runtimeFallback  widget.Bool
+	saveCompiler     string
+	showCompilerMenu bool
+	embedModules     widget.Bool
+	copyLicenses     widget.Bool
 
 	convertGeneration atomic.Uint64
 	runGeneration     atomic.Uint64
@@ -114,9 +126,9 @@ func New() *App {
 	}
 	th := material.NewTheme()
 	w := &app.Window{}
-	w.Option(app.Title("Semantic Programming Language"), app.Size(unit.Dp(1280), unit.Dp(760)), app.MinSize(unit.Dp(900), unit.Dp(560)))
+	w.Option(app.Title("Code Transpiler - Semantic Programming Language"), app.Size(unit.Dp(1280), unit.Dp(760)), app.MinSize(unit.Dp(900), unit.Dp(560)))
 	a := &App{
-		window: w, theme: th, status: "Ready",
+		window: w, theme: th, status: "Ready", saveCompiler: "native",
 		convertResults:  make(chan conversionResult, 4),
 		runResults:      make(chan runResult, 2),
 		saveResults:     make(chan saveResult, 2),
@@ -125,11 +137,21 @@ func New() *App {
 		source:          0,
 		target:          1,
 		runtimeFallback: widget.Bool{Value: true},
+		infoText:        cliHelp,
+		embedModules:    widget.Bool{Value: true},
+		copyLicenses:    widget.Bool{Value: true},
+	}
+	// Initialize the configured Semantic module store on GUI startup. A custom
+	// persisted base is honored; otherwise LOCALAPPDATA is used.
+	if _, err := backend.DefaultSemanticModuleStore(); err != nil {
+		a.status = "Semantic module store: " + err.Error()
 	}
 	a.infoScroll.List.Axis = layout.Vertical
 	a.hl = highlight.NewService(w.Invalidate)
 	a.left = newCodeEditor(th, false, codeColorScheme(true, true))
-	a.right = newCodeEditor(th, true, codeColorScheme(true, true))
+	// The output pane is also an editable Semantic/source workspace.  Convert
+	// still replaces it, while Compile/Save can operate on user-authored text.
+	a.right = newCodeEditor(th, false, codeColorScheme(true, true))
 	const initialR = "# Enter R code here\nx <- c(1, 2, 3)\nprint(x * 2)\n"
 	a.left.SetText(initialR)
 	a.right.SetText("// Go output will appear here.\n")
@@ -255,6 +277,20 @@ func highlightLanguage(id string) highlight.Language {
 		return highlight.Go
 	}
 }
+
+// parseSemanticGUI accepts every semantic transport the CLI accepts.  The GUI
+// intentionally exposes only .se, while existing .sp/.spz/JSON content can be
+// pasted or loaded without selecting a different parser.
+func parseSemanticGUI(data []byte) (*backend.SemanticProgram, error) {
+	trimmed := strings.TrimSpace(string(data))
+	if strings.HasPrefix(trimmed, "SPZ2") {
+		return backend.ParseSemanticSPZ(data)
+	}
+	if strings.HasPrefix(trimmed, "{") || strings.HasPrefix(trimmed, "[") {
+		return backend.ParseSemanticJSON(data)
+	}
+	return backend.ParseSemanticSE(data)
+}
 func (a *App) langForSource() highlight.Language { return highlightLanguage(a.currentSource().ID) }
 func (a *App) langForTarget() highlight.Language { return highlightLanguage(a.currentTarget().ID) }
 func (a *App) handleEditorEvents(gtx layout.Context) {
@@ -307,9 +343,9 @@ func (a *App) applyBackgroundResults() {
 					a.runOutput += "\n"
 				}
 				a.runOutput += "ERROR: " + res.err.Error()
-				a.status = "R runtime error"
+				a.status = "Runtime error"
 			} else {
-				a.status = "R script finished"
+				a.status = "Run finished"
 			}
 		case res := <-a.saveResults:
 			a.busy = false
@@ -356,15 +392,55 @@ func (a *App) handleClicks(gtx layout.Context) {
 	if a.executableBtn.Clicked(gtx) {
 		a.startSaveExecutable()
 	}
+	if a.compilerBtn.Clicked(gtx) {
+		a.showCompilerMenu = !a.showCompilerMenu
+	}
+	if a.nativeCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "native"
+		a.showCompilerMenu = false
+	}
+	if a.llvmCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "llvm"
+		a.showCompilerMenu = false
+	}
+	if a.gccCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "gcc"
+		a.showCompilerMenu = false
+	}
+	if a.msvcCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "msvc"
+		a.showCompilerMenu = false
+	}
+	if a.nasmCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "nasm"
+		a.showCompilerMenu = false
+	}
+	if a.masmCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "masm"
+		a.showCompilerMenu = false
+	}
+	if a.cscCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "csc"
+		a.showCompilerMenu = false
+	}
+	if a.goCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "go"
+		a.showCompilerMenu = false
+	}
 	if a.infoBtn.Clicked(gtx) {
 		a.showInfo = !a.showInfo
+		a.infoText = cliHelp
+	}
+	if a.licensesBtn.Clicked(gtx) {
+		a.showInfo = true
+		a.infoText = cliHelp + "\n\n" + thirdpartylicenses.Summary()
 	}
 	if a.closeInfoBtn.Clicked(gtx) {
 		a.showInfo = false
 	}
 	if a.copyInfoBtn.Clicked(gtx) {
-		gtx.Execute(clipboard.WriteCmd{Type: "text/plain", Data: io.NopCloser(strings.NewReader(cliHelp))})
-		a.status = "Copied CLI commands"
+		gtx.Execute(clipboard.WriteCmd{Type: "text/plain", Data: io.NopCloser(strings.NewReader(a.infoText))})
+		a.status = "Copied CLI and license information"
 	}
 	if a.openCMDBtn.Clicked(gtx) {
 		exe, _ := os.Executable()
@@ -380,6 +456,18 @@ func (a *App) handleClicks(gtx layout.Context) {
 			a.status = "Set PATH failed: " + err.Error()
 		} else {
 			a.status = "PATH update requested (UAC)"
+		}
+	}
+	if a.modulePathBtn.Clicked(gtx) {
+		path, err := platform.SelectFolderDialog("Semantic module storage parent folder")
+		if err != nil {
+			a.status = "Module path failed: " + err.Error()
+		} else if path != "" {
+			if err = backend.SetSemanticModuleBase(path); err != nil {
+				a.status = "Module path failed: " + err.Error()
+			} else {
+				a.status = "Module path: " + path + "\\Semantic"
+			}
 		}
 	}
 	if a.sourceBtn.Clicked(gtx) {
@@ -430,8 +518,62 @@ func (a *App) startConvert() {
 		code := ""
 		var toks []syntax.Token
 		if err == nil {
-			if source == "sp" || source == "spz" || source == "se" {
-				code, err = manytomany.TranspileSemanticSP(target, data)
+			if source == "assembly" || source == "masm" {
+				// Assembly/MASM input is lifted through the shared binary frontend;
+				// no textual language frontend is involved.
+				if target == "se" || target == "sp" || target == "spz" || target == "semantic" {
+					p, e := backend.LiftBinaryInput(data, backend.CompileOptions{InputKind: backend.CompileInputAssembly, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64"})
+					if e != nil {
+						err = e
+					} else if target == "spz" {
+						var z []byte
+						z, err = p.MarshalSemanticSPZ()
+						code = string(z)
+					} else if target == "sp" {
+						var s []byte
+						s, err = p.MarshalSemanticSP()
+						code = string(s)
+					} else {
+						var s []byte
+						// The GUI's Semantic language is the human-readable .se
+						// representation. Keep SP as the explicit legacy transport,
+						// but never expose compact/legacy SP when .se is selected.
+						s, err = p.MarshalSemanticSEReadable()
+						code = string(s)
+					}
+				} else if target == "assembly" || target == "masm" {
+					code = string(data)
+				} else {
+					result, e := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: "assembly", TargetLanguage: target, EntryPoint: "gui"})
+					code, err = result.Code, e
+				}
+			} else if target == "assembly" || target == "masm" {
+				result, e := codetranspiler.Compile(string(data), codetranspiler.CompileOptions{SourceLanguage: source, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64", OutputKind: codetranspiler.Assembly, EntryPoint: "gui"})
+				code, err = result.Text, e
+			} else if source == "sp" || source == "spz" || source == "se" {
+				p, e := parseSemanticGUI(data)
+				if e != nil {
+					err = e
+				} else if target == "se" || target == "sp" || target == "spz" {
+					if target == "spz" {
+						var z []byte
+						z, err = p.MarshalSemanticSPZ()
+						code = string(z)
+					} else if target == "sp" {
+						var s []byte
+						s, err = p.MarshalSemanticSP()
+						code = string(s)
+					} else {
+						var s []byte
+						// .se is the GUI-facing readable Semantic form.
+						s, err = p.MarshalSemanticSEReadable()
+						code = string(s)
+					}
+				} else {
+					code, err = manytomany.TranspileSemanticSPWithOptions(target, data, manytomany.TranspileRequest{
+						TargetLanguage: target, EntryPoint: "gui", EmbedAllModules: a.embedModules.Value,
+					})
+				}
 			} else if target == "sp" || target == "spz" || target == "se" {
 				var sp []byte
 				sp, err = manytomany.SemanticSP(source, string(data))
@@ -440,7 +582,7 @@ func (a *App) startConvert() {
 					if e != nil {
 						err = e
 					} else {
-						sp, err = p.MarshalSemanticSE()
+						sp, err = p.MarshalSemanticSEReadable()
 					}
 				}
 				if err == nil && (target == "spz") {
@@ -455,7 +597,7 @@ func (a *App) startConvert() {
 				}
 				code = string(sp)
 			} else {
-				result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", DisableRuntimeFallback: disableRuntime})
+				result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", EmbedAllModules: a.embedModules.Value, DisableRuntimeFallback: disableRuntime})
 				code, err = result.Code, convertErr
 			}
 		}
@@ -477,7 +619,7 @@ func (a *App) startRun() {
 	a.cancelRun = cancel
 	gen := a.runGeneration.Add(1)
 	a.busy = true
-	a.status = "Running " + a.currentSource().Name + " with embedded runtime…"
+	a.status = "Running " + a.currentSource().Name + " with internal runtime…"
 	reader := a.left.GetReader()
 	source := a.currentSource().ID
 	go func() {
@@ -485,13 +627,7 @@ func (a *App) startRun() {
 		out := ""
 		if err == nil {
 			if source == "sp" || source == "spz" || source == "se" {
-				var p *backend.SemanticProgram
-				var e error
-				if source == "spz" {
-					p, e = backend.ParseSemanticSPZ(data)
-				} else {
-					p, e = backend.ParseSemanticSP(data)
-				}
+				p, e := parseSemanticGUI(data)
 				if e != nil {
 					err = e
 				} else {
@@ -531,6 +667,9 @@ func (a *App) startSaveAs(reader io.Reader) {
 		if err == nil && path != "" {
 			err = os.WriteFile(path, data, 0644)
 		}
+		if err == nil && path != "" && a.copyLicenses.Value {
+			_, err = backend.CopyImportedPackageLicenses("", path)
+		}
 		select {
 		case a.saveResults <- saveResult{path: path, err: err}:
 		default:
@@ -548,15 +687,153 @@ func (a *App) startSaveExecutable() {
 	}
 	a.busy = true
 	a.status = "Building executable…"
-	data, err := io.ReadAll(a.left.GetReader())
-	source := a.currentSource().ID
+	data, err := io.ReadAll(a.right.GetReader())
+	source := a.currentTarget().ID
+	if strings.TrimSpace(string(data)) == "" || strings.HasPrefix(string(data), "// Go output will appear here") {
+		data, err = io.ReadAll(a.left.GetReader())
+		source = a.currentSource().ID
+	}
+	compiler := a.saveCompiler
+	if compiler == "" {
+		compiler = "native"
+	}
 	go func() {
 		var out codetranspiler.CompileResult
 		if err == nil {
-			out, err = codetranspiler.Compile(string(data), codetranspiler.CompileOptions{
-				SourceLanguage: source, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64",
-				OutputKind: codetranspiler.Executable, EntryPoint: "",
-			})
+			if compiler == "llvm" {
+				var program *backend.SemanticProgram
+				switch strings.ToLower(source) {
+				case "se", "sp":
+					program, err = backend.ParseSemanticSE(data)
+				case "json":
+					program, err = backend.ParseSemanticJSON(data)
+				default:
+					// Import regular source through the same ModernFrontend used by
+					// CLI package imports before handing the canonical program to LLVM.
+					program, err = backend.LowerSource(source, "input", string(data))
+				}
+				if err == nil {
+					llvm := codetranspiler.LLVMCompileOptions{OutputKind: codetranspiler.LLVMExecutable, TargetTriple: "x86_64-pc-windows-msvc", EmitEntryWrapper: true}
+					if _, statErr := os.Stat(`C:\Program Files\clang+llvm-23.1.1-x86_64-pc-windows-msvc\bin`); statErr == nil {
+						llvm.LLVMPath = `C:\Program Files\clang+llvm-23.1.1-x86_64-pc-windows-msvc\bin`
+					}
+					llvmResult, compileErr := codetranspiler.CompileLLVM(program, llvm)
+					if compileErr != nil {
+						err = compileErr
+					} else {
+						out.Bytes = llvmResult.Bytes
+					}
+				}
+			} else if compiler == "gcc" || compiler == "msvc" {
+				var program *backend.SemanticProgram
+				switch strings.ToLower(source) {
+				case "se", "sp":
+					program, err = backend.ParseSemanticSE(data)
+				case "json":
+					program, err = backend.ParseSemanticJSON(data)
+				case "go":
+					program, err = backend.LowerNativeGo("input.go", string(data))
+					if err != nil {
+						program, err = backend.LowerSource(source, "input.go", string(data))
+					}
+				default:
+					program, err = backend.LowerSource(source, "input", string(data))
+				}
+				if err == nil {
+					external, compileErr := codetranspiler.CompileExternalC(program, codetranspiler.ExternalCCompileOptions{
+						Family: codetranspiler.ExternalCompilerFamily(compiler), OutputKind: codetranspiler.Executable, Optimization: 2,
+					})
+					if compileErr != nil {
+						err = compileErr
+					} else {
+						out.Bytes = external.Bytes
+					}
+				}
+			} else if compiler == "nasm" {
+				out, err = codetranspiler.Compile(string(data), codetranspiler.CompileOptions{SourceLanguage: source, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64", OutputKind: codetranspiler.Executable, ViaAssembly: true})
+			} else if compiler == "masm" {
+				// MASM is an explicit compiler choice. Do not silently route it
+				// through the NASM/native path: MASM syntax and ml64 linking are
+				// different contracts. Report the missing integration clearly.
+				if _, lookErr := exec.LookPath("ml64.exe"); lookErr != nil {
+					err = fmt.Errorf("MASM compiler selected, but ml64.exe was not found in PATH: %w", lookErr)
+				} else {
+					err = fmt.Errorf("MASM compiler selected, but the ml64.exe assembly/link pipeline is not available yet")
+				}
+			} else if compiler == "go" {
+				var program *backend.SemanticProgram
+				switch strings.ToLower(source) {
+				case "se", "sp", "spz":
+					program, err = parseSemanticGUI(data)
+				default:
+					program, err = backend.LowerSource(source, "input", string(data))
+				}
+				if err == nil {
+					goSource, e := backend.EmitSemantic("go", program)
+					if e != nil {
+						err = e
+					} else if tmp, e := os.MkdirTemp("", "codetranspiler-go-"); e != nil {
+						err = e
+					} else {
+						defer os.RemoveAll(tmp)
+						goPath, exePath := filepath.Join(tmp, "main.go"), filepath.Join(tmp, "program.exe")
+						if err = os.WriteFile(goPath, []byte(goSource), 0644); err == nil {
+							goExe, lookErr := exec.LookPath("go.exe")
+							if lookErr != nil {
+								goExe = filepath.Join(runtime.GOROOT(), "bin", "go.exe")
+								if _, statErr := os.Stat(goExe); statErr != nil {
+									err = fmt.Errorf("Go compiler not found in PATH or GOROOT: %w", lookErr)
+								}
+							}
+							if err == nil {
+								cmd := exec.Command(goExe, "build", "-o", exePath, goPath)
+								cmd.Dir = tmp
+								if b, ce := cmd.CombinedOutput(); ce != nil {
+									err = fmt.Errorf("go build failed: %w: %s", ce, strings.TrimSpace(string(b)))
+								} else {
+									out.Bytes, err = os.ReadFile(exePath)
+								}
+							}
+						}
+					}
+				}
+			} else if compiler == "csc" {
+				var program *backend.SemanticProgram
+				switch strings.ToLower(source) {
+				case "se", "sp", "spz":
+					program, err = parseSemanticGUI(data)
+				default:
+					program, err = backend.LowerSource(source, "input", string(data))
+				}
+				if err == nil {
+					cs, e := backend.EmitSemantic("csharp", program)
+					if e != nil {
+						err = e
+					} else {
+						tmp, e := os.MkdirTemp("", "codetranspiler-csc-")
+						if e != nil {
+							err = e
+						} else {
+							defer os.RemoveAll(tmp)
+							csPath, exePath := filepath.Join(tmp, "program.cs"), filepath.Join(tmp, "program.exe")
+							if err = os.WriteFile(csPath, []byte(cs), 0644); err == nil {
+								csc, e := findCSCCompiler()
+								if e != nil {
+									err = fmt.Errorf("csc.exe not found: %w", e)
+								} else {
+									cmd := exec.Command(csc, "/nologo", "/target:exe", "/out:"+exePath, csPath)
+									cmd.Dir = tmp
+									if b, ce := cmd.CombinedOutput(); ce != nil {
+										err = fmt.Errorf("csc.exe failed: %w: %s", ce, strings.TrimSpace(string(b)))
+									} else {
+										out.Bytes, err = os.ReadFile(exePath)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 		path := ""
 		if err == nil {
@@ -565,12 +842,65 @@ func (a *App) startSaveExecutable() {
 		if err == nil && path != "" {
 			err = os.WriteFile(path, out.Bytes, 0700)
 		}
+		if err == nil && path != "" && a.copyLicenses.Value {
+			_, err = backend.CopyImportedPackageLicenses("", path)
+		}
 		select {
 		case a.saveResults <- saveResult{path: path, err: err}:
 		default:
 		}
 		a.window.Invalidate()
 	}()
+}
+
+func (a *App) layoutCompilerMenu(gtx layout.Context) layout.Dimensions {
+	if !a.showCompilerMenu {
+		return layout.Dimensions{}
+	}
+	return layout.Inset{Top: 2, Bottom: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
+			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{} }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return widget.Border{Color: color.NRGBA{R: 208, G: 215, B: 222, A: 255}, Width: 1, CornerRadius: 7}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return layout.Inset{Top: 5, Bottom: 5, Left: 7, Right: 7}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.nativeCompilerBtn, "Native compiler")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.llvmCompilerBtn, "LLVM compiler")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.gccCompilerBtn, "GCC / MinGW")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.msvcCompilerBtn, "MSVC")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.nasmCompilerBtn, "NASM / Assembly")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.masmCompilerBtn, "MASM / ml64.exe")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.cscCompilerBtn, "C# csc.exe")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.goCompilerBtn, "Go compiler")
+							}),
+						)
+					})
+				})
+			}),
+		)
+	})
 }
 func (a *App) layout(gtx layout.Context) layout.Dimensions {
 	if a.busy {
@@ -579,6 +909,7 @@ func (a *App) layout(gtx layout.Context) layout.Dimensions {
 	return layout.Inset{Top: 12, Bottom: 10, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 			layout.Rigid(a.layoutHeader),
+			layout.Rigid(a.layoutCompilerMenu),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				if !a.sourceOpen && !a.targetOpen {
 					return layout.Spacer{Height: 10}.Layout(gtx)
@@ -618,7 +949,26 @@ func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return smallButton(gtx, a.theme, &a.executableBtn, "Save Executable")
+			label := "Save Executable"
+			if a.saveCompiler == "llvm" {
+				label = "Save Executable (LLVM)"
+			} else if a.saveCompiler == "gcc" {
+				label = "Save Executable (GCC)"
+			} else if a.saveCompiler == "msvc" {
+				label = "Save Executable (MSVC)"
+			} else if a.saveCompiler == "nasm" {
+				label = "Save Executable (NASM / Assembly)"
+			} else if a.saveCompiler == "masm" {
+				label = "Save Executable (MASM / ml64.exe)"
+			} else if a.saveCompiler == "csc" {
+				label = "Save Executable (C# csc.exe)"
+			} else if a.saveCompiler == "go" {
+				label = "Save Executable (Go compiler)"
+			}
+			return smallButton(gtx, a.theme, &a.executableBtn, label)
+		}),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return smallButton(gtx, a.theme, &a.compilerBtn, "▼")
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -724,13 +1074,57 @@ func (a *App) layoutEditorPanel(gtx layout.Context, title string, ed *gvcode.Edi
 		}),
 	)
 }
+
+// findCSCCompiler resolves the C# compiler without requiring a global PATH
+// entry. Visual Studio/.NET installations commonly keep csc.exe below either
+// Framework or Framework64, so the search is deliberately data-driven.
+func findCSCCompiler() (string, error) {
+	for _, name := range []string{"csc.exe", "csc"} {
+		if path, err := exec.LookPath(name); err == nil {
+			return path, nil
+		}
+	}
+	for _, path := range []string{
+		`C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe`,
+		`C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe`,
+	} {
+		if info, err := os.Stat(path); err == nil && !info.IsDir() {
+			return path, nil
+		}
+	}
+	root := `C:\Windows\Microsoft.NET`
+	var found string
+	walkErr := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			if os.IsPermission(err) {
+				return filepath.SkipDir
+			}
+			return err
+		}
+		if found != "" {
+			return filepath.SkipDir
+		}
+		if !entry.IsDir() && strings.EqualFold(entry.Name(), "csc.exe") {
+			found = path
+		}
+		return nil
+	})
+	if found != "" {
+		return found, nil
+	}
+	if walkErr != nil {
+		return "", walkErr
+	}
+	return "", fmt.Errorf("searched PATH and %s", root)
+}
+
 func (a *App) layoutRunOutput(gtx layout.Context) layout.Dimensions {
 	return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return widget.Border{Color: color.NRGBA{R: 208, G: 215, B: 222, A: 255}, Width: 1, CornerRadius: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{Top: 8, Bottom: 8, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						l := material.Caption(a.theme, "Embedded R runtime output")
+						l := material.Caption(a.theme, "Runtime")
 						l.Font.Weight = font.SemiBold
 						return l.Layout(gtx)
 					}),
@@ -768,7 +1162,7 @@ func (a *App) layoutInfo(gtx layout.Context) layout.Dimensions {
 						return layout.Spacer{Height: 8}.Layout(gtx)
 					}),
 					layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-						label := material.Body2(a.theme, cliHelp)
+						label := material.Body2(a.theme, a.infoText)
 						label.Color = color.NRGBA{R: 31, G: 35, B: 40, A: 255}
 						return a.infoScroll.Layout(gtx, 1, func(gtx layout.Context, _ int) layout.Dimensions { return label.Layout(gtx) })
 					}),
@@ -792,11 +1186,27 @@ func (a *App) layoutFooter(gtx layout.Context) layout.Dimensions {
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.infoBtn, "Info") }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return smallButton(gtx, a.theme, &a.licensesBtn, "Licenses")
+			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				return smallButton(gtx, a.theme, &a.setPathBtn, "Set PATH")
+			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return smallButton(gtx, a.theme, &a.modulePathBtn, "Module folder")
 			}),
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{Size: gtx.Constraints.Min} }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				check := material.CheckBox(a.theme, &a.runtimeFallback, "Semantic runtime fallback")
+				return check.Layout(gtx)
+			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				check := material.CheckBox(a.theme, &a.embedModules, "Embed imported modules")
+				return check.Layout(gtx)
+			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				check := material.CheckBox(a.theme, &a.copyLicenses, "Copy package licenses")
 				return check.Layout(gtx)
 			}),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 12}.Layout(gtx) }),
@@ -838,6 +1248,9 @@ GENERAL
   CodeTranspiler.exe routes
   CodeTranspiler.exe licenses
   CodeTranspiler.exe setpath
+  CodeTranspiler.exe bundle-info [path]
+  CodeTranspiler.exe bundle-verify [path]
+  CodeTranspiler.exe bundle-extract <bundle> <directory>
 
 SEMANTIC / UAST
   CodeTranspiler.exe semantic-export -source <language> input -o program.semantic.json
@@ -845,20 +1258,32 @@ SEMANTIC / UAST
   CodeTranspiler.exe semantic-export -native -source go input.go -o program.json
   CodeTranspiler.exe semantic-export -input executable program.exe -o program.semantic.json
   CodeTranspiler.exe semantic-transpile -target <language> program.semantic.json -o output
+  CodeTranspiler.exe semantic-transpile -target <language> program.se -o output
   CodeTranspiler.exe semantic-transpile -target <language> program.sp -o output
-  CodeTranspiler.exe semantic-convert input.json -o output.sp
+  CodeTranspiler.exe semantic-transpile -target <language> program.spz -o output
+  CodeTranspiler.exe semantic-convert input.json -o output.se
+  CodeTranspiler.exe semantic-convert input.se -o output.spz
+  CodeTranspiler.exe semantic-merge a.se b.sp c.spz -o merged.se
   CodeTranspiler.exe semantic-format input.se --readable -o readable.se
   CodeTranspiler.exe semantic-format input.se --compact -o compact.se
-  CodeTranspiler.exe semantic-validate input.sp
-  CodeTranspiler.exe semantic-info input.sp
-  CodeTranspiler.exe semantic-info input.json
+  CodeTranspiler.exe semantic-validate input.se|input.sp|input.spz|input.json
+  CodeTranspiler.exe semantic-info input.se|input.sp|input.spz|input.json
   CodeTranspiler.exe native-analysis -source <language> input -o analysis.json
   CodeTranspiler.exe machine-ir -input executable program.exe -o machine-ir.json
   CodeTranspiler.exe decompile -input executable program.exe -o program.semantic.json
 
 SEMANTIC MODULES
+  CodeTranspiler.exe module create a.se b.spz -o mymodule.smod
+  CodeTranspiler.exe module merge a.se b.sp -o mymodule.smod
   CodeTranspiler.exe module import <source|module.se|module.spz>
   CodeTranspiler.exe module import --language go <source.go>
+  CodeTranspiler.exe module import --language python six
+  CodeTranspiler.exe module import --language rust itoa
+  CodeTranspiler.exe module import --language r jsonlite
+  CodeTranspiler.exe module import --language java org.apache.commons:commons-lang3
+  CodeTranspiler.exe module path
+  CodeTranspiler.exe module setpath <parent-folder>
+  CodeTranspiler.exe module setpath --default
   CodeTranspiler.exe module list
   CodeTranspiler.exe module info <cache-key>
   CodeTranspiler.exe module verify <cache-key>
@@ -902,9 +1327,13 @@ TRANSPILATION
   CodeTranspiler.exe transpile -target swift input.R -o output.swift
 
 NATIVE COMPILE
+  CodeTranspiler.exe compile input.se -o input.exe
   CodeTranspiler.exe compile input.sp -o input.exe
+  CodeTranspiler.exe compile input.spz -o input.exe
   CodeTranspiler.exe compile input.json -o input.exe
   CodeTranspiler.exe compile -source go -target native-x86_64-windows input.go -o program.exe
+  CodeTranspiler.exe compile -source go file1.go file2.go -o program.exe
+  CodeTranspiler.exe compile -source go package-directory -o program.exe
 
 BATCH / ANALYSIS
   CodeTranspiler.exe transpile-batch

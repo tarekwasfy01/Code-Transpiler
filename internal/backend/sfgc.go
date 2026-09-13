@@ -269,6 +269,14 @@ func (q *SFPCQuery) MerkleRoots() (SFPCTreeRoots, error) {
 	}
 	encode := func(tag string, v any) string {
 		b, _ := json.Marshal(v)
+		// UAST fields contain json.RawMessage values. Their embedded object-key
+		// order depends on which transport produced the graph, so canonicalize
+		// the complete payload before hashing. Otherwise a module loaded from
+		// SPZ can receive a different semantic root than the identical in-memory
+		// program that was stored.
+		if canonical, err := canonicalJSONBytes(b); err == nil {
+			b = canonical
+		}
 		h := sha256.Sum256(append(append([]byte(tag), 0), b...))
 		return fmt.Sprintf("sha256:%x", h)
 	}

@@ -453,6 +453,15 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		if trim == "{" || trim == ";" || trim == "return 0;" {
 			continue
 		}
+		// Valid Go permits a deferred/inline function invocation to close on a
+		// punctuation-only line (for example the `}()` tail of `defer func(){}`).
+		// It carries no standalone semantic operation; the surrounding function
+		// and call nodes already capture its meaning.  Treat only a run made
+		// entirely of structural punctuation as continuation, while keeping
+		// unknown operator/text lines fail-closed below.
+		if structuralPunctuationOnly(trim) {
+			continue
+		}
 		if strings.Contains(lower, "++") || strings.Contains(lower, "--") {
 			continue
 		}
@@ -470,7 +479,7 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			}
 		}
 		if !hasOperandToken {
-			return CanonicalProgram{}, fmt.Errorf("expected expression")
+			return CanonicalProgram{}, fmt.Errorf("expected expression at source line %d: %q", line.start, strings.TrimSpace(line.text))
 		}
 		_, _ = appendAction(ActionExpression, normalizeExpression(source, trim, profile), line.start)
 	}
@@ -585,6 +594,20 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 	}
 	_ = lexicalGraph
 	return CanonicalProgram{Source: source, R: strings.Join(output, "\n") + "\n", Nodes: nodes, Graph: graph, Actions: actions, Grammar: profile, Roles: roles, Lexemes: lexemes, Events: events, SemanticEvents: semanticEvents}, nil
+}
+
+func structuralPunctuationOnly(s string) bool {
+	if strings.TrimSpace(s) == "" {
+		return true
+	}
+	for _, r := range s {
+		switch r {
+		case '{', '}', '(', ')', '[', ']', ';', ',', ':':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func hasGoRangeTupleBinding(tokens []Lexeme) bool {

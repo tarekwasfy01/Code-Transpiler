@@ -19,20 +19,23 @@ type SemanticProgram struct {
 	// still execute the matrix language's canonical compatibility form. It is
 	// produced by the modern MatrixIR frontend; it is never used as semantic
 	// input by emitters or by TranspileCore.
-	CompatibilityR   string                `json:"-"`
-	Body             *BlockStmt            `json:"-"`
-	Evaluation       string                `json:"evaluation"`
-	ValueModel       string                `json:"value_model"`
-	IndexBase        int                   `json:"index_base"`
-	Types            SemanticTypeContract  `json:"type_contract"`
-	Origin           SemanticOrigin        `json:"origin"`
-	Metadata         map[string]string     `json:"metadata,omitempty"`
-	Extensions       map[string]any        `json:"extensions,omitempty"`
-	Contracts        SemanticContracts     `json:"contracts,omitempty"`
-	Dialects         []SemanticDialect     `json:"dialects,omitempty"`
-	SemanticFeatures *SemanticFeatureModel `json:"semantic_features,omitempty"`
-	UniversalAST     *UniversalASTDocument `json:"universal_ast,omitempty"`
-	Evidence         SemanticEvidence      `json:"evidence"`
+	CompatibilityR   string                      `json:"-"`
+	Body             *BlockStmt                  `json:"-"`
+	Evaluation       string                      `json:"evaluation"`
+	ValueModel       string                      `json:"value_model"`
+	IndexBase        int                         `json:"index_base"`
+	Types            SemanticTypeContract        `json:"type_contract"`
+	Origin           SemanticOrigin              `json:"origin"`
+	Metadata         map[string]string           `json:"metadata,omitempty"`
+	Extensions       map[string]any              `json:"extensions,omitempty"`
+	Contracts        SemanticContracts           `json:"contracts,omitempty"`
+	Dialects         []SemanticDialect           `json:"dialects,omitempty"`
+	SemanticFeatures *SemanticFeatureModel       `json:"semantic_features,omitempty"`
+	UniversalAST     *UniversalASTDocument       `json:"universal_ast,omitempty"`
+	ContractSchema   string                      `json:"contract_schema,omitempty"`
+	ContractTable    []SemanticContract          `json:"contract_table,omitempty"`
+	ContractRefs     []SemanticContractReference `json:"contract_refs,omitempty"`
+	Evidence         SemanticEvidence            `json:"evidence"`
 }
 
 // SemanticContracts state assertions made by a producer. They are data, not
@@ -109,17 +112,19 @@ type SemanticEvidence struct {
 }
 
 type SemanticScope struct {
-	ID     int    `json:"id"`
-	Kind   string `json:"kind"`
-	Parent int    `json:"parent"`
+	ID        int                     `json:"id"`
+	Kind      string                  `json:"kind"`
+	Parent    int                     `json:"parent"`
+	Semantics *SemanticScopeSemantics `json:"semantics,omitempty"`
 }
 type SemanticBinding struct {
-	ID         int    `json:"id"`
-	Name       string `json:"name"`
-	Scope      int    `json:"scope"`
-	Mutable    bool   `json:"mutable"`
-	Definition int    `json:"definition"`
-	TypeOrigin string `json:"type_origin"`
+	ID         int                       `json:"id"`
+	Name       string                    `json:"name"`
+	Scope      int                       `json:"scope"`
+	Mutable    bool                      `json:"mutable"`
+	Definition int                       `json:"definition"`
+	TypeOrigin string                    `json:"type_origin"`
+	Semantics  *SemanticBindingSemantics `json:"semantics,omitempty"`
 }
 
 // ParseSemanticCompatibility is the explicit legacy text ingress retained for

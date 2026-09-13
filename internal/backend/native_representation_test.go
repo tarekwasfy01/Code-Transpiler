@@ -15,6 +15,8 @@ func TestNativeWindowsX64RepresentationFamilies(t *testing.T) {
 		{"slice", SemanticType{Kind: "slice"}, NativeDescriptor},
 		{"closure", SemanticType{Kind: "closure"}, NativeClosureValue},
 		{"reference", SemanticType{Kind: "reference"}, NativeAddress},
+		{"null", SemanticType{Kind: "null"}, NativeScalar},
+		{"na", SemanticType{Kind: "na"}, NativeScalar},
 	} {
 		layout, err := SolveNativeLayout(p, test.typ, NativeABIValue)
 		if err != nil || layout.Representation != test.want || layout.PreferredAlignment < layout.ABIAlignment {

@@ -170,7 +170,7 @@ func validateSemanticFeatureModel(model *SemanticFeatureModel, source string) er
 		return err
 	}
 	if model.BasisSHA256 != semanticFeatureBase.BasisSHA256 || !reflect.DeepEqual(model.Basis, semanticFeatureBase.Basis) {
-		return fmt.Errorf("semantic feature basis differs from embedded calculated matrix")
+		return fmt.Errorf("semantic feature basis differs from authoritative basis")
 	}
 	if semanticProfileLanguage(source) != model.ProfileLanguage {
 		return fmt.Errorf("semantic feature profile does not match source language")

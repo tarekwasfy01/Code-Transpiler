@@ -15,6 +15,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
 const SemanticSPVersion = 1
@@ -32,7 +34,7 @@ const (
 // Stable SE schema keys are part of the format, so they do not need to be
 // repeated in every document. Unknown extension fields remain lossless via
 // their regular field.<name> spelling.
-var semanticSEKnownKeys = []string{"basis_sha256", "contracts", "evaluation", "evidence", "extensions", "index_base", "language_facet", "language_profile", "metadata", "nodes", "origin", "projection", "relations", "schema_version", "surface", "type_contract", "type_graph", "type_relations", "type_table", "value_model"}
+var semanticSEKnownKeys = []string{"basis_sha256", "contract_refs", "contract_schema", "contract_table", "contracts", "dialects", "evaluation", "evidence", "extensions", "index_base", "language_facet", "language_profile", "metadata", "nodes", "origin", "projection", "relations", "schema_version", "semantic_document_sha256", "semantic_features", "surface", "type_contract", "type_graph", "type_relations", "type_table", "value_model"}
 
 // SemanticSEFieldClass describes how a field is represented in the compact
 // format. The classifier is deliberately conservative: only values that are
@@ -65,7 +67,10 @@ func classifySemanticSEField(name string, raw json.RawMessage) SemanticSEFieldCl
 // MarshalSemanticSE emits the same lossless SemanticProgram envelope as SP,
 // under the new .se format name.
 func (p *SemanticProgram) MarshalSemanticSE() ([]byte, error) {
-	return p.MarshalSemanticSEReadable()
+	// The primary .se interchange form is lossless: preserve the canonical
+	// source surface exactly as stored in UAST. Callers that intentionally want
+	// a semantic-only artifact can use MarshalSemanticSESemanticOnly.
+	return p.marshalSemanticSE(true)
 }
 
 // MarshalSemanticSESemanticOnly emits the canonical semantic core without the
@@ -601,13 +606,27 @@ func ParseSemanticSP(data []byte) (*SemanticProgram, error) {
 		key = strings.TrimSpace(key)
 		value = strings.TrimSpace(value)
 		if isNativeSE && nativeSEBraceBalance(value) > 0 {
-			for nativeSEBraceBalance(value) > 0 {
+			// Structured native-SE values can contain millions of bytes. Repeated
+			// string concatenation here copies the complete prefix for every line
+			// and turns a large UAST document into quadratic work. Keep one builder
+			// and carry the balance forward so the graph transport remains usable at
+			// the same scale as its JSON representation.
+			quote, escaped := false, false
+			depth := nativeSEScanBalance(value, &quote, &escaped)
+			var valueBuilder strings.Builder
+			valueBuilder.Grow(len(value) + 64)
+			valueBuilder.WriteString(value)
+			for depth > 0 {
 				part := next()
 				if part == "" {
 					return nil, fmt.Errorf("se:%d: unterminated structured value", lineNo)
 				}
-				value += " " + strings.TrimSpace(part)
+				part = strings.TrimSpace(part)
+				valueBuilder.WriteByte(' ')
+				valueBuilder.WriteString(part)
+				depth += nativeSEScanBalance(part, &quote, &escaped)
 			}
+			value = valueBuilder.String()
 		}
 		if seen[key] {
 			return nil, fmt.Errorf("sp:%d: duplicate program field %q", lineNo, key)
@@ -720,34 +739,167 @@ func ParseSemanticSP(data []byte) (*SemanticProgram, error) {
 	return ParseSemanticJSON([]byte(payload))
 }
 
+// ParseSemanticSEGraph imports only the canonical graph plane of a native SE
+// document. Large evidence matrices are derived again after graph merge, so
+// reading them into a temporary reflection tree would waste memory and make a
+// distribution containing hundreds of source documents impractical. This is
+// still the same native-SE lexer and UAST validator; it only omits derived
+// planes that the graph merge deliberately recomputes.
+func ParseSemanticSEGraph(data []byte) (*UniversalASTDocument, error) {
+	lines := strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n")
+	lineNo := 0
+	next := func() string {
+		for lineNo < len(lines) {
+			lineNo++
+			s := strings.TrimSpace(lines[lineNo-1])
+			if s == "" || strings.HasPrefix(s, "#") {
+				continue
+			}
+			return s
+		}
+		return ""
+	}
+	parts := strings.Fields(next())
+	if len(parts) != 2 || (parts[0] != "se" && parts[0] != "sp") || parts[1] != "1" {
+		return nil, fmt.Errorf("se:%d: expected native SE version 1", lineNo)
+	}
+	if next() != "program {" {
+		return nil, fmt.Errorf("se:%d: expected program block", lineNo)
+	}
+	wanted := map[string]bool{
+		"basis_sha256": true, "contract_refs": true, "contract_schema": true,
+		"contract_table": true, "contracts": true, "dialects": true,
+		"evaluation": true, "extensions": true, "index_base": true,
+		"language_facet": true, "language_profile": true, "metadata": true,
+		"nodes": true, "origin": true, "projection": true,
+		"semantic_document_sha256": true, "semantic_features": true,
+		"type_contract": true, "type_graph": true, "type_relations": true,
+		"type_table": true, "value_model": true, "relations": true,
+		"evidence": true,
+	}
+	fields := map[string]spValue{}
+	seen := map[string]bool{}
+	for {
+		s := next()
+		if s == "" {
+			return nil, fmt.Errorf("se:%d: unterminated program block", lineNo)
+		}
+		if s == "}" {
+			break
+		}
+		key, value, ok := strings.Cut(s, "=")
+		if !ok {
+			// Human-readable native sections are derived projections. Skip their
+			// balanced body without parsing it into the graph plane.
+			if strings.HasSuffix(s, "{") {
+				depth := strings.Count(s, "{") - strings.Count(s, "}")
+				for depth > 0 {
+					part := next()
+					if part == "" {
+						return nil, fmt.Errorf("se:%d: unterminated native section", lineNo)
+					}
+					depth += strings.Count(part, "{") - strings.Count(part, "}")
+				}
+				continue
+			}
+			return nil, fmt.Errorf("se:%d: expected key = value", lineNo)
+		}
+		key, value = strings.TrimSpace(key), strings.TrimSpace(value)
+		name := strings.TrimPrefix(key, "field.")
+		if name == "schema_version" {
+			continue
+		}
+		if seen[name] {
+			return nil, fmt.Errorf("se:%d: duplicate graph field %q", lineNo, name)
+		}
+		seen[name] = true
+		depth := nativeSEBraceBalance(value)
+		if depth > 0 {
+			quote, escaped := false, false
+			depth = nativeSEScanBalance(value, &quote, &escaped)
+			if wanted[name] {
+				var builder strings.Builder
+				builder.Grow(len(value) + 64)
+				builder.WriteString(value)
+				for depth > 0 {
+					part := next()
+					if part == "" {
+						return nil, fmt.Errorf("se:%d: unterminated structured graph field %q", lineNo, name)
+					}
+					part = strings.TrimSpace(part)
+					builder.WriteByte(' ')
+					builder.WriteString(part)
+					depth += nativeSEScanBalance(part, &quote, &escaped)
+				}
+				value = builder.String()
+			} else {
+				for depth > 0 {
+					part := next()
+					if part == "" {
+						return nil, fmt.Errorf("se:%d: unterminated derived field %q", lineNo, name)
+					}
+					depth += nativeSEBraceBalance(part)
+				}
+				continue
+			}
+		}
+		if !wanted[name] {
+			continue
+		}
+		parsed, err := parseNativeSEValue(value)
+		if err != nil {
+			return nil, fmt.Errorf("se:%d: invalid graph field %q: %w", lineNo, name, err)
+		}
+		fields[name] = parsed
+	}
+	fields["schema_version"] = float64(SemanticSPVersion)
+	var u UniversalASTDocument
+	if err := assignSPFields(reflect.ValueOf(&u).Elem(), fields); err != nil {
+		return nil, err
+	}
+	if _, err := NormalizeUniversalAST(&u); err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
+
 func nativeSEBraceBalance(s string) int {
 	depth := 0
 	quote := false
 	escaped := false
+	return nativeSEScanBalanceState(s, &depth, &quote, &escaped)
+}
+
+func nativeSEScanBalance(s string, quote, escaped *bool) int {
+	depth := 0
+	return nativeSEScanBalanceState(s, &depth, quote, escaped)
+}
+
+func nativeSEScanBalanceState(s string, depth *int, quote, escaped *bool) int {
 	for _, r := range s {
-		if escaped {
-			escaped = false
+		if *escaped {
+			*escaped = false
 			continue
 		}
-		if r == '\\' && quote {
-			escaped = true
+		if r == '\\' && *quote {
+			*escaped = true
 			continue
 		}
 		if r == '"' {
-			quote = !quote
+			*quote = !*quote
 			continue
 		}
-		if quote {
+		if *quote {
 			continue
 		}
 		if r == '{' || r == '[' {
-			depth++
+			*depth++
 		}
 		if r == '}' || r == ']' {
-			depth--
+			*depth--
 		}
 	}
-	return depth
+	return *depth
 }
 
 func isNativeSEValue(s string) bool {
@@ -761,7 +913,21 @@ type nativeSEParser struct {
 }
 
 func parseNativeSEValue(s string) (spValue, error) {
-	p := &nativeSEParser{s: strings.TrimSpace(s)}
+	trimmed := strings.TrimSpace(s)
+	// Legacy SP writers emitted JSON-shaped field values while native SE uses
+	// the typed object/list vocabulary. Both are the same transport envelope;
+	// accept the JSON form at this lexer boundary so large graph imports can
+	// select only their canonical fields without rebuilding the legacy tree.
+	if strings.HasPrefix(trimmed, "{") || strings.HasPrefix(trimmed, "[") {
+		if json.Valid([]byte(trimmed)) {
+			// Keep JSON-shaped legacy fields lazy. Decoding into a generic
+			// map/slice tree first multiplies peak memory for the large nodes and
+			// relations fields; assignSPValue unmarshals this raw value directly
+			// into its destination type.
+			return json.RawMessage(trimmed), nil
+		}
+	}
+	p := &nativeSEParser{s: trimmed}
 	v, e := p.value()
 	if e == nil {
 		p.ws()
@@ -771,6 +937,7 @@ func parseNativeSEValue(s string) (spValue, error) {
 	}
 	return v, e
 }
+
 func (p *nativeSEParser) ws() {
 	for p.i < len(p.s) && (p.s[p.i] == ' ' || p.s[p.i] == '\t' || p.s[p.i] == '\n' || p.s[p.i] == '\r') {
 		p.i++
@@ -784,6 +951,33 @@ func (p *nativeSEParser) word() string {
 	}
 	return p.s[st:p.i]
 }
+
+func (p *nativeSEParser) string() (spValue, error) {
+	if p.i >= len(p.s) || p.s[p.i] != '"' {
+		return nil, fmt.Errorf("expected quoted string")
+	}
+	start := p.i
+	p.i++
+	escaped := false
+	for p.i < len(p.s) {
+		c := p.s[p.i]
+		p.i++
+		if c == '"' && !escaped {
+			var value string
+			if err := json.Unmarshal([]byte(p.s[start:p.i]), &value); err != nil {
+				return nil, err
+			}
+			return value, nil
+		}
+		if c == '\\' && !escaped {
+			escaped = true
+		} else {
+			escaped = false
+		}
+	}
+	return nil, fmt.Errorf("unterminated quoted string")
+}
+
 func (p *nativeSEParser) value() (spValue, error) {
 	p.ws()
 	if p.i >= len(p.s) {
@@ -803,7 +997,16 @@ func (p *nativeSEParser) value() (spValue, error) {
 				p.i++
 				return out, nil
 			}
-			k := p.word()
+			var k string
+			if p.i < len(p.s) && p.s[p.i] == '"' {
+				key, e := p.string()
+				if e != nil {
+					return nil, fmt.Errorf("object key: %w", e)
+				}
+				k, _ = key.(string)
+			} else {
+				k = p.word()
+			}
 			if k == "" {
 				return nil, fmt.Errorf("object key missing")
 			}
@@ -1097,11 +1300,33 @@ func parseStructuredSemanticDocument(fields map[string]spValue) (*SemanticProgra
 		if _, err := NormalizeUniversalAST(&u); err != nil {
 			return nil, err
 		}
-		return &SemanticProgram{UniversalAST: &u}, nil
+		// Rebase compatible transport snapshots to the current canonical UAST
+		// basis.  The graph itself remains unchanged; only derived projection
+		// vectors are refreshed at import time.
+		if loadUniversalASTBasis() == nil && u.BasisSHA256 != uastEmbedded.BasisSHA256 {
+			u.BasisSHA256 = uastEmbedded.BasisSHA256
+			if row := indexOf(uastEmbedded.Basis.Languages, u.LanguageProfile); row >= 0 {
+				u.LanguageFacet = make(matrixir.Vector, uastEmbedded.Basis.LanguageFacet.Cols)
+				for col := range u.LanguageFacet {
+					u.LanguageFacet[col] = uastEmbedded.Basis.LanguageFacet.At(row, col)
+				}
+			}
+		}
+		// Older SE exports omitted the document evaluation contract.  The
+		// canonical frontend contract is eager left-to-right, so recover that
+		// documented default at the transport boundary rather than making every
+		// caller special-case legacy exports.
+		if u.Evaluation == "" {
+			u.Evaluation = "eager_left_to_right"
+		}
+		return &SemanticProgram{UniversalAST: &u, Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Metadata: u.Metadata, Contracts: u.Contracts, Dialects: u.Dialects, Extensions: u.Extensions, SemanticFeatures: u.SemanticFeatures, ContractSchema: u.ContractSchema, ContractTable: u.ContractTable, ContractRefs: u.ContractRefs, Evidence: u.Evidence}, nil
 	}
 	var doc SemanticDocument
 	if err := assignSPFields(reflect.ValueOf(&doc).Elem(), fields); err != nil {
 		return nil, err
+	}
+	if doc.Evaluation == "" {
+		doc.Evaluation = "eager_left_to_right"
 	}
 	return ParseSemanticDocument(doc)
 }
@@ -1134,6 +1359,14 @@ func fieldByJSONName(v reflect.Value, name string) reflect.Value {
 	return reflect.Value{}
 }
 func assignSPValue(dst reflect.Value, src spValue) error {
+	if raw, ok := src.(json.RawMessage); ok {
+		if dst.CanAddr() {
+			if err := json.Unmarshal(raw, dst.Addr().Interface()); err != nil {
+				return err
+			}
+			return nil
+		}
+	}
 	// Value types with an explicit JSON unmarshaller own their structural
 	// representation. This covers sparse COO matrices and future contract
 	// values with private storage without adding package/type special cases.

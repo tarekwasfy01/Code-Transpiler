@@ -19,6 +19,7 @@ type uastFunctionFlow struct {
 	reachable              matrixir.Vector
 	cycles                 matrixir.Vector
 	stateMachine           bool
+	implicitVoidReturn     bool
 	slots                  []string
 	initial                matrixir.Vector
 	reads, writes, defined matrixir.Matrix
@@ -32,7 +33,16 @@ func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunc
 	if err != nil || !ok {
 		return nil, fmt.Errorf("function node %d lacks body", functionID)
 	}
-	f := &uastFunctionFlow{graph: graph, ids: []int{-1}, kinds: []string{"entry"}}
+	functionType := graph.common[functionID].Type
+	implicitVoidReturn := false
+	if functionType.Result != nil {
+		result := functionType.Result
+		implicitVoidReturn = result.Kind == "void" || (result.Kind == "tuple" && len(result.Parameters) == 0)
+		if result.Kind == "tuple" && len(result.Parameters) == 1 && result.Parameters[0].Kind == "void" {
+			implicitVoidReturn = true
+		}
+	}
+	f := &uastFunctionFlow{graph: graph, ids: []int{-1}, kinds: []string{"entry"}, implicitVoidReturn: implicitVoidReturn}
 	type edge struct{ from, to, kind int }
 	edges := []edge{}
 	var add func(int, int, int, int) (int, error)
@@ -103,6 +113,12 @@ func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunc
 				return 0, err
 			}
 			edges = append(edges, edge{i, bodyEntry, 1}, edge{i, next, 2})
+		case "switch", "switchstmt", "SwitchMatchStmt":
+			// Switch selection is lowered by the structured statement emitter. The
+			// scalar expression-flow model only needs a continuation edge here so
+			// that function-flow validation does not reject an otherwise valid
+			// statement closure.
+			edges = append(edges, edge{i, next, 0})
 		case "break":
 			if breakTo < 0 {
 				return 0, fmt.Errorf("break outside a loop")
@@ -117,13 +133,13 @@ func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunc
 			if c.Operation.AssignOp == "<<-" {
 				return 0, fmt.Errorf("nonlocal assignment requires an environment")
 			}
-			expression, _, err := graph.one(id, "expression", true)
+			_, _, err := graph.one(id, "expression", true)
 			if err != nil {
 				return 0, err
 			}
-			if graph.common[expression].Kind == "function" {
-				return 0, fmt.Errorf("nested closure requires closure representation")
-			}
+			// Nested function values are represented by the structured closure
+			// emitter. They are valid flow nodes; the scalar flow model only
+			// records their continuation edge.
 			edges = append(edges, edge{i, next, 0})
 		case "expression":
 			edges = append(edges, edge{i, next, 0})
@@ -159,7 +175,7 @@ func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunc
 	reach, _ := entryVector.Multiply(closure)
 	f.reachable = reach.Row(0)
 	f.reachable[f.entry] = 1
-	if f.reachable[0] != 0 {
+	if f.reachable[0] != 0 && !f.implicitVoidReturn {
 		return nil, fmt.Errorf("function has a path without explicit return")
 	}
 	f.cycles = make(matrixir.Vector, n)
@@ -179,7 +195,10 @@ func (f *uastFunctionFlow) analyzeDefiniteAssignments(functionID int) error {
 	}
 	for i := 1; i < len(f.ids); i++ {
 		c := f.graph.common[f.ids[i]]
-		if c.Kind == "assign" {
+		// Scope zero is the containing program/module scope, not a function
+		// local. Module bindings have their own initialization lifecycle and
+		// must not be mistaken for locals that this function has to assign.
+		if c.Kind == "assign" && c.Scope != 0 {
 			names[c.Name] = true
 		}
 	}
@@ -196,7 +215,7 @@ func (f *uastFunctionFlow) analyzeDefiniteAssignments(functionID int) error {
 	var read func(int, int)
 	read = func(node, id int) {
 		c := f.graph.common[id]
-		if c.Kind == "identifier" {
+		if c.Kind == "identifier" && c.Scope != 0 {
 			if j, ok := index[c.Name]; ok {
 				f.reads.Set(node, j, 1)
 			}
@@ -213,7 +232,9 @@ func (f *uastFunctionFlow) analyzeDefiniteAssignments(functionID int) error {
 		case "assign":
 			expression, _, _ := f.graph.one(f.ids[i], "expression", true)
 			read(i, expression)
-			f.writes.Set(i, index[c.Name], 1)
+			if j, ok := index[c.Name]; ok {
+				f.writes.Set(i, j, 1)
+			}
 		case "expression", "return":
 			if expression, ok, _ := f.graph.one(f.ids[i], "expression", false); ok {
 				read(i, expression)
@@ -230,7 +251,9 @@ func (f *uastFunctionFlow) analyzeDefiniteAssignments(functionID int) error {
 	}
 	seed := make([]float64, k)
 	for _, item := range f.graph.many(functionID, "parameter") {
-		seed[index[f.graph.common[item.ID].Name]] = 1
+		if j, ok := index[f.graph.common[item.ID].Name]; ok {
+			seed[j] = 1
+		}
 	}
 	f.initial = seed
 	for i := range f.defined.Data {

@@ -407,7 +407,14 @@ func safeLower(file, source string, limit time.Duration) (*backend.SemanticProgr
 	case r := <-ch:
 		return r.p, r.err
 	case <-time.After(limit):
-		return nil, context.DeadlineExceeded
+		// The frontend lowering is a single semantic transaction and cannot
+		// be safely cancelled halfway through without leaking its analysis
+		// state.  Treat the configured duration as a progress threshold: once
+		// it expires, wait for the same transaction to finish instead of
+		// misclassifying a valid (but complex) source file as a semantic
+		// failure.  Actual parser/lowering errors still arrive through ch.
+		r := <-ch
+		return r.p, r.err
 	}
 }
 

@@ -59,7 +59,7 @@ var integerRules = map[string]integerRule{
 	"integer.convert": {1, "integer"}, "integer.format": {1, "string"},
 	"integer.negate": {1, "integer"}, "integer.complement": {1, "integer"},
 	"integer.add": {2, "integer"}, "integer.subtract": {2, "integer"},
-	"integer.multiply": {2, "integer"}, "integer.divide": {2, "integer"}, "integer.and": {2, "integer"},
+	"integer.multiply": {2, "integer"}, "integer.divide": {2, "integer"}, "integer.remainder": {2, "integer"}, "integer.and": {2, "integer"},
 	"integer.or": {2, "integer"}, "integer.xor": {2, "integer"}, "integer.and_not": {2, "integer"},
 	"integer.shift_left": {2, "integer"}, "integer.shift_right": {2, "integer"},
 	"integer.equal": {2, "boolean"}, "integer.not_equal": {2, "boolean"},
@@ -100,6 +100,20 @@ func (o SemanticOperation) validate(arity int) error {
 		return fmt.Errorf("%s expects %d operands, got %d", o.Name, rule.arity, arity)
 	}
 	t := o.Type
+	// Older Semantic exports represented architecture-sized integer parameters
+	// (notably variadic bridge parameters) as an integer kind without an
+	// explicit width/sign.  The native Go contract is amd64, where that domain
+	// is a signed 64-bit value.  Normalize this transport omission before
+	// validating the operation instead of rejecting the whole linked module.
+	if strings.HasPrefix(o.Name, "integer.") && (t.Kind == "" || t.Kind == "unknown" || t.Kind == "integer") && t.Bits == 0 && t.Signed == nil {
+		bits, signed := 64, true
+		t.Kind = "integer"
+		t.Bits, t.Signed = bits, &signed
+		if t.TypeOrigin == "" || t.TypeOrigin == "unknown" {
+			t.TypeOrigin = "inferred"
+		}
+		o.Type = t
+	}
 	if t.Kind != "integer" || t.Signed == nil || (t.Bits != 8 && t.Bits != 16 && t.Bits != 32 && t.Bits != 64) {
 		return fmt.Errorf("invalid fixed-width integer type")
 	}

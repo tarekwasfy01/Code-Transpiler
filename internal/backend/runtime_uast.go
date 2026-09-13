@@ -26,6 +26,15 @@ type runUASTFunction struct {
 	env               *runEnv
 }
 
+// runUASTPrimitive is the callable value representation for canonical
+// frontend symbols that denote a backend primitive (for example a typed
+// integer conversion). Keeping this as a value closes the same call contract
+// whether the callee arrives through call.calls or through an expression
+// edge; it never materializes a missing binding as zero.
+type runUASTPrimitive struct {
+	name string
+}
+
 // uastExactIntegerParameterType recognizes the fixed-width portion of a
 // frontend parameter type.  Source-level names and provenance are useful UAST
 // facts but are not part of SemanticOperation's deliberately minimal exact
@@ -109,6 +118,9 @@ func (st *runState) uastStmt(env *runEnv, g *uastExecutionGraph, id int) (any, r
 		if err != nil {
 			return nil, runNormal, err
 		}
+		if async, ok := c.Attributes["go_async"].(bool); ok && async {
+			return st.spawnUASTTask(env, g, x, false), runNormal, nil
+		}
 		value, err := st.uastExpr(env, g, x)
 		return value, runNormal, err
 	case "assign":
@@ -129,6 +141,15 @@ func (st *runState) uastStmt(env *runEnv, g *uastExecutionGraph, id int) (any, r
 		value, err := st.uastExpr(env, g, x)
 		if err != nil {
 			return nil, runNormal, err
+		}
+		// Go local declarations are canonically represented as assign nodes.
+		// Preserve their explicit integer binding contract at this boundary so
+		// later typed operations receive exactInteger values.
+		if exactType, ok := uastExactIntegerParameterType(c.Type); ok {
+			value, err = evaluateInteger(SemanticOperation{Name: "integer.value", Type: exactType}, []any{value})
+			if err != nil {
+				return nil, runNormal, err
+			}
 		}
 		// The canonical assignment contract carries its binding in the typed
 		// target child. `name` is a convenience field for older projections, so
@@ -320,6 +341,11 @@ func (st *runState) uastExpr(env *runEnv, g *uastExecutionGraph, id int) (any, e
 		if value, ok := env.get(c.Name); ok {
 			return value, nil
 		}
+		if strings.HasPrefix(c.Name, "native_symbol_") {
+			if _, ok := nativeIntegerConversionType(strings.TrimPrefix(c.Name, "native_symbol_")); ok {
+				return &runUASTPrimitive{name: c.Name}, nil
+			}
+		}
 		return nil, fmt.Errorf("object %q not found", c.Name)
 	case "literal":
 		kind, text := c.Operation.LiteralKind, c.Operation.Text
@@ -487,6 +513,12 @@ func (st *runState) uastExpr(env *runEnv, g *uastExecutionGraph, id int) (any, e
 
 func (st *runState) uastCall(env *runEnv, g *uastExecutionGraph, id int) (any, error) {
 	c := g.common[id]
+	var callContract SemanticCallContract
+	if ok, err := contractForNode(g.document, id, SemanticCallContractKind, &callContract); err != nil {
+		return nil, err
+	} else if ok && len(callContract.Arguments) != len(g.many(id, "argument")) {
+		return nil, fmt.Errorf("CALL contract on node %d disagrees with argument graph", id)
+	}
 	calleeNode, _, err := g.oneRelationNode(id, "call.calls", true)
 	if err != nil {
 		return nil, err
@@ -519,6 +551,9 @@ func (st *runState) uastCall(env *runEnv, g *uastExecutionGraph, id int) (any, e
 	}
 	if fn, ok := value.(*runUASTFunction); ok {
 		return st.callUASTFunction(fn, args, names)
+	}
+	if primitive, ok := value.(*runUASTPrimitive); ok {
+		return st.primitive(primitive.name, args, names)
 	}
 	return nil, fmt.Errorf("attempt to call non-function")
 }
@@ -582,6 +617,12 @@ func (st *runState) uastExactCall(env *runEnv, g *uastExecutionGraph, calleeNode
 	}
 	if fn, ok := callee.(*runUASTFunction); ok {
 		return st.callUASTFunction(fn, args, names)
+	}
+	if primitive != "" {
+		return st.primitive(primitive, args, names)
+	}
+	if value, ok := callee.(*runUASTPrimitive); ok {
+		return st.primitive(value.name, args, names)
 	}
 	return nil, fmt.Errorf("attempt to call non-function")
 }

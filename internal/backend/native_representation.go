@@ -58,11 +58,35 @@ func SolveNativeLayout(profile NativeTargetProfile, typ SemanticType, context Na
 		return NativeLayout{}, fmt.Errorf("NATIVE_LAYOUT_GAP: dynamic type has no native representation")
 	case "boolean", "bool":
 		l.SizeBits, l.SizeBytes = 8, 1
-	case "integer":
-		if typ.Bits != 8 && typ.Bits != 16 && typ.Bits != 32 && typ.Bits != 64 {
+	case "null", "na":
+		// Null-like values have a stable one-word sentinel representation at
+		// the native boundary. Zero is the canonical value; keeping the slot
+		// word-sized preserves the scalar ABI and lets control/binding facts use
+		// the same register and spill contract as other scalar values.
+		l.SizeBits, l.SizeBytes = pointer*8, pointer
+		l.ABIAlignment, l.PreferredAlignment = pointer, pointer
+	case "integer", "arbitrary_integer":
+		bits := typ.Bits
+		if bits == 0 {
+			// Source-level machine integers (int/uint/size types) carry their
+			// width from the target ABI.  Only these explicit machine names may
+			// use the target word width; an anonymous integer remains unresolved.
+			switch typ.Name {
+			case "int", "uint", "usize", "isize", "uintptr":
+				bits = profile.IndexBitWidth
+			}
+			// Untyped/arbitrary integers in a native expression have no
+			// source-width contract.  At the machine boundary they use the
+			// target word, matching the canonical scalar ABI slot; oversized
+			// constants are still rejected by literal range checks.
+			if bits == 0 && typ.Kind == "arbitrary_integer" {
+				bits = profile.IndexBitWidth
+			}
+		}
+		if bits != 8 && bits != 16 && bits != 32 && bits != 64 {
 			return NativeLayout{}, fmt.Errorf("NATIVE_LAYOUT_GAP: integer width %d", typ.Bits)
 		}
-		l.SizeBits, l.SizeBytes = typ.Bits, typ.Bits/8
+		l.SizeBits, l.SizeBytes = bits, bits/8
 		l.ABIAlignment, l.PreferredAlignment = minNative(l.SizeBytes, pointer), minNative(l.SizeBytes, pointer)
 	case "float", "number", "numeric", "binary64":
 		bits := typ.Bits
@@ -86,6 +110,16 @@ func SolveNativeLayout(profile NativeTargetProfile, typ SemanticType, context Na
 		l.Representation, l.SizeBits, l.SizeBytes, l.ABIAlignment, l.PreferredAlignment, l.FieldOffsets = NativeClosureValue, pointer*16, pointer*2, pointer, pointer, []int{0, pointer}
 	case "slice", "array", "vector", "list":
 		l.Representation, l.SizeBits, l.SizeBytes, l.ABIAlignment, l.PreferredAlignment, l.FieldOffsets = NativeDescriptor, pointer*16, pointer*2, pointer, pointer, []int{0, pointer}
+	case "map":
+		// Maps cross the native boundary as a target-sized descriptor pair,
+		// matching slices and arrays. Element/key layout is carried by the
+		// semantic contract and does not change the descriptor ABI.
+		l.Representation, l.SizeBits, l.SizeBytes, l.ABIAlignment, l.PreferredAlignment, l.FieldOffsets = NativeDescriptor, pointer*16, pointer*2, pointer, pointer, []int{0, pointer}
+	case "interface", "trait":
+		// Interface values are opaque two-word contracts (type/vtable and
+		// data). Their method set is compile-time metadata; the native value
+		// representation is still stable and target-sized.
+		l.Representation, l.SizeBits, l.SizeBytes, l.ABIAlignment, l.PreferredAlignment, l.FieldOffsets = NativePair, pointer*16, pointer*2, pointer, pointer, []int{0, pointer}
 	case "tuple", "aggregate", "record", "struct":
 		l.Representation, l.SizeBits, l.SizeBytes, l.ABIAlignment, l.PreferredAlignment = NativeAddress, pointer*8, pointer, pointer, pointer
 		if context == NativeABIValue && typ.Length > 0 && typ.Length*pointer <= 16 {

@@ -296,7 +296,7 @@ func Tokenize(source, code string) []Lexeme {
 			continue
 		}
 		matched := ""
-		for _, operator := range []string{"<<-", "->>", ":::", "===", "!==", "=>", "::", "<<", ">>", "<-", "->", ":=", "<=", ">=", "==", "!=", "&&", "||", "%%", "%/%", "//", "**", "++", "--", "+=", "-=", "*=", "/="} {
+		for _, operator := range []string{"<<-", "->>", ":::", "===", "!==", "=>", "<<=", ">>=", "&=", "|=", "^=", "::", "<<", ">>", "<-", "->", ":=", "<=", ">=", "==", "!=", "&&", "||", "%%", "%/%", "//", "**", "++", "--", "+=", "-=", "*=", "/="} {
 			candidate := []rune(operator)
 			if i+len(candidate) <= len(runes) && string(runes[i:i+len(candidate)]) == operator {
 				matched = operator

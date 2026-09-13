@@ -3,6 +3,7 @@ package backend
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 )
 
@@ -125,6 +126,33 @@ func TestSemanticSEDirectKeysRoundTrip(t *testing.T) {
 	b, _ := q.MarshalSemanticJSON()
 	if !bytes.Equal(a, b) {
 		t.Fatal("SE direct-key roundtrip changed UAST")
+	}
+}
+
+func TestSemanticSEGraphPreservesContractPlane(t *testing.T) {
+	p, err := LowerSource("go", "se_graph_contracts.go", "package main\nfunc main(){ println(3) }\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	se, err := p.MarshalSemanticSE()
+	if err != nil {
+		t.Fatal(err)
+	}
+	q, err := ParseSemanticSEGraph(se)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.UniversalAST == nil || q == nil {
+		t.Fatal("missing UAST graph")
+	}
+	if q.ContractSchema != p.UniversalAST.ContractSchema {
+		t.Fatalf("contract schema lost: got %q want %q", q.ContractSchema, p.UniversalAST.ContractSchema)
+	}
+	if !reflect.DeepEqual(q.ContractTable, p.UniversalAST.ContractTable) {
+		t.Fatal("contract table changed in graph import")
+	}
+	if !reflect.DeepEqual(q.ContractRefs, p.UniversalAST.ContractRefs) {
+		t.Fatal("contract references changed in graph import")
 	}
 }
 

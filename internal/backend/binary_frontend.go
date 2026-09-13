@@ -778,6 +778,18 @@ func decodeX64(b []byte, base uint64) (x64Program, error) {
 				return x64Program{}, fmt.Errorf("x64: unsupported f7 group %d", r&7)
 			}
 			add(n, x, x64Operand{})
+		case op == 0xff:
+			// Win64 imports and function-value calls use FF /2 (CALL r/m64).
+			// Preserve the operand structurally so PE IAT calls remain visible to
+			// MachineIR and the semantic lifter instead of failing at the opcode.
+			group, target, e := readRM()
+			if e != nil {
+				return x64Program{}, e
+			}
+			if group&7 != 2 {
+				return x64Program{}, fmt.Errorf("x64: unsupported ff group /%d at %d", group&7, at)
+			}
+			add("call_indirect", target, x64Operand{})
 		case op == 0xd3:
 			r, x, e := readRM()
 			if e != nil {

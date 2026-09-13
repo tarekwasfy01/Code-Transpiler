@@ -19,5 +19,8 @@ func SaveSourceFileDialog(defaultName, ext, label string) (string, error) {
 	}
 	return filepath.Join(".", defaultName), nil
 }
+func SelectFolderDialog(string) (string, error) {
+	return "", fmt.Errorf("folder dialog is Windows-only")
+}
 
 var _ = os.Stdout

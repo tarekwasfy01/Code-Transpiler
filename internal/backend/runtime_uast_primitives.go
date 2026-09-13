@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/rand"
 	"sort"
 	"strconv"
 	"strings"
@@ -17,8 +18,70 @@ import (
 type runUASTCell struct{ value any }
 
 type runUASTTask struct {
-	value any
-	err   error
+	value      any
+	err        error
+	output     string
+	done       chan struct{}
+	outputOnce sync.Once
+	native     *nativeTaskControl
+}
+
+func (st *runState) registerTask(task *runUASTTask) {
+	st.taskMu.Lock()
+	*st.taskRegistry = append(*st.taskRegistry, task)
+	st.taskMu.Unlock()
+}
+
+func (st *runState) consumeTaskOutput(task *runUASTTask) {
+	task.outputOnce.Do(func() {
+		if task.output != "" {
+			st.out.WriteString(task.output)
+		}
+	})
+}
+
+func (st *runState) spawnUASTTask(env *runEnv, g *uastExecutionGraph, body int, statement bool) *runUASTTask {
+	task := &runUASTTask{done: make(chan struct{})}
+	st.registerTask(task)
+	st.tasks.Add(1)
+	run := func() {
+		defer st.tasks.Done()
+		defer close(task.done)
+		child := &runState{
+			exactCalls:   st.exactCalls,
+			rng:          rand.New(rand.NewSource(1)),
+			maxSteps:     st.maxSteps,
+			jumpTarget:   -1,
+			tasks:        st.tasks,
+			taskMu:       st.taskMu,
+			taskRegistry: st.taskRegistry,
+		}
+		childEnv := newRunEnv(env)
+		if statement {
+			task.value, _, task.err = child.uastStmt(childEnv, g, body)
+		} else {
+			task.value, task.err = child.uastExpr(childEnv, g, body)
+		}
+		task.output = child.out.String()
+	}
+	control, err := startNativeTask(run)
+	if err != nil {
+		task.err = err
+		st.tasks.Done()
+		close(task.done)
+		return task
+	}
+	task.native = control
+	return task
+}
+
+func waitRunUASTTask(task *runUASTTask) {
+	<-task.done
+	if task.native != nil {
+		if err := task.native.join(); task.err == nil && err != nil {
+			task.err = err
+		}
+	}
 }
 
 type runUASTChannel struct {
@@ -132,6 +195,31 @@ func (st *runState) uastPrimitiveStatement(env *runEnv, g *uastExecutionGraph, i
 		value, _, err := evaluate("initializer", "expression", "value")
 		if err != nil {
 			return nil, runNormal, err
+		}
+		// Typed declarations establish the exact integer value contract at the
+		// binding boundary.  Do not leave a typed initializer as a binary64
+		// runtime value and hope a later operation can infer its width.
+		exactType, exact := uastExactIntegerParameterType(c.Type)
+		// Frontends may attach the declared type to the binding child rather
+		// than the declaration node.  Both are the same canonical declaration
+		// contract; inspect the structured edge instead of inferring from names.
+		if !exact {
+			for _, role := range []string{"binding", "target", "declarator"} {
+				if child, found, childErr := g.one(id, role, false); childErr != nil {
+					return nil, runNormal, childErr
+				} else if found {
+					if typ, ok := uastExactIntegerParameterType(g.common[child].Type); ok {
+						exactType, exact = typ, true
+						break
+					}
+				}
+			}
+		}
+		if exact {
+			value, err = evaluateInteger(SemanticOperation{Name: "integer.value", Type: exactType}, []any{value})
+			if err != nil {
+				return nil, runNormal, err
+			}
 		}
 		if c.Name == "" {
 			// Groups can consist solely of child declarations.
@@ -247,8 +335,7 @@ func (st *runState) uastPrimitiveStatement(env *runEnv, g *uastExecutionGraph, i
 		if err != nil || !ok {
 			return nil, runNormal, fmt.Errorf("spawn node %d lacks body", id)
 		}
-		value, _, runErr := st.uastStmt(newRunEnv(env), g, body)
-		task := &runUASTTask{value: value, err: runErr}
+		task := st.spawnUASTTask(env, g, body, true)
 		if c.Name != "" {
 			env.declare(c.Name, task, false)
 		}
@@ -351,6 +438,12 @@ func (st *runState) uastPrimitiveExpression(env *runEnv, g *uastExecutionGraph, 
 		}
 		return values, nil
 	case "ConvertExpr", "TypeAssertExpr":
+		var conversion SemanticConversionContract
+		if ok, err := contractForNode(g.document, id, SemanticConversionContractKind, &conversion); err != nil {
+			return nil, err
+		} else if ok && c.Type.Kind != "" && conversion.TargetType.Kind != "" && !sameSemanticType(c.Type, conversion.TargetType) {
+			return nil, fmt.Errorf("CONVERSION contract on node %d disagrees with target type", id)
+		}
 		value, ok, err := evaluate("value", "expression", "operand")
 		if err != nil || !ok {
 			return nil, fmt.Errorf("conversion node %d lacks value", id)
@@ -429,6 +522,10 @@ func (st *runState) uastPrimitiveExpression(env *runEnv, g *uastExecutionGraph, 
 		if !ok {
 			return nil, fmt.Errorf("await node %d value is not a task", id)
 		}
+		if task.done != nil {
+			waitRunUASTTask(task)
+			st.consumeTaskOutput(task)
+		}
 		return task.value, task.err
 	case "ReceiveExpr":
 		value, ok, err := evaluate("channel", "value")
@@ -499,6 +596,12 @@ func (st *runState) uastPrimitiveExpression(env *runEnv, g *uastExecutionGraph, 
 
 func (st *runState) uastFunctionValue(env *runEnv, g *uastExecutionGraph, id int) (*runUASTFunction, error) {
 	c := g.common[id]
+	var functionContract SemanticFunctionContract
+	if ok, err := contractForNode(g.document, id, SemanticFunctionContractKind, &functionContract); err != nil {
+		return nil, err
+	} else if ok && len(functionContract.Parameters) != len(g.many(id, "parameter")) {
+		return nil, fmt.Errorf("FUNCTION contract on node %d disagrees with parameter graph", id)
+	}
 	body, ok, err := g.firstChild(id, "body")
 	if err != nil || !ok {
 		return nil, fmt.Errorf("function node %d lacks body", id)

@@ -571,6 +571,12 @@ func materializeUniversalOperandFacts(u *UniversalASTDocument) {
 		seen[r.Kind+":"+strconv.Itoa(r.From)+":"+r.To.ID] = true
 	}
 	for _, n := range u.Nodes {
+		// Structural scopes/modules own control children, never value operands.
+		// Their body edges are consumed by statement traversal and must not be
+		// projected into the data-flow relation plane.
+		if n.StructuralKind == "Scope" || n.StructuralKind == "ModuleDecl" {
+			continue
+		}
 		common, err := decodeUniversalCommon(&n)
 		if err != nil {
 			continue
@@ -709,7 +715,27 @@ func materializeUniversalEvidenceFields(u *UniversalASTDocument, e SemanticEvide
 }
 
 func deriveUniversalTypeTable(u *UniversalASTDocument) error {
+	return deriveUniversalTypeTableMode(u, true)
+}
+
+// deriveUniversalTypeTableForLinkedProject retains the canonical type table
+// and graph but defers the two dense, fully-derived relation views. A linked
+// project can contain many identical structural type occurrences; eagerly
+// expanding their nominal/equivalence Cartesian products is an analysis cost,
+// not a prerequisite for native lowering. Consumers can materialize the same
+// views from TypeTable when an analysis actually requests them.
+func deriveUniversalTypeTableForLinkedProject(u *UniversalASTDocument) error {
+	return deriveUniversalTypeTableMode(u, false)
+}
+
+func deriveUniversalTypeTableMode(u *UniversalASTDocument, materializeDenseRelations bool) error {
 	types := map[string]SemanticType{}
+	// A linked project can mention the same recursive aggregate type from many
+	// nodes and member documents.  Intern before descending: without this
+	// visited set the old closure walked an identical type subtree once per
+	// occurrence, turning project type collection into repeated exponential
+	// work and retaining large transient JSON buffers.
+	visitedTypes := map[string]bool{}
 	// Preserve frontend-proved nominal/package types even when no executable
 	// node directly carries the declaration. Their recursive children are
 	// inserted as well so the canonical type graph remains closed.
@@ -719,9 +745,15 @@ func deriveUniversalTypeTable(u *UniversalASTDocument) error {
 			return
 		}
 		raw, err := json.Marshal(typ)
-		if err == nil {
-			types[string(raw)] = typ
+		if err != nil {
+			return
 		}
+		key := string(raw)
+		if visitedTypes[key] {
+			return
+		}
+		visitedTypes[key] = true
+		types[key] = typ
 		for _, child := range semanticTypeChildrenForType(typ) {
 			if child != nil {
 				addType(*child)
@@ -739,11 +771,7 @@ func deriveUniversalTypeTable(u *UniversalASTDocument) error {
 		if c.Type.Kind == "" {
 			continue
 		}
-		raw, err := json.Marshal(c.Type)
-		if err != nil {
-			return err
-		}
-		types[string(raw)] = c.Type
+		addType(c.Type)
 	}
 	keys := make([]string, 0, len(types))
 	for key := range types {
@@ -758,6 +786,12 @@ func deriveUniversalTypeTable(u *UniversalASTDocument) error {
 	ids := map[string]int{}
 	for i, key := range keys {
 		ids[key] = i
+	}
+	if !materializeDenseRelations {
+		// TypeRelations is entirely derived from TypeTable/TypeGraph. Do not
+		// retain a project-wide legacy occurrence view during production linking.
+		u.TypeRelations = nil
+		return nil
 	}
 	// SemanticTypeRelations' JSON occurrence paths are a legacy document view
 	// (class C). The parent/child type incidence is canonical (class A) and is

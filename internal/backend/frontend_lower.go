@@ -22,6 +22,14 @@ func MatrixFrontendLanguages() []string {
 // matrix-recognised source language. Parser-specific facts remain transient;
 // the returned SemanticProgram owns only the canonical UAST.
 func LowerMatrixLanguage(language, source string) (*SemanticProgram, error) {
+	// Roslyn source units routinely carry compiler directives that are consumed
+	// before syntax lowering (#nullable, #pragma, region and line directives).
+	// They do not form executable UAST nodes. Remove only these trivia/directive
+	// forms while preserving every other source line and newline position; other
+	// preprocessor forms remain visible and fail closed in the parser.
+	if language == "csharp" {
+		source = stripCSharpTriviaDirectives(source)
+	}
 	// Hosts that package execution-ready grammar tables can promote the
 	// neutral ParseNode machine without changing the frontend API. An explicit
 	// environment path wins; otherwise discover the repository's bundled
@@ -88,6 +96,27 @@ func LowerMatrixLanguage(language, source string) (*SemanticProgram, error) {
 		UniversalAST:     u,
 		Evidence:         u.Evidence,
 	}, nil
+}
+
+func stripCSharpTriviaDirectives(source string) string {
+	lines := strings.SplitAfter(source, "\n")
+	for i, line := range lines {
+		trim := strings.TrimSpace(strings.TrimSuffix(line, "\n"))
+		if strings.HasPrefix(trim, "#nullable ") || strings.HasPrefix(trim, "#pragma ") ||
+			strings.HasPrefix(trim, "#region") || strings.HasPrefix(trim, "#endregion") ||
+			strings.HasPrefix(trim, "#line ") {
+			// Keep byte and line offsets stable for provenance diagnostics while
+			// removing directive tokens from the grammar input.
+			buf := []byte(line)
+			for j, b := range buf {
+				if b != '\r' && b != '\n' {
+					buf[j] = ' '
+				}
+			}
+			lines[i] = string(buf)
+		}
+	}
+	return strings.Join(lines, "")
 }
 
 func executionReadyCandidates() []string {
@@ -157,7 +186,7 @@ func LowerMatrixLanguageFromTables(language, source, tableDir string) (*Semantic
 						u.Metadata["frontend_table_bundle_hash"] = bundle.Hash
 						u.Metadata["frontend_table_bundle_language"] = language
 						u.Surface = NewUniversalASTSurface(language, source)
-						return &SemanticProgram{Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Metadata: u.Metadata, Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects, SemanticFeatures: u.SemanticFeatures, UniversalAST: u, Evidence: u.Evidence}, nil
+						return &SemanticProgram{Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Metadata: u.Metadata, Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects, SemanticFeatures: u.SemanticFeatures, UniversalAST: u, ContractSchema: u.ContractSchema, ContractTable: u.ContractTable, ContractRefs: u.ContractRefs, Evidence: u.Evidence}, nil
 					}
 				}
 			}
@@ -179,7 +208,7 @@ func LowerMatrixLanguageFromTables(language, source, tableDir string) (*Semantic
 		Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase,
 		Types: u.Types, Origin: u.Origin, Metadata: u.Metadata,
 		Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects,
-		SemanticFeatures: u.SemanticFeatures, UniversalAST: u, Evidence: u.Evidence,
+		SemanticFeatures: u.SemanticFeatures, UniversalAST: u, ContractSchema: u.ContractSchema, ContractTable: u.ContractTable, ContractRefs: u.ContractRefs, Evidence: u.Evidence,
 	}, nil
 }
 
@@ -1068,7 +1097,7 @@ func LowerMatrixEventsWithFactSink(language string, events []matrixir.CanonicalE
 		u.Metadata = map[string]string{}
 	}
 	u.Metadata["frontend_route"] = "COMPATIBILITY_REPARSE"
-	return &SemanticProgram{Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Metadata: u.Metadata, Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects, SemanticFeatures: u.SemanticFeatures, UniversalAST: u, Evidence: u.Evidence}, nil
+	return &SemanticProgram{Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Metadata: u.Metadata, Extensions: u.Extensions, Contracts: u.Contracts, Dialects: u.Dialects, SemanticFeatures: u.SemanticFeatures, UniversalAST: u, ContractSchema: u.ContractSchema, ContractTable: u.ContractTable, ContractRefs: u.ContractRefs, Evidence: u.Evidence}, nil
 }
 
 // LowerPython keeps the concrete frontend entry point while delegating to the

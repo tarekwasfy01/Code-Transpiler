@@ -21,6 +21,9 @@ func ValidateSemanticProgram(p *SemanticProgram) error {
 		if err := validateUniversalASTDocument(u); err != nil {
 			return err
 		}
+		if err := validateSemanticBehaviorExtensions(u); err != nil {
+			return err
+		}
 		if u.Projection != "semantic_document.v1" {
 			return nil
 		}

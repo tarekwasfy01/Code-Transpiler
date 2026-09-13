@@ -65,6 +65,12 @@ def r_exact(name, bits, signed, text, values):
             result = (abs(a) // abs(b)) * (-1 if (a < 0) != (b < 0) else 1)
         else:
             result = a // b
+    elif name == "integer.remainder":
+        if b == 0: raise ZeroDivisionError("integer.remainder by zero")
+        if signed:
+            result = (abs(a) % abs(b)) * (-1 if a < 0 else 1)
+        else:
+            result = a % b
     elif name == "integer.and": result = a & b
     elif name == "integer.or": result = a | b
     elif name == "integer.xor": result = a ^ b
@@ -91,7 +97,7 @@ class RExact {
   if(name.equals("integer.shift_left"))return new RExact(y.compareTo(java.math.BigInteger.valueOf(bits))>=0?java.math.BigInteger.ZERO:x.shiftLeft(y.intValue()),bits,signed);if(name.equals("integer.shift_right"))return new RExact(y.compareTo(java.math.BigInteger.valueOf(bits))>=0?(signed&&x.signum()<0?java.math.BigInteger.valueOf(-1):java.math.BigInteger.ZERO):x.shiftRight(y.intValue()),bits,signed);
   if(name.equals("integer.equal"))return a.raw.equals(b.raw);if(name.equals("integer.not_equal"))return !a.raw.equals(b.raw);
   if(name.equals("integer.less"))return x.compareTo(y)<0;if(name.equals("integer.less_equal"))return x.compareTo(y)<=0;if(name.equals("integer.greater"))return x.compareTo(y)>0;if(name.equals("integer.greater_equal"))return x.compareTo(y)>=0;
-  if(name.equals("integer.add"))return new RExact(a.raw.add(b.raw),bits,signed);if(name.equals("integer.subtract"))return new RExact(a.raw.subtract(b.raw),bits,signed);if(name.equals("integer.multiply"))return new RExact(a.raw.multiply(b.raw),bits,signed);if(name.equals("integer.divide")){if(y.signum()==0)throw new ArithmeticException("integer.divide by zero");return new RExact(x.divide(y),bits,signed);}
+  if(name.equals("integer.add"))return new RExact(a.raw.add(b.raw),bits,signed);if(name.equals("integer.subtract"))return new RExact(a.raw.subtract(b.raw),bits,signed);if(name.equals("integer.multiply"))return new RExact(a.raw.multiply(b.raw),bits,signed);if(name.equals("integer.divide")){if(y.signum()==0)throw new ArithmeticException("integer.divide by zero");return new RExact(x.divide(y),bits,signed);}if(name.equals("integer.remainder")){if(y.signum()==0)throw new ArithmeticException("integer.remainder by zero");return new RExact(x.remainder(y),bits,signed);}
   if(name.equals("integer.and"))return new RExact(a.raw.and(b.raw),bits,signed);if(name.equals("integer.or"))return new RExact(a.raw.or(b.raw),bits,signed);if(name.equals("integer.xor"))return new RExact(a.raw.xor(b.raw),bits,signed);if(name.equals("integer.and_not"))return new RExact(a.raw.and(b.raw.not()),bits,signed);
   throw new IllegalArgumentException("unknown exact integer operation: "+name);
  }
@@ -103,15 +109,15 @@ sealed class RExact {
  readonly System.Numerics.BigInteger raw; readonly int bits; readonly bool signed;
  RExact(System.Numerics.BigInteger value,int bits,bool signed){this.bits=bits;this.signed=signed;raw=value% (System.Numerics.BigInteger.One<<bits);if(raw.Sign<0)raw+=System.Numerics.BigInteger.One<<bits;}
  System.Numerics.BigInteger Value(){return signed&&raw>= (System.Numerics.BigInteger.One<<(bits-1))?raw-(System.Numerics.BigInteger.One<<bits):raw;}
- public override string ToString()=>Value().ToString();
- static RExact Exact(object value)=>value as RExact??throw new System.ArgumentException("expected exact integer");
+ public override string ToString(){return Value().ToString();}
+ static RExact Exact(object value){RExact exact=value as RExact;if(exact==null)throw new System.ArgumentException("expected exact integer");return exact;}
  public static object Apply(string name,int bits,bool signed,string text,object[] args){
   if(name=="integer.literal")return new RExact(System.Numerics.BigInteger.Parse(text),bits,signed);var a=Exact(args[0]);if(name!="integer.convert"&&(a.bits!=bits||a.signed!=signed))throw new System.ArgumentException("integer type mismatch");
   if(name=="integer.value")return a;if(name=="integer.convert")return new RExact(a.Value(),bits,signed);if(name=="integer.format")return a.ToString();if(name=="integer.negate")return new RExact(-a.raw,bits,signed);if(name=="integer.complement")return new RExact(~a.raw,bits,signed);
   var b=Exact(args[1]);if(b.bits!=bits||b.signed!=signed)throw new System.ArgumentException("integer type mismatch");var x=a.Value();var y=b.Value();
   if(name=="integer.shift_left")return new RExact(y>=bits?0:x<<checked((int)y),bits,signed);if(name=="integer.shift_right")return new RExact(y>=bits?(signed&&x<0?-1:0):x>>checked((int)y),bits,signed);
   if(name=="integer.equal")return a.raw==b.raw;if(name=="integer.not_equal")return a.raw!=b.raw;if(name=="integer.less")return x<y;if(name=="integer.less_equal")return x<=y;if(name=="integer.greater")return x>y;if(name=="integer.greater_equal")return x>=y;
-  if(name=="integer.add")return new RExact(a.raw+b.raw,bits,signed);if(name=="integer.subtract")return new RExact(a.raw-b.raw,bits,signed);if(name=="integer.multiply")return new RExact(a.raw*b.raw,bits,signed);if(name=="integer.divide"){if(y.IsZero)throw new System.DivideByZeroException();return new RExact(x/y,bits,signed);}if(name=="integer.and")return new RExact(a.raw&b.raw,bits,signed);if(name=="integer.or")return new RExact(a.raw|b.raw,bits,signed);if(name=="integer.xor")return new RExact(a.raw^b.raw,bits,signed);if(name=="integer.and_not")return new RExact(a.raw&~b.raw,bits,signed);throw new System.ArgumentException("unknown exact integer operation: "+name);
+  if(name=="integer.add")return new RExact(a.raw+b.raw,bits,signed);if(name=="integer.subtract")return new RExact(a.raw-b.raw,bits,signed);if(name=="integer.multiply")return new RExact(a.raw*b.raw,bits,signed);if(name=="integer.divide"){if(y.IsZero)throw new System.DivideByZeroException();return new RExact(x/y,bits,signed);}if(name=="integer.remainder"){if(y.IsZero)throw new System.DivideByZeroException();return new RExact(x%y,bits,signed);}if(name=="integer.and")return new RExact(a.raw&b.raw,bits,signed);if(name=="integer.or")return new RExact(a.raw|b.raw,bits,signed);if(name=="integer.xor")return new RExact(a.raw^b.raw,bits,signed);if(name=="integer.and_not")return new RExact(a.raw&~b.raw,bits,signed);throw new System.ArgumentException("unknown exact integer operation: "+name);
  }
 }
 `

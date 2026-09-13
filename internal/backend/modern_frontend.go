@@ -3,7 +3,6 @@ package backend
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
@@ -51,20 +50,17 @@ var modernFrontends = func() map[string]modernFrontend {
 			return LowerMatrixLanguage(language, source)
 		}
 	}
-	// Go uses the table frontend whenever a real execution-ready partition is
-	// present. Source-only builds must not enter an unbounded bootstrap lexer
-	// for every file, though: use the structured go/ast producer first and keep
-	// the matrix frontend as its generic fallback. This preserves the universal
-	// route when tables are installed while making the public Go API hermetic
-	// and bounded in ordinary source-only checkouts.
+	// Go's structured AST producer supplies type-checker-backed callable and
+	// declaration contracts. Keep it first even when execution-ready tables are
+	// installed: the generic matrix parser remains a fallback, but it must not
+	// replace those exact semantic facts with syntactic/unknown parameter nodes.
+	// The selected frontend still returns the same canonical UAST contract used
+	// by every downstream backend.
 	goMatrix := frontends["go"]
-	goNative := func(filename, source string) (*SemanticProgram, error) { return LowerNativeGo(filename, source) }
-	frontends["go"] = func(filename, source string) (*SemanticProgram, error) {
-		if _, err := matrixir.ResolveExecutionReadyBundle(os.Getenv("CODE_TRANSPILER_EXECUTION_READY_DIR"), executionReadyCandidates()...); err == nil {
-			return firstModernFrontend(goMatrix, goNative)(filename, source)
-		}
-		return firstModernFrontend(goNative, goMatrix)(filename, source)
+	goNative := func(filename, source string) (*SemanticProgram, error) {
+		return GoTypedSyntaxToSemantic(filename, source, nil)
 	}
+	frontends["go"] = firstModernFrontend(goNative, goMatrix)
 	return frontends
 }()
 

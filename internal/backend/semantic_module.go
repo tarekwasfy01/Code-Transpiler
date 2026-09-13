@@ -45,15 +45,77 @@ type SemanticModule struct {
 
 type SemanticModuleStore struct{ Root string }
 
-func DefaultSemanticModuleStore() (SemanticModuleStore, error) {
+type semanticPathConfig struct {
+	BaseRoot string `json:"base_root"`
+}
+
+func semanticPathConfigFile() string {
+	exe, err := os.Executable()
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(filepath.Dir(exe), "semantic-path.json")
+}
+
+func semanticBaseRoot() string {
+	if v := strings.TrimSpace(os.Getenv("SEMANTIC_MODULE_BASE")); v != "" {
+		return v
+	}
+	if p := semanticPathConfigFile(); p != "" {
+		if b, err := os.ReadFile(p); err == nil {
+			var c semanticPathConfig
+			if json.Unmarshal(b, &c) == nil && strings.TrimSpace(c.BaseRoot) != "" {
+				return c.BaseRoot
+			}
+		}
+	}
 	root := os.Getenv("LOCALAPPDATA")
 	if root == "" {
 		root, _ = os.UserCacheDir()
 	}
+	return root
+}
+
+// SetSemanticModuleBase persists the user-selected parent directory. The
+// actual store is always created below <base>/Semantic.
+func SetSemanticModuleBase(base string) error {
+	base, err := filepath.Abs(strings.TrimSpace(base))
+	if err != nil || base == "" {
+		return fmt.Errorf("invalid semantic module path")
+	}
+	if err := os.MkdirAll(base, 0755); err != nil {
+		return err
+	}
+	p := semanticPathConfigFile()
+	if p == "" {
+		return fmt.Errorf("cannot resolve executable path")
+	}
+	b, _ := json.MarshalIndent(semanticPathConfig{BaseRoot: base}, "", "  ")
+	if err := os.WriteFile(p, b, 0644); err != nil {
+		return err
+	}
+	_, err = DefaultSemanticModuleStore()
+	return err
+}
+
+func ResetSemanticModuleBase() error {
+	if p := semanticPathConfigFile(); p != "" {
+		_ = os.Remove(p)
+	}
+	_, err := DefaultSemanticModuleStore()
+	return err
+}
+
+func DefaultSemanticModuleStore() (SemanticModuleStore, error) {
+	root := semanticBaseRoot()
 	if root == "" {
 		return SemanticModuleStore{}, fmt.Errorf("cannot resolve user module store")
 	}
-	return SemanticModuleStore{Root: filepath.Join(root, "Semantic", "Modules")}, nil
+	s := SemanticModuleStore{Root: filepath.Join(root, "Semantic", "Modules")}
+	if err := s.ensure(); err != nil {
+		return SemanticModuleStore{}, err
+	}
+	return s, nil
 }
 
 func (s SemanticModuleStore) ensure() error {
@@ -62,8 +124,17 @@ func (s SemanticModuleStore) ensure() error {
 			return err
 		}
 	}
+	// The download directory is transient but must exist before any registry
+	// resolver starts, so callers can rely on a stable package acquisition path.
+	if err := os.MkdirAll(filepath.Join(filepath.Dir(s.Root), "download"), 0755); err != nil {
+		return err
+	}
 	return nil
 }
+
+// Ensure creates the stable module-store layout for API callers that supply a
+// custom store root. It is intentionally limited to the Semantic store tree.
+func (s SemanticModuleStore) Ensure() error { return s.ensure() }
 
 func semanticModuleRoot(p *SemanticProgram) (string, error) {
 	if p == nil || p.UniversalAST == nil {
@@ -85,15 +156,10 @@ func semanticModuleStableRoot(p *SemanticProgram) (string, error) {
 	if p == nil {
 		return "", fmt.Errorf("missing canonical UAST")
 	}
-	b, err := p.MarshalSemanticSPZ()
-	if err != nil {
-		return "", err
-	}
-	q, err := ParseSemanticSPZ(b)
-	if err != nil {
-		return "", err
-	}
-	return semanticModuleRoot(q)
+	// The program crossing this boundary is already canonical. Hash the
+	// canonical graph directly; a serialize/parse roundtrip here used to make
+	// every module import pay the full SPZ cost again.
+	return semanticModuleRoot(p)
 }
 
 func NewSemanticModule(identity, language, source string, p *SemanticProgram) (*SemanticModule, error) {

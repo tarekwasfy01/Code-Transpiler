@@ -140,6 +140,36 @@ func main() {}
 	}
 }
 
+func TestSemanticNativePipelineExecutesWin64StackArguments(t *testing.T) {
+	source := `package main
+func sum6(a, b, c, d, e, f int64) int64 { return a + b + c + d + e + f }
+func check() int64 {
+	if sum6(1, 2, 3, 4, 5, 6) == 21 { return 0 }
+	return 1
+}
+func main() {}
+	`
+	goFile := filepath.Join(t.TempDir(), "win64-stack-args.go")
+	if err := os.WriteFile(goFile, []byte(source), 0600); err != nil {
+		t.Fatal(err)
+	}
+	p, err := LowerNativeGo(goFile, source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := EmitNativeExecutable(p, "native-x86_64-windows", "check")
+	if err != nil {
+		t.Fatal(err)
+	}
+	exe := filepath.Join(t.TempDir(), "win64-stack-args.exe")
+	if err := os.WriteFile(exe, result.Bytes, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := exec.Command(exe).Run(); err != nil {
+		t.Fatalf("Win64 stack argument call returned failure: %v", err)
+	}
+}
+
 func TestSemanticNativePipelineExecutesDirectUASTAggregateIndex(t *testing.T) {
 	if err := loadUniversalASTBasis(); err != nil {
 		t.Fatal(err)
@@ -681,6 +711,140 @@ func main() { if inc(41) == 0 {} }
 	cmd := exec.Command(exe)
 	if err := cmd.Run(); err != nil {
 		t.Fatalf("native named function process failed: %v", err)
+	}
+}
+
+func TestSemanticNativePipelineExecutesVariadicAggregateABI(t *testing.T) {
+	source := `package main
+	func first(values ...int64) int64 { return values[1] }
+	func check() int64 { return first(7, 8) - 8 }
+func main() {}
+`
+	p, err := LowerNativeGo("variadic.go", source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := EmitNativeExecutable(p, "native-x86_64-windows", "check")
+	if err != nil {
+		t.Fatal(err)
+	}
+	exe := t.TempDir() + "\\variadic-aggregate.exe"
+	if err := os.WriteFile(exe, result.Bytes, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := exec.Command(exe).Run(); err != nil {
+		t.Fatalf("native variadic aggregate ABI failed: %v", err)
+	}
+}
+
+func TestSemanticNativePipelineExecutesArchitectureIntegerContract(t *testing.T) {
+	source := `package main
+func check() int64 {
+	var exact uint64 = 9007199254740993
+	var native int = 41
+	if exact != uint64(9007199254740993) { return 1 }
+	if native != 41 { return 2 }
+	return 0
+}
+func main() {}
+`
+	p, err := LowerNativeGo("architecture-integer.go", source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := EmitNativeExecutable(p, "native-x86_64-windows", "check")
+	if err != nil {
+		t.Fatal(err)
+	}
+	exe := t.TempDir() + "\\architecture-integer.exe"
+	if err := os.WriteFile(exe, result.Bytes, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := exec.Command(exe).Run(); err != nil {
+		t.Fatalf("native architecture integer contract failed: %v", err)
+	}
+}
+
+func TestSemanticNativePipelineExecutesCleanupContract(t *testing.T) {
+	source := `package main
+var state int64
+func setState() { state = 42 }
+func check() int64 {
+	state = 0
+	defer setState()
+	return state
+}
+func verify() int64 { check(); return state - 42 }
+func main() {}
+`
+	p, err := LowerNativeGo("cleanup.go", source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := EmitNativeExecutable(p, "native-x86_64-windows", "verify")
+	if err != nil {
+		t.Fatal(err)
+	}
+	exe := t.TempDir() + "\\cleanup.exe"
+	if err := os.WriteFile(exe, result.Bytes, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := exec.Command(exe).Run(); err != nil {
+		t.Fatalf("native cleanup contract failed: %v", err)
+	}
+}
+
+func TestSemanticNativePipelineExecutesCooperativeAsyncContract(t *testing.T) {
+	source := `package main
+var state int64
+func worker() { state = 7 }
+func verify() int64 {
+	go worker()
+	return state - 7
+}
+func main() {}
+`
+	p, err := LowerNativeGo("cooperative-async.go", source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := EmitNativeExecutable(p, "native-x86_64-windows", "verify")
+	if err != nil {
+		t.Fatal(err)
+	}
+	exe := t.TempDir() + "\\cooperative-async.exe"
+	if err := os.WriteFile(exe, result.Bytes, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := exec.Command(exe).Run(); err != nil {
+		t.Fatalf("native cooperative async contract failed: %v", err)
+	}
+}
+
+func TestSemanticNativePipelineExecutesParallelAssignmentContract(t *testing.T) {
+	source := `package main
+func pair() (int64, int64) { return 40, 1 }
+func verify() int64 {
+	x, y := pair()
+	x, y = y, x
+	return (x - 1) + (y - 40)
+}
+func main() {}
+`
+	p, err := LowerNativeGo("parallel-assignment.go", source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := EmitNativeExecutable(p, "native-x86_64-windows", "verify")
+	if err != nil {
+		t.Fatal(err)
+	}
+	exe := t.TempDir() + "\\parallel-assignment.exe"
+	if err := os.WriteFile(exe, result.Bytes, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := exec.Command(exe).Run(); err != nil {
+		t.Fatalf("native parallel assignment contract failed: %v", err)
 	}
 }
 

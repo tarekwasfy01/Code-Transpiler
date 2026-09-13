@@ -52,26 +52,32 @@ type UniversalASTBasis struct {
 }
 
 type UniversalASTDocument struct {
-	SchemaVersion          int                      `json:"schema_version"`
-	BasisSHA256            string                   `json:"basis_sha256"`
-	LanguageProfile        string                   `json:"language_profile"`
-	LanguageFacet          matrixir.Vector          `json:"language_facet"`
-	Projection             string                   `json:"projection,omitempty"`
-	SemanticDocumentSHA256 string                   `json:"semantic_document_sha256,omitempty"`
-	Evaluation             string                   `json:"evaluation,omitempty"`
-	ValueModel             string                   `json:"value_model,omitempty"`
-	IndexBase              int                      `json:"index_base,omitempty"`
-	Types                  SemanticTypeContract     `json:"type_contract,omitempty"`
-	Origin                 SemanticOrigin           `json:"origin,omitempty"`
-	Metadata               map[string]string        `json:"metadata,omitempty"`
-	Extensions             map[string]any           `json:"extensions,omitempty"`
-	Contracts              SemanticContracts        `json:"contracts,omitempty"`
-	Dialects               []SemanticDialect        `json:"dialects,omitempty"`
-	SemanticFeatures       *SemanticFeatureModel    `json:"semantic_features,omitempty"`
-	TypeTable              []SemanticTypeDefinition `json:"type_table,omitempty"`
-	TypeGraph              matrixir.SparseMatrix    `json:"type_graph,omitempty"`
-	TypeRelations          *SemanticTypeRelations   `json:"type_relations,omitempty"`
-	Evidence               SemanticEvidence         `json:"evidence,omitempty"`
+	SchemaVersion int `json:"schema_version"`
+	// ContractSchema is the additive v2 semantic plane. SchemaVersion and
+	// BasisSHA256 continue to identify the stable v1 structural basis so old
+	// documents remain readable while the contract table is introduced.
+	ContractSchema         string                      `json:"contract_schema,omitempty"`
+	BasisSHA256            string                      `json:"basis_sha256"`
+	LanguageProfile        string                      `json:"language_profile"`
+	LanguageFacet          matrixir.Vector             `json:"language_facet"`
+	Projection             string                      `json:"projection,omitempty"`
+	SemanticDocumentSHA256 string                      `json:"semantic_document_sha256,omitempty"`
+	Evaluation             string                      `json:"evaluation,omitempty"`
+	ValueModel             string                      `json:"value_model,omitempty"`
+	IndexBase              int                         `json:"index_base,omitempty"`
+	Types                  SemanticTypeContract        `json:"type_contract,omitempty"`
+	Origin                 SemanticOrigin              `json:"origin,omitempty"`
+	Metadata               map[string]string           `json:"metadata,omitempty"`
+	Extensions             map[string]any              `json:"extensions,omitempty"`
+	Contracts              SemanticContracts           `json:"contracts,omitempty"`
+	Dialects               []SemanticDialect           `json:"dialects,omitempty"`
+	SemanticFeatures       *SemanticFeatureModel       `json:"semantic_features,omitempty"`
+	TypeTable              []SemanticTypeDefinition    `json:"type_table,omitempty"`
+	TypeGraph              matrixir.SparseMatrix       `json:"type_graph,omitempty"`
+	TypeRelations          *SemanticTypeRelations      `json:"type_relations,omitempty"`
+	Evidence               SemanticEvidence            `json:"evidence,omitempty"`
+	ContractTable          []SemanticContract          `json:"contract_table,omitempty"`
+	ContractRefs           []SemanticContractReference `json:"contract_refs,omitempty"`
 	// Surface is the lossless source plane. It carries original bytes only;
 	// semantic lowering continues to use Nodes/Relations as the sole semantic
 	// representation. Same-language preservation can therefore round-trip
@@ -444,6 +450,12 @@ func validateUniversalASTDocument(d *UniversalASTDocument) error {
 				return fmt.Errorf("invalid relation attribute")
 			}
 		}
+	}
+	if err := normalizeUniversalContracts(d); err != nil {
+		return err
+	}
+	if err := validateUniversalContractTable(d); err != nil {
+		return err
 	}
 	return nil
 }

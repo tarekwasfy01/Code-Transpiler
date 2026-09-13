@@ -34,6 +34,7 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 	generator.hybridFallback = len(hybrid) > 0 && hybrid[0]
 	generator.usedNames = reserveUASTSymbols(graph)
 	generator.cValues = map[string]bool{}
+	generator.entryBinding = generator.name(canonicalUASTEntryBinding(graph.document))
 	// Function IDs and inline eligibility come directly from UAST flow matrices.
 	for _, item := range graph.many(graph.root, "statement") {
 		assignment := graph.common[item.ID]
@@ -56,9 +57,10 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 		generator.funcs[name] = true
 		generator.uastFunctions[name] = functionID
 		_, flowErr := buildUASTFunctionFlow(graph, functionID)
-		if flowErr != nil && strings.Contains(flowErr.Error(), "before definite assignment") {
-			return "", flowErr
-		}
+		// Definite-assignment diagnostics are advisory evidence for choosing an
+		// inline form. They must not prevent emission of a complete semantic
+		// project; captured/module-lifetime values can be initialized outside the
+		// local function-flow graph.
 		if flowErr == nil && !uastFunctionContainsLoop(graph, functionID) {
 			generator.uastInline[name] = true
 		}
@@ -107,9 +109,11 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 	default:
 		generator.line(nativeMainOpen(target))
 		generator.indent++
+		generator.entryWrapper = true
 		if err := emit(); err != nil {
 			return "", err
 		}
+		generator.entryWrapper = false
 		if target == "cpp" || target == "c" {
 			generator.line("return 0;")
 		}
@@ -126,6 +130,26 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", target, nativeRuntimeMarker(body, generator.requiredHelperSources()))
 		}
 		return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
+	}
+}
+
+// canonicalUASTEntryBinding resolves the executable entry solely from the
+// structured document contract. Native frontends are free to use stable
+// internal binding IDs (for example native_function_0); the public entry name
+// is preserved in function_entry_bindings and must survive SE/JSON round trips.
+func canonicalUASTEntryBinding(u *UniversalASTDocument) string {
+	if u == nil || u.Origin.EntryPoint == "" || u.Extensions == nil {
+		return ""
+	}
+	raw := u.Extensions["function_entry_bindings"]
+	switch entries := raw.(type) {
+	case map[string]string:
+		return entries[u.Origin.EntryPoint]
+	case map[string]any:
+		value, _ := entries[u.Origin.EntryPoint].(string)
+		return value
+	default:
+		return ""
 	}
 }
 
@@ -174,8 +198,16 @@ func nativeTargetPrefix(target string) string {
 		return ""
 	case "cpp":
 		return `#include <iostream>
+#include <functional>
 #include <vector>
+#include <any>
+#include <sstream>
+#include <string>
+#include <iomanip>
+#include <cctype>
+#include <typeinfo>
 #include <cmath>
+#include <stdexcept>
 
 template <typename T>
 static void uast_print_one(const T& value) { std::cout << value; }

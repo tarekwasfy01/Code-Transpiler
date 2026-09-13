@@ -16,6 +16,16 @@ import (
 // BOMs, normalizes line endings, or rewrites editor text before parsing.
 type TranspileRequest struct {
 	Source, SourceLanguage, TargetLanguage, EntryPoint string
+	// ModuleBaseDir and ModuleStoreRoot make package acquisition deterministic
+	// for API and CLI callers.  Semantic imports are resolved from the durable
+	// store first; a missing explicit package reference may then be acquired
+	// and projected into that store.
+	ModuleBaseDir   string
+	ModuleStoreRoot string
+	EmbedAllModules bool
+	// ModuleEmbeddingMode is "needed" (default), "references", or "all".
+	// EmbedAllModules remains as a compatibility alias for "all".
+	ModuleEmbeddingMode string
 	// DisableRuntimeFallback is opt-in so existing CLI/API callers retain the
 	// established NATIVE -> semantic-runtime -> ERROR order.
 	DisableRuntimeFallback bool
@@ -97,6 +107,25 @@ func TranspileCore(request TranspileRequest) (result TranspileResult, retErr err
 		return TranspileResult{Trace: trace}, wrapped
 	}
 	semantic = p.Semantic
+	if semantic != nil && len(semantic.Origin.Modules) > 0 {
+		backend.NormalizeGoPackageModuleReferences(semantic, request.ModuleBaseDir)
+		resolver, resolveErr := backend.NewUniversalModuleResolver()
+		if resolveErr != nil {
+			return TranspileResult{Trace: trace}, resolveErr
+		}
+		if request.ModuleStoreRoot != "" {
+			resolver.Store.Root = request.ModuleStoreRoot
+			if resolveErr = resolver.Store.Ensure(); resolveErr != nil {
+				return TranspileResult{Trace: trace}, resolveErr
+			}
+		}
+		if resolveErr = resolver.LinkSemanticDependenciesWithOptions(semantic, backend.SemanticModuleLinkOptions{
+			BaseDir: request.ModuleBaseDir, EmbedAll: request.EmbedAllModules,
+			Mode: backend.SemanticModuleEmbeddingMode(request.ModuleEmbeddingMode),
+		}); resolveErr != nil {
+			return TranspileResult{Trace: trace}, resolveErr
+		}
+	}
 	if p.Semantic != nil {
 		if wire, e := p.Semantic.MarshalSemanticJSON(); e == nil {
 			trace.UASTSHA256 = sha256Text(string(wire))
@@ -409,6 +438,17 @@ func SemanticSP(source, code string) ([]byte, error) {
 // TranspileSemanticSP imports SP and emits the requested target using the
 // existing SemanticProgram/UAST backend.
 func TranspileSemanticSP(target string, data []byte) (string, error) {
+	return transpileSemanticSPWithOptions(target, data, TranspileRequest{})
+}
+
+// TranspileSemanticSPWithOptions is the GUI/CLI bridge for semantic documents.
+// It applies the same module-linking contract as TranspileCore, including the
+// EmbedAllModules setting, before emitting the requested target.
+func TranspileSemanticSPWithOptions(target string, data []byte, request TranspileRequest) (string, error) {
+	return transpileSemanticSPWithOptions(target, data, request)
+}
+
+func transpileSemanticSPWithOptions(target string, data []byte, request TranspileRequest) (string, error) {
 	var p *backend.SemanticProgram
 	var err error
 	if len(data) >= 4 && string(data[:4]) == "SPZ2" {
@@ -418,6 +458,25 @@ func TranspileSemanticSP(target string, data []byte) (string, error) {
 	}
 	if err != nil {
 		return "", err
+	}
+	if len(p.Origin.Modules) > 0 {
+		backend.NormalizeGoPackageModuleReferences(p, request.ModuleBaseDir)
+		resolver, resolveErr := backend.NewUniversalModuleResolver()
+		if resolveErr != nil {
+			return "", resolveErr
+		}
+		if request.ModuleStoreRoot != "" {
+			resolver.Store.Root = request.ModuleStoreRoot
+			if resolveErr = resolver.Store.Ensure(); resolveErr != nil {
+				return "", resolveErr
+			}
+		}
+		if resolveErr = resolver.LinkSemanticDependenciesWithOptions(p, backend.SemanticModuleLinkOptions{
+			BaseDir: request.ModuleBaseDir, EmbedAll: request.EmbedAllModules,
+			Mode: backend.SemanticModuleEmbeddingMode(request.ModuleEmbeddingMode),
+		}); resolveErr != nil {
+			return "", resolveErr
+		}
 	}
 	return Emit(target, Program{Source: "semantic", Semantic: p})
 }

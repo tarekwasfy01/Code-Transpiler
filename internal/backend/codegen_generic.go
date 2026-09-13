@@ -41,6 +41,17 @@ type targetGen struct {
 	uastFunctions    map[string]int
 	uastInline       map[string]bool
 	uastActiveInline map[int]bool
+	// breakContexts records the nearest active loop/switch. A switch emitted
+	// as an if-chain has no target-language break construct, so its own break
+	// nodes are consumed while loop breaks retain their native meaning.
+	breakContexts []bool
+	// entryBinding identifies the canonical function binding selected by the
+	// document's entry-point contract. entryWrapper is true while a target's
+	// already-opened native main function is being populated. Together they
+	// let the renderer execute the structured entry body without rediscovering
+	// a source-language function name.
+	entryBinding string
+	entryWrapper bool
 }
 
 // requireHelper records a semantic support requirement before retaining the

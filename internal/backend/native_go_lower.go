@@ -29,17 +29,22 @@ import (
 // No normalized source text is created or fed to the legacy parser.
 // Unsupported syntax is an error, including dead unsupported code.
 func LowerNativeGo(filename, source string) (*SemanticProgram, error) {
-	return lowerNativeGo(filename, source, nil)
+	return GoTypedSyntaxToSemantic(filename, source, nil)
 }
 
 // LowerNativeGoWithDiagnostics runs the same structured Go AST producer as the
 // production frontend, but records every node-local unsupported contract in a
 // separate diagnostic context. No hole is returned to the canonical program.
 func LowerNativeGoWithDiagnostics(filename, source string, diagnostics *DiagnosticContext) (*SemanticProgram, error) {
-	return lowerNativeGo(filename, source, diagnostics)
+	return GoTypedSyntaxToSemantic(filename, source, diagnostics)
 }
 
-func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*SemanticProgram, error) {
+// GoTypedSyntaxToSemantic is the productive compiler boundary for Go. It
+// parses Go syntax with go/ast, resolves symbols/types with go/types, and
+// lowers the resulting typed syntax directly into the existing SemanticProgram
+// representation. No Go-specific secondary IR is introduced; callers below
+// this boundary consume the same canonical SemanticProgram as every frontend.
+func GoTypedSyntaxToSemantic(filename, source string, diagnostics *DiagnosticContext) (*SemanticProgram, error) {
 	fs := gotoken.NewFileSet()
 	file, err := goparser.ParseFile(fs, filename, source, 0)
 	if err != nil {
@@ -68,9 +73,22 @@ func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*Se
 	}
 	info := nativeGoTypeInfo()
 	typeFiles := nativeGoTypecheckFiles(filename, source, file, fs)
-	moduleImporter := nativeGoImporterFor(filename)
-	conf := types.Config{Importer: moduleImporter, Sizes: types.SizesFor("gc", "amd64")}
-	if _, err = conf.Check(packageName, fs, typeFiles, info); err != nil {
+	// A build-constrained file is exported as an isolated witness. Running the
+	// full go/types importer for it can recurse into platform-only packages and
+	// block indefinitely when no matching package context exists. The AST still
+	// supplies declarations and source spans; defer type resolution to an
+	// explicit project compile where the build context is known.
+	buildConstrained := strings.Contains(source, "//go:build") || strings.Contains(source, "// +build")
+	if !buildConstrained {
+		moduleImporter := nativeGoImporterFor(filename)
+		// Match the language version declared by the VirtualDisplays module and
+		// preserve alias/variadic contracts such as []any -> ...interface{}.
+		// Leaving GoVersion empty makes the checker use toolchain-version
+		// defaults, which can disagree with the module's declared semantics.
+		conf := types.Config{Importer: moduleImporter, Sizes: types.SizesFor("gc", "amd64"), GoVersion: "go1.23"}
+		_, err = conf.Check(packageName, fs, typeFiles, info)
+	}
+	if err != nil {
 		// A package-wide check may report an unavailable cgo/external sibling
 		// while still producing complete facts for the requested file. Preserve
 		// that partial structured information and let the lowerer reject only a
@@ -81,7 +99,19 @@ func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*Se
 		}
 		recordNativeGoBoundaryFailure(diagnostics, filename, file, "type.contract", "GO_TYPE_CONTRACT", err)
 	}
-	l := &goScalarLowerer{fs: fs, info: info, symbols: map[types.Object]string{}, types: map[string]SemanticType{}, functions: map[types.Object]string{}, diagnostics: diagnostics, filename: filename}
+	return lowerNativeGoPrepared(filename, source, diagnostics, fs, file, info, typeFiles, packageName, modules, buildConstrained)
+}
+
+// lowerNativeGoPrepared lowers one file from an already parsed and type-checked
+// package. Batch/project export uses this boundary to share one go/types pass
+// across every source file while still emitting one independent SemanticProgram
+// per file.
+func lowerNativeGoPrepared(filename, source string, diagnostics *DiagnosticContext, fs *gotoken.FileSet, file *ast.File, info *types.Info, typeFiles []*ast.File, packageName string, modules []string, buildConstrained bool) (*SemanticProgram, error) {
+	l := &goScalarLowerer{
+		fs: fs, info: info, symbols: map[types.Object]string{}, types: map[string]SemanticType{},
+		functions: map[types.Object]string{}, functionDecls: map[*ast.FuncDecl]string{},
+		functionNames: map[string]string{}, diagnostics: diagnostics, filename: filename,
+	}
 	var main *ast.FuncDecl
 	var helpers []*ast.FuncDecl
 	var initializers []*ast.FuncDecl
@@ -97,15 +127,22 @@ func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*Se
 			typeTable = append(typeTable, SemanticTypeDefinition{Type: nativeGoType(typeName.Type(), map[types.Type]bool{})})
 		}
 	}
-	packageFiles := typeFiles
+	// Sibling files participate in package type checking and symbol resolution,
+	// but this frontend invocation owns exactly the requested source file. Copying
+	// every sibling implementation into every emitted SemanticCompilationUnit
+	// creates N duplicate package bodies, duplicate entry symbols and quadratic
+	// project size. The project loader/linker combines unit summaries and machine
+	// fragments; it must never require duplicated UAST bodies.
+	resolvedPackageFiles := typeFiles
+	packageFiles := []*ast.File{file}
 	// Keep the exact package-resolution decision alongside the semantic
 	// program.  This is structured build context, not source text and not a
 	// second parser: consumers can audit which files and build configuration
 	// contributed declarations without rescanning the project directory.
 	moduleRoot, modulePath, hasModule := nativeGoModuleRoot(filename)
 	buildCtx := nativeGoBuildContext()
-	packageFileNames := make([]string, 0, len(packageFiles))
-	for _, pf := range packageFiles {
+	packageFileNames := make([]string, 0, len(resolvedPackageFiles))
+	for _, pf := range resolvedPackageFiles {
 		if pf == nil || pf.Name == nil {
 			continue
 		}
@@ -115,6 +152,21 @@ func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*Se
 		}
 	}
 	sort.Strings(packageFileNames)
+	if len(packageFileNames) == 0 && moduleRoot != "" {
+		// Some go/ast file sets intentionally omit filename provenance after a
+		// package-wide type check. The module directory remains the authoritative
+		// package boundary, so retain its deterministic source-file inventory.
+		if entries, readErr := os.ReadDir(moduleRoot); readErr == nil {
+			for _, entry := range entries {
+				name := entry.Name()
+				if entry.IsDir() || filepath.Ext(name) != ".go" || strings.HasPrefix(name, ".") || strings.HasSuffix(name, "_test.go") || strings.Contains(name, ".transpiled.") {
+					continue
+				}
+				packageFileNames = append(packageFileNames, filepath.Join(moduleRoot, name))
+			}
+			sort.Strings(packageFileNames)
+		}
+	}
 	for _, packageFile := range packageFiles {
 		for _, decl := range packageFile.Decls {
 			if gen, ok := decl.(*ast.GenDecl); ok {
@@ -139,8 +191,19 @@ func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*Se
 			// init has no callable source binding or entry-point identity. Package
 			// initialization remains compile-time/module metadata in this bounded
 			// executable UAST path and must not poison unrelated declarations.
-			binding := fmt.Sprintf("native_function_%d", len(helpers)+len(initializers))
-			l.functions[info.Defs[fn.Name]] = binding
+			// The AST declaration is the stable identity even when a recoverable
+			// package type-check error leaves go/types without a Def object. A nil
+			// types.Object must never be used as a shared map key: doing so aliases
+			// every unresolved function to the last declaration and destroys the
+			// executable entry/call graph during Semantic serialization.
+			binding := fmt.Sprintf("native_function_%d", len(l.functionDecls))
+			l.functionDecls[fn] = binding
+			if fn.Name != nil && fn.Name.Name != "" {
+				l.functionNames[fn.Name.Name] = binding
+			}
+			if object := info.Defs[fn.Name]; object != nil {
+				l.functions[object] = binding
+			}
 			if fn.Name.Name == "init" {
 				initializers = append(initializers, fn)
 				initializerBindings = append(initializerBindings, binding)
@@ -216,7 +279,7 @@ func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*Se
 		draft.Statements = append(draft.Statements, l.function(main))
 	}
 	for _, fn := range initializers {
-		binding := l.functions[info.Defs[fn.Name]]
+		binding := l.functionBinding(fn)
 		draft.Statements = append(draft.Statements, SemanticStatement{Kind: "expression", Source: l.span(fn), Expression: &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: binding}, Source: l.span(fn)}})
 	}
 	// A Go source file may be a library package with no `main` function.  The
@@ -304,13 +367,13 @@ func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*Se
 	// The backend resolves these names against canonical function bindings.
 	functionNames := map[string]string{}
 	for _, fn := range helpers {
-		functionNames[fn.Name.Name] = l.functions[info.Defs[fn.Name]]
+		functionNames[fn.Name.Name] = l.functionBinding(fn)
 	}
 	if main != nil {
-		functionNames["main"] = l.functions[info.Defs[main.Name]]
+		functionNames["main"] = l.functionBinding(main)
 	}
 	for i, fn := range initializers {
-		functionNames[fmt.Sprintf("init#%d", i)] = l.functions[info.Defs[fn.Name]]
+		functionNames[fmt.Sprintf("init#%d", i)] = l.functionBinding(fn)
 	}
 	if len(initializerBindings) > 0 {
 		program.Extensions["init_order"] = append([]string(nil), initializerBindings...)
@@ -329,7 +392,7 @@ func lowerNativeGo(filename, source string, diagnostics *DiagnosticContext) (*Se
 	if len(helpers) > 0 {
 		names := make([]string, len(helpers))
 		for i, fn := range helpers {
-			names[i] = l.functions[info.Defs[fn.Name]]
+			names[i] = l.functionBinding(fn)
 		}
 		entries := make([][3]int, 0, callGraph.NonZeros())
 		callGraph.Each(func(r, c int, v float64) { entries = append(entries, [3]int{r, c, int(v)}) })
@@ -423,6 +486,14 @@ func nativeGoBoundaryTypecheckError(err error) bool {
 // the bounded single-file behavior.
 func nativeGoTypecheckFiles(filename, source string, current *ast.File, fs *gotoken.FileSet) []*ast.File {
 	files := []*ast.File{current}
+	// Build-constrained files are valid standalone source witnesses, but their
+	// package context depends on the selected GOOS/GOARCH/tags. Loading every
+	// sibling here can trigger recursive module resolution (and effectively
+	// hang isolated semantic-export). Keep the isolated export hermetic; an
+	// explicit project compile still supplies its own unit summaries/index.
+	if strings.Contains(source, "//go:build") || strings.Contains(source, "// +build") {
+		return files
+	}
 	path := nativeGoResolveSourcePath(filename)
 	// A source string passed through the public API is virtual even when its
 	// suggested name happens to exist in the caller's working directory. Only
@@ -450,14 +521,21 @@ func nativeGoTypecheckFiles(filename, source string, current *ast.File, fs *goto
 		if entry.IsDir() || strings.HasPrefix(name, ".") || filepath.Ext(name) != ".go" || strings.HasSuffix(name, "_test.go") || strings.Contains(name, ".transpiled.") {
 			continue
 		}
-		candidate, _ := filepath.Abs(filepath.Join(dir, name))
-		if candidate == currentPath {
-			continue
-		}
+		// Build constraints are semantic package membership.  Ignoring the
+		// MatchFile result admits both runtime_windows_threads.go and
+		// runtime_nonwindows_threads.go on Windows and creates false duplicate
+		// declarations during isolated source export.
 		matched, matchErr := buildContext.MatchFile(dir, name)
 		if matchErr != nil || !matched {
 			continue
 		}
+		candidate, _ := filepath.Abs(filepath.Join(dir, name))
+		if candidate == currentPath {
+			continue
+		}
+		// The explicit extension/build-file filters above are authoritative for
+		// this package-context scan. MatchFile is advisory only: it can report a
+		// false negative for temporary modules outside GOPATH.
 		data, readErr := os.ReadFile(candidate)
 		if readErr != nil {
 			continue
@@ -467,6 +545,43 @@ func nativeGoTypecheckFiles(filename, source string, current *ast.File, fs *goto
 			continue
 		}
 		files = append(files, other)
+	}
+	if len(files) == 1 {
+		// ParseDir is the deterministic fallback for temporary/module
+		// directories where the build-context matcher does not expose sibling
+		// files through its directory view. It still admits only same-package,
+		// non-test Go files and never changes the requested source ownership.
+		packages, parseErr := goparser.ParseDir(fs, dir, func(info os.FileInfo) bool {
+			name := info.Name()
+			if info.IsDir() || filepath.Ext(name) != ".go" || strings.HasPrefix(name, ".") || strings.HasSuffix(name, "_test.go") || strings.Contains(name, ".transpiled.") {
+				return false
+			}
+			matched, matchErr := buildContext.MatchFile(dir, name)
+			return matchErr == nil && matched
+		}, 0)
+		if parseErr == nil {
+			for _, pkg := range packages {
+				if pkg == nil || pkg.Name != current.Name.Name {
+					continue
+				}
+				for _, other := range pkg.Files {
+					if other == current || other.Name == nil || other.Name.Name != current.Name.Name || nativeGoFileUsesC(other) {
+						continue
+					}
+					// ParseDir reparses the requested file, so pointer identity is
+					// insufficient to detect the duplicate. Compare canonical source
+					// filenames before appending a fallback AST.
+					if pos := fs.Position(other.Pos()); pos.Filename != "" {
+						if abs, err := filepath.Abs(pos.Filename); err == nil {
+							if curAbs, curErr := filepath.Abs(path); curErr == nil && strings.EqualFold(abs, curAbs) {
+								continue
+							}
+						}
+					}
+					files = append(files, other)
+				}
+			}
+		}
 	}
 	return files
 }
@@ -490,11 +605,31 @@ type goScalarLowerer struct {
 	loopDepth       int
 	switchDepth     int
 	functions       map[types.Object]string
+	functionDecls   map[*ast.FuncDecl]string
+	functionNames   map[string]string
 	inFunction      bool
 	integerFeatures map[string]bool
 	diagnostics     *DiagnosticContext
 	filename        string
 	resultTempSeq   int
+}
+
+func (l *goScalarLowerer) functionBinding(fn *ast.FuncDecl) string {
+	if l == nil || fn == nil {
+		return ""
+	}
+	if binding := l.functionDecls[fn]; binding != "" {
+		return binding
+	}
+	if fn.Name != nil {
+		if object := l.info.Defs[fn.Name]; object != nil {
+			if binding := l.functions[object]; binding != "" {
+				return binding
+			}
+		}
+		return l.functionNames[fn.Name.Name]
+	}
+	return ""
 }
 
 func cloneSemanticAttributes(in map[string]any) map[string]any {
@@ -525,17 +660,60 @@ func (i nativeGoFmtImporter) Import(path string) (*types.Package, error) {
 	pkg := types.NewPackage("fmt", "fmt")
 	anyType := types.NewInterfaceType(nil, nil)
 	anyType.Complete()
-	params := types.NewTuple(types.NewVar(gotoken.NoPos, pkg, "a", types.NewSlice(anyType)))
+	variadicArgs := types.NewSlice(anyType)
+	argsOnly := types.NewTuple(types.NewVar(gotoken.NoPos, pkg, "a", variadicArgs))
+	formatAndArgs := types.NewTuple(
+		types.NewVar(gotoken.NoPos, pkg, "format", types.Typ[types.String]),
+		types.NewVar(gotoken.NoPos, pkg, "a", variadicArgs),
+	)
+	// Keep the synthetic fmt package structurally accurate for code that uses
+	// io.Writer. Compiler packages such as cmd/compile/internal/syntax call
+	// fmt.Fprintf(dumper, ...); treating Fprintf like Printf makes valid Go
+	// compiler source fail package type checking before it can reach UAST.
+	delegate := i.delegate
+	if delegate == nil {
+		delegate = importer.Default()
+	}
+	ioPackage, ioErr := delegate.Import("io")
+	if ioErr != nil {
+		return nil, fmt.Errorf("resolve fmt writer contract: %w", ioErr)
+	}
+	writerObject := ioPackage.Scope().Lookup("Writer")
+	if writerObject == nil {
+		return nil, fmt.Errorf("resolve fmt writer contract: io.Writer is missing")
+	}
+	writerType := writerObject.Type()
+	writerAndArgs := types.NewTuple(
+		types.NewVar(gotoken.NoPos, pkg, "w", writerType),
+		types.NewVar(gotoken.NoPos, pkg, "a", variadicArgs),
+	)
+	writerFormatAndArgs := types.NewTuple(
+		types.NewVar(gotoken.NoPos, pkg, "w", writerType),
+		types.NewVar(gotoken.NoPos, pkg, "format", types.Typ[types.String]),
+		types.NewVar(gotoken.NoPos, pkg, "a", variadicArgs),
+	)
 	printResults := types.NewTuple(types.NewVar(gotoken.NoPos, pkg, "n", types.Typ[types.Int]), types.NewVar(gotoken.NoPos, pkg, "err", types.Universe.Lookup("error").Type()))
 	stringResult := types.NewTuple(types.NewVar(gotoken.NoPos, pkg, "s", types.Typ[types.String]))
 	errorResult := types.NewTuple(types.NewVar(gotoken.NoPos, pkg, "err", types.Universe.Lookup("error").Type()))
-	for _, name := range []string{"Println", "Printf", "Print", "Fprintln", "Fprintf", "Fprint"} {
-		pkg.Scope().Insert(types.NewFunc(gotoken.NoPos, pkg, name, types.NewSignatureType(nil, nil, nil, params, printResults, true)))
+	for _, name := range []string{"Println", "Print"} {
+		pkg.Scope().Insert(types.NewFunc(gotoken.NoPos, pkg, name, types.NewSignatureType(nil, nil, nil, argsOnly, printResults, true)))
 	}
-	for _, name := range []string{"Sprint", "Sprintf", "Sprintln"} {
-		pkg.Scope().Insert(types.NewFunc(gotoken.NoPos, pkg, name, types.NewSignatureType(nil, nil, nil, params, stringResult, true)))
+	for _, name := range []string{"Fprintln", "Fprint"} {
+		pkg.Scope().Insert(types.NewFunc(gotoken.NoPos, pkg, name, types.NewSignatureType(nil, nil, nil, writerAndArgs, printResults, true)))
 	}
-	pkg.Scope().Insert(types.NewFunc(gotoken.NoPos, pkg, "Errorf", types.NewSignatureType(nil, nil, nil, params, errorResult, true)))
+	for _, name := range []string{"Printf"} {
+		pkg.Scope().Insert(types.NewFunc(gotoken.NoPos, pkg, name, types.NewSignatureType(nil, nil, nil, formatAndArgs, printResults, true)))
+	}
+	pkg.Scope().Insert(types.NewFunc(gotoken.NoPos, pkg, "Fprintf", types.NewSignatureType(nil, nil, nil, writerFormatAndArgs, printResults, true)))
+	for _, name := range []string{"Sprint", "Sprintln"} {
+		pkg.Scope().Insert(types.NewFunc(gotoken.NoPos, pkg, name, types.NewSignatureType(nil, nil, nil, argsOnly, stringResult, true)))
+	}
+	pkg.Scope().Insert(types.NewFunc(gotoken.NoPos, pkg, "Sprintf", types.NewSignatureType(nil, nil, nil, formatAndArgs, stringResult, true)))
+	errorFormatAndArgs := types.NewTuple(
+		types.NewVar(gotoken.NoPos, pkg, "format", types.Typ[types.String]),
+		types.NewVar(gotoken.NoPos, pkg, "a", variadicArgs),
+	)
+	pkg.Scope().Insert(types.NewFunc(gotoken.NoPos, pkg, "Errorf", types.NewSignatureType(nil, nil, nil, errorFormatAndArgs, errorResult, true)))
 	pkg.MarkComplete()
 	return pkg, nil
 }
@@ -547,15 +725,25 @@ func (i nativeGoFmtImporter) Import(path string) (*types.Package, error) {
 // source-language special case or dropping the recursive relation.
 func (l *goScalarLowerer) orderFunctions(functions []*ast.FuncDecl) ([]*ast.FuncDecl, matrixir.SparseMatrix, error) {
 	indices := map[types.Object]int{}
+	nameIndices := map[string]int{}
 	for i, fn := range functions {
-		indices[l.info.Defs[fn.Name]] = i
+		if object := l.info.Defs[fn.Name]; object != nil {
+			indices[object] = i
+		}
+		if fn.Name != nil {
+			nameIndices[fn.Name.Name] = i
+		}
 	}
 	graph := matrixir.NewSparseMatrix(len(functions), len(functions))
 	for i, fn := range functions {
 		ast.Inspect(fn.Body, func(n ast.Node) bool {
 			if call, ok := n.(*ast.CallExpr); ok {
 				if id, ok := call.Fun.(*ast.Ident); ok {
-					if j, ok := indices[l.info.Uses[id]]; ok {
+					j, ok := indices[l.info.Uses[id]]
+					if !ok {
+						j, ok = nameIndices[id.Name]
+					}
+					if ok {
 						graph.Set(i, j, 1)
 					}
 				}
@@ -626,7 +814,11 @@ func (l *goScalarLowerer) function(fn *ast.FuncDecl) SemanticStatement {
 				if object != nil {
 					receiverType = object.Type()
 				}
-				parameter := SemanticParameter{Name: symbol, Mode: "receiver", Passing: "receiver", Type: nativeGoType(receiverType, map[types.Type]bool{})}
+				parameterType := nativeGoType(receiverType, map[types.Type]bool{})
+				if isUnknownSemanticType(parameterType) {
+					parameterType = nativeGoASTSemanticType(field.Type)
+				}
+				parameter := SemanticParameter{Name: symbol, Mode: "receiver", Passing: "receiver", Type: parameterType}
 				parameter.Type.Reference = parameter.Type.Identity != ""
 				function.Parameters = append(function.Parameters, parameter)
 			}
@@ -650,7 +842,11 @@ func (l *goScalarLowerer) function(fn *ast.FuncDecl) SemanticStatement {
 				if object != nil {
 					parameterType = object.Type()
 				}
-				parameter := SemanticParameter{Name: symbol, Type: nativeGoType(parameterType, map[types.Type]bool{})}
+				semanticType := nativeGoType(parameterType, map[types.Type]bool{})
+				if isUnknownSemanticType(semanticType) {
+					semanticType = nativeGoASTSemanticType(field.Type)
+				}
+				parameter := SemanticParameter{Name: symbol, Type: semanticType}
 				variadic := signature.Variadic() && paramIndex == signature.Params().Len()-1
 				if variadic {
 					parameter.Mode, parameter.Passing = "variadic", "variadic"
@@ -676,7 +872,7 @@ func (l *goScalarLowerer) function(fn *ast.FuncDecl) SemanticStatement {
 	if signature.Results().Len() == 0 {
 		function.Body.Statements = append(function.Body.Statements, SemanticStatement{Kind: "return", Source: l.span(fn.Body)})
 	}
-	statement := SemanticStatement{Kind: "assign", Name: l.functions[l.info.Defs[fn.Name]], AssignOp: "<-", Source: l.span(fn), Expression: &SemanticExpression{Kind: "function", Function: function, Source: l.span(fn)}}
+	statement := SemanticStatement{Kind: "assign", Name: l.functionBinding(fn), AssignOp: "<-", Source: l.span(fn), Expression: &SemanticExpression{Kind: "function", Function: function, Source: l.span(fn)}}
 	statement.Attributes = map[string]any{"go_signature": nativeGoType(signature, map[types.Type]bool{}), "variadic": signature.Variadic()}
 	parameterContracts := make([]any, 0, len(function.Parameters))
 	for _, parameter := range function.Parameters {
@@ -698,7 +894,23 @@ func (l *goScalarLowerer) function(fn *ast.FuncDecl) SemanticStatement {
 		results := make([]any, 0, signature.Results().Len())
 		for i := 0; i < signature.Results().Len(); i++ {
 			result := signature.Results().At(i)
-			results = append(results, map[string]any{"name": result.Name(), "type": nativeGoType(result.Type(), map[types.Type]bool{})})
+			resultType := nativeGoType(result.Type(), map[types.Type]bool{})
+			if isUnknownSemanticType(resultType) && fn.Type.Results != nil {
+				flat := 0
+				for _, field := range fn.Type.Results.List {
+					count := len(field.Names)
+					if count == 0 {
+						count = 1
+					}
+					for j := 0; j < count; j++ {
+						if flat == i {
+							resultType = nativeGoASTSemanticType(field.Type)
+						}
+						flat++
+					}
+				}
+			}
+			results = append(results, map[string]any{"name": result.Name(), "type": resultType})
 		}
 		statement.Attributes["results"] = results
 	}
@@ -739,7 +951,16 @@ func materializeFunctionCleanup(body SemanticStatement) SemanticStatement {
 	inject = func(stmt SemanticStatement) SemanticStatement {
 		switch stmt.Kind {
 		case "return":
-			prefix := reverse()
+			// Go evaluates a return expression before running deferred calls.
+			// Materialize that value in a synthetic binding so cleanup statements
+			// cannot observe a different state and overwrite the return register.
+			prefix := make([]SemanticStatement, 0, len(cleanups)+2)
+			if stmt.Expression != nil {
+				name := fmt.Sprintf("__defer_result_%d", len(cleanups))
+				prefix = append(prefix, SemanticStatement{Kind: "assign", Name: name, AssignOp: "<-", Expression: stmt.Expression, Source: stmt.Source, Attributes: map[string]any{"synthetic": true, "evaluate_once": true}})
+				stmt.Expression = &SemanticExpression{Kind: "identifier", Name: name, Source: stmt.Source}
+			}
+			prefix = append(prefix, reverse()...)
 			prefix = append(prefix, stmt)
 			return SemanticStatement{Kind: "block", Source: stmt.Source, Statements: prefix}
 		case "block":
@@ -830,6 +1051,69 @@ func syntheticGoSignature(fn *ast.FuncDecl) *types.Signature {
 		_, variadic = fn.Type.Params.List[len(fn.Type.Params.List)-1].Type.(*ast.Ellipsis)
 	}
 	return types.NewSignatureType(nil, nil, nil, params, results, variadic)
+}
+
+// nativeGoASTSemanticType preserves the callable shape when go/types returns
+// Invalid for a declaration. It is a syntax-level type contract only; names
+// and selectors stay unknown until a resolver proves their identity.
+func nativeGoASTSemanticType(expr ast.Expr) SemanticType {
+	switch x := expr.(type) {
+	case *ast.Ident:
+		name := x.Name
+		switch name {
+		case "bool":
+			return SemanticType{Kind: "boolean", TypeOrigin: "explicit"}
+		case "string":
+			return SemanticType{Kind: "string", TypeOrigin: "explicit"}
+		case "error":
+			return SemanticType{Kind: "interface", Name: "error", TypeOrigin: "explicit"}
+		case "int", "int8", "int16", "int32", "int64":
+			bits := 64
+			if len(name) > 3 {
+				if parsed, err := strconv.Atoi(name[3:]); err == nil {
+					bits = parsed
+				}
+			}
+			signed := true
+			return SemanticType{Kind: "integer", Bits: bits, Signed: &signed, TypeOrigin: "explicit"}
+		case "uint", "uint8", "uint16", "uint32", "uint64", "uintptr":
+			bits := 64
+			if name != "uint" && name != "uintptr" {
+				if parsed, err := strconv.Atoi(name[4:]); err == nil {
+					bits = parsed
+				}
+			}
+			unsigned := false
+			return SemanticType{Kind: "integer", Bits: bits, Signed: &unsigned, TypeOrigin: "explicit"}
+		case "float32", "float64":
+			bits := 64
+			if name == "float32" {
+				bits = 32
+			}
+			return SemanticType{Kind: "float", Bits: bits, IEEE754: true, TypeOrigin: "explicit"}
+		}
+	case *ast.ArrayType:
+		element := nativeGoASTSemanticType(x.Elt)
+		if x.Len == nil {
+			return SemanticType{Kind: "slice", Element: &element, TypeOrigin: "explicit"}
+		}
+		return SemanticType{Kind: "array", Element: &element, TypeOrigin: "explicit"}
+	case *ast.MapType:
+		key := nativeGoASTSemanticType(x.Key)
+		value := nativeGoASTSemanticType(x.Value)
+		return SemanticType{Kind: "map", Key: &key, Value: &value, TypeOrigin: "explicit"}
+	case *ast.Ellipsis:
+		element := nativeGoASTSemanticType(x.Elt)
+		return SemanticType{Kind: "slice", Element: &element, TypeOrigin: "explicit"}
+	case *ast.StarExpr:
+		element := nativeGoASTSemanticType(x.X)
+		return SemanticType{Kind: "pointer", Reference: true, Element: &element, TypeOrigin: "explicit"}
+	case *ast.InterfaceType:
+		return SemanticType{Kind: "interface", TypeOrigin: "explicit"}
+	case *ast.StructType:
+		return SemanticType{Kind: "struct", TypeOrigin: "explicit"}
+	}
+	return SemanticType{Kind: "unknown", TypeOrigin: "unknown"}
 }
 
 func (l *goScalarLowerer) helperCall(call *ast.CallExpr) *SemanticExpression {
@@ -994,6 +1278,21 @@ func (l *goScalarLowerer) name(n *ast.Ident) string {
 	if object == nil {
 		return "native_var_" + n.Name
 	}
+	if variable, ok := object.(*types.Var); ok && variable.Pkg() != nil && variable.Parent() == variable.Pkg().Scope() {
+		// Package storage has a stable project identity. Per-invocation ordinal
+		// names are suitable only for locals; using them for globals prevents a
+		// separately lowered unit from referring to the defining data symbol.
+		return n.Name
+	}
+	if _, ok := object.(*types.Func); ok {
+		// A function reference is a project-linkable symbol identity. Per-file
+		// synthetic names such as native_symbol_foo cannot match the defining
+		// unit's exported source binding and therefore make correct cross-unit
+		// relocation impossible. Package qualification is retained separately by
+		// the module/symbol contract; the package-local linker key is the declared
+		// function name.
+		return n.Name
+	}
 	if _, ok := object.(*types.Var); !ok {
 		// Constants, builtins and package objects are still valid symbolic
 		// references in the canonical expression contract.
@@ -1086,12 +1385,47 @@ func (l *goScalarLowerer) supportedValueSeen(t types.Type, seen map[types.Type]b
 // target-specific representation once; the source index is never forwarded as
 // executable Go text.
 func (l *goScalarLowerer) canonicalGoIndex(n ast.Expr) *SemanticExpression {
+	// Index positions are an integer contract at the canonical boundary. Do
+	// not let an untyped Go constant fall through the generic binary64 value
+	// model: the native selector would then add IEEE bits and bounds-check a
+	// huge number. The same typed operation is valid for every frontend that
+	// projects zero-based positions into the one-based UAST domain.
+	indexType := integerType(64, true)
+	if typ, ok := nativeFixedInteger(l.info.TypeOf(n)); ok {
+		indexType = typ
+	}
+	var index *SemanticExpression
+	if nativeGoIntegerFastPathExpr(n) {
+		index = l.integerExpr(n, indexType)
+	}
+	if index == nil {
+		// Keep source-level selector/dereference/type-assertion forms intact;
+		// their own structural expression cases retain the integer type contract.
+		index = l.expr(n)
+	}
+	one := l.integerOperation(n, "integer.literal", indexType)
+	one.Operation.Text = "1"
+	// Keep the index-base projection as the ordinary structural binary node.
+	// Its operands are still typed integer operations, so the native machine
+	// path receives exact integer values while direct source targets can use
+	// their ordinary scalar `index + 1` syntax without requiring a target
+	// runtime integer dispatcher.
 	return &SemanticExpression{
-		Kind: "binary", Operator: "+", Left: l.expr(n),
-		Right:  &SemanticExpression{Kind: "literal", LiteralKind: "number", Text: "1", Source: l.span(n)},
-		Source: l.span(n),
+		Kind: "binary", Operator: "+", Left: index, Right: one,
+		Type: indexType, TypeOrigin: "inferred",
+		Attributes: map[string]any{"canonical_index": true}, Source: l.span(n),
 	}
 }
+
+// indexArgument preserves the key contract for maps while applying the
+// canonical positional-index contract only to sequence-like aggregates.
+func (l *goScalarLowerer) indexArgument(base ast.Expr, index ast.Expr) *SemanticExpression {
+	if l.indexIsPositional(base) {
+		return l.canonicalGoIndex(index)
+	}
+	return l.expr(index)
+}
+
 func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 	// `len` has Go's architecture-sized integer result, but semantically it is
 	// the canonical sequence-length operation.  Handle this builtin before the
@@ -1102,18 +1436,29 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 			return &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "length"}, Arguments: []SemanticArgument{{Value: l.expr(call.Args[0])}}, Source: l.span(call)}
 		}
 	}
-	if typ, ok := nativeFixedInteger(l.info.TypeOf(n)); ok {
-		return l.integerExpr(n, typ)
+	// Calls must remain structured call expressions even when their result type
+	// is an integer.  The integer fast path is for arithmetic/comparison
+	// expressions; applying it to a typed CallExpr erases the callee and its
+	// ABI/variadic contract before machine lowering gets a chance to emit the
+	// call.  Keep the dispatch structural and let integerExpr handle only the
+	// non-call integer forms.
+	if _, isCall := n.(*ast.CallExpr); !isCall {
+		if typ, ok := nativeFixedInteger(l.info.TypeOf(n)); ok && nativeGoIntegerFastPathExpr(n) {
+			return l.integerExpr(n, typ)
+		}
 	}
 	if binary, ok := n.(*ast.BinaryExpr); ok {
 		if typ, ok := nativeFixedInteger(l.info.TypeOf(binary.X)); ok {
-			op := map[string]string{"==": "integer.equal", "!=": "integer.not_equal", "<": "integer.less", "<=": "integer.less_equal", ">": "integer.greater", ">=": "integer.greater_equal"}[binary.Op.String()]
+			op := nativeGoIRIntegerComparison(binary.Op.String())
 			if op != "" {
 				return l.integerOperation(n, op, typ, l.expr(binary.X), l.expr(binary.Y))
 			}
 		}
 	}
 	e := &SemanticExpression{Source: l.span(n)}
+	if typ := nativeGoType(l.info.TypeOf(n), map[types.Type]bool{}); !isUnknownSemanticType(typ) {
+		e.Type, e.TypeOrigin = typ, typ.TypeOrigin
+	}
 	if tv, ok := l.info.Types[n]; ok && tv.Value != nil {
 		e.Kind = "literal"
 		switch tv.Value.Kind() {
@@ -1200,6 +1545,10 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 		return l.helperCall(x)
 	case *ast.CompositeLit:
 		e.Kind = "aggregate"
+		if isUnknownSemanticType(e.Type) {
+			e.Type = nativeGoASTSemanticType(x.Type)
+			e.TypeOrigin = e.Type.TypeOrigin
+		}
 		for _, a := range x.Elts {
 			e.Arguments = append(e.Arguments, SemanticArgument{Value: l.expr(a)})
 		}
@@ -1207,10 +1556,12 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 	case *ast.IndexExpr:
 		e.Kind = "index"
 		e.Value = l.expr(x.X)
-		e.Arguments = []SemanticArgument{{Value: l.canonicalGoIndex(x.Index)}}
+		e.Arguments = []SemanticArgument{{Value: l.indexArgument(x.X, x.Index)}}
 		return e
 	case *ast.SliceExpr:
-		e.Kind = "index"
+		// Preserve the canonical slice family. A slice carries two optional
+		// ordered bounds and must not be collapsed into a one-index read.
+		e.Kind = "slice"
 		e.Value = l.expr(x.X)
 		if x.Low != nil {
 			e.Arguments = append(e.Arguments, SemanticArgument{Value: l.expr(x.Low)})
@@ -1254,13 +1605,22 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 		}
 		e.Name = l.name(x)
 	case *ast.SelectorExpr:
-		// Selectors remain ordinary callee expressions; the shared call
-		// projector normalizes qualified names through its target contract.
-		e.Kind = "identifier"
-		if pkg, ok := x.X.(*ast.Ident); ok {
-			e.Name = pkg.Name + "." + x.Sel.Name
-		} else {
+		// A typed selection is a structural member access. Preserve the
+		// receiver and selected field as graph operands so the common UAST
+		// member-layout contract can project it without source-language text.
+		// Package-qualified names are not member layouts; they remain symbolic
+		// callees and are resolved by the generic external ABI contract.
+		if l.info.Selections[x] != nil {
+			e.Kind = "member"
+			e.Value = l.expr(x.X)
 			e.Name = x.Sel.Name
+		} else {
+			e.Kind = "identifier"
+			if pkg, ok := x.X.(*ast.Ident); ok {
+				e.Name = pkg.Name + "." + x.Sel.Name
+			} else {
+				e.Name = x.Sel.Name
+			}
 		}
 	case *ast.StarExpr:
 		e.Kind = "unary"
@@ -1340,19 +1700,28 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 			// canonical program so every target projector observes the same
 			// evaluation and extraction order.
 			if len(x.Rhs) != 1 {
-				// Parallel assignment with matching arity is an ordered product;
-				// retain all expressions and project each position independently.
+				// Every multi-LHS assignment is parallel in Go: all RHS values
+				// are evaluated before any target is written.  Materialize each
+				// value in a synthetic binding first, then perform the stores from
+				// those bindings.  This also covers `x, y = y, x`; lowering the
+				// pairs directly would overwrite x before y is read.
 				if len(x.Rhs) == len(x.Lhs) {
-					block := SemanticStatement{Kind: "block", Source: l.span(n)}
+					parallel := SemanticStatement{Kind: "block", Source: l.span(n)}
+					temps := make([]string, len(x.Rhs))
 					for i, rhs := range x.Rhs {
-						lhs, ok := x.Lhs[i].(*ast.Ident)
-						if !ok {
-							block.Statements = append(block.Statements, SemanticStatement{Kind: "expression", Expression: &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "__assign_target"}, Arguments: []SemanticArgument{{Value: l.expr(x.Lhs[i])}, {Value: l.expr(rhs)}}}})
-							continue
-						}
-						block.Statements = append(block.Statements, SemanticStatement{Kind: "assign", Name: l.name(lhs), AssignOp: "<-", Expression: l.expr(rhs), Source: l.span(x.Lhs[i])})
+						temps[i] = fmt.Sprintf("native_parallel_%d_%d", l.resultTempSeq, i)
+						parallel.Statements = append(parallel.Statements, SemanticStatement{Kind: "assign", Name: temps[i], AssignOp: "<-", Source: l.span(rhs), Expression: l.expr(rhs), Attributes: map[string]any{"synthetic": true, "evaluate_once": true}})
 					}
-					s = block
+					for i, lhs := range x.Lhs {
+						value := &SemanticExpression{Kind: "identifier", Name: temps[i], Source: l.span(lhs)}
+						if ident, yes := lhs.(*ast.Ident); yes {
+							parallel.Statements = append(parallel.Statements, SemanticStatement{Kind: "assign", Name: l.name(ident), AssignOp: "<-", Source: l.span(lhs), Expression: value})
+						} else {
+							parallel.Statements = append(parallel.Statements, SemanticStatement{Kind: "expression", Source: l.span(lhs), Expression: &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "__assign_target"}, Arguments: []SemanticArgument{{Value: l.expr(lhs)}, {Value: value}}}})
+						}
+					}
+					l.resultTempSeq++
+					s = parallel
 					break
 				}
 				l.fail(n, "multiple RHS expressions")
@@ -1396,6 +1765,28 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 			break
 		}
 		if len(x.Lhs) != 1 || len(x.Rhs) != 1 {
+			if len(x.Lhs) == len(x.Rhs) && len(x.Lhs) > 1 {
+				// Go evaluates all right-hand sides before writing any left-hand
+				// target. Preserve that contract as an explicit temporary product;
+				// the native selector then performs ordinary ordered stores.
+				parallel := SemanticStatement{Kind: "block", Source: l.span(n)}
+				temps := make([]string, len(x.Rhs))
+				for i, rhs := range x.Rhs {
+					temps[i] = fmt.Sprintf("native_parallel_%d_%d", l.resultTempSeq, i)
+					parallel.Statements = append(parallel.Statements, SemanticStatement{Kind: "assign", Name: temps[i], AssignOp: "<-", Source: l.span(rhs), Expression: l.expr(rhs), Attributes: map[string]any{"synthetic": true, "evaluate_once": true}})
+				}
+				for i, lhs := range x.Lhs {
+					value := &SemanticExpression{Kind: "identifier", Name: temps[i], Source: l.span(lhs)}
+					if ident, yes := lhs.(*ast.Ident); yes {
+						parallel.Statements = append(parallel.Statements, SemanticStatement{Kind: "assign", Name: l.name(ident), AssignOp: "<-", Source: l.span(lhs), Expression: value})
+					} else {
+						parallel.Statements = append(parallel.Statements, SemanticStatement{Kind: "expression", Source: l.span(lhs), Expression: &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "__assign_target"}, Arguments: []SemanticArgument{{Value: l.expr(lhs)}, {Value: value}}}})
+					}
+				}
+				l.resultTempSeq++
+				s = parallel
+				break
+			}
 			l.fail(n, "parallel or compound assignment")
 			break
 		}
@@ -1403,7 +1794,7 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 		if !ok {
 			if idx, yes := x.Lhs[0].(*ast.IndexExpr); yes {
 				s.Kind = "expression"
-				s.Expression = &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "__index_set"}, Arguments: []SemanticArgument{{Value: l.expr(idx.X)}, {Value: l.canonicalGoIndex(idx.Index)}, {Value: l.expr(x.Rhs[0])}}, Source: l.span(n)}
+				s.Expression = &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "__index_set"}, Arguments: []SemanticArgument{{Value: l.expr(idx.X)}, {Value: l.indexArgument(idx.X, idx.Index)}, {Value: l.expr(x.Rhs[0])}}, Source: l.span(n)}
 				break
 			}
 			if sel, yes := x.Lhs[0].(*ast.SelectorExpr); yes {
@@ -1485,7 +1876,13 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 		// representation is a later legalization concern, never a frontend parse
 		// failure.
 		if object != nil {
-			l.types[l.name(ident)] = nativeGoType(object.Type(), map[types.Type]bool{})
+			typ := nativeGoType(object.Type(), map[types.Type]bool{})
+			l.types[l.name(ident)] = typ
+			// A local declaration is represented by the canonical assignment
+			// contract, but its declared type must remain on that statement so
+			// downstream UAST execution can establish exact-width values.
+			s.Type = typ
+			s.TypeOrigin = typ.TypeOrigin
 		}
 		s.Kind = "assign"
 		s.AssignOp = "<-"
@@ -1563,9 +1960,9 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 				if x.Tok == gotoken.DEC {
 					op = "-"
 				}
-				idxValue := &SemanticExpression{Kind: "index", Value: l.expr(idx.X), Arguments: []SemanticArgument{{Value: l.canonicalGoIndex(idx.Index)}}}
+				idxValue := &SemanticExpression{Kind: "index", Value: l.expr(idx.X), Arguments: []SemanticArgument{{Value: l.indexArgument(idx.X, idx.Index)}}}
 				updated := &SemanticExpression{Kind: "binary", Operator: op, Left: idxValue, Right: &SemanticExpression{Kind: "literal", LiteralKind: "number", Text: "1"}}
-				s.Expression = &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "__index_set"}, Arguments: []SemanticArgument{{Value: l.expr(idx.X)}, {Value: l.canonicalGoIndex(idx.Index)}, {Value: updated}}}
+				s.Expression = &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "__index_set"}, Arguments: []SemanticArgument{{Value: l.expr(idx.X)}, {Value: l.indexArgument(idx.X, idx.Index)}, {Value: updated}}}
 				break
 			}
 			if sel, yes := x.X.(*ast.SelectorExpr); yes {

@@ -115,7 +115,7 @@ func TestNativeFunctions(t *testing.T) {
 	}
 }
 
-func TestNativeFunctionBoundaries(t *testing.T) {
+func TestNativeFunctionBoundariesAreStructurallyAccepted(t *testing.T) {
 	for _, source := range []string{
 		`package main; func a(){defer a()};func main(){a()}`,
 		`package main; func a(x ...string){};func main(){a("x")}`,
@@ -123,8 +123,13 @@ func TestNativeFunctionBoundaries(t *testing.T) {
 		`package main; func a()(bool,string){return true,"x"};func main(){a()}`,
 		`package main; func a(x int){};func main(){a(1)}`,
 	} {
-		if _, err := LowerNativeGo("unsupported.go", source); err == nil {
-			t.Errorf("accepted unsupported function: %s", source)
+		p, err := LowerNativeGo("supported.go", source)
+		if err != nil {
+			t.Errorf("rejected structurally supported function: %v", err)
+			continue
+		}
+		if p.UniversalAST == nil || len(p.UniversalAST.Nodes) == 0 {
+			t.Errorf("supported function produced no canonical UAST: %s", source)
 		}
 	}
 	p, err := LowerNativeGo("graph.go", `package main;func a(){b()};func b(){};func main(){a()}`)

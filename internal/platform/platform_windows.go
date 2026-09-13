@@ -20,26 +20,43 @@ const (
 	threadPriorityAboveNormal = uintptr(1)
 )
 
-// SetPath elevates once and adds the executable directory to the machine PATH.
+// SetPath installs the sp.cmd alias and adds its directory to the per-user
+// PATH synchronously.  A user PATH is sufficient for the CLI and avoids an
+// asynchronous elevation race where `sp` was unavailable immediately after
+// the command returned.
 func SetPath(exe string) error {
-	dir, err := filepath.Abs(filepath.Dir(exe))
+	var err error
+	exe, err = filepath.Abs(exe)
 	if err != nil {
 		return err
 	}
-	// Install the documented `sp` command beside the executable.  PATH then
-	// exposes both codetranspiler.exe and this stable command alias.
-	name := filepath.Base(exe)
-	shim := filepath.Join(dir, "sp.cmd")
-	shimText := "@echo off\r\n\"%~dp0" + name + "\" %*\r\n"
-	// The install directory may require elevation, so a local write is only a
-	// fast path; the elevated command below writes it again when necessary.
-	_ = os.WriteFile(shim, []byte(shimText), 0644)
-	q := strings.ReplaceAll(dir, "'", "''")
-	qe := strings.ReplaceAll(exe, "'", "''")
-	qs := strings.ReplaceAll(shim, "'", "''")
-	script := "$d='" + q + "';$e='" + qe + "';$s='" + qs + "';Set-Content -LiteralPath $s -Value ('@echo off`r`n\"%~dp0' + (Split-Path -Leaf $e) + '\" %*`r`n') -Encoding ASCII;$p=[Environment]::GetEnvironmentVariable('Path','Machine');if(-not (($p -split ';') -contains $d)){[Environment]::SetEnvironmentVariable('Path',(($p.TrimEnd(';')+';'+$d).Trim(';')),'Machine')}"
-	arg := "-NoProfile -Command \"" + strings.ReplaceAll(script, "\"", "\\\"") + "\""
-	return exec.Command("powershell.exe", "-NoProfile", "-Command", "Start-Process powershell.exe -Verb RunAs -ArgumentList '"+strings.ReplaceAll(arg, "'", "''")+"'").Run()
+	// Keep the shim writable and stable even when the executable is installed
+	// under a protected directory.  It points at the concrete EXE path rather
+	// than relying on the caller's working directory.
+	shimDir := filepath.Join(os.Getenv("LOCALAPPDATA"), "CodeTranspiler")
+	if shimDir == "CodeTranspiler" {
+		shimDir, _ = os.UserConfigDir()
+		shimDir = filepath.Join(shimDir, "CodeTranspiler")
+	}
+	if err := os.MkdirAll(shimDir, 0755); err != nil {
+		return err
+	}
+	shim := filepath.Join(shimDir, "sp.cmd")
+	quotedExe := strings.ReplaceAll(exe, "\"", "\"\"")
+	shimText := "@echo off\r\n\"" + quotedExe + "\" %*\r\n"
+	if err := os.WriteFile(shim, []byte(shimText), 0644); err != nil {
+		return err
+	}
+	q := strings.ReplaceAll(shimDir, "'", "''")
+	script := "$d='" + q + "';$p=[Environment]::GetEnvironmentVariable('Path','User');if(-not (($p -split ';') -contains $d)){[Environment]::SetEnvironmentVariable('Path',(($p.TrimEnd(';')+';'+$d).Trim(';')),'User')}"
+	if err := exec.Command("powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script).Run(); err != nil {
+		return err
+	}
+	// Make the alias available to commands launched from this process too.
+	if current := os.Getenv("Path"); !strings.Contains(";"+strings.ToLower(current)+";", ";"+strings.ToLower(shimDir)+";") {
+		_ = os.Setenv("Path", strings.Trim(current, ";")+";"+shimDir)
+	}
+	return nil
 }
 
 var (
@@ -145,6 +162,40 @@ try {
 		p += ext
 	}
 	return filepath.Clean(p), nil
+}
+
+func SelectFolderDialog(title string) (string, error) {
+	safe := strings.ReplaceAll(title, "'", "''")
+	// OpenFileDialog uses the full Explorer shell UI (address bar, editable
+	// paths, breadcrumbs and copy/paste) while ValidateNames=false turns the
+	// selection into a folder picker. FolderBrowserDialog intentionally is not
+	// used because its compact tree view cannot accept or copy full paths.
+	script := `$ErrorActionPreference='Stop'
+Add-Type -AssemblyName System.Windows.Forms
+$d=New-Object System.Windows.Forms.OpenFileDialog
+$d.Title='` + safe + `'
+$d.CheckFileExists=$false
+$d.CheckPathExists=$true
+$d.ValidateNames=$false
+$d.DereferenceLinks=$true
+$d.AddExtension=$false
+$d.FileName='Select this folder'
+$d.Filter='Folders|*'
+try {
+ if($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK){
+  $p=$d.FileName
+  $leaf=[System.IO.Path]::GetFileName($p)
+  if($leaf -eq 'Select this folder' -or $leaf -eq 'Select this folder.folder'){ $p=[System.IO.Path]::GetDirectoryName($p) }
+  [Console]::Out.Write($p)
+ }
+} finally { $d.Dispose() }`
+	cmd := exec.Command("powershell.exe", "-NoProfile", "-NonInteractive", "-STA", "-WindowStyle", "Hidden", "-EncodedCommand", encodePowerShell(script))
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("open folder dialog: %w", err)
+	}
+	return filepath.Clean(strings.TrimSpace(string(out))), nil
 }
 func encodePowerShell(script string) string {
 	words := utf16.Encode([]rune(script))

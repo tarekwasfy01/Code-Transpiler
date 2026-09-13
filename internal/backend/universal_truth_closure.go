@@ -22,6 +22,10 @@ func ApplyUniversalTruthClosure(u *UniversalASTDocument) {
 		"object": true, "condition": true, "sequence": true,
 	}
 	seen := map[string]bool{}
+	structural := make(map[int]string, len(u.Nodes))
+	for _, n := range u.Nodes {
+		structural[n.ID] = n.StructuralKind
+	}
 	for _, r := range u.Relations {
 		seen[r.Kind+":"+strconv.Itoa(r.From)+":"+r.To.Domain+":"+r.To.ID] = true
 	}
@@ -32,6 +36,17 @@ func ApplyUniversalTruthClosure(u *UniversalASTDocument) {
 		var role string
 		_ = json.Unmarshal(r.Attributes["role"], &role)
 		if !allowed[role] {
+			continue
+		}
+		if r.From == 0 {
+			continue
+		}
+		// A function's body is control structure, not a value operand.  The
+		// generic closure must not manufacture data.operand edges from Scope /
+		// Module nodes; doing so makes the relation illegal for their facets and
+		// causes otherwise valid frontend projections to fail during evidence
+		// enrichment.
+		if role == "body" && (structural[r.From] == "Scope" || structural[r.From] == "ModuleDecl") {
 			continue
 		}
 		key := "data.operand:" + strconv.Itoa(r.From) + ":node:" + r.To.ID

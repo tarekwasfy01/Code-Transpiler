@@ -380,7 +380,7 @@ func ApplyVerifiedGraphRewrite(program *SemanticProgram, match []int, recipe Gen
 }
 
 func semanticProgramFromUAST(u *UniversalASTDocument) *SemanticProgram {
-	return &SemanticProgram{UniversalAST: u, Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Contracts: u.Contracts, Dialects: u.Dialects, Extensions: u.Extensions, Evidence: u.Evidence}
+	return &SemanticProgram{UniversalAST: u, Evaluation: u.Evaluation, ValueModel: u.ValueModel, IndexBase: u.IndexBase, Types: u.Types, Origin: u.Origin, Contracts: u.Contracts, Dialects: u.Dialects, Extensions: u.Extensions, ContractSchema: u.ContractSchema, ContractTable: u.ContractTable, ContractRefs: u.ContractRefs, Evidence: u.Evidence}
 }
 
 // RewriteNativeFixedPoint applies every registered, exact structural rewrite
@@ -884,6 +884,7 @@ func applyVerifiedAverage2Rewrite(u *UniversalASTDocument, match []int, recipe G
 		return nil, fmt.Errorf("AVERAGE2 rewrite node %d requires exactly two operands, got %d", root.ID, len(operands))
 	}
 	integerOperands := true
+	formulaType := common.Type
 	byID := map[int]*UniversalASTNode{}
 	for i := range cloned.Nodes {
 		byID[cloned.Nodes[i].ID] = &cloned.Nodes[i]
@@ -899,6 +900,37 @@ func applyVerifiedAverage2Rewrite(u *UniversalASTDocument, match []int, recipe G
 		if decodeErr != nil || (child.Type.Kind != "integer" && child.Type.Bits == 0 && child.Operation.LiteralKind != "integer") {
 			integerOperands = false
 			break
+		}
+		if formulaType.Kind == "" || formulaType.Kind == "unknown" {
+			if child.Type.Kind == "integer" && child.Type.Bits != 0 {
+				formulaType = child.Type
+			}
+		}
+	}
+	if integerOperands && (formulaType.Kind == "" || formulaType.Kind == "unknown") {
+		// A legacy scalar witness may omit its inferred type. The guarded
+		// integer recipe still has a language-neutral exact domain: use the
+		// established native integer default rather than leaving the result
+		// untyped and allowing a later ABI stage to erase it.
+		formulaType = integerType(64, true)
+	}
+	if integerOperands && formulaType.Kind == "integer" {
+		// The recipe consumes the original operand nodes exactly once. Their
+		// literal spelling is not a type contract: normalize their existing
+		// type facts to the proven integer formula domain so every downstream
+		// consumer selects the same integer value/ABI path.
+		for _, operand := range operands {
+			id, parseErr := strconv.Atoi(operand.ID)
+			if parseErr != nil {
+				continue
+			}
+			if candidate := byID[id]; candidate != nil {
+				typeRef, marshalErr := json.Marshal(formulaType)
+				if marshalErr != nil {
+					return nil, marshalErr
+				}
+				candidate.Fields["type_ref"] = typeRef
+			}
 		}
 	}
 	addNode := func(structural, kind string, operation universalOperationRecord) (int, error) {
@@ -917,13 +949,17 @@ func applyVerifiedAverage2Rewrite(u *UniversalASTDocument, match []int, recipe G
 		put("id", id)
 		put("kind", kind)
 		put("scope_id", common.Scope)
-		if common.Type.Kind != "" {
+		if operation.Typed != nil && operation.Typed.Type.Kind != "" {
+			put("type_ref", operation.Typed.Type)
+		} else if formulaType.Kind != "" && formulaType.Kind != "unknown" {
+			put("type_ref", formulaType)
+		} else if common.Type.Kind != "" {
 			put("type_ref", common.Type)
 		}
 		put("operation", operation)
 		return id, nil
 	}
-	addID, err := addNode("OperationExpr", "binary", universalOperationRecord{Operator: "+", Semantics: SemanticSemantics{Operation: "add", Dispatch: "builtin"}})
+	addID, err := addNode("OperationExpr", "binary", universalOperationRecord{Operator: "+", Semantics: SemanticSemantics{Operation: "add", Dispatch: "builtin"}, Typed: typedIntegerRewriteOperation("integer.add", formulaType, integerOperands)})
 	if err != nil {
 		return nil, err
 	}
@@ -934,7 +970,7 @@ func applyVerifiedAverage2Rewrite(u *UniversalASTDocument, match []int, recipe G
 	if common.Type.Kind == "integer" || common.Type.Bits > 0 || integerOperands {
 		twoKind = "integer"
 	}
-	twoID, err := addNode("LiteralExpr", "literal", universalOperationRecord{LiteralKind: twoKind, Text: "2"})
+	twoID, err := addNode("LiteralExpr", "literal", universalOperationRecord{LiteralKind: twoKind, Text: "2", Typed: typedIntegerRewriteOperation("integer.literal", formulaType, integerOperands)})
 	if err != nil {
 		return nil, err
 	}
@@ -974,7 +1010,11 @@ func applyVerifiedAverage2Rewrite(u *UniversalASTDocument, match []int, recipe G
 	}
 	kind, _ := json.Marshal("binary")
 	root.Fields["kind"] = kind
-	operation, _ := json.Marshal(universalOperationRecord{Operator: "/", Semantics: SemanticSemantics{Operation: "div", Dispatch: "builtin"}})
+	if formulaType.Kind != "" && formulaType.Kind != "unknown" {
+		rootType, _ := json.Marshal(formulaType)
+		root.Fields["type_ref"] = rootType
+	}
+	operation, _ := json.Marshal(universalOperationRecord{Operator: "/", Semantics: SemanticSemantics{Operation: "div", Dispatch: "builtin"}, Typed: typedIntegerRewriteOperation("integer.divide", formulaType, integerOperands)})
 	root.Fields["operation"] = operation
 	delete(root.Fields, "value")
 	if cloned.Metadata == nil {
@@ -998,6 +1038,13 @@ func applyVerifiedAverage2Rewrite(u *UniversalASTDocument, match []int, recipe G
 		return nil, err
 	}
 	return canonical, nil
+}
+
+func typedIntegerRewriteOperation(name string, typ SemanticType, integerOperands bool) *SemanticOperation {
+	if !integerOperands || typ.Kind != "integer" || typ.Bits == 0 || typ.Signed == nil {
+		return nil
+	}
+	return &SemanticOperation{Name: name, Type: typ}
 }
 
 func nativeRecipeMatches(u *UniversalASTDocument, recipe GeneratedLoweringRecipe) []int {

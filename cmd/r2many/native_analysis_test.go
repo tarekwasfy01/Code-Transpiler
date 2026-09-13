@@ -50,7 +50,10 @@ func TestNativeSemanticExportCLI(t *testing.T) {
 	if _, err := os.Stat(output); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(source, []byte(`package main;func main(){x:=1;_=x}`), 0600); err != nil {
+	// This is valid, supported Go and must not be used to detect strict-mode
+	// fallback. A type switch remains outside the native frontend contract and
+	// proves that -native fails closed instead of silently using the legacy path.
+	if err := os.WriteFile(source, []byte(`package main;func main(){switch any(1).(type){default:}}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	if err := semanticExport([]string{"-native", "-source", "go", source, "-o", output}); err == nil {

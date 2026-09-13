@@ -61,8 +61,21 @@ func exactIntegerOperation(name string, bits int, signed bool, text string, valu
 	operands := make([]exactInteger, len(values))
 	for i, value := range values {
 		x, ok := value.(exactInteger)
+		// The canonical runtime may cross a legacy scalar boundary before a
+		// typed operation is reached.  Re-establish the explicit integer
+		// contract only for value/convert (the two boundary operations); all
+		// arithmetic still rejects non-exact operands.
+		if !ok && (name == "integer.value" || name == "integer.convert") {
+			if integer, scalarOK := runtimeIntegerScalar(value); scalarOK {
+				x = exactInteger{bits: bits, signed: signed, raw: integer.Uint64()}
+				if integer.Sign() < 0 {
+					x.raw = uint64(integer.Int64())
+				}
+				ok = true
+			}
+		}
 		if !ok {
-			return nil, fmt.Errorf("%s operand %d is not an exact integer", name, i)
+			return nil, fmt.Errorf("%s operand %d is not an exact integer (runtime type %T)", name, i, value)
 		}
 		if name != "integer.convert" && (x.bits != bits || x.signed != signed) {
 			return nil, fmt.Errorf("%s operand type mismatch", name)
@@ -92,18 +105,18 @@ func exactIntegerOperation(name string, bits int, signed bool, text string, valu
 		return r.normalized(), nil
 	}
 	b := operands[1]
-	shift := b.raw
-	if shift >= uint64(bits) {
-		if name == "integer.shift_right" && a.signed && a.signedValue() < 0 {
-			r.raw = ^uint64(0)
+	if name == "integer.shift_left" || name == "integer.shift_right" {
+		shift := b.raw
+		if shift >= uint64(bits) {
+			if name == "integer.shift_right" && a.signed && a.signedValue() < 0 {
+				r.raw = ^uint64(0)
+			}
+			return r.normalized(), nil
 		}
-		return r.normalized(), nil
-	}
-	if name == "integer.shift_left" {
-		r.raw = a.raw << shift
-		return r.normalized(), nil
-	}
-	if name == "integer.shift_right" {
+		if name == "integer.shift_left" {
+			r.raw = a.raw << shift
+			return r.normalized(), nil
+		}
 		if a.signed {
 			r.raw = uint64(a.signedValue() >> shift)
 		} else {
@@ -129,6 +142,27 @@ func exactIntegerOperation(name string, bits int, signed bool, text string, valu
 			r.raw = uint64(q.Int64())
 		} else {
 			r.raw = q.Uint64()
+		}
+		return r.normalized(), nil
+	}
+	if name == "integer.remainder" {
+		if b.raw == 0 {
+			return nil, fmt.Errorf("integer.remainder by zero")
+		}
+		var x, y big.Int
+		if a.signed {
+			x.SetInt64(a.signedValue())
+			y.SetInt64(b.signedValue())
+		} else {
+			x.SetUint64(a.raw)
+			y.SetUint64(b.raw)
+		}
+		var rem big.Int
+		rem.Rem(&x, &y)
+		if a.signed {
+			r.raw = uint64(rem.Int64())
+		} else {
+			r.raw = rem.Uint64()
 		}
 		return r.normalized(), nil
 	}
@@ -167,4 +201,41 @@ func exactIntegerOperation(name string, bits int, signed bool, text string, valu
 		return nil, fmt.Errorf("unimplemented operation %s", name)
 	}
 	return r.normalized(), nil
+}
+
+// runtimeIntegerScalar re-establishes an explicit integer contract at a
+// typed-value boundary. It accepts only integral numeric values; arithmetic
+// operations still require exactInteger operands and therefore cannot bypass
+// width/signedness validation through this helper.
+func runtimeIntegerScalar(value any) (*big.Int, bool) {
+	switch v := value.(type) {
+	case int:
+		return big.NewInt(int64(v)), true
+	case int8:
+		return big.NewInt(int64(v)), true
+	case int16:
+		return big.NewInt(int64(v)), true
+	case int32:
+		return big.NewInt(int64(v)), true
+	case int64:
+		return big.NewInt(v), true
+	case uint:
+		return new(big.Int).SetUint64(uint64(v)), true
+	case uint8:
+		return new(big.Int).SetUint64(uint64(v)), true
+	case uint16:
+		return new(big.Int).SetUint64(uint64(v)), true
+	case uint32:
+		return new(big.Int).SetUint64(uint64(v)), true
+	case uint64:
+		return new(big.Int).SetUint64(v), true
+	case float64:
+		integer, accuracy := new(big.Float).SetFloat64(v).Int(nil)
+		return integer, accuracy == big.Exact
+	case float32:
+		integer, accuracy := new(big.Float).SetFloat64(float64(v)).Int(nil)
+		return integer, accuracy == big.Exact
+	default:
+		return nil, false
+	}
 }
