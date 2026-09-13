@@ -20,6 +20,8 @@ import (
 
 type result struct {
 	File, Hash, Status, Phase, Diagnostic, Output string
+	Modules                                       []string
+	Embeddings                                    []backend.SemanticEmbeddedModule
 	Bytes                                         int64
 	DurationMS                                    int64
 }
@@ -49,7 +51,14 @@ func (l *streamingFailureLog) record(index int, r result) {
 
 func main() {
 	root := flag.String("root", ".", "project root")
+	singleFile := flag.String("file", "", "transpile only this Go file while retaining root module resolution")
 	out := flag.String("out", "outputs/go-semantic-project-current", "output directory")
+	format := flag.String("format", "se", "output format: se or json")
+	moduleRoot := flag.String("module-root", "", "shared Semantic module store root")
+	embedModules := flag.Bool("embed-modules", false, "embed resolved module bodies once in .se files and link later users to the owner")
+	embedMode := flag.String("embed-mode", "full", "module embedding mode: full or needed")
+	license := flag.Bool("license", false, "copy imported module licenses once")
+	resume := flag.Bool("resume", false, "skip source files whose semantic output already exists")
 	workers := flag.Int("workers", 6, "parallel frontend workers")
 	// Go package type resolution can legitimately traverse a module import
 	// graph. Twenty seconds classified valid large files as TIMEOUT before the
@@ -57,9 +66,24 @@ func main() {
 	// package-resolution pass enough time to complete.
 	timeoutSeconds := flag.Int("timeout", 120, "per-file frontend timeout in seconds")
 	flag.Parse()
-	if err := os.MkdirAll(filepath.Join(*out, "semantic-json"), 0755); err != nil {
+	if *embedMode != "full" && *embedMode != "needed" {
+		panic("embed-mode must be full or needed")
+	}
+	if *format != "se" && *format != "json" {
+		panic("format must be se or json")
+	}
+	if err := os.MkdirAll(filepath.Join(*out, "semantic-"+*format), 0755); err != nil {
 		panic(err)
 	}
+	embedStoreRoot := *moduleRoot
+	if *embedModules && strings.TrimSpace(embedStoreRoot) == "" {
+		var embedErr error
+		embedStoreRoot, embedErr = backend.ModuleStoreRoot()
+		if embedErr != nil {
+			panic(embedErr)
+		}
+	}
+	embedRegistry := backend.NewSemanticModuleEmbeddingRegistry(filepath.Join(*out, "semantic-"+*format))
 	var files []string
 	err := filepath.WalkDir(*root, func(path string, d os.DirEntry, e error) error {
 		if e != nil {
@@ -81,6 +105,32 @@ func main() {
 		panic(err)
 	}
 	sort.Strings(files)
+	if strings.TrimSpace(*singleFile) != "" {
+		candidate := *singleFile
+		if !filepath.IsAbs(candidate) {
+			candidate = filepath.Join(*root, candidate)
+		}
+		candidate, err = filepath.Abs(candidate)
+		if err != nil {
+			panic(err)
+		}
+		if st, statErr := os.Stat(candidate); statErr != nil || st.IsDir() {
+			panic(fmt.Sprintf("-file is not a Go file: %s", candidate))
+		}
+		files = []string{candidate}
+	}
+	if *resume {
+		pending := files[:0]
+		for _, file := range files {
+			rel, _ := filepath.Rel(*root, file)
+			name := strings.TrimSuffix(rel, filepath.Ext(rel)) + "." + *format
+			if _, statErr := os.Stat(filepath.Join(*out, "semantic-"+*format, name)); statErr == nil {
+				continue
+			}
+			pending = append(pending, file)
+		}
+		files = pending
+	}
 	results := make([]result, len(files))
 	failureFile, err := os.OpenFile(filepath.Join(*out, "failure_matrix.ndjson"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
@@ -119,20 +169,59 @@ func main() {
 					}
 					r.Diagnostic = compact(e.Error())
 				} else {
-					wire, x := p.MarshalSemanticJSON()
-					if x != nil {
+					var x error
+					if x = backend.CompleteCanonicalUASTContracts(p); x != nil {
 						r.Status = "FAIL"
-						r.Phase = "SEMANTIC_SERIALIZE"
+						r.Phase = "UAST_CONTRACT_COMPLETION"
 						r.Diagnostic = compact(x.Error())
 					} else {
-						r.Status = "PASS"
-						r.Phase = "SOURCE_TO_SEMANTIC"
-						name := strings.ReplaceAll(rel, "\\", "__")
-						r.Output = filepath.Join("semantic-json", name+".semantic.json")
-						if x = os.WriteFile(filepath.Join(*out, r.Output), wire, 0644); x != nil {
+						r.Modules = append([]string(nil), p.Origin.Modules...)
+						name := strings.TrimSuffix(rel, filepath.Ext(rel)) + "." + *format
+						r.Output = filepath.Join("semantic-"+*format, name)
+						if *embedModules {
+							r.Embeddings, x = backend.EmbedSemanticModules(p, backend.SemanticModuleEmbeddingOptions{
+								BaseDir: *root, StoreRoot: embedStoreRoot, UnitPath: filepath.Join(*out, r.Output), Language: p.Origin.SourceLanguage, NeededOnly: *embedMode == "needed", Registry: embedRegistry,
+							})
+						}
+						if x != nil {
 							r.Status = "FAIL"
-							r.Phase = "SEMANTIC_WRITE"
+							r.Phase = "SEMANTIC_MODULE_EMBED"
 							r.Diagnostic = compact(x.Error())
+						}
+						var wire []byte
+						if x == nil && *format == "se" {
+							wire, x = p.MarshalSemanticSEWithSource()
+						} else if x == nil {
+							wire, x = p.MarshalSemanticJSON()
+						}
+						if x != nil {
+							r.Status = "FAIL"
+							r.Phase = "SEMANTIC_SERIALIZE"
+							r.Diagnostic = compact(x.Error())
+						} else {
+							r.Status = "PASS"
+							r.Phase = "SOURCE_TO_SEMANTIC"
+							outputPath := filepath.Join(*out, r.Output)
+							if x = os.MkdirAll(filepath.Dir(outputPath), 0755); x == nil {
+								x = os.WriteFile(outputPath, wire, 0644)
+							}
+							if x == nil {
+								unitID := filepath.ToSlash(rel)
+								var summary backend.SemanticUnitSummary
+								summary, x = backend.BuildSemanticUnitSummary(outputPath, unitID)
+								if x == nil {
+									var summaryBytes []byte
+									summaryBytes, x = json.Marshal(summary)
+									if x == nil {
+										x = os.WriteFile(outputPath+".summary.json", append(summaryBytes, '\n'), 0644)
+									}
+								}
+							}
+							if x != nil {
+								r.Status = "FAIL"
+								r.Phase = "SEMANTIC_WRITE_OR_SUMMARY"
+								r.Diagnostic = compact(x.Error())
+							}
 						}
 					}
 				}
@@ -146,6 +235,126 @@ func main() {
 	}
 	close(jobs)
 	wg.Wait()
+	// Keep module imports in one project-level manifest.  Per-unit output must
+	// not embed the same dependency bodies repeatedly; the project compiler can
+	// resolve this manifest through its GlobalSemanticIndex/link plan.
+	links := make([]map[string]any, 0, len(results))
+	for _, r := range results {
+		if r.Status != "PASS" || len(r.Modules) == 0 {
+			continue
+		}
+		links = append(links, map[string]any{
+			"unit":    r.File,
+			"output":  r.Output,
+			"imports": r.Modules,
+		})
+	}
+	if b, e := json.MarshalIndent(map[string]any{
+		"schema": "semantic-project-module-links.v1",
+		"units":  links,
+	}, "", "  "); e == nil {
+		if e = os.WriteFile(filepath.Join(*out, "module-links.json"), append(b, '\n'), 0644); e != nil {
+			panic(e)
+		}
+	}
+	if false && *embedModules {
+		storeRoot := *moduleRoot
+		if strings.TrimSpace(storeRoot) == "" {
+			storeRoot, err = backend.ModuleStoreRoot()
+			if err != nil {
+				panic(err)
+			}
+		}
+		semanticDir := filepath.Join(*out, "semantic-se")
+		registry := backend.NewSemanticModuleEmbeddingRegistry(semanticDir)
+		type embeddingReport struct {
+			Unit    string                           `json:"unit"`
+			Entries []backend.SemanticEmbeddedModule `json:"entries"`
+			Error   string                           `json:"error,omitempty"`
+		}
+		reports := make([]embeddingReport, 0)
+		for i := range results {
+			if results[i].Status != "PASS" || results[i].Output == "" {
+				continue
+			}
+			path := filepath.Join(*out, results[i].Output)
+			data, readErr := os.ReadFile(path)
+			report := embeddingReport{Unit: results[i].Output}
+			if readErr == nil {
+				program, parseErr := backend.ParseSemanticSE(data)
+				if parseErr == nil {
+					// The frontend keeps import facts on the SemanticProgram boundary;
+					// older SE graph serialization could leave the mirrored UAST origin
+					// empty. Restore the already measured per-file import facts before
+					// embedding, never by rescanning or retranspiling the Go source.
+					program.Origin.Modules = append([]string(nil), results[i].Modules...)
+					if program.UniversalAST != nil {
+						program.UniversalAST.Origin.Modules = append([]string(nil), results[i].Modules...)
+					}
+					report.Entries, parseErr = backend.EmbedSemanticModules(program, backend.SemanticModuleEmbeddingOptions{
+						BaseDir: *root, StoreRoot: storeRoot, UnitPath: path, Registry: registry,
+					})
+					if parseErr == nil {
+						data, parseErr = program.MarshalSemanticSEWithSource()
+						if parseErr == nil {
+							parseErr = os.WriteFile(path, data, 0644)
+						}
+					}
+				}
+				if parseErr != nil {
+					report.Error = parseErr.Error()
+				}
+			} else {
+				report.Error = readErr.Error()
+			}
+			reports = append(reports, report)
+		}
+		b, e := json.MarshalIndent(map[string]any{"schema": "semantic-module-embedding.v1", "units": reports}, "", "  ")
+		if e != nil {
+			panic(e)
+		}
+		if e = os.WriteFile(filepath.Join(*out, "module-embedding.json"), append(b, '\n'), 0644); e != nil {
+			panic(e)
+		}
+	}
+	if *embedModules {
+		type embeddingReport struct {
+			Unit    string                           `json:"unit"`
+			Entries []backend.SemanticEmbeddedModule `json:"entries"`
+		}
+		reports := make([]embeddingReport, 0)
+		for _, r := range results {
+			if r.Status == "PASS" && len(r.Embeddings) > 0 {
+				reports = append(reports, embeddingReport{Unit: r.Output, Entries: r.Embeddings})
+			}
+		}
+		b, e := json.MarshalIndent(map[string]any{"schema": "semantic-module-embedding.v1", "phase": "pre-serialization", "units": reports}, "", "  ")
+		if e != nil {
+			panic(e)
+		}
+		if e = os.WriteFile(filepath.Join(*out, "module-embedding.json"), append(b, '\n'), 0644); e != nil {
+			panic(e)
+		}
+	}
+	if *license && strings.TrimSpace(*moduleRoot) != "" {
+		if _, e := backend.CopyImportedPackageLicenses(*moduleRoot, *out); e != nil {
+			panic(e)
+		}
+	}
+	if *license {
+		// Preserve the repository license alongside the generated project. This
+		// is independent of imported-package notices and remains useful when the
+		// shared module store is empty.
+		if data, e := os.ReadFile(filepath.Join(*root, "LICENSE")); e == nil {
+			licenseDir := filepath.Join(*out, "licenses")
+			if e = os.MkdirAll(licenseDir, 0755); e != nil {
+				panic(e)
+			}
+			if e = os.WriteFile(filepath.Join(licenseDir, "PROJECT-LICENSE"), data, 0644); e != nil {
+				panic(e)
+			}
+		}
+	}
 	families := map[string]map[string]int{}
 	for _, r := range results {
 		if r.Status == "FAIL" {
@@ -190,6 +399,10 @@ func safeLower(file, source string, limit time.Duration) (*backend.SemanticProgr
 		}()
 		p, err = backend.LowerSource("go", file, source)
 	}()
+	if limit <= 0 {
+		r := <-ch
+		return r.p, r.err
+	}
 	select {
 	case r := <-ch:
 		return r.p, r.err
@@ -208,6 +421,8 @@ func compact(s string) string {
 func classify(s string) (string, string) {
 	l := strings.ToLower(s)
 	switch {
+	case strings.Contains(l, "timeout") || strings.Contains(l, "deadline exceeded"):
+		return "FRONTEND_ANALYSIS_TIMEOUT", "ANALYSIS_BUDGET"
 	case strings.Contains(l, "import") || strings.Contains(l, "package"):
 		return "PACKAGE_RESOLUTION", "MODULE_BINDING"
 	case strings.Contains(l, "type") || strings.Contains(l, "declared"):

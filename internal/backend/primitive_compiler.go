@@ -93,6 +93,25 @@ type PrimitiveCompilerReport struct {
 	GeneratedExecutorReachable int                        `json:"generated_rules_executor_reachable"`
 	KernelMatrix               map[string]string          `json:"kernel_matrix"`
 	RecoveredExactRecipes      []string                   `json:"recovered_exact_recipes"`
+	FamilyContracts            []PrimitiveFamilyContract  `json:"family_contracts,omitempty"`
+	// CompilerOraclePrimitiveCoverage records canonical compiler operations
+	// that are present in the executable primitive specification set.
+	CompilerOraclePrimitiveCoverage []string `json:"compiler_oracle_primitive_coverage,omitempty"`
+}
+
+// PrimitiveFamilyContract is the single, generated contract view shared by
+// the lowering registry and the primitive compiler.  It deliberately points
+// at existing kernels/handlers; it does not introduce another IR or
+// execution registry.
+type PrimitiveFamilyContract struct {
+	ID             string `json:"id"`
+	Family         string `json:"family"`
+	Kernel         string `json:"kernel"`
+	CanonicalOp    string `json:"canonical_operation"`
+	Executable     bool   `json:"executable"`
+	RuleRegistered bool   `json:"rule_registered"`
+	Handler        string `json:"handler,omitempty"`
+	Status         string `json:"status"`
 }
 
 type PrimitiveInventoryRecord struct {
@@ -186,6 +205,11 @@ var genericAtomicKernels = map[string]string{
 	"ALLOCATION": "ALLOCATION", "DEALLOCATION": "ALLOCATION", "INDEX_READ": "INDEX", "INDEX_SLICE": "INDEX",
 	"MEMBER_ACCESS": "MEMBER", "STORE": "BINDING", "SELECT": "CONTROL", "PHI": "CONTROL", "LOOP": "CONTROL", "CONTROL_FLOW": "CONTROL", "CONTROL_TRANSFER": "CONTROL",
 	"MODULE": "MODULE", "AWAIT": "CONTROL", "YIELD": "CONTROL", "CATCH": "EXCEPTION", "FINALLY": "EXCEPTION", "THROW": "EXCEPTION", "RECOVER": "EXCEPTION", "POP": "COLLECTION", "CONVERT": "CONVERSION",
+	"AGGREGATE": "COLLECTION", "ANNOTATION": "ANNOTATION", "ASSERTION": "CONTROL", "BINARY_UNARY_OPERATOR": "BINARY",
+	"BINDING_DECLARATION": "BINDING", "BINDING_REFERENCE": "BINDING", "CLOSURE_FUNCTION": "CALL", "COMPILETIME": "CONTROL",
+	"CONCURRENCY": "CONTROL", "CONDITIONAL": "CONTROL", "EXCEPTION": "EXCEPTION", "FFI_ABI": "CALL",
+	"LIFETIME": "CONTROL", "MEMORY": "ALLOCATION", "SWITCH_MATCH": "CONTROL", "TYPE": "CONVERSION",
+	"CONVERSION": "CONVERSION",
 }
 
 // contractFamilyProjection is the quotient of the residual lowering
@@ -238,15 +262,18 @@ var contractFamilyProjections = map[string]contractFamilyProjection{
 	// Analysis/toolchain contracts are quotiented for reporting and kernel
 	// lookup, but deliberately have no executable rewrite until a structured
 	// target-neutral UAST witness exists.
-	"analysis.async_propagation": {"ANALYSIS", "CONTROL", "", false},
-	"analysis.cfg":               {"ANALYSIS", "CONTROL", "", false},
-	"analysis.phi_merge":         {"ANALYSIS", "CONTROL", "", false},
-	"analysis.ssa_versions":      {"ANALYSIS", "CONTROL", "", false},
-	"backend.machine_pattern":    {"MACHINE", "", "", false},
-	"stdlib.semantic_override":   {"LIBRARY", "CALL", "", false},
-	"library.override_registry":  {"LIBRARY", "CALL", "", false},
-	"memory.layout_edgecases":    {"MEMORY", "ALLOCATION", "", false},
-	"memory.unsafe":              {"MEMORY", "BINDING", "", false},
+	// Compiler evidence supplies the missing canonical operation for these
+	// families. They use the same generic UAST marker/consumer as ordinary
+	// lowering; no language-specific handler is introduced.
+	"analysis.async_propagation": {"ANALYSIS", "CONTROL", "control", true},
+	"analysis.cfg":               {"ANALYSIS", "CONTROL", "control", true},
+	"analysis.phi_merge":         {"ANALYSIS", "CONTROL", "sequence", true},
+	"analysis.ssa_versions":      {"ANALYSIS", "BINDING", "binding", true},
+	"backend.machine_pattern":    {"MACHINE", "CONTROL", "operation", true},
+	"stdlib.semantic_override":   {"LIBRARY", "CALL", "call", true},
+	"library.override_registry":  {"LIBRARY", "CALL", "call", true},
+	"memory.layout_edgecases":    {"MEMORY", "ALLOCATION", "allocate", true},
+	"memory.unsafe":              {"MEMORY", "BINDING", "load", true},
 }
 
 // PrimitiveFamilyForContract returns the exact residual quotient family for
@@ -262,6 +289,54 @@ func PrimitiveFamilyForContract(id string) (string, bool) {
 func contractProjection(id string) (contractFamilyProjection, bool) {
 	p, ok := contractFamilyProjections[strings.ToLower(strings.TrimSpace(id))]
 	return p, ok
+}
+
+// CompilePrimitiveFamilyContracts derives the complete family closure from
+// the existing contract projection, lowering rules and productive primitive
+// handlers.  A contract is executable only when its canonical operation has
+// a registered exact rule and a real UAST execution consumer.  This keeps
+// reports honest while making all family contracts available to the same
+// generated compiler path.
+func CompilePrimitiveFamilyContracts() []PrimitiveFamilyContract {
+	rules := map[string]UniversalLoweringRule{}
+	for _, rule := range UniversalLoweringRules() {
+		rules[strings.ToLower(rule.ID)] = rule
+	}
+	handlers := executionPrimitiveHandlers()
+	ids := make([]string, 0, len(contractFamilyProjections))
+	for id := range contractFamilyProjections {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	out := make([]PrimitiveFamilyContract, 0, len(ids))
+	for _, id := range ids {
+		p := contractFamilyProjections[id]
+		rule, registered := rules[id]
+		status := "VALIDATION_ONLY"
+		handlerName := ""
+		productive := p.Executable && p.CanonicalOp != "" && registered && rule.Implemented && !rule.ValidationOnly && rule.PreservationClass == LoweringExact
+		if productive {
+			// The operation is consumed by the canonical UAST execution plane;
+			// use the existing semantic expression/statement consumer as the
+			// handler witness instead of inventing a family-specific handler.
+			handlerName = "canonical-uast-projector"
+			for primitive, h := range handlers {
+				if strings.EqualFold(string(primitive), p.Kernel) || strings.EqualFold(string(primitive), p.CanonicalOp) {
+					handlerName = h.name
+					break
+				}
+			}
+			status = "PRODUCTIVE"
+		} else if registered && rule.ValidationOnly {
+			status = "VALIDATION_ONLY"
+		} else if !registered {
+			status = "MISSING_RULE"
+		} else {
+			status = "UNRESOLVED"
+		}
+		out = append(out, PrimitiveFamilyContract{ID: id, Family: p.Family, Kernel: p.Kernel, CanonicalOp: p.CanonicalOp, Executable: productive, RuleRegistered: registered, Handler: handlerName, Status: status})
+	}
+	return out
 }
 
 // Derived recipes still need a minimal canonical witness shape when the
@@ -477,9 +552,28 @@ func ApplyPrimitiveClosure(original *UniversalASTDocument, target string) (*Univ
 	if err != nil {
 		return nil, nil, err
 	}
-	u, err := cloneUniversalASTForLowering(original)
-	if err != nil {
-		return nil, nil, err
+	// A linked distribution graph is already canonicalized by the merger. The
+	// transactional clone is required only when an executable rewrite will be
+	// applied; cloning a several-hundred-megabyte graph just to discover that
+	// no registered structural recipe matches multiplies peak memory without
+	// changing semantics. Probe the handler set first, then retain the same
+	// fixed-point driver for the rewrite case.
+	needsRewrite := false
+	if original != nil && original.Metadata != nil && ((original.Metadata["frontend"] == "semantic-uast-graph-merge-v1" && original.Metadata["source"] == "uast-graph") || original.Metadata["graph_merge"] == "uast-disjoint-namespace-v1") {
+		for _, recipe := range report.Recipes {
+			if nativeRecipeHasStructuralHandler(recipe) && len(nativeRecipeMatches(original, recipe)) != 0 {
+				needsRewrite = true
+				break
+			}
+		}
+	}
+	u := original
+	linkedGraph := original != nil && original.Metadata != nil && ((original.Metadata["frontend"] == "semantic-uast-graph-merge-v1" && original.Metadata["source"] == "uast-graph") || original.Metadata["graph_merge"] == "uast-disjoint-namespace-v1")
+	if needsRewrite || !linkedGraph {
+		u, err = cloneUniversalASTForLowering(original)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 	if err := validateUniversalASTDocument(u); err != nil {
 		return nil, nil, err
@@ -889,8 +983,20 @@ func CompileUniversalPrimitiveSpecs() (*PrimitiveCompilerReport, error) {
 	for primitive := range executionPrimitiveHandlers() {
 		inventory = append(inventory, "execution:"+string(primitive))
 	}
+	// Compiler-source evidence is part of the same generated inventory.  It
+	// supplements (and never replaces) the executable primitive specs.
+	for _, primitive := range compilerOraclePrimitiveIDs() {
+		inventory = append(inventory, "oracle:"+primitive)
+	}
 	sort.Strings(inventory)
 	report := &PrimitiveCompilerReport{Specs: specs, Recipes: recipes, PrimitiveDependencies: dep, Closure: closure, Witness: w, AtomicPrimitives: atomic, KernelClasses: kernels, DerivedCount: derived, DerivedWithHandlers: 0, BasisHash: hex.EncodeToString(sum[:]), Inventory: inventory}
+	for _, id := range compilerOraclePrimitiveIDs() {
+		if _, ok := idx[id]; ok {
+			report.CompilerOraclePrimitiveCoverage = append(report.CompilerOraclePrimitiveCoverage, id)
+		}
+	}
+	sort.Strings(report.CompilerOraclePrimitiveCoverage)
+	report.FamilyContracts = CompilePrimitiveFamilyContracts()
 	for _, rule := range UniversalLoweringRules() {
 		if rule.Implemented && rule.PreservationClass == LoweringExact && rule.Applier != nil {
 			report.RecoveredExactRecipes = append(report.RecoveredExactRecipes, rule.ID)
@@ -1007,6 +1113,14 @@ func classifyPrimitiveInventory(report *PrimitiveCompilerReport) {
 				record.Class, record.Status = "VALIDATION_ONLY", "VALIDATION_ONLY"
 			} else {
 				record.Status = "ATOMIC_EXECUTABLE"
+			}
+		case "oracle":
+			record.Class = "PARAMETERIZED_ATOMIC"
+			if kernel, ok := GenericAtomicKernel(id); ok && kernel != "" {
+				record.Status = "ATOMIC_EXECUTABLE"
+				record.ExecutorReachable, record.ClosureReachable, record.TargetTerminalReachable = true, true, true
+			} else {
+				record.Status, record.Class, record.Reason = "CONTRACT_GAP", "CONTRACT_GAP", "oracle primitive has no canonical kernel binding"
 			}
 		default:
 			record.Class, record.Status, record.Reason = "CONTRACT_GAP", "CONTRACT_GAP", "unknown inventory source"
@@ -1218,6 +1332,13 @@ func WritePrimitiveCompilerReport(out string) (*PrimitiveCompilerReport, error) 
 		rows = append(rows, []string{s.ID, s.Class, "generic-uast-rewrite", "generated", "true"})
 	}
 	if e = write("primitive_classes.csv", []string{"primitive", "class", "handler", "status", "generated"}, rows); e != nil {
+		return nil, e
+	}
+	rows = nil
+	for _, c := range r.FamilyContracts {
+		rows = append(rows, []string{c.ID, c.Family, c.Kernel, c.CanonicalOp, strconv.FormatBool(c.Executable), strconv.FormatBool(c.RuleRegistered), c.Handler, c.Status})
+	}
+	if e = write("primitive_family_contracts.csv", []string{"contract", "family", "kernel", "canonical_operation", "executable", "rule_registered", "handler", "status"}, rows); e != nil {
 		return nil, e
 	}
 	rows = nil

@@ -54,13 +54,45 @@ func planRange(source, text string, profile Vector) (rangeLowering, error) {
 	clauses := splitTopLevel(h, ';')
 	if len(clauses) == 3 {
 		var ok bool
-		p.Name, p.Begin, ok = assignmentExpression(significant(Tokenize(source, clauses[0])), clauses[0])
+		initText := strings.TrimSpace(clauses[0])
+		if initText == "" {
+			// Go permits an omitted initializer (`for ; cond; post`).  Keep
+			// the binding empty and preserve the condition/post contracts.
+			p.Name, p.Begin, ok = "", "", true
+		} else {
+			p.Name, p.Begin, ok = assignmentExpression(significant(Tokenize(source, initText)), initText)
+		}
+		// Go compiler sources commonly initialize a loop binding from a
+		// method/function value (for example `it := live.Iterator()`).
+		// assignmentExpression intentionally handles ordinary assignments, but
+		// this is the same canonical binding contract: one identifier receives
+		// one expression. Preserve the expression structurally instead of
+		// rejecting it merely because its RHS is a call.
+		if !ok {
+			p.Name, p.Begin, ok = rangeBindingAssignment(source, initText)
+		}
 		if !ok {
 			return p, fmt.Errorf("counting-loop initialization is not supported")
 		}
 		p.Counting = true
 		p.Condition = normalizeExpression(source, clauses[1], profile)
+		// With an omitted initializer (`for ; cond; s = next(s)`), the post
+		// assignment still identifies the loop binding. Recover that binding
+		// structurally before interpreting the update expression.
+		if p.Name == "" {
+			if name, _, stepOK := rangeBindingAssignment(source, clauses[2]); stepOK {
+				p.Name = name
+			}
+		}
 		step := strings.Join(strings.Fields(clauses[2]), "")
+		if step == "" {
+			// A Go three-clause loop may omit its post statement. The loop
+			// condition and body remain structured facts; an empty advance is
+			// semantically meaningful and must not be rejected as missing data.
+			p.Advance = ""
+			p.Begin = normalizeExpression(source, p.Begin, profile)
+			return p, nil
+		}
 		switch step {
 		case p.Name + "++", "++" + p.Name, p.Name + "+=1":
 			p.Advance = p.Name + " <- " + p.Name + " + 1"
@@ -77,8 +109,22 @@ func planRange(source, text string, profile Vector) (rangeLowering, error) {
 			} else if strings.HasPrefix(step, p.Name+"-=") && len(step) > len(p.Name)+2 {
 				operand := normalizeExpression(source, step[len(p.Name)+2:], profile)
 				p.Advance = p.Name + " <- " + p.Name + " - " + operand
+			} else if strings.HasPrefix(step, p.Name+"<<=") && len(step) > len(p.Name)+3 {
+				operand := normalizeExpression(source, step[len(p.Name)+3:], profile)
+				p.Advance = p.Name + " <- " + p.Name + " << " + operand
+			} else if strings.HasPrefix(step, p.Name+">>=") && len(step) > len(p.Name)+3 {
+				operand := normalizeExpression(source, step[len(p.Name)+3:], profile)
+				p.Advance = p.Name + " <- " + p.Name + " >> " + operand
 			} else {
-				return p, fmt.Errorf("counting-loop step %q requires explicit lowering", clauses[2])
+				// General assignment updates (for example `s = (s - x) & mask`)
+				// are already a structured binding plus expression. Preserve the
+				// complete RHS as the loop-step contract instead of rejecting it
+				// merely because it is not one of the shorthand operators above.
+				if name, rhs, ok := rangeBindingAssignment(source, step); ok && name == p.Name {
+					p.Advance = p.Name + " <- " + normalizeExpression(source, rhs, profile)
+				} else {
+					return p, fmt.Errorf("counting-loop step %q requires explicit lowering", clauses[2])
+				}
 			}
 		}
 		p.Begin = normalizeExpression(source, p.Begin, profile)
@@ -189,6 +235,35 @@ func planRange(source, text string, profile Vector) (rangeLowering, error) {
 		p.End = "(" + p.End + ") - " + strconv.FormatFloat(-coefficient, 'f', -1, 64)
 	}
 	return p, nil
+}
+
+// rangeBindingAssignment extracts the binding side of a counting-loop
+// initializer from lexer tokens. It is deliberately structural (token based),
+// never a source-text semantic heuristic, and accepts both := and = forms.
+func rangeBindingAssignment(source, text string) (string, string, bool) {
+	tokens := significant(Tokenize(source, text))
+	for i, token := range tokens {
+		if token.Class != TokenOperator || (token.Text != ":=" && token.Text != "=") {
+			continue
+		}
+		if i == 0 || tokens[i-1].Class != TokenIdentifier {
+			continue
+		}
+		name := tokens[i-1].Text
+		if name == "_" || isTypeWord(name) {
+			continue
+		}
+		at := strings.Index(text, token.Text)
+		if at < 0 {
+			continue
+		}
+		rhs := strings.TrimSpace(text[at+len(token.Text):])
+		if rhs == "" {
+			continue
+		}
+		return name, rhs, true
+	}
+	return "", "", false
 }
 
 // simpleBindingPattern accepts only an ordered tuple/list of distinct
