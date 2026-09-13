@@ -105,6 +105,7 @@ type App struct {
 	status           string
 	busy             bool
 	runtimeFallback  widget.Bool
+	autoDetect       widget.Bool
 	saveCompiler     string
 	showCompilerMenu bool
 	activeRibbonMenu string
@@ -144,6 +145,7 @@ func New() *App {
 		source:          0,
 		target:          1,
 		runtimeFallback: widget.Bool{Value: true},
+		autoDetect:      widget.Bool{Value: false},
 		infoText:        cliHelp,
 		embedModules:    widget.Bool{Value: true},
 		copyLicenses:    widget.Bool{Value: true},
@@ -570,6 +572,12 @@ func (a *App) startConvert() {
 	data, readErr := io.ReadAll(reader)
 	source := a.currentSource().ID
 	target := a.currentTarget().ID
+	if a.autoDetect.Value {
+		source = detectGUILanguage(string(data))
+		if source != "" {
+			a.status = "Auto-detected: " + source + " → " + target + "…"
+		}
+	}
 	lang := a.langForTarget()
 	disableRuntime := !a.runtimeFallback.Value
 	go func() {
@@ -671,6 +679,30 @@ func (a *App) startConvert() {
 		}
 		a.window.Invalidate()
 	}()
+}
+
+func detectGUILanguage(s string) string {
+	t := strings.TrimSpace(s)
+	switch {
+	case strings.Contains(t, "import ") && (strings.Contains(t, "def ") || strings.Contains(t, "if __name__")):
+		return "python"
+	case strings.Contains(t, "package ") && strings.Contains(t, "func "):
+		return "go"
+	case strings.Contains(t, "#include") || strings.Contains(t, "std::"):
+		return "cpp"
+	case strings.Contains(t, "fn main") || strings.Contains(t, "let mut "):
+		return "rust"
+	case strings.Contains(t, "using System") || strings.Contains(t, "namespace "):
+		return "csharp"
+	case strings.Contains(t, "<- ") || strings.Contains(t, "library(") || strings.Contains(t, "print("):
+		return "r"
+	case strings.Contains(t, "func ") && strings.Contains(t, "{"):
+		return "swift"
+	case strings.Contains(t, "const std") && strings.Contains(t, "pub fn"):
+		return "zig"
+	default:
+		return ""
+	}
 }
 func (a *App) startRun() {
 	if a.cancelRun != nil {
@@ -1023,6 +1055,9 @@ func (a *App) layoutRibbonMenu(gtx layout.Context) layout.Dimensions {
 		return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{Top: 5, Bottom: 5, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return material.CheckBox(a.theme, &a.autoDetect, "Auto-detect language").Layout(gtx)
+					}),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						return material.CheckBox(a.theme, &a.runtimeFallback, "Runtime fallback").Layout(gtx)
 					}),
