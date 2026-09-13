@@ -107,6 +107,8 @@ type App struct {
 	showCompilerMenu bool
 	embedModules     widget.Bool
 	copyLicenses     widget.Bool
+	treeVisible      bool
+	treeStarted      time.Time
 
 	convertGeneration atomic.Uint64
 	runGeneration     atomic.Uint64
@@ -321,6 +323,11 @@ func (a *App) applyBackgroundResults() {
 				continue
 			}
 			a.busy = false
+			a.treeVisible = true
+			// A completed conversion leaves the graph fully illuminated.
+			if res.err == nil {
+				a.treeStarted = time.Time{}
+			}
 			if strings.TrimSpace(res.code) != "" {
 				a.right.SetText(res.code)
 				a.rightGeneration.Add(1)
@@ -503,6 +510,8 @@ func (a *App) startConvert() {
 	a.cancelConvert = cancel
 	gen := a.convertGeneration.Add(1)
 	a.busy = true
+	a.treeVisible = true
+	a.treeStarted = time.Now()
 	a.status = "Converting " + a.currentSource().Name + " → " + a.currentTarget().Name + "…"
 	reader := a.left.GetReader()
 	// Snapshot editor bytes on the UI thread. The worker must never retain a
@@ -570,8 +579,9 @@ func (a *App) startConvert() {
 						code = string(s)
 					}
 				} else {
+					storeRoot, _ := backend.ModuleStoreRoot()
 					code, err = manytomany.TranspileSemanticSPWithOptions(target, data, manytomany.TranspileRequest{
-						TargetLanguage: target, EntryPoint: "gui", EmbedAllModules: a.embedModules.Value,
+						TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: filepath.Dir(os.Args[0]), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "all",
 					})
 				}
 			} else if target == "sp" || target == "spz" || target == "se" {
@@ -597,7 +607,8 @@ func (a *App) startConvert() {
 				}
 				code = string(sp)
 			} else {
-				result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", EmbedAllModules: a.embedModules.Value, DisableRuntimeFallback: disableRuntime})
+				storeRoot, _ := backend.ModuleStoreRoot()
+				result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: filepath.Dir(os.Args[0]), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "all", DisableRuntimeFallback: disableRuntime})
 				code, err = result.Code, convertErr
 			}
 		}
@@ -1043,21 +1054,80 @@ func (a *App) layoutMain(gtx layout.Context) layout.Dimensions {
 			return a.layoutEditorPanel(gtx, "Input · "+a.currentSource().Name, a.left)
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return layout.Inset{Left: 14, Right: 14}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					btn := material.Button(a.theme, &a.convertBtn, "Convert")
-					btn.Background = color.NRGBA{R: 9, G: 105, B: 218, A: 255}
-					btn.Color = color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-					btn.CornerRadius = unit.Dp(8)
-					btn.Inset = layout.Inset{Top: 12, Bottom: 12, Left: 20, Right: 20}
-					return btn.Layout(gtx)
-				})
+			return layout.Inset{Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx,
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						btn := material.Button(a.theme, &a.convertBtn, "Convert")
+						btn.Background = color.NRGBA{R: 9, G: 105, B: 218, A: 255}
+						btn.Color = color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+						btn.CornerRadius = unit.Dp(8)
+						btn.Inset = layout.Inset{Top: 10, Bottom: 10, Left: 16, Right: 16}
+						return btn.Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 14}.Layout(gtx) }),
+					layout.Rigid(a.layoutTreeOfLife),
+				)
 			})
 		}),
 		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 			return a.layoutEditorPanel(gtx, "Output · "+a.currentTarget().Name, a.right)
 		}),
 	)
+}
+
+// layoutTreeOfLife is a lightweight, dependency-free progress visualization.
+// The graph is intentionally drawn with text glyphs so it remains available in
+// the portable GUI build. Nodes illuminate from the bottom upward while a
+// conversion is running and remain orange after completion.
+func (a *App) layoutTreeOfLife(gtx layout.Context) layout.Dimensions {
+	if !a.treeVisible {
+		return layout.Dimensions{}
+	}
+	progress := float32(1)
+	if a.busy && !a.treeStarted.IsZero() {
+		progress = float32(gtx.Now.Sub(a.treeStarted)) / float32(8*time.Second)
+		if progress < 0 {
+			progress = 0
+		}
+		if progress > 0.95 {
+			progress = 0.95
+		}
+		gtx.Execute(op.InvalidateCmd{At: gtx.Now.Add(120 * time.Millisecond)})
+	}
+	levels := []string{"●", "● ●", "● ●", "● ●", "●", "●"}
+	return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx,
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			l := material.Caption(a.theme, "Semantic")
+			l.Font.Weight = font.SemiBold
+			l.Color = color.NRGBA{R: 87, G: 96, B: 106, A: 255}
+			return l.Layout(gtx)
+		}),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Top: 5, Bottom: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx,
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, levels[0], progress >= 0.85) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, "│", progress >= 0.68) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, levels[1], progress >= 0.52) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, "│", progress >= 0.36) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, levels[2], progress >= 0.20) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, "│", progress >= 0.08) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, levels[5], true) }),
+				)
+			})
+		}),
+	)
+}
+
+func (a *App) treeGlyph(gtx layout.Context, glyph string, active bool) layout.Dimensions {
+	l := material.Body1(a.theme, glyph)
+	l.Alignment = text.Middle
+	if active {
+		l.Color = color.NRGBA{R: 255, G: 145, B: 25, A: 255}
+	} else {
+		l.Color = color.NRGBA{R: 210, G: 216, B: 222, A: 255}
+	}
+	l.TextSize = unit.Sp(22)
+	return l.Layout(gtx)
 }
 func (a *App) layoutEditorPanel(gtx layout.Context, title string, ed *gvcode.Editor) layout.Dimensions {
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -1194,7 +1264,7 @@ func (a *App) layoutFooter(gtx layout.Context) layout.Dimensions {
 			}),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return smallButton(gtx, a.theme, &a.modulePathBtn, "Module folder")
+				return smallButton(gtx, a.theme, &a.modulePathBtn, "Semantic Modules")
 			}),
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{Size: gtx.Constraints.Min} }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
