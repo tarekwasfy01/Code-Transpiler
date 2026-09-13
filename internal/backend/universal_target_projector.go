@@ -478,7 +478,27 @@ func (UniversalTargetNameResolver) Resolve(preferred string, spec TargetSpec) st
 	if spec.Naming.StyleInsensitive {
 		return fmt.Sprintf("%s%x", spec.Naming.GeneratedPrefix, preferred)
 	}
-	return safeName(preferred)
+	name := safeName(preferred)
+	// Source identifiers are allowed to collide with target keywords (for
+	// example Python permits `var`, while Zig uses `var` as a declaration
+	// keyword).  Keep the mapping structural and target-driven so emitted code
+	// is always syntactically valid without adding source-language handlers.
+	if targetReservedWord(spec.ID, name) {
+		return "__uast_" + name
+	}
+	return name
+}
+
+func targetReservedWord(target, name string) bool {
+	words := map[string]map[string]struct{}{
+		"zig":    {"var": {}, "const": {}, "fn": {}, "pub": {}, "struct": {}, "enum": {}, "type": {}, "comptime": {}, "if": {}, "else": {}, "for": {}, "while": {}, "return": {}, "switch": {}, "catch": {}, "orelse": {}, "error": {}},
+		"cpp":    {"auto": {}, "class": {}, "struct": {}, "template": {}, "typename": {}, "namespace": {}, "return": {}, "if": {}, "else": {}, "for": {}, "while": {}, "switch": {}, "case": {}, "default": {}, "const": {}, "static": {}, "void": {}, "int": {}, "double": {}, "float": {}, "char": {}, "bool": {}},
+		"c":      {"auto": {}, "struct": {}, "typedef": {}, "return": {}, "if": {}, "else": {}, "for": {}, "while": {}, "switch": {}, "case": {}, "default": {}, "const": {}, "static": {}, "void": {}, "int": {}, "double": {}, "float": {}, "char": {}},
+		"csharp": {"var": {}, "class": {}, "struct": {}, "namespace": {}, "return": {}, "if": {}, "else": {}, "for": {}, "while": {}, "switch": {}, "case": {}, "default": {}, "new": {}, "string": {}, "int": {}, "double": {}, "bool": {}},
+		"go":     {"var": {}, "const": {}, "func": {}, "type": {}, "package": {}, "import": {}, "return": {}, "if": {}, "else": {}, "for": {}, "switch": {}, "case": {}, "default": {}, "range": {}, "go": {}, "defer": {}, "map": {}, "struct": {}, "interface": {}},
+	}
+	_, ok := words[NormalizeLanguage(target)][name]
+	return ok
 }
 
 func targetSpec(id string) (TargetSpec, bool) {
