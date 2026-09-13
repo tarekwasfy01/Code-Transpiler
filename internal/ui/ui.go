@@ -90,6 +90,7 @@ type App struct {
 	left, right *gvcode.Editor
 
 	convertBtn, copyBtn, saveBtn, executableBtn, compilerBtn, nativeCompilerBtn, llvmCompilerBtn, gccCompilerBtn, msvcCompilerBtn, nasmCompilerBtn, masmCompilerBtn, cscCompilerBtn, goCompilerBtn, infoBtn, licensesBtn, copyInfoBtn, closeInfoBtn, openCMDBtn, setPathBtn, modulePathBtn, runBtn widget.Clickable
+	fileMenuBtn, editMenuBtn, runMenuBtn, cmdMenuBtn, settingsMenuBtn, modulesMenuBtn, helpMenuBtn                                                                                                                                                                                                 widget.Clickable
 	sourceBtn, targetBtn                                                                                                                                                                                                                                                                           widget.Clickable
 	sourceClicks, targetClicks                                                                                                                                                                                                                                                                     []widget.Clickable
 	sourceOpen, targetOpen                                                                                                                                                                                                                                                                         bool
@@ -105,6 +106,7 @@ type App struct {
 	runtimeFallback  widget.Bool
 	saveCompiler     string
 	showCompilerMenu bool
+	activeRibbonMenu string
 	embedModules     widget.Bool
 	copyLicenses     widget.Bool
 	treeVisible      bool
@@ -383,6 +385,22 @@ func (a *App) applyBackgroundResults() {
 	}
 }
 func (a *App) handleClicks(gtx layout.Context) {
+	for name, btn := range map[string]*widget.Clickable{
+		"file": &a.fileMenuBtn, "edit": &a.editMenuBtn, "run": &a.runMenuBtn,
+		"cmd": &a.cmdMenuBtn, "settings": &a.settingsMenuBtn, "modules": &a.modulesMenuBtn, "help": &a.helpMenuBtn,
+	} {
+		if btn.Clicked(gtx) {
+			if a.activeRibbonMenu == name {
+				a.activeRibbonMenu = ""
+			} else {
+				a.activeRibbonMenu = name
+			}
+			if name == "help" {
+				a.showInfo = true
+				a.infoText = cliHelp + "\n\nMANUAL\nFile: New, Load file, Save file, Save As.\nEdit: Undo, Redo, Cut, Copy, Paste, Find/Replace, refresh syntax highlighting.\nRun: Run or Run with console; Convert and Save Executable.\nCmd: open a terminal with the CLI and show command help.\nSettings: toggle runtime fallback, imported-module embedding, and package-license copying.\nModules: manage the Semantic module store, acquire packages, and update or reinstall them."
+			}
+		}
+	}
 	if a.convertBtn.Clicked(gtx) {
 		a.startConvert()
 	}
@@ -919,7 +937,9 @@ func (a *App) layout(gtx layout.Context) layout.Dimensions {
 	}
 	return layout.Inset{Top: 12, Bottom: 10, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+			layout.Rigid(a.layoutRibbon),
 			layout.Rigid(a.layoutHeader),
+			layout.Rigid(a.layoutRibbonMenu),
 			layout.Rigid(a.layoutCompilerMenu),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				if !a.sourceOpen && !a.targetOpen {
@@ -942,6 +962,68 @@ func (a *App) layout(gtx layout.Context) layout.Dimensions {
 			}),
 			layout.Rigid(a.layoutFooter),
 		)
+	})
+}
+
+func (a *App) layoutRibbon(gtx layout.Context) layout.Dimensions {
+	items := []struct {
+		b     *widget.Clickable
+		label string
+	}{
+		{&a.fileMenuBtn, "File"}, {&a.editMenuBtn, "Edit"}, {&a.runMenuBtn, "Run"},
+		{&a.cmdMenuBtn, "Cmd"}, {&a.settingsMenuBtn, "Settings"}, {&a.modulesMenuBtn, "Modules"}, {&a.helpMenuBtn, "Help"},
+	}
+	children := make([]layout.FlexChild, 0, len(items)*2)
+	for i, item := range items {
+		if i > 0 {
+			children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 4}.Layout(gtx) }))
+		}
+		it := item
+		children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, it.b, it.label+"  ▾") }))
+	}
+	return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return layout.Inset{Top: 4, Bottom: 4, Left: 4, Right: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx, children...)
+		})
+	})
+}
+
+func (a *App) layoutRibbonMenu(gtx layout.Context) layout.Dimensions {
+	if a.activeRibbonMenu == "" {
+		return layout.Dimensions{}
+	}
+	labels := map[string][]string{
+		"file":     {"New", "Load file", "Save file", "Save As"},
+		"edit":     {"Undo", "Redo", "Cut", "Copy", "Paste", "Find / Replace", "Refresh syntax highlighting"},
+		"run":      {"Run", "Run with console", "Convert", "Save Executable"},
+		"cmd":      {"Open CMD", "CLI help"},
+		"settings": {"Runtime fallback", "Embed imported modules", "Include package licenses"},
+		"modules":  {"Semantic Modules", "Get package", "Set module folder", "Delete", "Reinstall", "Update"},
+		"help":     {"Manual", "Info", "Licenses", "Set PATH"},
+	}
+	items := labels[a.activeRibbonMenu]
+	var noop widget.Clickable
+	return layout.Inset{Top: 4, Bottom: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Top: 4, Bottom: 4, Left: 5, Right: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				children := make([]layout.FlexChild, 0, len(items)*2)
+				for i, label := range items {
+					if i > 0 {
+						children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 5}.Layout(gtx) }))
+					}
+					textLabel := label
+					children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						b := material.Button(a.theme, &noop, textLabel)
+						b.Background = color.NRGBA{R: 247, G: 249, B: 251, A: 255}
+						b.Color = color.NRGBA{R: 45, G: 52, B: 60, A: 255}
+						b.CornerRadius = 5
+						b.Inset = layout.Inset{Top: 5, Bottom: 5, Left: 8, Right: 8}
+						return b.Layout(gtx)
+					}))
+				}
+				return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx, children...)
+			})
+		})
 	})
 }
 func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
