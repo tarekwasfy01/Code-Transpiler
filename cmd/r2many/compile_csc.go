@@ -25,7 +25,16 @@ func compileCSC(args []string) error {
 	if fs.NArg() != 1 || *out == "" {
 		return fmt.Errorf("usage: compile-csc input.se|input.json -o output.exe [-keep-cs]")
 	}
+	var err error
 	input := fs.Arg(0)
+	input, err = filepath.Abs(input)
+	if err != nil {
+		return err
+	}
+	*out, err = filepath.Abs(*out)
+	if err != nil {
+		return err
+	}
 	data, err := os.ReadFile(input)
 	if err != nil {
 		return err

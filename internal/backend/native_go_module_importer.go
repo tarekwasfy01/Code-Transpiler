@@ -28,6 +28,11 @@ type nativeGoModuleImporter struct {
 	loading    map[string]bool
 }
 
+// moduleImporterCache shares parsed/type-checked module packages across
+// per-file frontend invocations. Access is serialized by each importer mutex.
+var moduleImporterCache sync.Map // map[root+module] *nativeGoModuleImporter
+var nativeGoFallbackImporterMu sync.Mutex
+
 func nativeGoImporterFor(filename string) types.Importer {
 	root, modulePath, ok := nativeGoModuleRoot(filename)
 	if !ok {
@@ -43,10 +48,13 @@ func nativeGoImporterFor(filename string) types.Importer {
 	// "concurrent map writes" panics. Package resolution stays structured and
 	// deterministic within this check while the corpus runner provides its own
 	// case-level parallelism.
-	return nativeGoFmtImporter{delegate: &nativeGoModuleImporter{
-		root: root, modulePath: modulePath, fallback: importer.Default(),
-		loaded: map[string]*types.Package{}, loading: map[string]bool{},
-	}}
+	key := root + "\x00" + modulePath
+	if cached, ok := moduleImporterCache.Load(key); ok {
+		return nativeGoFmtImporter{delegate: cached.(*nativeGoModuleImporter)}
+	}
+	created := &nativeGoModuleImporter{root: root, modulePath: modulePath, fallback: importer.Default(), loaded: map[string]*types.Package{}, loading: map[string]bool{}}
+	actual, _ := moduleImporterCache.LoadOrStore(key, created)
+	return nativeGoFmtImporter{delegate: actual.(*nativeGoModuleImporter)}
 }
 
 func nativeGoModuleRoot(filename string) (string, string, bool) {
@@ -98,7 +106,13 @@ func nativeGoResolveSourcePath(filename string) string {
 
 func (i *nativeGoModuleImporter) Import(path string) (*types.Package, error) {
 	if path != i.modulePath && !strings.HasPrefix(path, i.modulePath+"/") {
-		return i.fallback.Import(path)
+		// go/importer.Default shares export-data readers internally and is not
+		// safe for concurrent use by corpus workers. Serialize only this
+		// external fallback; module-local shallow loads remain parallel-safe.
+		nativeGoFallbackImporterMu.Lock()
+		pkg, err := i.fallback.Import(path)
+		nativeGoFallbackImporterMu.Unlock()
+		return pkg, err
 	}
 	// Source-file export is a structural frontend operation. Recursively
 	// type-checking the complete compiler module for every individual file can

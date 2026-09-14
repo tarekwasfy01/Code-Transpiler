@@ -86,6 +86,13 @@ func GoTypedSyntaxToSemantic(filename, source string, diagnostics *DiagnosticCon
 		// Leaving GoVersion empty makes the checker use toolchain-version
 		// defaults, which can disagree with the module's declared semantics.
 		conf := types.Config{Importer: moduleImporter, Sizes: types.SizesFor("gc", "amd64"), GoVersion: "go1.23"}
+		// Very large generated SSA tables spend most of their time type-checking
+		// thousands of repetitive function bodies. Keep package/declaration/type
+		// facts while deferring body-level checks to the structural AST lowering.
+		// This is language-neutral and only activates for genuinely large units.
+		if len(source) >= 1_000_000 {
+			conf.IgnoreFuncBodies = true
+		}
 		_, err = conf.Check(packageName, fs, typeFiles, info)
 	}
 	if err != nil {

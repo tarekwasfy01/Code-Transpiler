@@ -214,6 +214,17 @@ func uastEmptyForReturn(graph *uastExecutionGraph, id int) string {
 	return walk(id, "")
 }
 
+func csharpFunctionType(arity int) (string, error) {
+	if arity < 0 || arity > 16 {
+		return "", fmt.Errorf("C# function-value arity %d is outside the CLR Func contract", arity)
+	}
+	types := make([]string, arity+1)
+	for i := range types {
+		types[i] = "dynamic"
+	}
+	return "System.Func<" + strings.Join(types, ", ") + ">", nil
+}
+
 func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, id int) error {
 	flow, flowErr := buildUASTFunctionFlow(graph, id)
 	if flowErr != nil && !g.nativeDirect {
@@ -323,7 +334,15 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		case "cpp":
 			g.line("auto " + name + " = [&](" + typed("double %s") + ") {")
 		case "csharp":
-			g.line("System.Func<dynamic, dynamic> " + name + " = (" + strings.Join(names, ", ") + ") => {")
+			delegateType, err := csharpFunctionType(len(names))
+			if err != nil {
+				return err
+			}
+			parameters := "(" + strings.Join(names, ", ") + ")"
+			if len(names) == 0 {
+				parameters = "()"
+			}
+			g.line(delegateType + " " + name + " = " + parameters + " => {")
 		case "java":
 			g.line("java.util.function.Function<Double, Double> " + name + " = (" + strings.Join(names, ", ") + ") -> {")
 		case "kotlin":

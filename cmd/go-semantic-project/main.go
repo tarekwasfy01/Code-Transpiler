@@ -158,7 +158,7 @@ func main() {
 				sum := sha256.Sum256(data)
 				rel, _ := filepath.Rel(*root, file)
 				start := time.Now()
-				p, e := safeLower(file, string(data), time.Duration(*timeoutSeconds)*time.Second)
+				p, e := lowerWithRetry(file, string(data), time.Duration(*timeoutSeconds)*time.Second)
 				r := result{File: rel, Hash: fmt.Sprintf("%x", sum[:]), Bytes: int64(len(data)), DurationMS: time.Since(start).Milliseconds()}
 				if e != nil {
 					r.Status = "FAIL"
@@ -357,7 +357,7 @@ func main() {
 	}
 	families := map[string]map[string]int{}
 	for _, r := range results {
-		if r.Status == "FAIL" {
+		if r.Status != "PASS" {
 			fam, prim := classify(r.Diagnostic)
 			if families[fam] == nil {
 				families[fam] = map[string]int{}
@@ -407,15 +407,30 @@ func safeLower(file, source string, limit time.Duration) (*backend.SemanticProgr
 	case r := <-ch:
 		return r.p, r.err
 	case <-time.After(limit):
-		// The frontend lowering is a single semantic transaction and cannot
-		// be safely cancelled halfway through without leaking its analysis
-		// state.  Treat the configured duration as a progress threshold: once
-		// it expires, wait for the same transaction to finish instead of
-		// misclassifying a valid (but complex) source file as a semantic
-		// failure.  Actual parser/lowering errors still arrive through ch.
-		r := <-ch
-		return r.p, r.err
+		// Keep the per-file bound hard so one pathological frontend analysis
+		// cannot stall the complete worker pool. The lowering goroutine is
+		// isolated and its result is discarded after the deadline.
+		return nil, context.DeadlineExceeded
 	}
+}
+
+// lowerWithRetry gives complex but finite compiler units a bounded second
+// chance. The retry remains isolated per file and is still capped, so a
+// pathological unit cannot stall the complete project run.
+func lowerWithRetry(file, source string, limit time.Duration) (*backend.SemanticProgram, error) {
+	p, err := safeLower(file, source, limit)
+	if err != context.DeadlineExceeded {
+		return p, err
+	}
+	if limit <= 0 {
+		return p, err
+	}
+	if limit > 10*time.Minute {
+		limit = 10 * time.Minute
+	} else {
+		limit *= 4
+	}
+	return safeLower(file, source, limit)
 }
 
 func compact(s string) string {

@@ -1096,7 +1096,7 @@ func CompileSemanticProject(p *SemanticProject, opts CompileOptions) (CompileRes
 		saveProjectSummaryCache(p, opts.CacheDir)
 	}
 	var projectClosure ExecutableClosure
-	if opts.OutputKind == CompileExecutable {
+	if opts.OutputKind == CompileExecutable && !opts.EmbedAllModules {
 		root := strings.TrimSpace(opts.EntryPoint)
 		if root == "" {
 			root = strings.TrimSpace(p.EntryPoint)
@@ -1112,6 +1112,10 @@ func CompileSemanticProject(p *SemanticProject, opts CompileOptions) (CompileRes
 			return CompileResult{}, fmt.Errorf("EXECUTABLE_CLOSURE_UNITS: %w", err)
 		}
 	}
+	// Explicit full embedding is a deliberate project mode: retain every
+	// loaded semantic unit so module bodies are emitted, rather than reducing
+	// the graph to the executable closure (which can omit library bodies and
+	// produce a start-only stub).
 	projectIndexFingerprint := semanticProjectIndexFingerprint(p.Index)
 	// Entry ownership is a project-index fact. Resolve it from the compact
 	// summaries before workers begin releasing unit bodies. Relying solely on a

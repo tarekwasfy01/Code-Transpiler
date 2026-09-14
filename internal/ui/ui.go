@@ -302,6 +302,16 @@ func parseSemanticGUI(data []byte) (*backend.SemanticProgram, error) {
 	}
 	return backend.ParseSemanticSE(data)
 }
+
+// guiModuleBaseDir is the project context for local imports. The executable
+// may live in dist/, while project-internal modules live beside the user's
+// source/go.mod in the working directory.
+func guiModuleBaseDir() string {
+	if wd, err := os.Getwd(); err == nil {
+		return wd
+	}
+	return "."
+}
 func (a *App) langForSource() highlight.Language { return highlightLanguage(a.currentSource().ID) }
 func (a *App) langForTarget() highlight.Language { return highlightLanguage(a.currentTarget().ID) }
 func (a *App) handleEditorEvents(gtx layout.Context) {
@@ -639,7 +649,7 @@ func (a *App) startConvert() {
 				} else {
 					storeRoot, _ := backend.ModuleStoreRoot()
 					code, err = manytomany.TranspileSemanticSPWithOptions(target, data, manytomany.TranspileRequest{
-						TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: filepath.Dir(os.Args[0]), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "all",
+						TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: guiModuleBaseDir(), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "all",
 					})
 				}
 			} else if target == "sp" || target == "spz" || target == "se" {
@@ -666,7 +676,7 @@ func (a *App) startConvert() {
 				code = string(sp)
 			} else {
 				storeRoot, _ := backend.ModuleStoreRoot()
-				result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: filepath.Dir(os.Args[0]), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "all", DisableRuntimeFallback: disableRuntime})
+				result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: guiModuleBaseDir(), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "all", DisableRuntimeFallback: disableRuntime})
 				code, err = result.Code, convertErr
 			}
 		}
