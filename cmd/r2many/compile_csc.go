@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/manytomany"
 )
 
 // compileCSC is the explicit SemanticProgram -> C# -> csc.exe route.  It

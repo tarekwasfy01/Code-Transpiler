@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/matrixir"
 )
 
 //go:embed universal_ast_schema.json

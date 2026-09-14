@@ -3,7 +3,7 @@ package backend
 
 import (
 	"fmt"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/matrixir"
 )
 
 // A, T and F are separately labelled transition matrices for unconditional, true and

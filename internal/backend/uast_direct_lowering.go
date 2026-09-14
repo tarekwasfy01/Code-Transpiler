@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/matrixir"
 )
 
 // DirectLoweringRequirement is one row of M_CO. It describes only registry

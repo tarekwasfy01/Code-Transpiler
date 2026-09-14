@@ -3,7 +3,7 @@ package backend
 
 import (
 	"fmt"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/matrixir"
 )
 
 // CapabilityMatrix is feature x target. Status planes are mutually exclusive;

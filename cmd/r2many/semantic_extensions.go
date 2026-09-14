@@ -3,7 +3,7 @@ package main
 
 import "strings"
 
-import "github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+import "github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/backend"
 
 func isSemanticTextPath(path string) bool {
 	l := strings.ToLower(path)

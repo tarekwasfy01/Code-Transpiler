@@ -17,13 +17,13 @@ import (
 	"time"
 
 	"gioui.org/app"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/runtimeassets"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/targetrun"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/thirdpartylicenses"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/ui"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/platform"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/runtimeassets"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/targetrun"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/thirdpartylicenses"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/ui"
 )
 
 // Set by the local onefile build. Defaults keep source-tree invocations

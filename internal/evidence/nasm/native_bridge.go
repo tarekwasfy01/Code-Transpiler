@@ -1,7 +1,7 @@
 package nasm
 
 import (
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend/x86encode"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/backend/x86encode"
 )
 
 // EncodeNativeWitness routes a concrete assembly witness through the

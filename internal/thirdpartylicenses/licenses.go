@@ -36,7 +36,7 @@ var Py2Many string
 
 func All() []Entry {
 	return []Entry{
-		{Name: "Code Transpiler", License: "MIT", Source: "https://github.com/tarekwasfy01/Code-Transpiler", Text: Project, Embedded: true},
+		{Name: "Code Transpiler", License: "MIT", Source: "https://github.com/tarekwasfy01/Code-Transpiler/v2/v2", Text: Project, Embedded: true},
 		{Name: "Tree-sitter", License: "MIT", Source: "https://github.com/tree-sitter/tree-sitter", Text: TreeSitter, Embedded: true},
 		{Name: "Gio", License: "MIT", Source: "https://gioui.org", Text: Gio, Embedded: true},
 		{Name: "gvcode", License: "MIT", Source: "https://github.com/oligo/gvcode", Text: GVCode, Embedded: true},

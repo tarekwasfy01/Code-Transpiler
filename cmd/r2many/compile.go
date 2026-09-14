@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler/v2/v2"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/backend"
 )
 
 func compileNative(args []string) error {

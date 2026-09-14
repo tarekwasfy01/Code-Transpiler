@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/v2/internal/matrixir"
 )
 
 // SemanticTypeRelations is a lossless incidence projection of type uses and
