@@ -1,9 +1,0 @@
-id,name,rule
-INV001,feature_exactly_one_facet,Each feature maps to exactly one UASF quotient class.
-INV002,facet_signature_exact,All features in a facet have identical SemanticAxis+RelationAxis vectors.
-INV003,structural_kind_one_hot,Each structural AST node instance has exactly one structural_kind.
-INV004,facet_vector_sparse,Each node instance may carry zero or more semantic facets.
-INV005,relation_kind_closed,Every relation instance uses a relation from the concrete relation catalog.
-INV006,field_mask_derived,Applicable semantic fields derive from facet/axis/relation matrices.
-INV007,coverage_interval_preserved,Unknown/partial SemanticProgram coverage remains lower/upper interval data.
-INV008,no_priority_operator,No ranking/priority vector participates in schema construction.
