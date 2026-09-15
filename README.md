@@ -1,78 +1,68 @@
-# Code-Transpiler
+# Code Transpiler
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg)](https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler)
+<p align="center">
+  <img width="256" height="256" alt="code-transpiler-logo" src="https://github.com/user-attachments/assets/88fbf224-6e52-426e-a124-5482df814b75" />
+</p>
 
-## Local development additions (not yet released)
+<p align="center">
+  <a href="https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler">
+    <img src="https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg" alt="Go Reference" />
+  </a>
+  &nbsp;
+  <a href="https://get.microsoft.com/installer/download/9n1kb1kxxtmn?referrer=appbadge">
+    <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200" alt="Get it from Microsoft" />
+  </a>
+</p>
 
-Native Go analysis is available through
-`NativeAnalysisJSON("go", "input.go", source)` and the CLI command
-`native-analysis -source go input.go -o analysis.json`.
-It uses Go's parser and type checker, preserving literal spelling, structured
-types, source spans, and lexical symbol relations. Imports are currently rejected.
-The output is an **analysis artifact, not an executable SemanticProgram**.
+## Semantic Programming Language
 
-The separate `NativeSemanticJSON("go", "input.go", source)` API and
-`semantic-export -native -source go input.go -o program.json` CLI path now
-produce an **executable SemanticProgram** for a bounded Go scalar/control
-subset. They preserve block shadowing and source mapping, and reject unsupported
-input without falling back to the old parser. Its Go target and embedded runtime
-are verified alongside Python, Rust, C and C++ for the bounded subset; other targets
-are gated by the `native.go.scalar` capability.
-Native helper functions support bool/string/fixed-width integer parameters, zero or one return
-value, direct calls and conditional returns. Their sparse caller-to-callee matrix
-orders declarations and rejects recursion. The additional `native.go.functions`
-capability enables the embedded runtime and Go/Python/Rust/C/C++ emission.
-Argument order, argument side effects and boolean short-circuit behavior are
-checked against original Go execution after a deterministic JSON roundtrip.
-Void fallthrough becomes an explicit semantic return. Empty functions, loop
-returns and ordered effectful operands are included in the executable fixture
-`internal/backend/testdata/native_functions.go`. C is also tested with `-O2`.
-Architecture-sized integers, floating-point native operations, general imports,
-recursive functions and Unicode are not yet part
-of this strict executable subset. Existing default translation remains legacy.
+The self hosted **Semantic Programming Language (`.sp`) originated from Code Transpiler** and its language-independent `SemanticProgram / Universal AST`.
 
-`CapabilityMatrixJSON(features)` and `capability-matrix [feature ...]` expose
-feature-by-target status matrices. Required capabilities now gate emission;
-unknown dialect operations gate execution and emission.
+Code Transpiler remains the associated **Go package, reference implementation and bootstrap compiler**.
 
-`ImplementationMatrixJSON()` and `implementation-matrix` expose 19 typed integer
-operations across JSON, runtime, all 13 source adapters and all 13 target adapters
-(19 x 28). This matrix gates emission directly from the actual operation nodes;
-removing a document's optional requirement strings cannot bypass it. Its route
-matrix describes declared availability, not execution-test evidence.
+Semantic Programming Language:
 
-The new `tagged_exact_scalars_v1` value contract preserves int8/16/32/64 and
-uint8/16/32/64 without binary64 conversion. Typed core nodes encode literals,
-loads, addition/subtraction/multiplication, bit operations, comparisons,
-formatting, and explicit integer conversions with modular wrap semantics.
-Division, remainder and shifts are not implemented in this subset. Integer
-parameter types and value-passing semantics survive the executable JSON codec.
-The 1,472-case integer matrix uses boundaries and seeded values across all
-eight domains, with an independent big.Int oracle and optional external runs.
+https://github.com/tarekwasfy01/Semantic-Programming-Language
 
-Implemented native input is currently **Go**. Exact integer target adapters are
-**Go, Python, Rust, C, C++, Java and C#**. Other native frontends and exact target adapters
-remain explicit unsupported matrix entries, not claimed implementations.
+---
 
-See [frontend migration status](SEMANTIC_FRONTEND_V2.md) and the complete
-[development instructions](SEMANTIC_DEVELOPMENT.md) for implemented boundaries,
-the 1,024-case arithmetic differential test, and remaining compiler work.
+## About
 
+Code Transpiler is a matrix-driven many-to-many compiler and transpiler for 13 programming languages.
 
+It provides:
 
-Code-Transpiler is a matrix-driven many-to-many compiler for 13 programming
-languages. It is available as a Windows application, a command-line program
-and an importable Go package.
+* Go package
+* Windows application
+* command-line interface
+* SemanticProgram / UAST
+* source-to-source transpilation
+* native x86-64 compilation
+* assembly, machine-code, object and executable processing
+* binary-to-Semantic lifting
 
 ```text
-Go module:   github.com/tarekwasfy01/Code-Transpiler
-Go package:  codetranspiler
-Executable:  CodeTranspiler.exe
+Go module:  github.com/tarekwasfy01/Code-Transpiler
+Go package: codetranspiler
+Executable: CodeTranspiler.exe
 ```
 
-Go package names cannot contain `-`, so the module and repository are named
-`Code-Transpiler`, while the identifier used in Go source is
-`codetranspiler`.
+
+
+### Run the API example directly
+
+The list-languages example is its own ready-to-run Go module. No manual
+`go mod init` or `go get` step is required:
+
+```text
+cd examples/list-languages
+go run .
+```
+
+On Windows, `examples\list-languages\run.cmd` performs dependency tidying and
+runs the example automatically. The importable library supports pure-Go builds
+with `CGO_ENABLED=0`; the optional external grammar scanner reports a capability
+error only when a grammar that actually requires it is used.
 
 The compiler lowers supported constructs into `SemanticProgram`, whose
 canonical state is the matrix-derived Universal AST. The old recursive
@@ -84,13 +74,33 @@ Canonical JSON contains universal nodes, semantic facets, typed fields,
 language projection, source positions and graph relations. A backend rejects
 UAST semantics that its direct or compatibility lowering cannot preserve.
 
-See [Universal AST migration status](UAST_MIGRATION_STATUS.md) for measured
+See [Universal AST migration status](docs/UAST_MIGRATION_STATUS.md) for measured
 direct coverage, target capability matrices and the remaining compatibility
 adapters.
 
 > Route availability means that the supported common subset can be parsed and
 > emitted. It does not claim complete equivalence for every feature of every
 > source and target language.
+
+## Semantic formats
+
+Semantic is the language-independent program representation. `.se` is the
+readable Semantic language, `.sp` is compact Semantic transport text, and
+`.spz` is its compressed transport form. All three are lossless views of the
+same `SemanticProgram`; JSON remains an explicit interchange/debug format.
+
+SFPC (Semantic Fixed Point Compression) stores only an irreducible explicit
+basis and derives repeated facts by closure. For a program graph `G`:
+
+```text
+F(G) = G_explicit ∪ derive(F(G))
+closure(B) = G
+```
+
+where `B` is the smallest explicit basis. Grammar compression encodes a
+repeated production `A → X₁…Xₙ` once and uses references, reducing repeated
+cost from `k·Σ|Xᵢ|` to `Σ|Xᵢ| + k·|ref(A)|`. `.spz` compresses that canonical
+stream; decoding satisfies `Decode(Encode(P)) ≡ P`.
 
 ## Supported languages
 
@@ -116,7 +126,7 @@ Aliases include `py`, `rs`, `c++` and `c#`. The registry therefore exposes
 ## Install the Go package
 
 ```bash
-go get github.com/tarekwasfy01/Code-Transpiler
+go get github.com/tarekwasfy01/Code-Transpiler@v1.2.10
 ```
 
 Import it:
@@ -380,22 +390,46 @@ Get-Content requests.json |
 ### Export SemanticProgram
 
 ```powershell
-CodeTranspiler.exe semantic-export `
+sp semantic-export `
   -source python `
   input.py `
   -o program.semantic.json
 ```
 
+Use the same command for the three Semantic formats:
+
+```powershell
+sp semantic-export -source go input.go -format se  -o program.se
+sp semantic-export -source go input.go -format sp  -o program.sp
+sp semantic-export -source go input.go -format spz -o program.spz
+```
+
 ### Translate SemanticProgram
 
 ```powershell
-CodeTranspiler.exe semantic-transpile `
+sp semantic-transpile `
   -target rust `
-  program.semantic.json `
+  program.se `
   -o output.rs
 ```
 
 If `-o` is omitted, generated source is written to standard output.
+
+Convert and format Semantic documents without changing their meaning:
+
+```powershell
+sp semantic-convert program.semantic.json -o program.se
+sp semantic-format program.se --readable -o readable.se
+sp semantic-format program.se --compact -o compact.se
+sp semantic-format program.se -o program.sp
+sp semantic-format program.se -o program.spz
+sp semantic-validate program.spz
+sp semantic-info program.se
+```
+
+Every command shown here also accepts the executable form
+`CodeTranspiler.exe <command> ...`; `sp <command> ...` and
+`CodeTranspiler.exe <command> ...` are equivalent.
 
 ### Query a capability
 
@@ -467,7 +501,7 @@ Sparse relations use COO encoding:
 }
 ```
 
-See [SEMANTIC_PROGRAM.md](SEMANTIC_PROGRAM.md) for the complete current format
+See [docs/SEMANTIC_PROGRAM.md](docs/SEMANTIC_PROGRAM.md) for the complete current format
 and its semantic boundaries.
 
 ## Build from source
@@ -479,7 +513,7 @@ Requirements:
 - PowerShell
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build-onefile.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\build-onefile.ps1
 ```
 
 Output:
@@ -517,11 +551,11 @@ emulation or an explicit unsupported result.
 ## License
 
 Code-Transpiler is licensed under the MIT License. See [LICENSE](LICENSE).
-Third-party information is recorded in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+Third-party information is recorded in [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md)
 and [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt).
 
 CrossTL source is not bundled. Its possible future role as an external GPU
-adapter is described in [CROSSTL_DESIGN.md](CROSSTL_DESIGN.md).
+adapter is described in [docs/CROSSTL_DESIGN.md](docs/CROSSTL_DESIGN.md).
 
 ## Repository
 
@@ -535,3 +569,4 @@ For the combined Go/Python/R/Rust/C++/Kotlin/Java/C# matrix handoffs, use
 `./run-all-handoffs.ps1`; see [Joint handoff workflow](tools/matrix-audit/ALL_HANDOFFS.md).
 
 https://github.com/tarekwasfy01/Code-Transpiler
+
