@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 import (
@@ -258,11 +259,22 @@ func Tokenize(source, code string) []Lexeme {
 			continue
 		}
 		if c == '"' || c == '\'' || c == '`' {
-			start, quote := i, c
-			i++
+			start, quote, delimiterWidth := i, c, 1
+			if source == "python" && c != '`' && i+2 < len(runes) && runes[i+1] == c && runes[i+2] == c {
+				delimiterWidth = 3
+			}
+			i += delimiterWidth
 			for i < len(runes) {
+				if delimiterWidth == 3 && runes[i] == quote && i+2 < len(runes) && runes[i+1] == quote && runes[i+2] == quote && (i == 0 || runes[i-1] != '\\') {
+					i += 3
+					break
+				}
 				if runes[i] == '\\' && i+1 < len(runes) {
 					i += 2
+					continue
+				}
+				if delimiterWidth == 3 {
+					i++
 					continue
 				}
 				i++
@@ -295,7 +307,7 @@ func Tokenize(source, code string) []Lexeme {
 			continue
 		}
 		matched := ""
-		for _, operator := range []string{"<<-", "->>", ":::", "===", "!==", "=>", "::", "<-", "->", ":=", "<=", ">=", "==", "!=", "&&", "||", "%%", "%/%", "//", "**", "++", "--", "+=", "-=", "*=", "/="} {
+		for _, operator := range []string{"<<-", "->>", ":::", "===", "!==", "=>", "<<=", ">>=", "&=", "|=", "^=", "::", "<<", ">>", "<-", "->", ":=", "<=", ">=", "==", "!=", "&&", "||", "%%", "%/%", "//", "**", "++", "--", "+=", "-=", "*=", "/="} {
 			candidate := []rune(operator)
 			if i+len(candidate) <= len(runes) && string(runes[i:i+len(candidate)]) == operator {
 				matched = operator

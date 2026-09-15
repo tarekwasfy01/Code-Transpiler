@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package main
 
 import (
@@ -8,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
 )
@@ -49,19 +51,88 @@ func targetExtension(target string) string {
 func transpile(args []string) error {
 	fs := flag.NewFlagSet("transpile", flag.ContinueOnError)
 	var source, target, out string
+	var inputKind string
 	fs.StringVar(&source, "source", "auto", "source language or auto")
 	fs.StringVar(&source, "from", "auto", "alias of -source")
 	fs.StringVar(&target, "target", "go", "target language or all")
 	fs.StringVar(&target, "to", "go", "alias of -target")
 	fs.StringVar(&out, "o", "", "output file, or directory for -target all")
+	fs.StringVar(&inputKind, "input", "source", "source|assembly|machine|object|executable")
+	arch := fs.String("source-arch", "x86_64", "binary input architecture")
+	base := fs.Uint64("base-address", 0, "optional binary image base")
 	native := fs.Bool("native", false, "strict native frontend; no legacy fallback")
-	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-source": true, "-from": true, "-target": true, "-to": true, "-o": true, "-native": false})); err != nil {
+	runtimeFallback := fs.Bool("runtime", true, "allow semantic runtime as last-resort fallback")
+	noRuntime := fs.Bool("no-runtime", false, "disable semantic runtime fallback (DIRECT only)")
+	moduleRoot := fs.String("module-root", "", "Semantic module store root (cache-first package imports)")
+	embedAll := fs.Bool("embed-all-modules", false, "embed every resolved module instead of only required roots")
+	moduleMode := fs.String("module-mode", "needed", "Semantic imports: needed, references, or all")
+	license := fs.Bool("license", false, "copy licenses of imported packages beside output")
+	fs.BoolVar(license, "l", false, "alias for -license")
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-source": true, "-from": true, "-target": true, "-to": true, "-o": true, "-input": true, "-source-arch": true, "-base-address": true, "-native": false, "-runtime": true, "-no-runtime": false, "-module-root": true, "-module-mode": true, "-embed-all-modules": false, "--embed-all-modules": false, "-license": false, "-l": false})); err != nil {
 		return err
 	}
+	if *embedAll {
+		*moduleMode = string(backend.SemanticModulesAll)
+	}
+	if *moduleMode != "needed" && *moduleMode != "references" && *moduleMode != "all" {
+		return fmt.Errorf("invalid -module-mode %q (expected needed, references, or all)", *moduleMode)
+	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: transpile -source <language|auto> -target <language|all> input [-o output] [-native]")
+		return fmt.Errorf("usage: transpile -source <language|auto> -target <language|all> input [-o output] [-module-root DIR] [-embed-all-modules] [-native]")
 	}
 	input := fs.Arg(0)
+	// Semantic transport files are self-describing.  Route them directly to
+	// the canonical SemanticProgram importer before source-language inference;
+	// .se is not a registered surface-language extension.
+	if isSemanticPath(input) {
+		if target == "all" {
+			return fmt.Errorf("Semantic input requires one target")
+		}
+		if out == "" {
+			return fmt.Errorf("Semantic input requires -o <output>")
+		}
+		data, err := os.ReadFile(input)
+		if err != nil {
+			return err
+		}
+		code, err := manytomany.TranspileSemanticSP(target, data)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(out, []byte(code), 0644); err != nil {
+			return err
+		}
+		if *license {
+			_, err = backend.CopyImportedPackageLicenses(*moduleRoot, out)
+		}
+		return err
+	}
+	if inputKind != "source" {
+		data, err := os.ReadFile(input)
+		if err != nil {
+			return err
+		}
+		kind := map[string]codetranspiler.CompileInputKind{"assembly": codetranspiler.InputAssembly, "machine": codetranspiler.InputMachine, "machine_code": codetranspiler.InputMachine, "object": codetranspiler.InputObject, "executable": codetranspiler.InputExecutable}[inputKind]
+		if kind == "" {
+			return fmt.Errorf("unsupported input kind %q", inputKind)
+		}
+		if target == "all" {
+			return fmt.Errorf("binary input requires one target")
+		}
+		if out == "" {
+			return fmt.Errorf("binary input requires -o <output>")
+		}
+		outputKind := codetranspiler.Source
+		result, err := codetranspiler.Compile(string(data), codetranspiler.CompileOptions{InputKind: kind, SourceArch: *arch, TargetArch: *arch, TargetLanguage: target, BaseAddress: *base, OutputKind: outputKind})
+		if err != nil {
+			return err
+		}
+		payload := []byte(result.Text)
+		if target == "assembly" {
+			payload = []byte(result.Text)
+		}
+		return os.WriteFile(out, payload, 0644)
+	}
 	source, err := sourceLanguage(source, input)
 	if err != nil {
 		return err
@@ -128,7 +199,7 @@ func transpile(args []string) error {
 			// CLI and GUI share the same immutable request boundary. The CLI may
 			// still fan out targets, but every individual output crosses exactly
 			// the same Frontend -> UAST -> Native/Runtime core as GUI Convert.
-			result, coreErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: destination, EntryPoint: "cli"})
+			result, coreErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: destination, EntryPoint: "cli", ModuleBaseDir: filepath.Dir(input), ModuleStoreRoot: *moduleRoot, EmbedAllModules: *embedAll, ModuleEmbeddingMode: *moduleMode, DisableRuntimeFallback: *noRuntime || !*runtimeFallback})
 			code, err = result.Code, coreErr
 		} else if program.Semantic == nil && destination == source {
 			// This is the explicit legacy ingress compatibility case: parsing did
@@ -145,6 +216,9 @@ func transpile(args []string) error {
 		if err == nil {
 			err = os.WriteFile(output, []byte(code), 0644)
 		}
+		if err == nil && *license {
+			_, err = backend.CopyImportedPackageLicenses(*moduleRoot, output)
+		}
 		if err != nil {
 			result.Error = err.Error()
 			failures++
@@ -160,6 +234,11 @@ func transpile(args []string) error {
 		}
 		if e = os.WriteFile(filepath.Join(out, "translation-report.json"), encoded, 0644); e != nil {
 			return e
+		}
+		if *license {
+			if _, e = backend.CopyImportedPackageLicenses(*moduleRoot, out); e != nil {
+				return e
+			}
 		}
 	}
 	if failures > 0 {

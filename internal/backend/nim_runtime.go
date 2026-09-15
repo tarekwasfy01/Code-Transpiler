@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // Nim values share one tagged representation across scalar expressions,

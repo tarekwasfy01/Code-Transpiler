@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -12,6 +13,14 @@ func generateTargetFromUniversalExisting(evaluation, target string, graph *uastE
 	return generateTargetFromUniversalMode(evaluation, target, graph, true)
 }
 
+// generateTargetFromUniversalHybrid keeps native emission as the default but
+// permits an individual unsupported UAST statement to cross the existing
+// compatibility boundary.  It is selected only after a strict direct attempt
+// has identified a concrete DIRECT_NATIVE_UNAVAILABLE contract gap.
+func generateTargetFromUniversalHybrid(evaluation, target string, graph *uastExecutionGraph) (string, error) {
+	return generateTargetFromUniversalMode(evaluation, target, graph, true, true)
+}
+
 // generateTargetFromUniversalCompatibility is intentionally private. It is
 // the one explicit UAST -> target compatibility entrance. It does not receive
 // a route mode from CLI or manytomany.
@@ -19,32 +28,40 @@ func generateTargetFromUniversalCompatibility(evaluation, target string, graph *
 	return generateTargetFromUniversalMode(evaluation, target, graph, false)
 }
 
-func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecutionGraph, nativeDirect bool) (string, error) {
+func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecutionGraph, nativeDirect bool, hybrid ...bool) (string, error) {
 	generator := &targetGen{evaluation: evaluation, target: target, declared: []map[string]bool{{}}, funcs: map[string]bool{}, inline: map[string]*FunctionExpr{}, activeInline: map[*FunctionExpr]bool{}, uastFunctions: map[string]int{}, uastInline: map[string]bool{}, uastActiveInline: map[int]bool{}, helperSources: map[string]string{}, directVectors: map[string]bool{}}
 	generator.nativeDirect = nativeDirect
+	generator.hybridFallback = len(hybrid) > 0 && hybrid[0]
 	generator.usedNames = reserveUASTSymbols(graph)
 	generator.cValues = map[string]bool{}
+	generator.entryBinding = generator.name(canonicalUASTEntryBinding(graph.document))
 	// Function IDs and inline eligibility come directly from UAST flow matrices.
 	for _, item := range graph.many(graph.root, "statement") {
 		assignment := graph.common[item.ID]
-		if assignment.Kind != "assign" {
+		functionID, name := -1, ""
+		if assignment.Kind == "function" && assignment.Name != "" {
+			functionID, name = item.ID, generator.name(assignment.Name)
+		} else if assignment.Kind == "assign" {
+			expression, ok, err := graph.one(item.ID, "expression", false)
+			if err != nil {
+				return "", err
+			}
+			if !ok || graph.common[expression].Kind != "function" {
+				continue
+			}
+			functionID, name = expression, generator.name(assignment.Name)
+		}
+		if functionID < 0 || name == "" {
 			continue
 		}
-		expression, ok, err := graph.one(item.ID, "expression", false)
-		if err != nil {
-			return "", err
-		}
-		if !ok || graph.common[expression].Kind != "function" {
-			continue
-		}
-		name := generator.name(assignment.Name)
 		generator.funcs[name] = true
-		generator.uastFunctions[name] = expression
-		_, flowErr := buildUASTFunctionFlow(graph, expression)
-		if flowErr != nil && strings.Contains(flowErr.Error(), "before definite assignment") {
-			return "", flowErr
-		}
-		if flowErr == nil && !uastFunctionContainsLoop(graph, expression) {
+		generator.uastFunctions[name] = functionID
+		_, flowErr := buildUASTFunctionFlow(graph, functionID)
+		// Definite-assignment diagnostics are advisory evidence for choosing an
+		// inline form. They must not prevent emission of a complete semantic
+		// project; captured/module-lifetime values can be initialized outside the
+		// local function-flow graph.
+		if flowErr == nil && !uastFunctionContainsLoop(graph, functionID) {
 			generator.uastInline[name] = true
 		}
 	}
@@ -57,38 +74,95 @@ func generateTargetFromUniversalMode(evaluation, target string, graph *uastExecu
 		return nil
 	}
 	switch target {
-	case "python", "julia", "nim", "swift":
+	case "r", "python", "julia", "nim", "swift":
+		// C/C++ and similar source frontends commonly carry a top-level
+		// return from their entry function. Interpreted targets have no
+		// statement-level return, so preserve the structured control fact by
+		// placing the complete root body in one generated entry function. This
+		// is a target form choice; no source text or diagnostic is inspected.
+		wrapped := target == "python" && graphHasRootReturn(graph)
+		if wrapped {
+			generator.line("def main():")
+			generator.indent++
+		}
 		if err := emit(); err != nil {
 			return "", err
 		}
+		if wrapped {
+			generator.indent--
+			generator.line("main()")
+		}
 		body := generator.b.String()
+		if generator.hybridFallback && generator.runtimeUsed {
+			return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
+		}
 		if nativeSourceWithoutRuntime(target, body, generator.requiredHelperSources()) {
-			return nativeTargetPrefix(target) + body, nil
+			return nativeTargetPrefixForBody(target, body, generator.requiredHelperSources()) + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 		}
 		if generator.nativeDirect {
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", target, nativeRuntimeMarker(body, generator.requiredHelperSources()))
 		}
-		return targetPrelude(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + generator.b.String(), nil
+		// Compatibility is the explicit runtime last resort. TargetSpec keeps
+		// syntax-only imports for the native path, so use the established
+		// complete runtime prelude here rather than returning unresolved r_* calls.
+		return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + generator.b.String(), nil
 	default:
 		generator.line(nativeMainOpen(target))
 		generator.indent++
+		generator.entryWrapper = true
 		if err := emit(); err != nil {
 			return "", err
 		}
+		generator.entryWrapper = false
 		if target == "cpp" || target == "c" {
 			generator.line("return 0;")
 		}
 		generator.indent--
 		generator.line(mainClose(target))
 		body := generator.b.String()
+		if generator.hybridFallback && generator.runtimeUsed {
+			return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
+		}
 		if nativeSourceWithoutRuntime(target, body, generator.requiredHelperSources()) {
-			return nativeTargetPrefix(target) + body, nil
+			return nativeTargetPrefixForBody(target, body, generator.requiredHelperSources()) + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 		}
 		if generator.nativeDirect {
 			return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s emitted %s", target, nativeRuntimeMarker(body, generator.requiredHelperSources()))
 		}
-		return targetPrelude(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
+		return targetPreludeExisting(target) + "\n" + renderTargetHelpers(generator.requiredHelperSources()) + "\n" + body, nil
 	}
+}
+
+// canonicalUASTEntryBinding resolves the executable entry solely from the
+// structured document contract. Native frontends are free to use stable
+// internal binding IDs (for example native_function_0); the public entry name
+// is preserved in function_entry_bindings and must survive SE/JSON round trips.
+func canonicalUASTEntryBinding(u *UniversalASTDocument) string {
+	if u == nil || u.Origin.EntryPoint == "" || u.Extensions == nil {
+		return ""
+	}
+	raw := u.Extensions["function_entry_bindings"]
+	switch entries := raw.(type) {
+	case map[string]string:
+		return entries[u.Origin.EntryPoint]
+	case map[string]any:
+		value, _ := entries[u.Origin.EntryPoint].(string)
+		return value
+	default:
+		return ""
+	}
+}
+
+func graphHasRootReturn(graph *uastExecutionGraph) bool {
+	if graph == nil || graph.root < 0 {
+		return false
+	}
+	for _, item := range graph.many(graph.root, "statement") {
+		if strings.EqualFold(graph.common[item.ID].Kind, "return") {
+			return true
+		}
+	}
+	return false
 }
 
 func nativeSourceWithoutRuntime(_ string, body string, helpers []string) bool {
@@ -119,13 +193,45 @@ func nativeMainOpen(target string) string {
 func nativeTargetPrefix(target string) string {
 	switch target {
 	case "go":
-		return "package main\n\nimport \"fmt\"\n\n"
+		return "package main\n\nimport (\n    \"fmt\"\n    \"math\"\n)\n\n"
 	case "rust":
 		return ""
 	case "cpp":
-		return "#include <iostream>\n#include <vector>\n\n"
+		return `#include <iostream>
+#include <functional>
+#include <vector>
+#include <any>
+#include <sstream>
+#include <string>
+#include <iomanip>
+#include <cctype>
+#include <typeinfo>
+#include <cmath>
+#include <stdexcept>
+
+template <typename T>
+static void uast_print_one(const T& value) { std::cout << value; }
+
+template <typename T>
+static void uast_print_one(const std::vector<T>& values) {
+    std::cout << "[";
+    for (size_t i = 0; i < values.size(); ++i) {
+        if (i) std::cout << ", ";
+        uast_print_one(values[i]);
+    }
+    std::cout << "]";
+}
+
+template <typename... Values>
+static void uast_print(const Values&... values) {
+    bool first = true;
+    ((std::cout << (first ? "" : " "), first = false, uast_print_one(values)), ...);
+    std::cout << std::endl;
+}
+
+`
 	case "c":
-		return "#include <stdio.h>\n\n"
+		return "#include <stdio.h>\n#include <stdbool.h>\n#include <math.h>\n\n"
 	case "zig":
 		return "const std = @import(\"std\");\n\n"
 	case "csharp":
@@ -135,4 +241,14 @@ func nativeTargetPrefix(target string) string {
 	default:
 		return ""
 	}
+}
+
+// nativeTargetPrefixForBody keeps imports tied to actually emitted target
+// forms. Go rejects an unused import, so math is added only when a generated
+// expression/helper references it.
+func nativeTargetPrefixForBody(target, body string, helpers []string) string {
+	if target == "go" && !strings.Contains(body+strings.Join(helpers, "\n"), "math.") {
+		return "package main\n\nimport (\n    \"fmt\"\n)\n\n"
+	}
+	return nativeTargetPrefix(target)
 }

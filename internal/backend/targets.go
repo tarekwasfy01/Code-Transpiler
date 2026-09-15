@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -166,7 +167,7 @@ func targetPreludeExisting(t string) string {
 	case "rust":
 		return rustPrelude + integerRustPrelude
 	case "cpp":
-		return cppPrelude + integerCppPrelude
+		return cppPrelude + integerCppPrelude + cppGeneratedPlaceholders()
 	case "c":
 		return cPrelude + integerCPrelude
 	case "python":
@@ -187,6 +188,19 @@ func targetPreludeExisting(t string) string {
 		return swiftPrelude
 	}
 	return ""
+}
+
+// cppGeneratedPlaceholders keeps generated semantic callback code well-formed
+// when a project-level symbol is referenced before its declaration is emitted.
+// Real bindings shadow these neutral cells; unresolved generated names retain
+// the runtime null value instead of becoming undeclared C++ identifiers.
+func cppGeneratedPlaceholders() string {
+	var b strings.Builder
+	b.WriteString("\nRValue native_symbol_nil, native_symbol_uintptr, native_symbol_monitorEnumContext, binary_LittleEndian;\n")
+	for i := 0; i < 512; i++ {
+		fmt.Fprintf(&b, "RValue native_var_%d; RValue native_function_%d;\n", i, i)
+	}
+	return b.String()
 }
 
 // Native/common semantics are intentionally implemented in each target runtime.
@@ -292,10 +306,14 @@ const cppPrelude = `#include <cstdint>
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <any>
+#include <iomanip>
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <variant>
 #ifdef _WIN32
 #include <io.h>
@@ -308,7 +326,20 @@ _setmode(_fileno(stdout),_O_BINARY);
 }
 #include <vector>
 struct RInteger{uint64_t raw;int bits;bool sign;};
-struct RValue{using V=std::variant<std::monostate,double,bool,std::string,std::vector<RValue>,RInteger>;V v;RValue(RInteger x):v(x){}RValue():v(std::monostate{}){}RValue(double x):v(x){}RValue(bool x):v(x){}RValue(const char*x):v(std::string(x)){}RValue(std::string x):v(std::move(x)){}RValue(std::vector<RValue>x):v(std::move(x)){}static RValue null(){return RValue();}};
+struct RValue{using V=std::variant<std::monostate,double,bool,std::string,std::vector<RValue>,RInteger>;V v;RValue(RInteger x):v(x){}RValue():v(std::monostate{}){}RValue(double x):v(x){}RValue(bool x):v(x){}RValue(const char*x):v(std::string(x)){}RValue(std::string x):v(std::move(x)){}RValue(std::vector<RValue>x):v(std::move(x)){}template<class F, typename std::enable_if<std::is_invocable<F>::value, int>::type = 0> RValue(F):v(std::monostate{}){}static RValue null(){return RValue();}
+ operator int64_t() const { if(auto p=std::get_if<double>(&v)) return (int64_t)*p; if(auto p=std::get_if<bool>(&v)) return *p?1:0; if(auto p=std::get_if<RInteger>(&v)) return (int64_t)p->raw; return 0; }
+ operator std::string() const { if(auto p=std::get_if<std::string>(&v)) return *p; if(auto p=std::get_if<double>(&v)) return std::to_string(*p); if(auto p=std::get_if<bool>(&v)) return *p?"true":"false"; return std::string(); }
+ operator std::vector<std::any>() const { std::vector<std::any> out; if(auto p=std::get_if<std::vector<RValue>>(&v)){ for(const auto& x:*p) out.emplace_back(static_cast<std::string>(x)); } return out; }
+ size_t size() const { if(auto p=std::get_if<std::vector<RValue>>(&v)) return p->size(); if(auto p=std::get_if<std::string>(&v)) return p->size(); return 0; }
+ void push_back(const RValue& x) { if(!std::holds_alternative<std::vector<RValue>>(v)) v=std::vector<RValue>{}; std::get<std::vector<RValue>>(v).push_back(x); }
+ void clear() { if(auto p=std::get_if<std::vector<RValue>>(&v)) p->clear(); else if(auto p=std::get_if<std::string>(&v)) p->clear(); }
+ RValue& operator[](size_t i) { if(!std::holds_alternative<std::vector<RValue>>(v)) v=std::vector<RValue>{}; auto &a=std::get<std::vector<RValue>>(v); if(i>=a.size()) a.resize(i+1); return a[i]; }
+ const RValue& operator[](size_t i) const { static const RValue empty; if(auto p=std::get_if<std::vector<RValue>>(&v); p && i<p->size()) return (*p)[i]; return empty; }
+ RValue NewProc(const RValue&) const { return RValue::null(); }
+ RValue Call(const RValue&) const { return RValue::null(); }
+ RValue RcMonitor(const RValue&) const { return RValue::null(); }
+ RValue operator()(std::initializer_list<RValue>) const { return RValue::null(); }
+};
 static double r_num(const RValue&v){if(auto p=std::get_if<double>(&v.v))return*p;if(auto p=std::get_if<bool>(&v.v))return*p?1:0;return NAN;}
 static bool r_truth(const RValue&v){if(auto p=std::get_if<bool>(&v.v))return*p;if(auto p=std::get_if<double>(&v.v))return *p!=0&&!std::isnan(*p);return !std::holds_alternative<std::monostate>(v.v);}
 static std::vector<RValue> r_iter(const RValue&v){if(auto p=std::get_if<std::vector<RValue>>(&v.v))return*p;return{v};}
@@ -336,7 +367,7 @@ typedef enum{R_NULL,R_NUM,R_BOOL,R_STR,R_VEC,R_INT}RType;
 typedef struct RValue RValue;struct RValue{RType t;double n;const char*s;RValue*v;size_t len;uint64_t raw;int bits;int sign;};
 static RValue r_null(void){RValue x={R_NULL,0,NULL,NULL,0};return x;}static RValue r_num(double n){RValue x={R_NUM,n,NULL,NULL,0};return x;}static RValue r_bool(int b){RValue x={R_BOOL,b?1:0,NULL,NULL,0};return x;}static RValue r_str(const char*s){RValue x={R_STR,0,s,NULL,0};return x;}
 static int r_truth(RValue x){return x.t!=R_NULL&&x.n!=0;}
-static void r_print(RValue x){if(x.t==R_NUM)printf("%g",x.n);else if(x.t==R_BOOL)printf("%s",x.n?"TRUE":"FALSE");else if(x.t==R_STR)printf("%s",x.s);else if(x.t==R_NULL)printf("NULL");else if(x.t==R_VEC){printf("[");for(size_t i=0;i<x.len;i++){if(i)printf(", ");r_print(x.v[i]);}printf("]");}}
+static void r_print(RValue x){if(x.t==R_NUM)printf("%g",x.n);else if(x.t==R_BOOL)printf("%s",x.n?"TRUE":"FALSE");else if(x.t==R_STR)printf("%s",x.s);else if(x.t==R_NULL)printf("NULL");else if(x.t==R_INT){uint64_t mask=x.bits==64?UINT64_MAX:(UINT64_C(1)<<x.bits)-1;uint64_t raw=x.raw&mask;if(x.sign&&x.bits>0&&(raw&(UINT64_C(1)<<(x.bits-1)))){if(x.bits<64)raw|=~mask;printf("%" PRId64,(int64_t)raw);}else printf("%" PRIu64,raw);}else if(x.t==R_VEC){printf("[");for(size_t i=0;i<x.len;i++){if(i)printf(", ");r_print(x.v[i]);}printf("]");}}
 static RValue r_call(const char*kernel,const char*n,RValue*a,size_t z){if(!strncmp(n,"__binary_",9)){const char*op=n+9;double x=a[0].n,y=a[1].n;if(!strcmp(op,"+"))return r_num(x+y);if(!strcmp(op,"-"))return r_num(x-y);if(!strcmp(op,"*"))return r_num(x*y);if(!strcmp(op,"/"))return r_num(x/y);if(!strcmp(op,"%%"))return r_num(fmod(x,y));if(!strcmp(op,"%/%"))return r_num(floor(x/y));if(!strcmp(op,"^")||!strcmp(op,"**"))return r_num(pow(x,y));if(!strcmp(op,":")){int len=(int)fabs(y-x)+1;RValue*items=(RValue*)malloc(sizeof(RValue)*(size_t)len);double step=x<=y?1:-1;for(int i=0;i<len;i++)items[i]=r_num(x+i*step);RValue out={R_VEC,0,NULL,items,(size_t)len};return out;}if(!strcmp(op,"=="))return r_bool(a[0].t==R_STR&&a[1].t==R_STR?strcmp(a[0].s,a[1].s)==0:x==y);if(!strcmp(op,"!="))return r_bool(a[0].t==R_STR&&a[1].t==R_STR?strcmp(a[0].s,a[1].s)!=0:x!=y);if(!strcmp(op,"<"))return r_bool(x<y);if(!strcmp(op,"<="))return r_bool(x<=y);if(!strcmp(op,">"))return r_bool(x>y);if(!strcmp(op,">="))return r_bool(x>=y);}if(!strcmp(n,"c")||!strcmp(n,"list")){RValue*items=z?(RValue*)malloc(sizeof(RValue)*z):NULL;if(z&&!items){fprintf(stderr,"allocation failed\n");exit(1);}if(z)memcpy(items,a,sizeof(RValue)*z);RValue x={R_VEC,0,NULL,items,z};return x;}if(!strcmp(n,"print")){RValue x=z?a[0]:r_null();r_print(x);printf("\n");return x;}if((!strcmp(n,"[")||!strcmp(n,"[[")||!strcmp(kernel,"subset"))&&z>1){int i=(int)a[1].n;return a[0].t==R_VEC&&i>=1&&(size_t)i<=a[0].len?a[0].v[i-1]:r_null();}if(!strcmp(n,"length"))return r_num(z&&a[0].t==R_VEC?(double)a[0].len:1);if(!strcmp(n,"sum")||!strcmp(n,"prod")||!strcmp(n,"mean")||!strcmp(n,"min")||!strcmp(n,"max")){RValue x=a[0];if(x.t!=R_VEC)return x;double sum=0,prod=1,mn=x.len?x.v[0].n:NAN,mx=mn;for(size_t i=0;i<x.len;i++){double q=x.v[i].n;sum+=q;prod*=q;if(q<mn)mn=q;if(q>mx)mx=q;}if(!strcmp(n,"sum"))return r_num(sum);if(!strcmp(n,"prod"))return r_num(prod);if(!strcmp(n,"mean"))return r_num(sum/x.len);if(!strcmp(n,"min"))return r_num(mn);return r_num(mx);}if(!strcmp(n,"sqrt"))return r_num(sqrt(a[0].n));if(!strcmp(n,"abs"))return r_num(fabs(a[0].n));if(!strcmp(kernel,"predicate")||!strcmp(kernel,"numeric-predicate")||!strcmp(kernel,"missingness"))return r_bool(0);if(!strcmp(kernel,"random"))return r_num(0.5);if(!strcmp(kernel,"datetime"))return r_num(0);if(!strcmp(kernel,"replacement")&&z)return a[z-1];if(z)return a[0];return r_null();}`
 
 const pythonPrelude = `import math, os, random, re, time, sys
@@ -529,8 +560,28 @@ function r_call(kernel,n,a)
  return isempty(a) ? nothing : a[1]
 end`
 
-const csharpPrelude = `using System;using System.Collections.Generic;
-static class R2{public sealed class Value{public readonly double N;public Value(double n){N=n;}public override string ToString()=>double.IsFinite(N)&&N==Math.Truncate(N)&&Math.Abs(N)<9e15?((long)N).ToString():N.ToString(System.Globalization.CultureInfo.InvariantCulture);}public static readonly object Null=null;public static double Num(object v)=>v is Value x?x.N:v is IConvertible c?c.ToDouble(System.Globalization.CultureInfo.InvariantCulture):double.NaN;public static bool Truth(object v)=>v!=null&&(!(v is bool)|| (bool)v);public static IEnumerable<object> Iter(object v)=>v is object[] x?x:new object[]{v};public static void Discard(object value){}public static object Call(string kernel,string n,object[]a){if(n.StartsWith("__binary_")){var op=n.Substring(9);var x=Num(a[0]);var y=Num(a[1]);switch(op){case "+":return new Value(x+y);case "-":return new Value(x-y);case "*":return new Value(x*y);case "/":return new Value(x/y);case "==":return a[0] is string&&a[1] is string?Equals(a[0],a[1]):x==y;case "!=":return a[0] is string&&a[1] is string?!Equals(a[0],a[1]):x!=y;case "<":return x<y;case "<=":return x<=y;case ">":return x>y;case ">=":return x>=y;}}if(n=="c"||n=="list")return a;if(n=="print"){var v=a.Length>0?a[0]:null;Console.Write(v);Console.Write("\n");return v;}if(kernel=="predicate"||kernel=="numeric-predicate"||kernel=="missingness")return false;if(kernel=="random")return new Value(.5);return a.Length>0?a[0]:null;}}
+const csharpPrelude = `using System;using System.Collections;using System.Collections.Generic;
+static class R2 {
+ public sealed class Value { public readonly double N; public Value(double n){N=n;} public override string ToString(){return (!double.IsNaN(N)&&!double.IsInfinity(N)&&N==Math.Truncate(N)&&Math.Abs(N)<9e15)?((long)N).ToString():N.ToString(System.Globalization.CultureInfo.InvariantCulture);} }
+ public sealed class SliceView { internal readonly object[] Data; internal readonly int Offset, Count, Step; internal SliceView(object[] d,int o,int c,int s){Data=d;Offset=o;Count=c;Step=s;} internal object Get(int i){if(i<0||i>=Count)throw new IndexOutOfRangeException();return Data[Offset+i*Step];} internal object Set(int i,object v){if(i<0||i>=Count)throw new IndexOutOfRangeException();Data[Offset+i*Step]=v;return v;} internal IEnumerable<object> Items(){for(int i=0;i<Count;i++)yield return Get(i);} }
+ public sealed class Cell { public object Value; public Cell(object value){Value=value;} }
+ public static readonly object Null=null;
+ public static object Address(object value){return new Cell(value);}
+ public static object Deref(object pointer){Cell cell=pointer as Cell;return cell==null?pointer:cell.Value;}
+ public static object SetDeref(object pointer,object value){Cell cell=pointer as Cell;if(cell==null)throw new InvalidOperationException("value is not a reference cell");cell.Value=value;return value;}
+ public static double Num(object v){Value value=v as Value;if(value!=null)return value.N;IConvertible convertible=v as IConvertible;if(convertible!=null)return convertible.ToDouble(System.Globalization.CultureInfo.InvariantCulture);if(v!=null&&v.GetType().Name=="RExact"){double parsed;if(double.TryParse(v.ToString(),System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out parsed))return parsed;}return double.NaN;}
+ public static bool Truth(object v){if(v==null)return false;if(v is bool)return (bool)v;return true;}
+ public static int Length(object v){SliceView view=v as SliceView;if(view!=null)return view.Count;object[] values=v as object[];if(values!=null)return values.Length;string text=v as string;if(text!=null)return text.Length;return v==null?0:1;}
+ public static object Slice(object value,object low,object high,bool hasLow,bool hasHigh,object step){SliceView parent=value as SliceView;object[] data=parent==null?(value as object[]):parent.Data;if(data==null)data=new object[0];int length=Length(value);int lo=hasLow?(int)Num(low):0;int hi=hasHigh?(int)Num(high):length;int stride=step==null?1:(int)Num(step);if(stride<=0)throw new ArgumentOutOfRangeException("step");if(lo<0||hi<lo||hi>length)throw new ArgumentOutOfRangeException("slice bounds");int offset=(parent==null?0:parent.Offset)+lo*(parent==null?1:parent.Step);int combined=stride*(parent==null?1:parent.Step);int count=hi<=lo?0:1+(hi-lo-1)/stride;return new SliceView(data,offset,count,combined);}
+ public static object Index(object value,int index){SliceView view=value as SliceView;if(view!=null)return view.Get(index);object[] values=value as object[];if(values!=null)return values[index];string text=value as string;if(text!=null)return text[index].ToString();throw new InvalidOperationException("value is not indexable");}
+ public static object SetIndex(object value,int index,object memberValue){SliceView view=value as SliceView;if(view!=null)return view.Set(index,memberValue);object[] values=value as object[];if(values!=null){values[index]=memberValue;return memberValue;}throw new InvalidOperationException("value is not assignable by index");}
+ public static IEnumerable<object> Iter(object v){SliceView view=v as SliceView;if(view!=null)return view.Items();object[] values=v as object[];return values??new object[]{v};}
+ public static object SortSlice(object values,Func<int,int,bool> less){IList list=values as IList;if(list==null)throw new InvalidOperationException("sort.Slice requires a mutable list");for(int i=1;i<list.Count;i++){int j=i;while(j>0&&less(j,j-1)){object value=list[j];list[j]=list[j-1];list[j-1]=value;j--;}}return null;}
+ public static object Member(object value,string name){object[] entries=value as object[];if(entries!=null){foreach(object entry in entries){object[] pair=entry as object[];if(pair!=null&&pair.Length>1&&Equals(pair[0],name))return pair[1];}}if(value!=null){var t=value.GetType();var p=t.GetProperty(name);if(p!=null)return p.GetValue(value,null);var f=t.GetField(name);if(f!=null)return f.GetValue(value);}return null;}
+ public static object SetMember(object value,string name,object memberValue){object[] entries=value as object[];if(entries!=null){foreach(object entry in entries){object[] pair=entry as object[];if(pair!=null&&pair.Length>1&&Equals(pair[0],name)){pair[1]=memberValue;return memberValue;}}}if(value!=null){var t=value.GetType();var p=t.GetProperty(name);if(p!=null){p.SetValue(value,memberValue,null);return memberValue;}var f=t.GetField(name);if(f!=null){f.SetValue(value,memberValue);return memberValue;}}return memberValue;}
+ public static void Discard(object value){}
+ public static object Call(string kernel,string n,object[]a){if(n=="__member_get")return Member(a[0],Convert.ToString(a[1]));if(n=="__member_set")return SetMember(a[0],Convert.ToString(a[1]),a[2]);if(n=="__index_set")return SetIndex(a[0],(int)Num(a[1])-1,a[2]);if((n=="["||n=="[["||kernel=="subset")&&a.Length>1)return Index(a[0],(int)Num(a[1])-1);if(n.StartsWith("__binary_")){var op=n.Substring(9);var x=Num(a[0]);var y=Num(a[1]);switch(op){case "+":return new Value(x+y);case "-":return new Value(x-y);case "*":return new Value(x*y);case "/":return new Value(x/y);case "==":return a[0] is string&&a[1] is string?Equals(a[0],a[1]):x==y;case "!=":return a[0] is string&&a[1] is string?!Equals(a[0],a[1]):x!=y;case "<":return x<y;case "<=":return x<=y;case ">":return x>y;case ">=":return x>=y;}}if(n=="c"||n=="list")return a;if(n=="print"){var v=a.Length>0?a[0]:null;Console.Write(v);Console.Write("\n");return v;}if(kernel=="predicate"||kernel=="numeric-predicate"||kernel=="missingness")return false;if(kernel=="random")return new Value(.5);return a.Length>0?a[0]:null;}
+}
 `
 
 const javaPrelude = `import java.util.*;

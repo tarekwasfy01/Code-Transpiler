@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import "github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"

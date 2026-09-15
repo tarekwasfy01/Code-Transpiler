@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // This file is the productive matrix frontend parser.  It intentionally uses
@@ -9,7 +10,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"sync/atomic"
 )
+
+// textSemanticParseCalls is test instrumentation for the migration boundary.
+// The canonical MatrixIR frontend must leave this counter unchanged; only the
+// explicitly named compatibility entry points may invoke the historical text
+// fact parser.
+var textSemanticParseCalls atomic.Uint64
 
 type ParsedNode struct {
 	ID     int
@@ -113,11 +121,13 @@ type factParser struct {
 	t         []token
 	i         int
 	sink      FrontendFactSink
+	language  string
 	scope     int
 	nextScope int
 }
 
 func parseFrontendFacts(language, code string, sink FrontendFactSink) (FrontendSemanticFacts, error) {
+	textSemanticParseCalls.Add(1)
 	if sink == nil {
 		return FrontendSemanticFacts{}, fmt.Errorf("missing frontend fact sink")
 	}
@@ -133,7 +143,7 @@ func parseFrontendFacts(language, code string, sink FrontendFactSink) (FrontendS
 	if err != nil {
 		return FrontendSemanticFacts{}, err
 	}
-	p := &factParser{t: ts, sink: sink, nextScope: 1}
+	p := &factParser{t: ts, sink: sink, language: NormalizeLanguage(language), nextScope: 1}
 	root, err := p.program()
 	if err != nil {
 		return FrontendSemanticFacts{}, err
@@ -493,18 +503,34 @@ func (p *factParser) parseForBinding() (token, ParsedNode, error) {
 	}
 	ordinal := 0
 	for {
-		name, e := p.expect(tokIdent, "")
-		if e != nil || name.text == "_" {
-			if e == nil {
+		role := "binding"
+		bindingName := ""
+		var binding ParsedNode
+		var e error
+		if p.cur().kind == tokLParen || p.cur().kind == tokLBracket {
+			if p.language != "python" {
+				return token{}, pattern, fmt.Errorf("nested loop binding is supported only for Python")
+			}
+			_, binding, e = p.parseForBinding()
+		} else {
+			rest := p.accept(tokOp, "*")
+			name, nameErr := p.expect(tokIdent, "")
+			e = nameErr
+			if e == nil && name.text == "_" && p.language != "python" {
 				e = fmt.Errorf("unsupported loop binding %q", name.text)
 			}
-			return token{}, pattern, e
+			if e == nil {
+				bindingName = name.text
+				binding, e = p.emit("SymbolRef", "identifier", name.text, universalOperationRecord{})
+			}
+			if rest {
+				role = "rest_binding"
+			}
 		}
-		binding, e := p.emit("SymbolRef", "identifier", name.text, universalOperationRecord{})
 		if e != nil {
 			return token{}, pattern, e
 		}
-		p.child(pattern, binding, "binding", ordinal, name.text, false)
+		p.child(pattern, binding, role, ordinal, bindingName, false)
 		ordinal++
 		if p.accept(close, "") {
 			break
@@ -583,17 +609,25 @@ func (p *factParser) expression(min int) (ParsedNode, error) {
 			break
 		}
 		p.next()
+		// The parser records canonical semantics, not an ambiguous source token.
+		// R `^` denotes exponentiation; C-family `^` remains bitwise XOR.  The
+		// common POWER form is `**`, which the target legalizer already maps to
+		// each target's native math representation.
+		canonicalOp := op
+		if p.language == "r" && op == "^" {
+			canonicalOp = "**"
+		}
 		next := pr + 1
-		if op == "^" || op == "**" {
+		if canonicalOp == "^" || canonicalOp == "**" {
 			next = pr
 		}
 		r, e := p.expression(next)
 		if e != nil {
 			return l, e
 		}
-		sem := SemanticSemantics{Dispatch: "builtin", EvaluationOrder: "left_to_right", ShortCircuit: op == "&&" || op == "||"}
-		sem.Operation = map[string]string{"+": "add", "-": "subtract", "*": "multiply", "/": "divide", "%%": "remainder", "==": "equal", "!=": "not_equal", "<": "less_than", "<=": "less_or_equal", ">": "greater_than", ">=": "greater_or_equal", "&&": "logical_and", "||": "logical_or"}[op]
-		n, e := p.emit("OperationExpr", "binary", "", universalOperationRecord{Operator: op, Semantics: sem})
+		sem := SemanticSemantics{Dispatch: "builtin", EvaluationOrder: "left_to_right", ShortCircuit: canonicalOp == "&&" || canonicalOp == "||"}
+		sem.Operation = map[string]string{"+": "add", "-": "subtract", "*": "multiply", "/": "divide", "**": "power", "%%": "remainder", "==": "equal", "!=": "not_equal", "<": "less_than", "<=": "less_or_equal", ">": "greater_than", ">=": "greater_or_equal", "&&": "logical_and", "||": "logical_or"}[canonicalOp]
+		n, e := p.emit("OperationExpr", "binary", "", universalOperationRecord{Operator: canonicalOp, Semantics: sem})
 		if e != nil {
 			return l, e
 		}

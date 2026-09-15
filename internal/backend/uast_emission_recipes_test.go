@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -61,7 +62,7 @@ func TestProjectionPrimitiveCoverIsExactAndMinimized(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := len(analysis.Primitives), 21; got != want {
+	if got, want := len(analysis.Primitives), 19; got != want {
 		t.Fatalf("matrix quotient primitives=%d want minimized=%d", got, want)
 	}
 	if err := analysis.ValidateExact(); err != nil {

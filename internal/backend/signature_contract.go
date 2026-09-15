@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import "fmt"
@@ -25,7 +26,23 @@ func (v *signatureContractVisitor) EnterExpression(e *SemanticExpression) error 
 		}
 		return nil
 	}
-	if f.Binding != "exact_v1" || (f.DefaultEvaluation != "definition" && f.DefaultEvaluation != "call") {
+	// A non-empty binding can also be an ordinary lexical function identity
+	// produced by a frontend (for example native_function_0). Only `exact_v1`
+	// denotes the optional named/default-argument contract. Do not reject an
+	// otherwise ordinary function declaration merely because its symbol is
+	// recorded for call resolution.
+	if f.Binding != "exact_v1" {
+		if f.DefaultEvaluation == "" {
+			for _, p := range f.Parameters {
+				if p.Mode != "" {
+					return fmt.Errorf("parameter modes require exact binding")
+				}
+			}
+			return nil
+		}
+		return fmt.Errorf("unsupported function binding/default contract")
+	}
+	if f.DefaultEvaluation != "definition" && f.DefaultEvaluation != "call" {
 		return fmt.Errorf("unsupported function binding/default contract")
 	}
 	v.exact = true

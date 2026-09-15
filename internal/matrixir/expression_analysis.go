@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 import "fmt"
@@ -13,6 +14,35 @@ func AnalyzeSemanticExpression(language, text string) ([]CanonicalSemanticEvent,
 // consequently it never reparses an Event.Text payload.
 func AnalyzeSemanticTokens(language string, tokens []Lexeme) ([]CanonicalSemanticEvent, error) {
 	clean := significant(append([]Lexeme(nil), tokens...))
+	// Keep source-language spellings in the lexer, but project Python's
+	// arithmetic operators onto the canonical semantic operators before the
+	// precedence parser runs.  This is a token projection, not source-text
+	// reparsing, and therefore also applies when callers already own grammar
+	// tokens (the structured frontend path).
+	if language == "python" {
+		for i := range clean {
+			if clean[i].Class != TokenOperator {
+				continue
+			}
+			switch clean[i].Text {
+			case "//":
+				clean[i].Text = "%/%"
+			case "%":
+				clean[i].Text = "%%"
+			}
+		}
+	}
+	// R and the canonical expression layer distinguish POWER from the
+	// C-family bitwise-XOR token. Preserve that distinction at the grammar
+	// token boundary, so structured facts and every target projection receive
+	// the same parameterized operation without inspecting source text later.
+	if language == "r" {
+		for i := range clean {
+			if clean[i].Class == TokenOperator && clean[i].Text == "^" {
+				clean[i].Text = "**"
+			}
+		}
+	}
 	for i, token := range clean {
 		if token.Class == TokenOperator && token.Text == "=>" {
 			return analyzeArrowClosure(language, clean, i)
@@ -83,7 +113,7 @@ type semanticExpressionParser struct {
 	events []CanonicalSemanticEvent
 }
 
-var semanticPrecedence = map[string]int{"?": 1, "||": 2, "|": 2, "&&": 3, "&": 3, "==": 4, "!=": 4, "<": 4, "<=": 4, ">": 4, ">=": 4, "+": 5, "-": 5, "*": 6, "/": 6, "%%": 6, "%/%": 6, "^": 8, "**": 8, "$": 9, "::": 9, ":::": 9, "@": 9}
+var semanticPrecedence = map[string]int{"?": 1, "||": 2, "|": 2, "&&": 3, "&": 3, "==": 4, "!=": 4, "<": 4, "<=": 4, ">": 4, ">=": 4, "<<": 5, ">>": 5, "+": 6, "-": 6, "*": 7, "/": 7, "%%": 7, "%/%": 7, "^": 8, "**": 8, "$": 9, "::": 9, ":::": 9, "@": 9}
 
 func (p *semanticExpressionParser) current() Lexeme {
 	if p.pos >= len(p.tokens) {
@@ -107,6 +137,15 @@ func (p *semanticExpressionParser) add(kind, text string, start, end int, childr
 		}
 	case "binary", "unary":
 		fields["operator"] = text
+		if text == "%/%" {
+			fields["operation_id"] = "numeric.div.floor"
+		} else if text == "%%" {
+			fields["operation_id"] = "numeric.mod.floor"
+		} else if text == "%" {
+			fields["operation_id"] = "numeric.rem.trunc"
+		} else if text == "**" {
+			fields["operation_id"] = "numeric.power"
+		}
 	}
 	p.events = append(p.events, CanonicalSemanticEvent{ID: id, StructureKind: kind, Text: text, SourceOffset: start, Fields: fields, Roles: children, FactFamily: ParsedFamilyForStructure(kind)})
 	return id

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // Command machine-differential persists comparable Tree-sitter and generic
 // machine traces.  It deliberately records state vectors rather than parser
 // diagnostics, so later failure reduction has real machine data to work with.

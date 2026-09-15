@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // matrix-audit exposes the existing transpilers without the GUI/runtimeassets dependency.
 // It is an audit adapter, not an alternate implementation of translation.
 package main
@@ -22,13 +23,17 @@ type Request struct {
 	IncludeSemantic bool     `json:"include_semantic,omitempty"`
 }
 type Response struct {
-	ID       string                         `json:"id"`
-	Code     string                         `json:"code,omitempty"`
-	Error    string                         `json:"error,omitempty"`
-	Analysis *GraphAnalysis                 `json:"analysis,omitempty"`
-	Flows    []backend.FunctionFlowEvidence `json:"flows,omitempty"`
-	Semantic *backend.SemanticProgram       `json:"semantic,omitempty"`
-	Results  []Response                     `json:"results,omitempty"`
+	ID             string                           `json:"id"`
+	Code           string                           `json:"code,omitempty"`
+	Error          string                           `json:"error,omitempty"`
+	Analysis       *GraphAnalysis                   `json:"analysis,omitempty"`
+	Flows          []backend.FunctionFlowEvidence   `json:"flows,omitempty"`
+	Semantic       *backend.SemanticProgram         `json:"semantic,omitempty"`
+	Results        []Response                       `json:"results,omitempty"`
+	SemanticJSON   string                           `json:"semantic_json,omitempty"`
+	UASTJSON       string                           `json:"uast_json,omitempty"`
+	FactProvenance []backend.AuditFactProvenance    `json:"fact_provenance,omitempty"`
+	FactDemands    []backend.AuditBackendFactDemand `json:"fact_demands,omitempty"`
 }
 type GraphAnalysis struct {
 	Semantic              matrixir.Vector `json:"semantic"`
@@ -161,6 +166,38 @@ func apply(r Request) (out Response) {
 			return
 		}
 		out.Code = string(data)
+		return
+	}
+	if r.Mode == "semantic-snapshot" {
+		program, err := manytomany.Parse(r.Source, r.Code)
+		if err != nil {
+			out.Error = err.Error()
+			return
+		}
+		semanticJSON, err := program.Semantic.MarshalSemanticJSON()
+		if err != nil {
+			out.Error = err.Error()
+			return
+		}
+		uastJSON, err := program.Semantic.MarshalUniversalASTJSON()
+		if err != nil {
+			out.Error = err.Error()
+			return
+		}
+		provenance, err := backend.AuditSemanticFactProvenance(program.Semantic)
+		if err != nil {
+			out.Error = err.Error()
+			return
+		}
+		demands, err := backend.AuditBackendFactDemandTrace(program.Semantic)
+		if err != nil {
+			out.Error = err.Error()
+			return
+		}
+		out.SemanticJSON = string(semanticJSON)
+		out.UASTJSON = string(uastJSON)
+		out.FactProvenance = provenance
+		out.FactDemands = demands
 		return
 	}
 	if r.Mode == "from-semantic-document" {

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import "testing"
@@ -10,7 +11,9 @@ func TestAnalyzeRuntimeTaintUsesFinalSourceOnly(t *testing.T) {
 	if !taint.Tainted() {
 		t.Fatal("runtime source was accepted")
 	}
-	want := map[string]bool{"R2": true, "r_call": true, "runtime helper": true}
+	// Helper IDs are not taint evidence by themselves; only markers in the
+	// generated final source are classified as compatibility-runtime artifacts.
+	want := map[string]bool{"R2": true, "r_call": true}
 	for _, artifact := range taint.Artifacts {
 		delete(want, artifact)
 	}

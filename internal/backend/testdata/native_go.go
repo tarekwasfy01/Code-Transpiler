@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package sample
 
 func preserve(x uint64) uint64 {

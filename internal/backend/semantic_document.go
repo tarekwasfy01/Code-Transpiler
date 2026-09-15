@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -18,24 +19,27 @@ const SemanticDocumentSchema = "r2many.semantic-program"
 const SemanticDocumentVersion = 1
 
 type SemanticDocument struct {
-	SchemaVersion    int                      `json:"schema_version"`
-	Schema           string                   `json:"schema"`
-	Evaluation       string                   `json:"evaluation"`
-	ValueModel       string                   `json:"value_model"`
-	IndexBase        int                      `json:"index_base"`
-	Types            SemanticTypeContract     `json:"type_contract"`
-	Origin           SemanticOrigin           `json:"origin"`
-	Metadata         map[string]string        `json:"metadata,omitempty"`
-	Extensions       map[string]any           `json:"extensions,omitempty"`
-	Contracts        SemanticContracts        `json:"contracts,omitempty"`
-	Dialects         []SemanticDialect        `json:"dialects,omitempty"`
-	SemanticFeatures *SemanticFeatureModel    `json:"semantic_features,omitempty"`
-	UniversalAST     *UniversalASTDocument    `json:"universal_ast,omitempty"`
-	TypeTable        []SemanticTypeDefinition `json:"type_table,omitempty"`
-	TypeGraph        matrixir.SparseMatrix    `json:"type_graph,omitempty"`
-	TypeRelations    *SemanticTypeRelations   `json:"type_relations,omitempty"`
-	Root             SemanticStatement        `json:"root"`
-	Evidence         SemanticEvidence         `json:"evidence"`
+	SchemaVersion    int                         `json:"schema_version"`
+	Schema           string                      `json:"schema"`
+	ContractSchema   string                      `json:"contract_schema,omitempty"`
+	Evaluation       string                      `json:"evaluation"`
+	ValueModel       string                      `json:"value_model"`
+	IndexBase        int                         `json:"index_base"`
+	Types            SemanticTypeContract        `json:"type_contract"`
+	Origin           SemanticOrigin              `json:"origin"`
+	Metadata         map[string]string           `json:"metadata,omitempty"`
+	Extensions       map[string]any              `json:"extensions,omitempty"`
+	Contracts        SemanticContracts           `json:"contracts,omitempty"`
+	Dialects         []SemanticDialect           `json:"dialects,omitempty"`
+	SemanticFeatures *SemanticFeatureModel       `json:"semantic_features,omitempty"`
+	UniversalAST     *UniversalASTDocument       `json:"universal_ast,omitempty"`
+	TypeTable        []SemanticTypeDefinition    `json:"type_table,omitempty"`
+	TypeGraph        matrixir.SparseMatrix       `json:"type_graph,omitempty"`
+	TypeRelations    *SemanticTypeRelations      `json:"type_relations,omitempty"`
+	ContractTable    []SemanticContract          `json:"contract_table,omitempty"`
+	ContractRefs     []SemanticContractReference `json:"contract_refs,omitempty"`
+	Root             SemanticStatement           `json:"root"`
+	Evidence         SemanticEvidence            `json:"evidence"`
 }
 
 // SemanticTypeDefinition gives structural types a stable document-local ID.
@@ -61,10 +65,14 @@ type SemanticStatement struct {
 	Expression *SemanticExpression `json:"expression,omitempty"`
 	Condition  *SemanticExpression `json:"condition,omitempty"`
 	Sequence   *SemanticExpression `json:"sequence,omitempty"`
-	Then       *SemanticStatement  `json:"then,omitempty"`
-	Else       *SemanticStatement  `json:"else,omitempty"`
-	Body       *SemanticStatement  `json:"body,omitempty"`
-	Statements []SemanticStatement `json:"statements,omitempty"`
+	// Patterns preserves ordered match alternatives as semantic expressions.
+	// They are projected into first-class UAST pattern relations instead of
+	// being flattened into ordinary statements or opaque source text.
+	Patterns   []SemanticExpression `json:"patterns,omitempty"`
+	Then       *SemanticStatement   `json:"then,omitempty"`
+	Else       *SemanticStatement   `json:"else,omitempty"`
+	Body       *SemanticStatement   `json:"body,omitempty"`
+	Statements []SemanticStatement  `json:"statements,omitempty"`
 }
 
 type SemanticExpression struct {
@@ -284,6 +292,11 @@ func deriveTypeTable(root *SemanticStatement) ([]SemanticTypeDefinition, matrixi
 		if err := expression(s.Sequence); err != nil {
 			return err
 		}
+		for i := range s.Patterns {
+			if err := expression(&s.Patterns[i]); err != nil {
+				return err
+			}
+		}
 		if err := statement(s.Then); err != nil {
 			return err
 		}
@@ -326,17 +339,34 @@ func deriveTypeTable(root *SemanticStatement) ([]SemanticTypeDefinition, matrixi
 }
 
 type SemanticSemantics struct {
-	Operation       string `json:"operation,omitempty"`
-	Dispatch        string `json:"dispatch,omitempty"`
-	Overflow        string `json:"overflow,omitempty"`
-	EvaluationOrder string `json:"evaluation_order,omitempty"`
-	ShortCircuit    bool   `json:"short_circuit,omitempty"`
-	IndexBase       int    `json:"index_base,omitempty"`
-	NegativeIndex   string `json:"negative_index,omitempty"`
-	OutOfBounds     string `json:"out_of_bounds,omitempty"`
-	Slicing         string `json:"slicing,omitempty"`
-	ErrorModel      string `json:"error_model,omitempty"`
-	Confidence      string `json:"confidence,omitempty"`
+	Operation           string `json:"operation,omitempty"`
+	Dispatch            string `json:"dispatch,omitempty"`
+	Overflow            string `json:"overflow,omitempty"`
+	EvaluationOrder     string `json:"evaluation_order,omitempty"`
+	ShortCircuit        bool   `json:"short_circuit,omitempty"`
+	IndexBase           int    `json:"index_base,omitempty"`
+	NegativeIndex       string `json:"negative_index,omitempty"`
+	OutOfBounds         string `json:"out_of_bounds,omitempty"`
+	Slicing             string `json:"slicing,omitempty"`
+	ErrorModel          string `json:"error_model,omitempty"`
+	Confidence          string `json:"confidence,omitempty"`
+	Mutation            string `json:"mutation,omitempty"`
+	Identity            string `json:"identity,omitempty"`
+	Aliasing            string `json:"aliasing,omitempty"`
+	IndexDomain         string `json:"index_domain,omitempty"`
+	SliceStartInclusive *bool  `json:"slice_start_inclusive,omitempty"`
+	SliceEndInclusive   *bool  `json:"slice_end_inclusive,omitempty"`
+	SliceStartDefault   string `json:"slice_start_default,omitempty"`
+	SliceEndDefault     string `json:"slice_end_default,omitempty"`
+	SliceStep           string `json:"slice_step,omitempty"`
+	FailureCondition    string `json:"failure_condition,omitempty"`
+	FailureResult       string `json:"failure_result,omitempty"`
+	ExceptionCategory   string `json:"exception_category,omitempty"`
+	FailureContinuation string `json:"failure_continuation,omitempty"`
+	Suspension          string `json:"suspension,omitempty"`
+	Resumption          string `json:"resumption,omitempty"`
+	StatePersistence    string `json:"state_persistence,omitempty"`
+	Completion          string `json:"completion,omitempty"`
 }
 
 type SemanticSourceSpan struct {
@@ -402,11 +432,19 @@ func (p *SemanticProgram) Document() (SemanticDocument, error) {
 	if err := validateUniversalASTDocument(p.UniversalAST); err != nil {
 		return SemanticDocument{}, err
 	}
-	doc := SemanticDocument{SchemaVersion: SemanticDocumentVersion, Schema: SemanticDocumentSchema, Evaluation: p.Evaluation, ValueModel: p.ValueModel, IndexBase: p.IndexBase, Types: p.Types, Origin: p.Origin, Metadata: p.Metadata, Extensions: p.Extensions, Contracts: p.Contracts, Dialects: p.Dialects, SemanticFeatures: p.SemanticFeatures, UniversalAST: p.UniversalAST, TypeTable: table, TypeGraph: graph, TypeRelations: relations, Root: root, Evidence: p.Evidence}
+	doc := SemanticDocument{SchemaVersion: SemanticDocumentVersion, Schema: SemanticDocumentSchema, ContractSchema: p.ContractSchema, Evaluation: p.Evaluation, ValueModel: p.ValueModel, IndexBase: p.IndexBase, Types: p.Types, Origin: p.Origin, Metadata: p.Metadata, Extensions: p.Extensions, Contracts: p.Contracts, Dialects: p.Dialects, SemanticFeatures: p.SemanticFeatures, UniversalAST: p.UniversalAST, TypeTable: table, TypeGraph: graph, TypeRelations: relations, ContractTable: p.ContractTable, ContractRefs: p.ContractRefs, Root: root, Evidence: p.Evidence}
 	if err = reconcileUniversalAST(&doc); err != nil {
 		return SemanticDocument{}, err
 	}
 	p.UniversalAST = doc.UniversalAST
+	// ContractTable and ContractRefs are canonical UAST data. Copy the
+	// normalized table into the compatibility document so the one-way
+	// projection comparison does not mistake interned contracts for lost data.
+	if doc.UniversalAST != nil {
+		doc.ContractSchema = doc.UniversalAST.ContractSchema
+		doc.ContractTable = doc.UniversalAST.ContractTable
+		doc.ContractRefs = doc.UniversalAST.ContractRefs
+	}
 	if err = installLegacyProgramView(p, doc); err != nil {
 		return SemanticDocument{}, err
 	}
@@ -423,7 +461,7 @@ func (p *SemanticProgram) documentFromCanonicalUniversalAST() (SemanticDocument,
 	if err := validateUniversalASTDocument(p.UniversalAST); err != nil {
 		return SemanticDocument{}, err
 	}
-	if p.UniversalAST.Projection != "semantic_document.v1" {
+	if p.UniversalAST.Projection != "semantic_document.v1" && p.UniversalAST.Projection != "frontend_facts.v1" {
 		return SemanticDocument{}, fmt.Errorf("universal AST payload is canonical but has no SemanticDocument compatibility view")
 	}
 	// Dialect operations have canonical UAST contracts but no lossless legacy
@@ -463,11 +501,18 @@ func (p *SemanticProgram) documentFromCanonicalUniversalAST() (SemanticDocument,
 func installLegacyProgramView(p *SemanticProgram, doc SemanticDocument) error {
 	root, err := documentStatementAST(doc.Root)
 	if err != nil {
-		return err
+		// The executable legacy tree is a compatibility adapter, not the
+		// semantic authority. New structured forms such as switch clauses may
+		// be losslessly present in SemanticDocument/UAST before the old AST
+		// executor learns to execute them. Preserve the canonical UAST and leave
+		// the optional legacy body unavailable instead of rejecting good input.
+		p.Body = nil
+		return nil
 	}
 	body, ok := root.(*BlockStmt)
 	if !ok {
-		return fmt.Errorf("universal AST root is not an executable block")
+		p.Body = nil
+		return nil
 	}
 	p.Body = body
 	p.Evaluation, p.ValueModel, p.IndexBase, p.Types, p.Origin = doc.Evaluation, doc.ValueModel, doc.IndexBase, doc.Types, doc.Origin
@@ -501,7 +546,24 @@ func (p *SemanticProgram) MarshalUniversalASTJSON() ([]byte, error) {
 	if err := validateUniversalASTDocument(p.UniversalAST); err != nil {
 		return nil, err
 	}
-	return json.Marshal(p.UniversalAST)
+	raw, err := json.Marshal(p.UniversalAST)
+	if err != nil {
+		return nil, err
+	}
+	return canonicalJSONBytes(raw)
+}
+
+// canonicalJSONBytes normalizes embedded RawMessage/jsontext values as well
+// as ordinary object keys. UseNumber preserves integer and decimal spellings
+// while making map ordering independent of parse history.
+func canonicalJSONBytes(raw []byte) ([]byte, error) {
+	var v any
+	d := json.NewDecoder(bytes.NewReader(raw))
+	d.UseNumber()
+	if err := d.Decode(&v); err != nil {
+		return nil, err
+	}
+	return json.Marshal(v)
 }
 
 type semanticDocumentWire SemanticDocument
@@ -553,7 +615,7 @@ func ParseUniversalASTJSON(data []byte) (*SemanticProgram, error) {
 	if _, err := NormalizeUniversalAST(&u); err != nil {
 		return nil, err
 	}
-	p := &SemanticProgram{UniversalAST: &u}
+	p := &SemanticProgram{UniversalAST: &u, ContractSchema: u.ContractSchema, ContractTable: u.ContractTable, ContractRefs: u.ContractRefs}
 	if u.Projection == "semantic_document.v1" && u.Metadata["frontend"] != "native-go-uast-v1" {
 		// Validate and derive the public compatibility view exactly once. The
 		// imported UAST remains the sole semantic representation afterwards.
@@ -667,12 +729,62 @@ func ParseSemanticDocument(doc SemanticDocument) (*SemanticProgram, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Scope identifiers are allocation details of the reconstructed tree. The
+	// semantic contract is the parent/child and binding topology, so compare a
+	// canonical compact renumbering rather than requiring incidental numeric IDs
+	// to match across projections.
+	inputTree = canonicalizeScopeIDs(inputTree)
+	outputTree = canonicalizeScopeIDs(outputTree)
 	if !bytes.Equal(inputTree, outputTree) {
-		return nil, fmt.Errorf("semantic executable tree contains inconsistent or unsupported annotations; refusing information loss")
+		at := 0
+		for at < len(inputTree) && at < len(outputTree) && inputTree[at] == outputTree[at] {
+			at++
+		}
+		lo := at - 80
+		if lo < 0 {
+			lo = 0
+		}
+		hi := at + 160
+		if hi > len(inputTree) {
+			hi = len(inputTree)
+		}
+		hj := at + 160
+		if hj > len(outputTree) {
+			hj = len(outputTree)
+		}
+		return nil, fmt.Errorf("semantic executable tree contains inconsistent or unsupported annotations; refusing information loss (first difference at byte %d, input=%s, output=%s)", at, inputTree[lo:hi], outputTree[lo:hj])
 	}
 	p.nodeSources, p.sourceTree = sources.spans, outputTree
 	p.UniversalAST = doc.UniversalAST
 	return p, nil
+}
+
+func canonicalizeScopeIDs(data []byte) []byte {
+	var root any
+	if json.Unmarshal(data, &root) != nil {
+		return data
+	}
+	var visit func(any)
+	visit = func(v any) {
+		switch x := v.(type) {
+		case map[string]any:
+			if _, ok := x["scope"]; ok {
+				// Scope numbering is allocator-local; topology and bindings are
+				// verified by the evidence matrices separately.
+				x["scope"] = 0
+			}
+			for _, child := range x {
+				visit(child)
+			}
+		case []any:
+			for _, child := range x {
+				visit(child)
+			}
+		}
+	}
+	visit(root)
+	data, _ = json.Marshal(root)
+	return data
 }
 
 func validateDialects(dialects []SemanticDialect) error {
@@ -701,6 +813,9 @@ func assignDocumentIDs(root *SemanticStatement) {
 		expr(s.Expression)
 		expr(s.Condition)
 		expr(s.Sequence)
+		for i := range s.Patterns {
+			expr(&s.Patterns[i])
+		}
 		stmt(s.Then)
 		stmt(s.Else)
 		stmt(s.Body)
@@ -792,6 +907,9 @@ func decorateDocument(root *SemanticStatement, evidence SemanticEvidence, indexB
 		}
 		expr(s.Condition)
 		expr(s.Sequence)
+		for i := range s.Patterns {
+			expr(&s.Patterns[i])
+		}
 		stmt(s.Then)
 		stmt(s.Else)
 		stmt(s.Body)
@@ -1148,7 +1266,7 @@ func documentStatementAST(d SemanticStatement) (Stmt, error) {
 		}
 		v, err := documentExpressionAST(d.Expression)
 		return &AssignStmt{Name: d.Name, Op: d.AssignOp, Value: v}, err
-	case "if":
+	case "if", "ifstmt":
 		c, err := documentExpressionAST(d.Condition)
 		if err != nil {
 			return nil, err
@@ -1165,7 +1283,7 @@ func documentStatementAST(d SemanticStatement) (Stmt, error) {
 			}
 		}
 		return &IfStmt{Cond: c, Then: then, Else: other}, nil
-	case "while":
+	case "while", "whilestmt":
 		c, err := documentExpressionAST(d.Condition)
 		if err != nil {
 			return nil, err
@@ -1175,7 +1293,7 @@ func documentStatementAST(d SemanticStatement) (Stmt, error) {
 			return nil, err
 		}
 		return &WhileStmt{Cond: c, Body: b}, nil
-	case "for":
+	case "for", "forstmt":
 		if d.Name == "" {
 			return nil, fmt.Errorf("semantic for missing name")
 		}
@@ -1188,7 +1306,7 @@ func documentStatementAST(d SemanticStatement) (Stmt, error) {
 			return nil, err
 		}
 		return &ForStmt{Name: d.Name, Seq: seq, Body: b}, nil
-	case "repeat":
+	case "repeat", "repeatstmt":
 		b, err := documentStatementPointerAST(d.Body)
 		return &RepeatStmt{Body: b}, err
 	case "return":

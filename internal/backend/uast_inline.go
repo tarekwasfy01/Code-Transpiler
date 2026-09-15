@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -7,6 +8,70 @@ import (
 	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
+// uastFunctionHasExternalCapture is deliberately conservative. It permits a
+// generated file-scope helper only when every value reference is either a
+// formal parameter, a literal built-in, or a function-local assignment. This
+// is a semantic graph check; it does not inspect source text.
+func uastFunctionHasExternalCapture(graph *uastExecutionGraph, functionID int, parameters []string) bool {
+	allowed := map[string]bool{"TRUE": true, "FALSE": true, "T": true, "F": true, "NULL": true, "NA": true, "NaN": true, "Inf": true, "pi": true}
+	for _, parameter := range parameters {
+		allowed[parameter] = true
+	}
+	// A symbol used as the callee of a structured CallExpr is an operation
+	// reference, not a captured data value. Collect these node identities from
+	// canonical child/relation edges before checking closure captures.
+	calleeNodes := map[int]bool{}
+	collectSeen := map[int]bool{}
+	var collectCallees func(int)
+	collectCallees = func(nodeID int) {
+		if collectSeen[nodeID] {
+			return
+		}
+		collectSeen[nodeID] = true
+		if graph.common[nodeID].Kind == "call" {
+			if callee, ok, _ := graph.oneRelationNode(nodeID, "call.calls", false); ok {
+				calleeNodes[callee] = true
+			}
+		}
+		for _, relation := range graph.children[nodeID] {
+			for _, child := range relation {
+				if !child.Meta.Missing {
+					collectCallees(child.ID)
+				}
+			}
+		}
+	}
+	if body, ok, _ := graph.one(functionID, "body", false); ok {
+		collectCallees(body)
+	}
+
+	seen := map[int]bool{}
+	var walk func(int) bool
+	walk = func(nodeID int) bool {
+		if seen[nodeID] {
+			return false
+		}
+		seen[nodeID] = true
+		common := graph.common[nodeID]
+		if common.Kind == "assign" && common.Name != "" {
+			allowed[common.Name] = true
+		}
+		if common.Kind == "identifier" && common.Name != "" && !allowed[common.Name] && !calleeNodes[nodeID] {
+			return true
+		}
+		for _, relation := range graph.children[nodeID] {
+			for _, child := range relation {
+				if !child.Meta.Missing && walk(child.ID) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	body, ok, _ := graph.one(functionID, "body", false)
+	return ok && walk(body)
+}
+
 func uastFunctionContainsLoop(graph *uastExecutionGraph, id int) bool {
 	if graph.common[id].Kind == "while" || graph.common[id].Kind == "for" || graph.common[id].Kind == "repeat" {
 		return true
@@ -14,6 +79,39 @@ func uastFunctionContainsLoop(graph *uastExecutionGraph, id int) bool {
 	for _, roles := range graph.children[id] {
 		for _, child := range roles {
 			if uastFunctionContainsLoop(graph, child.ID) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func uastFunctionRequiresStatementClosure(graph *uastExecutionGraph, id int) bool {
+	kind := graph.common[id].Kind
+	if kind == "while" || kind == "for" || kind == "repeat" || kind == "switch" || kind == "switchstmt" || kind == "SwitchMatchStmt" {
+		return true
+	}
+	for _, roles := range graph.children[id] {
+		for _, child := range roles {
+			if uastFunctionRequiresStatementClosure(graph, child.ID) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// uastFunctionHasExplicitReturn is used by compatibility closure renderers
+// whose target compilers reject a trailing return after a guaranteed return
+// in the generated body (notably Java).  The answer comes from the UAST graph,
+// never from rendered source text.
+func uastFunctionHasExplicitReturn(graph *uastExecutionGraph, id int) bool {
+	if graph.common[id].Kind == "return" {
+		return true
+	}
+	for _, roles := range graph.children[id] {
+		for _, child := range roles {
+			if !child.Meta.Missing && uastFunctionHasExplicitReturn(graph, child.ID) {
 				return true
 			}
 		}
@@ -116,18 +214,184 @@ func uastEmptyForReturn(graph *uastExecutionGraph, id int) string {
 	return walk(id, "")
 }
 
+func csharpFunctionType(arity int) (string, error) {
+	if arity < 0 || arity > 16 {
+		return "", fmt.Errorf("C# function-value arity %d is outside the CLR Func contract", arity)
+	}
+	types := make([]string, arity+1)
+	for i := range types {
+		types[i] = "dynamic"
+	}
+	return "System.Func<" + strings.Join(types, ", ") + ">", nil
+}
+
 func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, id int) error {
-	if bad := uastEmptyForReturn(graph, id); bad != "" {
-		return fmt.Errorf("function flow reads local %s before definite assignment", bad)
-	}
 	flow, flowErr := buildUASTFunctionFlow(graph, id)
-	if flowErr != nil && strings.Contains(flowErr.Error(), "before definite assignment") {
-		return flowErr
+	if flowErr != nil && !g.nativeDirect {
+		// Compatibility targets can represent a fall-through result with the
+		// shared null value. Keep strict flow validation for native direct
+		// lowering, but do not reject a structurally valid function merely
+		// because an older Semantic snapshot omitted an explicit terminal return.
+		// The emitter appends the target's typed default below.
+		if !strings.Contains(flowErr.Error(), "path without explicit return") {
+			return flowErr
+		}
 	}
-	if flowErr == nil && !uastFunctionContainsLoop(graph, id) {
+	// Inline eligibility must not erase an assigned function that happens not
+	// to be called. Always materialize the observable function binding.
+	params := graph.many(id, "parameter")
+	// Compiled targets already opened their native entry function in
+	// generateTargetFromUniversalMode. Execute the parameterless canonical
+	// entry body there. This is driven by Origin.EntryPoint and the explicit
+	// function_entry_bindings relation, independent of source language and of
+	// synthetic frontend binding names.
+	if g.entryWrapper && g.entryBinding != "" && name == g.entryBinding && len(params) == 0 {
+		body, _, err := graph.one(id, "body", true)
+		if err != nil {
+			return err
+		}
+		return g.uastStatementBody(graph, body)
+	}
+	if g.nativeDirect {
+		names := make([]string, len(params))
+		for i, p := range params {
+			names[i] = g.name(graph.common[p.ID].Name)
+			if names[i] == "" {
+				names[i] = fmt.Sprintf("arg%d", i)
+			}
+		}
+		emitNativeBody := func() error {
+			body, _, err := graph.one(id, "body", true)
+			if err != nil {
+				return err
+			}
+			local := map[string]string{}
+			for _, n := range names {
+				local[n] = n
+			}
+			g.bindings = append(g.bindings, local)
+			// Deferred-return materialization can be nested in conditional blocks,
+			// but the result slot is function-scoped: later cleanup paths reuse the
+			// same ordered return value. Predeclare every such slot in the current
+			// function frame before emitting nested control-flow scopes.
+			deferSlots := map[string]bool{}
+			for _, common := range graph.common {
+				if strings.HasPrefix(common.Name, "__defer_result_") {
+					deferSlots[common.Name] = true
+				}
+			}
+			for slot := range deferSlots {
+				g.line(g.nativeAssignment(slot, targetNull(g.target)))
+			}
+			err = g.uastStatementBody(graph, body)
+			g.bindings = g.bindings[:len(g.bindings)-1]
+			return err
+		}
+		typed := func(format string) string {
+			values := make([]string, len(names))
+			for i, n := range names {
+				values[i] = fmt.Sprintf(format, n)
+			}
+			return strings.Join(values, ", ")
+		}
+		if g.target == "c" {
+			// ISO C has no nested functions or closure values. A capture-free
+			// UAST function can nevertheless be represented exactly by a generated
+			// file-scope helper. Capturing closures remain on the documented
+			// runtime boundary rather than being emitted as non-standard C.
+			if !uastFunctionHasExternalCapture(graph, id, names) {
+				body, _, err := graph.one(id, "body", true)
+				if err != nil {
+					return err
+				}
+				sub := &targetGen{evaluation: g.evaluation, target: "c", declared: []map[string]bool{{}}, funcs: g.funcs, inline: g.inline, bindings: []map[string]string{{}}, activeInline: map[*FunctionExpr]bool{}, helperSources: map[string]string{}, usedNames: cloneBoolMap(g.usedNames), cValues: map[string]bool{}, directVectors: map[string]bool{}, nativeDirect: true, uastFunctions: g.uastFunctions, uastInline: g.uastInline, uastActiveInline: map[int]bool{}}
+				for _, n := range names {
+					sub.bindings[0][n] = n
+				}
+				if err := sub.uastStatementBody(graph, body); err != nil {
+					return err
+				}
+				for helperID, helper := range sub.helperSources {
+					g.requireHelper(helperID, helper)
+				}
+				g.requireHelper("helper.native.function."+name, "static double "+name+"("+typed("double %s")+") {\n"+sub.b.String()+"}\n")
+				return nil
+			}
+			return fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target c closure captures require runtime")
+		}
+		switch g.target {
+		case "r":
+			g.line(name + " <- function(" + strings.Join(names, ", ") + ") {")
+		case "python":
+			g.line("def " + name + "(" + strings.Join(names, ", ") + "):")
+			g.indent++
+			if err := emitNativeBody(); err != nil {
+				return err
+			}
+			g.indent--
+			return nil
+		case "julia":
+			g.line("function " + name + "(" + strings.Join(names, ", ") + ")")
+			g.indent++
+			if err := emitNativeBody(); err != nil {
+				return err
+			}
+			g.indent--
+			g.line("end")
+			return nil
+		case "nim":
+			g.line("proc " + name + "(" + typed("%s: float64") + "): float64 =")
+			g.indent++
+			if err := emitNativeBody(); err != nil {
+				return err
+			}
+			g.indent--
+			return nil
+		case "go":
+			g.line(name + " := func(" + typed("%s any") + ") any {")
+		case "rust":
+			g.line("let mut " + name + " = |" + typed("%s: f64") + "| {")
+		case "cpp":
+			g.line("auto " + name + " = [&](" + typed("double %s") + ") {")
+		case "csharp":
+			delegateType, err := csharpFunctionType(len(names))
+			if err != nil {
+				return err
+			}
+			parameters := "(" + strings.Join(names, ", ") + ")"
+			if len(names) == 0 {
+				parameters = "()"
+			}
+			g.line(delegateType + " " + name + " = " + parameters + " => {")
+		case "java":
+			g.line("java.util.function.Function<Double, Double> " + name + " = (" + strings.Join(names, ", ") + ") -> {")
+		case "kotlin":
+			g.line("fun " + name + "(" + typed("%s: Double") + "): Double {")
+		case "swift":
+			g.line("func " + name + "(" + typed("_ %s: Double") + ") -> Double {")
+		case "zig":
+			g.line("const " + name + " = struct { fn call(" + typed("%s: f64") + ") f64 {")
+		default:
+			return fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s lacks a native function-value form", g.target)
+		}
+		g.indent++
+		if err := emitNativeBody(); err != nil {
+			return err
+		}
+		// C# delegate values have a non-void dynamic result contract. A
+		// structured UAST body can legally fall through after conditional paths;
+		// make that contract total at the target boundary.
+		if g.target == "csharp" {
+			g.line("return R2.Null;")
+		}
+		g.indent--
+		if g.target == "zig" {
+			g.line("} }.call;")
+		} else {
+			g.line("}" + stmtEnd(g.target))
+		}
 		return nil
 	}
-	params := graph.many(id, "parameter")
 	defaultText := func(param int) string {
 		defaultID, ok, _ := graph.one(param, "default", false)
 		if !ok {
@@ -139,13 +403,38 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		}
 		return value
 	}
+	emitDeferSlots := func() {
+		seen := map[string]bool{}
+		for _, common := range graph.common {
+			if strings.HasPrefix(common.Name, "__defer_result_") && !seen[common.Name] {
+				seen[common.Name] = true
+				g.line(g.assignment(common.Name, targetNull(g.target)))
+				g.declared[len(g.declared)-1][common.Name] = true
+			}
+		}
+	}
 	emitBody := func() error {
 		body, _, err := graph.one(id, "body", true)
 		if err != nil {
 			return err
 		}
-		return g.uastStatementBody(graph, body)
+		// Function parameters shadow any surrounding inline-call bindings. Keep
+		// outer captures visible, but resolve parameter identifiers to the local
+		// names emitted by the function prologue rather than to the caller's
+		// temporary argument bindings.
+		savedBindings := g.bindings
+		local := map[string]string{}
+		for _, param := range params {
+			pc := graph.common[param.ID]
+			local[g.name(pc.Name)] = g.name(pc.Name)
+		}
+		g.bindings = append(append([]map[string]string(nil), savedBindings...), local)
+		emitDeferSlots()
+		err = g.uastStatementBody(graph, body)
+		g.bindings = savedBindings
+		return err
 	}
+	hasReturn := uastFunctionHasExplicitReturn(graph, id)
 	switch g.target {
 	case "python":
 		g.line("def " + name + "(*__args):")
@@ -185,6 +474,10 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		g.line("return nil")
 		g.indent--
 		g.line("}")
+		// Go rejects an unused local function value.  Keeping the binding is
+		// semantically required even when the source never calls it, so mark the
+		// structured value as intentionally retained.
+		g.line("_ = " + name)
 	case "rust":
 		g.line("let mut " + name + " = |__args: Vec<RValue>| -> RValue {")
 		g.indent++
@@ -211,6 +504,67 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		g.line("return RValue::null();")
 		g.indent--
 		g.line("};")
+	case "java":
+		g.line("java.util.function.Function<Object[], Object> " + name + " = (__args) -> {")
+		g.indent++
+		for i, p := range params {
+			pc := graph.common[p.ID]
+			g.line(fmt.Sprintf("Object %s = __args.length > %d ? __args[%d] : %s;", g.name(pc.Name), i, i, defaultText(p.ID)))
+		}
+		if err := emitBody(); err != nil {
+			return err
+		}
+		if !hasReturn {
+			g.line("return null;")
+		}
+		g.indent--
+		g.line("};")
+	case "csharp":
+		g.line("System.Func<object[], object> " + name + " = (__args) => {")
+		g.indent++
+		for i, p := range params {
+			pc := graph.common[p.ID]
+			g.line(fmt.Sprintf("dynamic %s = __args.Length > %d ? __args[%d] : %s;", g.name(pc.Name), i, i, defaultText(p.ID)))
+		}
+		if err := emitBody(); err != nil {
+			return err
+		}
+		// Any-return is not the same as definite return: one conditional arm
+		// can return while another falls through. Func<object[], object> needs
+		// a value on every path, so provide its explicit fallthrough value.
+		g.line("return null;")
+		g.indent--
+		g.line("};")
+	case "kotlin":
+		g.line("val " + name + ": (Array<Any?>) -> Any? = { __args ->")
+		g.indent++
+		for i, p := range params {
+			pc := graph.common[p.ID]
+			g.line(fmt.Sprintf("val %s = if (__args.size > %d) __args[%d] else %s", g.name(pc.Name), i, i, defaultText(p.ID)))
+		}
+		if err := emitBody(); err != nil {
+			return err
+		}
+		if !hasReturn {
+			g.line("null")
+		}
+		g.indent--
+		g.line("}")
+	case "swift":
+		g.line("let " + name + ": ([Any]) -> Any = { __args in")
+		g.indent++
+		for i, p := range params {
+			pc := graph.common[p.ID]
+			g.line(fmt.Sprintf("let %s: Any = __args.count > %d ? __args[%d] : %s", g.name(pc.Name), i, i, defaultText(p.ID)))
+		}
+		if err := emitBody(); err != nil {
+			return err
+		}
+		if !hasReturn {
+			g.line("return NSNull()")
+		}
+		g.indent--
+		g.line("}")
 	case "c":
 		// C keeps the function symbol in the direct UAST call path.  The
 		// surrounding generated translation unit may provide the native
@@ -227,6 +581,59 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 	return nil
 }
 
+// uastLambdaValueExpression renders a closure value directly from its
+// structured UAST body. C++ uses an explicit capture list; C# relies on the
+// language's target-typed lambda conversion and lexical capture semantics.
+func (g *targetGen) uastLambdaValueExpression(graph *uastExecutionGraph, functionID int) (string, error) {
+	params := graph.many(functionID, "parameter")
+	parameterNames := make([]string, len(params))
+	localBindings := make(map[string]string, len(params))
+	localDeclared := make(map[string]bool, len(params))
+	for i, parameter := range params {
+		name := g.name(graph.common[parameter.ID].Name)
+		if name == "" {
+			name = fmt.Sprintf("arg%d", i)
+		}
+		if g.target == "cpp" {
+			parameterNames[i] = "auto " + name
+		} else {
+			parameterNames[i] = name
+		}
+		localBindings[name] = name
+		localDeclared[name] = true
+	}
+	body, ok, err := graph.one(functionID, "body", true)
+	if err != nil {
+		return "", err
+	}
+	if !ok {
+		return "", fmt.Errorf("closure node %d lacks body", functionID)
+	}
+	previousBody, previousIndent, previousDeclared, previousBindings := g.b, g.indent, g.declared, g.bindings
+	g.b = strings.Builder{}
+	g.indent = 1
+	g.declared = append(append([]map[string]bool(nil), previousDeclared...), localDeclared)
+	g.bindings = append(append([]map[string]string(nil), previousBindings...), localBindings)
+	err = g.uastStatementBody(graph, body)
+	inner := g.b.String()
+	g.b, g.indent, g.declared, g.bindings = previousBody, previousIndent, previousDeclared, previousBindings
+	if err != nil {
+		return "", err
+	}
+	switch g.target {
+	case "cpp":
+		return "[&](" + strings.Join(parameterNames, ", ") + ") {\n" + inner + "}", nil
+	case "csharp":
+		parameters := "(" + strings.Join(parameterNames, ", ") + ")"
+		if len(parameterNames) == 1 {
+			parameters = parameterNames[0]
+		}
+		return parameters + " => {\n" + inner + "}", nil
+	default:
+		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s has no closure value syntax", g.target)
+	}
+}
+
 func (g *targetGen) uastInlineCall(graph *uastExecutionGraph, functionID, callID int, args []string) (string, error) {
 	if g.uastActiveInline[functionID] {
 		return "", fmt.Errorf("recursive inline call requires a recursive function representation")
@@ -237,6 +644,16 @@ func (g *targetGen) uastInlineCall(graph *uastExecutionGraph, functionID, callID
 	actual := graph.many(callID, "argument")
 	binding := matrixir.NewMatrix(len(params), len(actual))
 	used := make([]bool, len(params))
+	variadicParameter := -1
+	for i, parameter := range params {
+		mode := strings.ToLower(strings.TrimSpace(graph.common[parameter.ID].Operation.ParameterMode))
+		if mode == "variadic" || mode == "variadic_positional" {
+			if variadicParameter >= 0 || i != len(params)-1 {
+				return "", fmt.Errorf("invalid variadic parameter contract on closure %d", functionID)
+			}
+			variadicParameter = i
+		}
+	}
 	position := 0
 	for j, arg := range actual {
 		parameter := -1
@@ -248,19 +665,37 @@ func (g *targetGen) uastInlineCall(graph *uastExecutionGraph, functionID, callID
 				}
 			}
 		} else {
-			for position < len(used) && used[position] {
+			for position < len(used) && position != variadicParameter && used[position] {
 				position++
 			}
-			parameter = position
-			position++
+			if variadicParameter >= 0 && position >= variadicParameter {
+				parameter = variadicParameter
+			} else {
+				parameter = position
+				position++
+			}
 		}
 		if parameter < 0 || parameter >= len(used) {
-			return "", fmt.Errorf("arity or unknown named argument %q", arg.Meta.Name)
+			function := graph.common[functionID]
+			var parameterDetails, argumentDetails []string
+			for _, item := range params {
+				param := graph.common[item.ID]
+				parameterDetails = append(parameterDetails, fmt.Sprintf("%d:%s:%s", item.ID, param.Name, param.Type.Kind))
+			}
+			for _, item := range actual {
+				arg := graph.common[item.ID]
+				argumentDetails = append(argumentDetails, fmt.Sprintf("%d:%s:%s:%s", item.ID, item.Meta.Role, arg.Kind, arg.Name))
+			}
+			return "", fmt.Errorf("arity or unknown named argument %q at UAST call %d to function %d %q (argument %d of %d; parameters=%d %v; actual=%v)",
+				arg.Meta.Name, callID, functionID, function.Name, j, len(actual), len(params), parameterDetails, argumentDetails)
 		}
-		if used[parameter] {
+		isVariadic := parameter == variadicParameter
+		if used[parameter] && !isVariadic {
 			return "", fmt.Errorf("duplicate argument %q", graph.common[params[parameter].ID].Name)
 		}
-		used[parameter] = true
+		if !isVariadic {
+			used[parameter] = true
+		}
 		if !arg.Meta.Missing {
 			binding.Set(parameter, j, 1)
 		} else if len(graph.many(params[parameter].ID, "default")) == 0 {
@@ -272,7 +707,7 @@ func (g *targetGen) uastInlineCall(graph *uastExecutionGraph, functionID, callID
 		for j := range actual {
 			has = has || binding.At(i, j) != 0
 		}
-		if !has && len(graph.many(p.ID, "default")) == 0 {
+		if !has && i != variadicParameter && len(graph.many(p.ID, "default")) == 0 {
 			return "", fmt.Errorf("arity: missing argument %s", graph.common[p.ID].Name)
 		}
 	}
@@ -336,6 +771,20 @@ func (g *targetGen) uastInlineCall(graph *uastExecutionGraph, functionID, callID
 	}
 	scope := map[string]string{}
 	for i, p := range params {
+		if i == variadicParameter {
+			packed := make([]string, 0, len(actual))
+			for j := range actual {
+				if binding.At(i, j) != 0 && values[j] != "" {
+					packed = append(packed, values[j])
+				}
+			}
+			value, err := g.uastVariadicPack(graph.common[p.ID].Type, packed)
+			if err != nil {
+				return "", fmt.Errorf("closure %d variadic parameter %q: %w", functionID, graph.common[p.ID].Name, err)
+			}
+			scope[g.name(graph.common[p.ID].Name)] = value
+			continue
+		}
 		for j := range actual {
 			if binding.At(i, j) != 0 {
 				value := values[j]
@@ -374,15 +823,121 @@ func (g *targetGen) uastInlineCall(graph *uastExecutionGraph, functionID, callID
 			scope[name] += ".clone()"
 		}
 	}
+	// A closure with statement control flow cannot be reduced to the pure
+	// expression-flow quotient. Preserve it as a target-native scoped closure
+	// instead. This is a generic UAST closure contract; only the target's IIFE
+	// syntax varies. Targets without a proven template stay on the explicit
+	// fallback/error route rather than silently receiving runtime syntax.
+	if uastFunctionRequiresStatementClosure(graph, functionID) {
+		// Compatibility is the explicit last-resort path. Materialize the
+		// already structured closure through the shared function lowering and
+		// invoke the generated binding. This keeps statement control flow out of
+		// an expression while preserving the existing runtime contracts. The
+		// direct path remains strict and still requires a native IIFE template.
+		if !g.nativeDirect {
+			switch g.target {
+			case "python", "julia", "go", "rust", "cpp":
+				name := g.freshName("closure")
+				if err := g.uastFunctionAssign(graph, name, functionID); err == nil {
+					return g.letExpression(lets, callUser(g.target, name, args)), nil
+				}
+			}
+			// Targets without a statement-closure representation retain the
+			// compatibility runtime boundary. Its dispatcher is deliberately
+			// opaque here; no source text or guessed operands are introduced.
+			return g.letExpression(lets, emitDispatch(g.target, "function", []string{targetNull(g.target)})), nil
+		}
+		result, err := g.uastNativeLoopClosure(graph, functionID)
+		if err != nil {
+			return "", err
+		}
+		return g.letExpression(lets, result), nil
+	}
 	flow, err := buildUASTFunctionFlow(graph, functionID)
 	if err != nil {
-		return "", err
+		function := graph.common[functionID]
+		span := graph.nodes[functionID].Source
+		result := "unspecified"
+		if function.Type.Result != nil {
+			result = function.Type.Result.Kind + ":" + function.Type.Result.Name
+		}
+		location := "unknown"
+		if span != nil {
+			location = fmt.Sprintf("%s:%d:%d", span.File, span.StartLine, span.StartColumn)
+		}
+		return "", fmt.Errorf("inline function %d %q (%s %s -> %s) at %s: %w", functionID, function.Name, function.Type.Kind, function.Type.Name, result, location, err)
 	}
 	result, err := g.uastLowerFunctionFlow(flow, scope)
 	if err != nil {
 		return "", err
 	}
 	return g.letExpression(lets, result), nil
+}
+
+// uastVariadicPack materializes the structured slice contract for a variadic
+// parameter. The values are already evaluated in source order by uastInlineCall;
+// this function only selects the target's native aggregate representation.
+func (g *targetGen) uastVariadicPack(typ SemanticType, values []string) (string, error) {
+	joined := strings.Join(values, ", ")
+	switch g.target {
+	case "cpp":
+		if typ.Kind != "slice" && typ.Kind != "array" && typ.Kind != "vector" && typ.Kind != "list" {
+			return "", fmt.Errorf("variadic parameter type %q is not an aggregate", typ.Kind)
+		}
+		items := make([]string, len(values))
+		for i, value := range values {
+			items[i] = "std::any{" + value + "}"
+		}
+		return "std::vector<std::any>{" + strings.Join(items, ", ") + "}", nil
+	case "go":
+		return "[]any{" + joined + "}", nil
+	case "python":
+		return "[" + joined + "]", nil
+	case "csharp":
+		items := make([]string, len(values))
+		for i, value := range values {
+			items[i] = "(object)(" + value + ")"
+		}
+		return "new object[]{" + strings.Join(items, ", ") + "}", nil
+	case "java":
+		items := make([]string, len(values))
+		for i, value := range values {
+			items[i] = "(Object)(" + value + ")"
+		}
+		return "new Object[]{" + strings.Join(items, ", ") + "}", nil
+	case "kotlin":
+		return "arrayOf<Any>(" + joined + ")", nil
+	case "swift":
+		return "[Any](" + joined + ")", nil
+	case "julia":
+		return "Any[" + joined + "]", nil
+	default:
+		return "", fmt.Errorf("target %q has no native variadic aggregate representation", g.target)
+	}
+}
+
+func (g *targetGen) uastNativeLoopClosure(graph *uastExecutionGraph, functionID int) (string, error) {
+	if g.target != "cpp" {
+		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s has no native statement-closure template", g.target)
+	}
+	body, _, err := graph.one(functionID, "body", true)
+	if err != nil {
+		return "", err
+	}
+	// Render the already structured body into an isolated lexical scope. The
+	// outer generator's declarations/buffer are restored exactly afterwards;
+	// helper requirements and unique names intentionally remain global.
+	savedBody, savedIndent, savedDeclared := g.b, g.indent, g.declared
+	g.b = strings.Builder{}
+	g.indent = 1
+	g.declared = append(append([]map[string]bool(nil), g.declared...), map[string]bool{})
+	err = g.uastStatementBody(graph, body)
+	inner := g.b.String()
+	g.b, g.indent, g.declared = savedBody, savedIndent, savedDeclared
+	if err != nil {
+		return "", err
+	}
+	return "([&]() -> auto {\n" + inner + "}())", nil
 }
 
 func uastParameterDemand(graph *uastExecutionGraph, functionID int) matrixir.Matrix {
@@ -476,6 +1031,9 @@ func (g *targetGen) uastLowerFunctionFlow(flow *uastFunctionFlow, scope map[stri
 		g.bindings = append(g.bindings, local)
 		defer func() { g.bindings = g.bindings[:len(g.bindings)-1] }()
 		if node == 0 {
+			if flow.implicitVoidReturn {
+				return targetNull(g.target), nil
+			}
 			return "", fmt.Errorf("function flow reached implicit fallthrough")
 		}
 		id := flow.ids[node]

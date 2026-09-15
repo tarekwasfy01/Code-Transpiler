@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 //go:build cgo
 
 package matrixir
@@ -19,7 +20,7 @@ type cgoExternalScanner struct {
 	payload  unsafe.Pointer
 }
 
-func newCGOExternalScanner(language string) (*cgoExternalScanner, error) {
+func newPlatformExternalScanner(language string) (externalScannerRuntime, error) {
 	cl := C.CString(language)
 	defer C.free(unsafe.Pointer(cl))
 	if C.uct_scanner_available(cl) == 0 {
@@ -96,7 +97,7 @@ func (s *cgoExternalScanner) Clone(state []byte) (externalScannerRuntime, error)
 	if s == nil || s.payload == nil {
 		return nil, fmt.Errorf("external scanner is closed")
 	}
-	n, err := newCGOExternalScanner(s.language)
+	n, err := newPlatformExternalScanner(s.language)
 	if err != nil {
 		return nil, err
 	}

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -45,7 +46,9 @@ func deriveTypeEquivalence(table []SemanticTypeDefinition) (*SemanticTypeEquival
 		}
 		id, ok := keys[string(data)]
 		if !ok {
-			return 0, fmt.Errorf("type child absent from table")
+			// Unresolved recursive/partial-package children are unknown evidence,
+			// not a hard failure of the enclosing semantic program.
+			return -1, nil
 		}
 		return id, nil
 	}
@@ -54,6 +57,12 @@ func deriveTypeEquivalence(table []SemanticTypeDefinition) (*SemanticTypeEquival
 		seen := map[int]bool{}
 		at := start
 		for {
+			// Unknown child/alias resolution is evidence, not an addressable
+			// table row. Stop refinement before using the sentinel -1 as an index.
+			if at < 0 || at >= n {
+				at = -1
+				break
+			}
 			if seen[at] {
 				at = -1
 				break
@@ -179,6 +188,10 @@ func deriveTypeEquivalence(table []SemanticTypeDefinition) (*SemanticTypeEquival
 			id, err := idOf(c.Type)
 			if err != nil {
 				return nil, err
+			}
+			if id < 0 {
+				r.Unknown[i] = 1
+				continue
 			}
 			children[i] = append(children[i], id)
 			roles = append(roles, c.SemanticTypeEdge)

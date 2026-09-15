@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -29,11 +30,28 @@ type targetGen struct {
 	// compatibility API also accepts R-shaped snippets tagged as another
 	// language; those retain the established runtime encoding and decoder
 	// contract.
-	nativeDirect     bool
+	nativeDirect bool
+	// hybridFallback is enabled only for the second pass after a strict direct
+	// projection fails.  It lets the shared UAST emitter retain successful
+	// native statements while routing only unsupported statements through the
+	// established compatibility runtime.
+	hybridFallback   bool
+	runtimeUsed      bool
 	generatedAt      map[string]int
 	uastFunctions    map[string]int
 	uastInline       map[string]bool
 	uastActiveInline map[int]bool
+	// breakContexts records the nearest active loop/switch. A switch emitted
+	// as an if-chain has no target-language break construct, so its own break
+	// nodes are consumed while loop breaks retain their native meaning.
+	breakContexts []bool
+	// entryBinding identifies the canonical function binding selected by the
+	// document's entry-point contract. entryWrapper is true while a target's
+	// already-opened native main function is being populated. Together they
+	// let the renderer execute the structured entry body without rediscovering
+	// a source-language function name.
+	entryBinding string
+	entryWrapper bool
 }
 
 // requireHelper records a semantic support requirement before retaining the
@@ -86,7 +104,7 @@ func generateTargetFromMode(source, target string, ast *BlockStmt, nativeDirect 
 		}
 		body := g.b.String()
 		if nativeDirect {
-			return nativeTargetPrefix(target) + body, nil
+			return nativeTargetPrefixForBody(target, body, g.requiredHelperSources()) + strings.Join(g.requiredHelperSources(), "\n") + "\n" + body, nil
 		}
 		return targetPrelude(target) + "\n" + strings.Join(g.helpers, "\n") + "\n" + body, nil
 	default:
@@ -108,7 +126,7 @@ func generateTargetFromMode(source, target string, ast *BlockStmt, nativeDirect 
 		g.line(mainClose(target))
 		body := g.b.String()
 		if nativeDirect {
-			return nativeTargetPrefix(target) + body, nil
+			return nativeTargetPrefixForBody(target, body, g.requiredHelperSources()) + strings.Join(g.requiredHelperSources(), "\n") + "\n" + body, nil
 		}
 		return targetPrelude(target) + "\n" + strings.Join(g.helpers, "\n") + "\n" + body, nil
 	}
@@ -853,6 +871,20 @@ func callUser(t, n string, args []string) string {
 		return n + "(vec![" + a + "])"
 	case "cpp":
 		return n + "({" + a + "})"
+	case "c":
+		// C compatibility closures are represented by the shared runtime call
+		// boundary.  Calling the generated identifier directly would require a
+		// nested function (not part of ISO C) and leaves an undeclared symbol when
+		// the source function is a first-class value.
+		return fmt.Sprintf("r_call(\"function\", %q, (RValue[]){%s}, %d)", n, a, len(args))
+	case "java":
+		return n + ".apply(new Object[]{" + a + "})"
+	case "csharp":
+		return n + "(new object[]{" + a + "})"
+	case "kotlin":
+		return n + "(arrayOf(" + a + "))"
+	case "swift":
+		return n + "([" + a + "])"
 	default:
 		return n + "(" + a + ")"
 	}

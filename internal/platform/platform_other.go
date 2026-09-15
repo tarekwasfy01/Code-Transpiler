@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 //go:build !windows
 
 package platform
@@ -11,11 +12,15 @@ import (
 func EnsureCLIConsole()    {}
 func BoostGUIThread()      {}
 func OpenCMD(string) error { return fmt.Errorf("Open CMD is Windows-only") }
+func SetPath(string) error { return fmt.Errorf("setpath is Windows-only") }
 func SaveSourceFileDialog(defaultName, ext, label string) (string, error) {
 	if defaultName == "" {
 		defaultName = "output" + ext
 	}
 	return filepath.Join(".", defaultName), nil
+}
+func SelectFolderDialog(string) (string, error) {
+	return "", fmt.Errorf("folder dialog is Windows-only")
 }
 
 var _ = os.Stdout

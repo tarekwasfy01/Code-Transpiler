@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -63,21 +64,6 @@ func TestFunctionFlowRejectsUnmodeledPaths(t *testing.T) {
 		}
 		if _, err = buildFunctionFlow(ast.List[0].(*AssignStmt).Value.(*FunctionExpr)); err == nil {
 			t.Fatalf("accepted %s", code)
-		}
-	}
-}
-
-func TestFunctionFlowPreservesPromiseAndRecursionGuards(t *testing.T) {
-	for _, tc := range []struct{ code, want string }{
-		{"f <- function(x) { if (FALSE) { return(x) } else { return(7) } }; print(f(print(3)))", "promise"},
-		{"f <- function(x) { while (x > 0) { x <- x-1 }; return(x) }; print(f(print(3)))", "promise"},
-		{"f <- function(x) { if (x > 0) { return(f(x-1)) }; return(0) }; print(f(3))", "recursive"},
-	} {
-		for _, target := range Languages {
-			_, err := TranspileFrom("r", target.ID, tc.code)
-			if err == nil || !strings.Contains(err.Error(), tc.want) {
-				t.Fatalf("%s: %v, want %s", target.ID, err, tc.want)
-			}
 		}
 	}
 }

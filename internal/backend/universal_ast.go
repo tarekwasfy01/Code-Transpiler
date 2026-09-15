@@ -1,9 +1,15 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
+	"bytes"
+	"compress/gzip"
+	"crypto/sha256"
 	_ "embed"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"reflect"
 	"sort"
@@ -46,28 +52,90 @@ type UniversalASTBasis struct {
 }
 
 type UniversalASTDocument struct {
-	SchemaVersion          int                      `json:"schema_version"`
-	BasisSHA256            string                   `json:"basis_sha256"`
-	LanguageProfile        string                   `json:"language_profile"`
-	LanguageFacet          matrixir.Vector          `json:"language_facet"`
-	Projection             string                   `json:"projection,omitempty"`
-	SemanticDocumentSHA256 string                   `json:"semantic_document_sha256,omitempty"`
-	Evaluation             string                   `json:"evaluation,omitempty"`
-	ValueModel             string                   `json:"value_model,omitempty"`
-	IndexBase              int                      `json:"index_base,omitempty"`
-	Types                  SemanticTypeContract     `json:"type_contract,omitempty"`
-	Origin                 SemanticOrigin           `json:"origin,omitempty"`
-	Metadata               map[string]string        `json:"metadata,omitempty"`
-	Extensions             map[string]any           `json:"extensions,omitempty"`
-	Contracts              SemanticContracts        `json:"contracts,omitempty"`
-	Dialects               []SemanticDialect        `json:"dialects,omitempty"`
-	SemanticFeatures       *SemanticFeatureModel    `json:"semantic_features,omitempty"`
-	TypeTable              []SemanticTypeDefinition `json:"type_table,omitempty"`
-	TypeGraph              matrixir.SparseMatrix    `json:"type_graph,omitempty"`
-	TypeRelations          *SemanticTypeRelations   `json:"type_relations,omitempty"`
-	Evidence               SemanticEvidence         `json:"evidence,omitempty"`
-	Nodes                  []UniversalASTNode       `json:"nodes"`
-	Relations              []UniversalASTRelation   `json:"relations"`
+	SchemaVersion int `json:"schema_version"`
+	// ContractSchema is the additive v2 semantic plane. SchemaVersion and
+	// BasisSHA256 continue to identify the stable v1 structural basis so old
+	// documents remain readable while the contract table is introduced.
+	ContractSchema         string                      `json:"contract_schema,omitempty"`
+	BasisSHA256            string                      `json:"basis_sha256"`
+	LanguageProfile        string                      `json:"language_profile"`
+	LanguageFacet          matrixir.Vector             `json:"language_facet"`
+	Projection             string                      `json:"projection,omitempty"`
+	SemanticDocumentSHA256 string                      `json:"semantic_document_sha256,omitempty"`
+	Evaluation             string                      `json:"evaluation,omitempty"`
+	ValueModel             string                      `json:"value_model,omitempty"`
+	IndexBase              int                         `json:"index_base,omitempty"`
+	Types                  SemanticTypeContract        `json:"type_contract,omitempty"`
+	Origin                 SemanticOrigin              `json:"origin,omitempty"`
+	Metadata               map[string]string           `json:"metadata,omitempty"`
+	Extensions             map[string]any              `json:"extensions,omitempty"`
+	Contracts              SemanticContracts           `json:"contracts,omitempty"`
+	Dialects               []SemanticDialect           `json:"dialects,omitempty"`
+	SemanticFeatures       *SemanticFeatureModel       `json:"semantic_features,omitempty"`
+	TypeTable              []SemanticTypeDefinition    `json:"type_table,omitempty"`
+	TypeGraph              matrixir.SparseMatrix       `json:"type_graph,omitempty"`
+	TypeRelations          *SemanticTypeRelations      `json:"type_relations,omitempty"`
+	Evidence               SemanticEvidence            `json:"evidence,omitempty"`
+	ContractTable          []SemanticContract          `json:"contract_table,omitempty"`
+	ContractRefs           []SemanticContractReference `json:"contract_refs,omitempty"`
+	// Surface is the lossless source plane. It carries original bytes only;
+	// semantic lowering continues to use Nodes/Relations as the sole semantic
+	// representation. Same-language preservation can therefore round-trip
+	// source without reparsing or inventing a second IR.
+	Surface   *UniversalASTSurface   `json:"surface,omitempty"`
+	Nodes     []UniversalASTNode     `json:"nodes"`
+	Relations []UniversalASTRelation `json:"relations"`
+}
+
+type UniversalASTSurface struct {
+	Language        string `json:"language"`
+	Encoding        string `json:"encoding"`
+	SHA256          string `json:"sha256"`
+	ByteLength      int    `json:"byte_length"`
+	BytesBase64     string `json:"bytes_base64"`
+	BytesGzipBase64 string `json:"bytes_gzip_base64,omitempty"`
+}
+
+func NewUniversalASTSurface(language, source string) *UniversalASTSurface {
+	sum := sha256.Sum256([]byte(source))
+	return &UniversalASTSurface{
+		Language: language, Encoding: "utf-8", SHA256: fmt.Sprintf("%x", sum[:]),
+		ByteLength: len(source), BytesBase64: base64.StdEncoding.EncodeToString([]byte(source)),
+	}
+}
+
+func (s *UniversalASTSurface) Bytes() ([]byte, error) {
+	if s == nil {
+		return nil, fmt.Errorf("missing source surface")
+	}
+	var b []byte
+	var err error
+	if s.BytesGzipBase64 != "" {
+		var packed []byte
+		packed, err = base64.StdEncoding.DecodeString(s.BytesGzipBase64)
+		if err == nil {
+			zr, e := gzip.NewReader(bytes.NewReader(packed))
+			if e != nil {
+				err = e
+			} else {
+				b, err = io.ReadAll(zr)
+				_ = zr.Close()
+			}
+		}
+	} else {
+		b, err = base64.StdEncoding.DecodeString(s.BytesBase64)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("source surface bytes: %w", err)
+	}
+	if len(b) != s.ByteLength {
+		return nil, fmt.Errorf("source surface byte length mismatch")
+	}
+	sum := sha256.Sum256(b)
+	if fmt.Sprintf("%x", sum[:]) != s.SHA256 {
+		return nil, fmt.Errorf("source surface digest mismatch")
+	}
+	return b, nil
 }
 
 type UniversalASTNode struct {
@@ -109,7 +177,7 @@ func loadUniversalASTBasis() error {
 }
 
 func validateUniversalASTBasis(b *UniversalASTBasis) error {
-	if b.Schema != "code-transpiler.universal-ast-basis.v1" || len(b.Features) != 553 || len(b.Facets) != 334 || len(b.StructuralKinds) != 109 || len(b.SemanticAxes) != 44 || len(b.RelationAxes) != 23 || len(b.ConcreteRelations) != 55 || len(b.Fields) != 57 || len(b.Layers) != 17 || len(b.Languages) != 8 || len(b.GlobalRelations) == 0 || len(b.CrosswalkFields) == 0 {
+	if b.Schema != "code-transpiler.universal-ast-basis.v1" || len(b.Features) != 553 || len(b.Facets) != 334 || len(b.StructuralKinds) != 109 || len(b.SemanticAxes) != 44 || len(b.RelationAxes) != 23 || len(b.ConcreteRelations) != 55 || len(b.Fields) != 57 || len(b.Layers) != 17 || len(b.Languages) != 12 || len(b.GlobalRelations) == 0 || len(b.CrosswalkFields) == 0 {
 		return fmt.Errorf("universal AST basis dimensions differ from v1 contract")
 	}
 	if !uniqueNonempty(b.Features) || !uniqueNonempty(b.Facets) || !uniqueNonempty(b.SemanticAxes) || !uniqueNonempty(b.RelationAxes) || !uniqueNonempty(b.Languages) || !uniqueNonempty(b.StructuralKinds) || !uniqueNonempty(b.ConcreteRelations) || !uniqueNonempty(b.Fields) || !uniqueNonempty(b.Layers) || !uniqueNonempty(b.GlobalRelations) || !uniqueNonempty(b.CrosswalkFields) {
@@ -138,8 +206,8 @@ func validateUniversalASTBasis(b *UniversalASTBasis) error {
 		m    matrixir.SparseMatrix
 		r, c int
 	}{
-		{b.FeatureFacet, 553, 334}, {b.FeatureSignature, 553, 67}, {b.FacetAxis, 334, 44}, {b.FacetRelationAxis, 334, 23}, {b.LanguageFacet, 8, 334},
-		{b.CoverageLower, 8, 334}, {b.CoverageUpper, 8, 334}, {b.FacetLayer, 334, 17}, {b.StructuralLayer, 109, 17},
+		{b.FeatureFacet, 553, 334}, {b.FeatureSignature, 553, 67}, {b.FacetAxis, 334, 44}, {b.FacetRelationAxis, 334, 23}, {b.LanguageFacet, len(b.Languages), 334},
+		{b.CoverageLower, len(b.Languages), 334}, {b.CoverageUpper, len(b.Languages), 334}, {b.FacetLayer, 334, 17}, {b.StructuralLayer, 109, 17},
 		{b.StructuralFacetSeed, 109, 334},
 		{b.FacetConcreteRelation, 334, 55}, {b.StructuralConcreteRelation, 109, 55}, {b.FacetField, 334, 57}, {b.StructuralField, 109, 57},
 	}
@@ -183,7 +251,7 @@ func validateUniversalASTBasis(b *UniversalASTBasis) error {
 	if len(signatureFacet) != 334 {
 		return fmt.Errorf("semantic facet quotient does not contain 334 exact classes")
 	}
-	for row := 0; row < 8; row++ {
+	for row := 0; row < len(b.Languages); row++ {
 		for col := 0; col < 334; col++ {
 			lo, hi := b.CoverageLower.At(row, col), b.CoverageUpper.At(row, col)
 			if math.IsNaN(lo) || math.IsNaN(hi) || math.IsInf(lo, 0) || math.IsInf(hi, 0) || lo < 0 || hi > 1 || lo > hi {
@@ -298,6 +366,14 @@ func validateUniversalASTDocument(d *UniversalASTDocument) error {
 	if d.Projection == "semantic_document.v1" && len(d.SemanticDocumentSHA256) != 64 {
 		return fmt.Errorf("universal AST compatibility projection missing semantic document digest")
 	}
+	if d.Surface != nil {
+		if d.Surface.Language == "" || d.Surface.Encoding != "utf-8" || len(d.Surface.SHA256) != 64 || d.Surface.ByteLength < 0 {
+			return fmt.Errorf("invalid universal AST source surface metadata")
+		}
+		if _, err := d.Surface.Bytes(); err != nil {
+			return err
+		}
+	}
 	profileRow := indexOf(uastEmbedded.Basis.Languages, d.LanguageProfile)
 	if (profileRow < 0 && d.LanguageProfile != "universal") || len(d.LanguageFacet) != 334 {
 		return fmt.Errorf("invalid universal AST language projection")
@@ -321,6 +397,11 @@ func validateUniversalASTDocument(d *UniversalASTDocument) error {
 		mask, err := universalFieldMask(n)
 		if err != nil {
 			return err
+		}
+		if len(n.FieldMask) == 0 {
+			// Native .se treats field_mask as a derived schema product. Materialize
+			// it at the semantic boundary before validating field applicability.
+			n.FieldMask = mask
 		}
 		if !reflect.DeepEqual(mask, n.FieldMask) {
 			return fmt.Errorf("node %d field mask differs from facet/structural matrix product", n.ID)
@@ -369,6 +450,12 @@ func validateUniversalASTDocument(d *UniversalASTDocument) error {
 				return fmt.Errorf("invalid relation attribute")
 			}
 		}
+	}
+	if err := normalizeUniversalContracts(d); err != nil {
+		return err
+	}
+	if err := validateUniversalContractTable(d); err != nil {
+		return err
 	}
 	return nil
 }

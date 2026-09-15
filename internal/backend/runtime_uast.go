@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -25,11 +26,44 @@ type runUASTFunction struct {
 	env               *runEnv
 }
 
+// runUASTPrimitive is the callable value representation for canonical
+// frontend symbols that denote a backend primitive (for example a typed
+// integer conversion). Keeping this as a value closes the same call contract
+// whether the callee arrives through call.calls or through an expression
+// edge; it never materializes a missing binding as zero.
+type runUASTPrimitive struct {
+	name string
+}
+
+// uastExactIntegerParameterType recognizes the fixed-width portion of a
+// frontend parameter type.  Source-level names and provenance are useful UAST
+// facts but are not part of SemanticOperation's deliberately minimal exact
+// integer carrier; normalize only at this runtime boundary.
+func uastExactIntegerParameterType(t SemanticType) (SemanticType, bool) {
+	if t.Kind != "integer" || t.Signed == nil {
+		return SemanticType{}, false
+	}
+	if t.Bits != 8 && t.Bits != 16 && t.Bits != 32 && t.Bits != 64 {
+		return SemanticType{}, false
+	}
+	return integerType(t.Bits, *t.Signed), true
+}
+
 func (st *runState) uastBlock(env *runEnv, g *uastExecutionGraph, id int) (last any, signal runSignal, runErr error) {
 	if g.common[id].Kind != "block" {
 		return nil, runNormal, fmt.Errorf("embedded UAST runtime: node %d is not a block", id)
 	}
 	deferredStart := len(st.deferred)
+	// Blocks own lexical declarations. Keep the parent for captured reads and
+	// nonlocal assignment, but never let a same-named declaration in a sibling
+	// block overwrite the previous binding.
+	blockEnv := env
+	// The document scope is the module environment: declarations made there
+	// must remain visible to the explicit executable-entry invocation. Nested
+	// scopes still receive an isolated lexical environment.
+	if g.root != id {
+		blockEnv = newRunEnv(env)
+	}
 	defer func() {
 		cleanupValue, cleanupSignal, cleanupErr := st.runDeferred(deferredStart)
 		if cleanupErr != nil {
@@ -50,7 +84,7 @@ func (st *runState) uastBlock(env *runEnv, g *uastExecutionGraph, id int) (last 
 		if err := st.tick(); err != nil {
 			return nil, runNormal, err
 		}
-		value, signal, err := st.uastStmt(env, g, child.ID)
+		value, signal, err := st.uastStmt(blockEnv, g, child.ID)
 		if err != nil {
 			return nil, runNormal, err
 		}
@@ -84,10 +118,23 @@ func (st *runState) uastStmt(env *runEnv, g *uastExecutionGraph, id int) (any, r
 		if err != nil {
 			return nil, runNormal, err
 		}
+		if async, ok := c.Attributes["go_async"].(bool); ok && async {
+			return st.spawnUASTTask(env, g, x, false), runNormal, nil
+		}
 		value, err := st.uastExpr(env, g, x)
 		return value, runNormal, err
 	case "assign":
-		x, _, err := child("expression", true)
+		// Canonical frontend facts use the semantic `value` role for an
+		// assignment initializer, while the legacy compatibility view calls the
+		// same edge `expression`.  Execute either representation directly from
+		// the UAST; never require a text-parsed compatibility node here.
+		x, ok, err := child("expression", false)
+		if err != nil {
+			return nil, runNormal, err
+		}
+		if !ok {
+			x, _, err = child("value", true)
+		}
 		if err != nil {
 			return nil, runNormal, err
 		}
@@ -95,7 +142,31 @@ func (st *runState) uastStmt(env *runEnv, g *uastExecutionGraph, id int) (any, r
 		if err != nil {
 			return nil, runNormal, err
 		}
-		if err := env.assign(c.Name, value); err != nil {
+		// Go local declarations are canonically represented as assign nodes.
+		// Preserve their explicit integer binding contract at this boundary so
+		// later typed operations receive exactInteger values.
+		if exactType, ok := uastExactIntegerParameterType(c.Type); ok {
+			value, err = evaluateInteger(SemanticOperation{Name: "integer.value", Type: exactType}, []any{value})
+			if err != nil {
+				return nil, runNormal, err
+			}
+		}
+		// The canonical assignment contract carries its binding in the typed
+		// target child. `name` is a convenience field for older projections, so
+		// recover it structurally when that optional field is absent. This keeps
+		// every frontend on the same definition/reference path.
+		name := c.Name
+		if name == "" {
+			if target, ok, targetErr := child("target", false); targetErr != nil {
+				return nil, runNormal, targetErr
+			} else if ok {
+				name = g.common[target].Name
+			}
+		}
+		if name == "" {
+			return nil, runNormal, fmt.Errorf("assignment has no structured binding target")
+		}
+		if err := env.assign(name, value); err != nil {
 			return nil, runNormal, err
 		}
 		return value, runNormal, nil
@@ -223,6 +294,21 @@ func (st *runState) uastStmt(env *runEnv, g *uastExecutionGraph, id int) (any, r
 		return nil, runBreak, nil
 	case "continue":
 		return nil, runNext, nil
+	case "function":
+		// A named function declaration is a statement-level binding.  Its
+		// closure value is built from the structured parameter/body children and
+		// installed in the current lexical environment before later statements
+		// execute, which also makes forward and recursive calls resolve through
+		// the same symbol path.
+		value, err := st.uastFunctionValue(env, g, id)
+		if err != nil {
+			return nil, runNormal, err
+		}
+		if c.Name == "" {
+			return nil, runNormal, fmt.Errorf("function node %d lacks a binding name", id)
+		}
+		env.declare(c.Name, value, false)
+		return value, runNormal, nil
 	default:
 		return st.uastPrimitiveStatement(env, g, id)
 	}
@@ -254,6 +340,11 @@ func (st *runState) uastExpr(env *runEnv, g *uastExecutionGraph, id int) (any, e
 		}
 		if value, ok := env.get(c.Name); ok {
 			return value, nil
+		}
+		if strings.HasPrefix(c.Name, "native_symbol_") {
+			if _, ok := nativeIntegerConversionType(strings.TrimPrefix(c.Name, "native_symbol_")); ok {
+				return &runUASTPrimitive{name: c.Name}, nil
+			}
 		}
 		return nil, fmt.Errorf("object %q not found", c.Name)
 	case "literal":
@@ -289,9 +380,19 @@ func (st *runState) uastExpr(env *runEnv, g *uastExecutionGraph, id int) (any, e
 			}
 			values[i] = value
 		}
-		return evaluateInteger(*c.Operation.Typed, values)
+		value, err := evaluateInteger(*c.Operation.Typed, values)
+		if err != nil {
+			return nil, fmt.Errorf("typed operation node %d (%s): %w", id, c.Operation.Typed.Name, err)
+		}
+		return value, nil
 	case "unary":
-		x, err := one("value")
+		x, ok, err := g.one(id, "value", false)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			x, err = one("operand")
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -311,6 +412,17 @@ func (st *runState) uastExpr(env *runEnv, g *uastExecutionGraph, id int) (any, e
 		}
 		return nil, fmt.Errorf("unsupported operator %q", c.Operation.Operator)
 	case "binary":
+		op := c.Operation.Operator
+		if c.Operation.SemanticID != "" {
+			switch c.Operation.SemanticID {
+			case "numeric.div.floor":
+				op = "%/%"
+			case "numeric.mod.floor":
+				op = "%%"
+			case "numeric.rem.trunc":
+				op = "%"
+			}
+		}
 		left, err := one("left")
 		if err != nil {
 			return nil, err
@@ -320,10 +432,10 @@ func (st *runState) uastExpr(env *runEnv, g *uastExecutionGraph, id int) (any, e
 			return nil, err
 		}
 		if value, ok := a.(bool); ok {
-			if c.Operation.Operator == "&&" && !value {
+			if op == "&&" && !value {
 				return false, nil
 			}
-			if c.Operation.Operator == "||" && value {
+			if op == "||" && value {
 				return true, nil
 			}
 		}
@@ -335,7 +447,7 @@ func (st *runState) uastExpr(env *runEnv, g *uastExecutionGraph, id int) (any, e
 		if err != nil {
 			return nil, err
 		}
-		return runBinary(c.Operation.Operator, a, b)
+		return runBinary(op, a, b)
 	case "index":
 		valueNode, err := one("value")
 		if err != nil {
@@ -363,7 +475,7 @@ func (st *runState) uastExpr(env *runEnv, g *uastExecutionGraph, id int) (any, e
 		for _, item := range g.many(id, "parameter") {
 			p := g.common[item.ID]
 			param := runUASTParameter{name: p.Name, mode: p.Operation.ParameterMode, passing: p.Operation.ParameterPassing, defaultNode: -1}
-			if p.Operation.ParameterPassing == "value" {
+			if p.Operation.ParameterPassing == "value" && p.Type.Kind != "" && p.Type.Kind != "unknown" {
 				typ := p.Type
 				param.typ = &typ
 			}
@@ -401,6 +513,12 @@ func (st *runState) uastExpr(env *runEnv, g *uastExecutionGraph, id int) (any, e
 
 func (st *runState) uastCall(env *runEnv, g *uastExecutionGraph, id int) (any, error) {
 	c := g.common[id]
+	var callContract SemanticCallContract
+	if ok, err := contractForNode(g.document, id, SemanticCallContractKind, &callContract); err != nil {
+		return nil, err
+	} else if ok && len(callContract.Arguments) != len(g.many(id, "argument")) {
+		return nil, fmt.Errorf("CALL contract on node %d disagrees with argument graph", id)
+	}
 	calleeNode, _, err := g.oneRelationNode(id, "call.calls", true)
 	if err != nil {
 		return nil, err
@@ -433,6 +551,9 @@ func (st *runState) uastCall(env *runEnv, g *uastExecutionGraph, id int) (any, e
 	}
 	if fn, ok := value.(*runUASTFunction); ok {
 		return st.callUASTFunction(fn, args, names)
+	}
+	if primitive, ok := value.(*runUASTPrimitive); ok {
+		return st.primitive(primitive.name, args, names)
 	}
 	return nil, fmt.Errorf("attempt to call non-function")
 }
@@ -497,6 +618,12 @@ func (st *runState) uastExactCall(env *runEnv, g *uastExecutionGraph, calleeNode
 	if fn, ok := callee.(*runUASTFunction); ok {
 		return st.callUASTFunction(fn, args, names)
 	}
+	if primitive != "" {
+		return st.primitive(primitive, args, names)
+	}
+	if value, ok := callee.(*runUASTPrimitive); ok {
+		return st.primitive(value.name, args, names)
+	}
 	return nil, fmt.Errorf("attempt to call non-function")
 }
 
@@ -530,8 +657,12 @@ func (st *runState) callUASTFunction(fn *runUASTFunction, args []any, names []st
 			value = nil
 		}
 		if p.typ != nil {
-			if _, err := evaluateInteger(SemanticOperation{Name: "integer.value", Type: *p.typ}, []any{value}); err != nil {
-				return nil, fmt.Errorf("parameter %s: %w", p.name, err)
+			if exactType, ok := uastExactIntegerParameterType(*p.typ); ok {
+				coerced, err := evaluateInteger(SemanticOperation{Name: "integer.value", Type: exactType}, []any{value})
+				if err != nil {
+					return nil, fmt.Errorf("parameter %s: %w", p.name, err)
+				}
+				value = coerced
 			}
 		}
 		env.set(p.name, value)
@@ -592,8 +723,12 @@ func (st *runState) callExactUASTFunction(fn *runUASTFunction, args []any, names
 			}
 		}
 		if p.typ != nil {
-			if _, err := evaluateInteger(SemanticOperation{Name: "integer.value", Type: *p.typ}, []any{value}); err != nil {
-				return nil, fmt.Errorf("parameter %s: %w", p.name, err)
+			if exactType, ok := uastExactIntegerParameterType(*p.typ); ok {
+				coerced, err := evaluateInteger(SemanticOperation{Name: "integer.value", Type: exactType}, []any{value})
+				if err != nil {
+					return nil, fmt.Errorf("parameter %s: %w", p.name, err)
+				}
+				value = coerced
 			}
 		}
 		env.set(p.name, value)

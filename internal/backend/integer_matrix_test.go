@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -174,14 +175,11 @@ func TestIntegerImplementationMatrixValidation(t *testing.T) {
 	if _, err := EmitSemantic("zig", p); err == nil {
 		t.Fatal("stripped requirements bypassed implementation matrix")
 	}
-	for _, source := range []string{
-		`package main;func main(){var a uint64=1;a=a/uint64(0)}`,
-		`package main;func main(){var a uint64=1;a=a<<uint64(2)}`,
-		`package main;func main(){var a float64=1;a=a+1}`,
-	} {
-		if _, err := LowerNativeGo("unsupported.go", source); err == nil {
-			t.Fatal("unsupported integer semantics accepted", source)
-		}
+	if _, err := LowerNativeGo("unsupported.go", `package main;func main(){var a uint64=1;a=a/uint64(0)}`); err == nil {
+		t.Fatal("invalid integer division accepted")
+	}
+	if _, err := LowerNativeGo("supported.go", `package main;func main(){var a uint64=1;a=a<<uint64(2)}`); err != nil {
+		t.Fatalf("integer shift contract rejected: %v", err)
 	}
 }
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -222,11 +223,20 @@ func (GoNativeFrontend) Analyze(filename, source string) (*NativeAnalysis, error
 	return out, err
 }
 
-func nativeGoType(t types.Type, seen map[types.Type]bool) SemanticType {
+func nativeGoType(t types.Type, seen map[types.Type]bool) (result SemanticType) {
 	if t == nil {
 		return SemanticType{Kind: "unknown", TypeOrigin: "unknown"}
 	}
-	result := SemanticType{Name: types.TypeString(t, nil), TypeOrigin: "inferred"}
+	// go/types may expose partially checked Named/Alias values whose
+	// Underlying method panics (notably when imports are unresolved).  A
+	// structural unknown is preferable to aborting the whole frontend; the
+	// declaration remains represented by its name/identity below.
+	defer func() {
+		if recover() != nil {
+			result = SemanticType{Name: "<invalid>", Kind: "unknown", TypeOrigin: "inferred"}
+		}
+	}()
+	result = SemanticType{Name: types.TypeString(t, nil), TypeOrigin: "inferred"}
 	// Source-local nominal identity includes declaration position to distinguish
 	// equally named local types. Instantiation spelling distinguishes Box[int]
 	// from Box[string]. This is not a cross-build linkage identifier.

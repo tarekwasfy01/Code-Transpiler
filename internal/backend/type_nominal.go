@@ -1,7 +1,7 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
@@ -23,11 +23,16 @@ func deriveNominalRelations(table []SemanticTypeDefinition) (*SemanticNominalRel
 	for _, entry := range table {
 		t := entry.Type
 		if t.Reference && t.Identity == "" {
-			return nil, fmt.Errorf("type reference %d has no identity", entry.ID)
+			// Anonymous/structural references are valid in isolated frontend
+			// documents.  They have no nominal identity to resolve, so keep them
+			// in the structural type plane and simply omit them from nominal
+			// relations instead of rejecting the complete document.
+			continue
 		}
-		if t.Reference && len(semanticTypeChildren(&t)) != 0 {
-			return nil, fmt.Errorf("type reference %d contains a definition", entry.ID)
-		}
+		// A frontend may retain instantiated shape details on a reference
+		// (notably for isolated Go files).  Nominal resolution is identity-only;
+		// those details belong to the structural type plane and must not turn a
+		// valid reference into a rejected definition.
 		if t.Identity != "" {
 			set[t.Identity] = true
 		}

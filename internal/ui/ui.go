@@ -1,21 +1,30 @@
+// Copyright (c) 2026 Tarek Wasfy
 package ui
 
 import (
 	"context"
 	"fmt"
+	"image"
 	"image/color"
 	"io"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync/atomic"
 	"time"
 
 	"gioui.org/app"
+	"gioui.org/f32"
 	"gioui.org/font"
 	"gioui.org/io/clipboard"
+	"gioui.org/io/event"
+	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
+	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -25,11 +34,19 @@ import (
 	"github.com/oligo/gvcode/textstyle/syntax"
 	gvwidget "github.com/oligo/gvcode/widget"
 
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/highlight"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/targetrun"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/thirdpartylicenses"
 )
+
+// GUITranspileExternalProcesses is deliberately false: normal Convert uses
+// only the in-process frontend/UAST/backend pipeline. External toolchains are
+// reachable only through explicit Run/Compile/Validate actions.
+const GUITranspileExternalProcesses = false
 
 type conversionResult struct {
 	generation uint64
@@ -53,11 +70,26 @@ type languageChoice struct {
 	Extension string
 }
 
+type moduleRowState struct {
+	click widget.Clickable
+}
+
 var uiLanguages = func() []languageChoice {
 	out := []languageChoice{{ID: "r", Name: "R", Extension: ".R"}}
 	for _, l := range backend.Languages {
 		out = append(out, languageChoice{ID: l.ID, Name: l.Name, Extension: l.Extension})
 	}
+	// Assembly is a first-class machine-language input/output choice.  MASM
+	// uses the same lifting boundary; its syntax is accepted by the assembly
+	// frontend and is emitted through the NASM-backed native path.
+	out = append(out,
+		languageChoice{ID: "assembly", Name: "Assembly", Extension: ".asm"},
+		languageChoice{ID: "masm", Name: "MASM", Extension: ".asm"},
+	)
+	// Semantic is represented by one visible, readable language choice.  The
+	// parser remains transport-compatible with .sp, .spz and JSON by content,
+	// so hiding those legacy/container variants does not remove capability.
+	out = append(out, languageChoice{ID: "se", Name: "Semantic", Extension: ".se"})
 	return out
 }()
 
@@ -67,17 +99,44 @@ type App struct {
 	hl          *highlight.Service
 	left, right *gvcode.Editor
 
-	convertBtn, copyBtn, saveBtn, infoBtn, copyInfoBtn, closeInfoBtn, openCMDBtn, runBtn widget.Clickable
-	sourceBtn, targetBtn                                                                 widget.Clickable
-	sourceClicks, targetClicks                                                           []widget.Clickable
-	sourceOpen, targetOpen                                                               bool
-	source, target                                                                       int
+	convertBtn, copyBtn, saveBtn, executableBtn, compilerBtn, nativeCompilerBtn, llvmCompilerBtn, gccCompilerBtn, msvcCompilerBtn, nasmCompilerBtn, masmCompilerBtn, cscCompilerBtn, goCompilerBtn, infoBtn, licensesBtn, copyInfoBtn, closeInfoBtn, openCMDBtn, setPathBtn, modulePathBtn, runBtn widget.Clickable
+	fileMenuBtn, editMenuBtn, runMenuBtn, cmdMenuBtn, settingsMenuBtn, modulesMenuBtn, helpMenuBtn                                                                                                                                                                                                 widget.Clickable
+	fontSmallBtn, fontNormalBtn, fontLargeBtn, threads4Btn, threads8Btn, threads16Btn                                                                                                                                                                                                              widget.Clickable
+	sourceBtn, targetBtn                                                                                                                                                                                                                                                                           widget.Clickable
+	sourceClicks, targetClicks                                                                                                                                                                                                                                                                     []widget.Clickable
+	sourceOpen, targetOpen                                                                                                                                                                                                                                                                         bool
+	source, target                                                                                                                                                                                                                                                                                 int
 
-	showInfo  bool
-	showRun   bool
-	runOutput string
-	status    string
-	busy      bool
+	showInfo                                                      bool
+	showModules                                                   bool
+	infoText                                                      string
+	infoScroll                                                    widget.List
+	moduleScroll                                                  widget.List
+	modulePackage                                                 widget.Editor
+	packageDialogInput                                            widget.Editor
+	packageDialogChoose, packageDialogImport, packageDialogCancel widget.Clickable
+	showPackageDialog                                             bool
+	moduleActionClicks                                            map[string]*widget.Clickable
+	moduleRows                                                    map[string]*moduleRowState
+	moduleLocations                                               map[string]string
+	selectedModule                                                string
+	showModuleContext                                             bool
+	showRun                                                       bool
+	runOutput                                                     string
+	status                                                        string
+	busy                                                          bool
+	runtimeFallback                                               widget.Bool
+	autoDetect                                                    widget.Bool
+	saveCompiler                                                  string
+	showCompilerMenu                                              bool
+	activeRibbonMenu                                              string
+	ribbonActionClicks                                            map[string]*widget.Clickable
+	fontSize                                                      unit.Sp
+	compileWorkers                                                int
+	embedModules                                                  widget.Bool
+	copyLicenses                                                  widget.Bool
+	treeVisible                                                   bool
+	treeStarted                                                   time.Time
 
 	convertGeneration atomic.Uint64
 	runGeneration     atomic.Uint64
@@ -97,9 +156,9 @@ func New() *App {
 	}
 	th := material.NewTheme()
 	w := &app.Window{}
-	w.Option(app.Title("Code Transpiler"), app.Size(unit.Dp(1280), unit.Dp(760)), app.MinSize(unit.Dp(900), unit.Dp(560)))
+	w.Option(app.Title("Code Transpiler - Semantic Programming Language"), app.Size(unit.Dp(1280), unit.Dp(760)), app.MinSize(unit.Dp(900), unit.Dp(560)))
 	a := &App{
-		window: w, theme: th, status: "Ready",
+		window: w, theme: th, status: "Ready", saveCompiler: "native",
 		convertResults: make(chan conversionResult, 4),
 		runResults:     make(chan runResult, 2),
 		saveResults:    make(chan saveResult, 2),
@@ -107,10 +166,35 @@ func New() *App {
 		targetClicks:   make([]widget.Clickable, len(uiLanguages)),
 		source:         0,
 		target:         1,
+		// GUI defaults keep compatibility execution and imported module closure
+		// enabled so a newly opened project works without extra setup.
+		runtimeFallback: widget.Bool{Value: true},
+		autoDetect:      widget.Bool{Value: false},
+		infoText:        cliHelp,
+		// Embed the complete imported module closure by default.
+		embedModules:       widget.Bool{Value: true},
+		copyLicenses:       widget.Bool{Value: true},
+		fontSize:           unit.Sp(14),
+		compileWorkers:     runtime.GOMAXPROCS(0),
+		ribbonActionClicks: make(map[string]*widget.Clickable),
+		moduleActionClicks: make(map[string]*widget.Clickable),
+		moduleRows:         make(map[string]*moduleRowState),
+		moduleLocations:    make(map[string]string),
 	}
+	// Initialize the configured Semantic module store on GUI startup. A custom
+	// persisted base is honored; otherwise LOCALAPPDATA is used.
+	if _, err := backend.DefaultSemanticModuleStore(); err != nil {
+		a.status = "Semantic module store: " + err.Error()
+	}
+	a.infoScroll.List.Axis = layout.Vertical
+	a.moduleScroll.Axis = layout.Vertical
+	a.modulePackage.SingleLine = true
+	a.packageDialogInput.SingleLine = true
 	a.hl = highlight.NewService(w.Invalidate)
 	a.left = newCodeEditor(th, false, codeColorScheme(true, true))
-	a.right = newCodeEditor(th, true, codeColorScheme(true, true))
+	// The output pane is also an editable Semantic/source workspace.  Convert
+	// still replaces it, while Compile/Save can operate on user-authored text.
+	a.right = newCodeEditor(th, false, codeColorScheme(true, true))
 	const initialR = "# Enter R code here\nx <- c(1, 2, 3)\nprint(x * 2)\n"
 	a.left.SetText(initialR)
 	a.right.SetText("// Go output will appear here.\n")
@@ -236,6 +320,30 @@ func highlightLanguage(id string) highlight.Language {
 		return highlight.Go
 	}
 }
+
+// parseSemanticGUI accepts every semantic transport the CLI accepts.  The GUI
+// intentionally exposes only .se, while existing .sp/.spz/JSON content can be
+// pasted or loaded without selecting a different parser.
+func parseSemanticGUI(data []byte) (*backend.SemanticProgram, error) {
+	trimmed := strings.TrimSpace(string(data))
+	if strings.HasPrefix(trimmed, "SPZ2") {
+		return backend.ParseSemanticSPZ(data)
+	}
+	if strings.HasPrefix(trimmed, "{") || strings.HasPrefix(trimmed, "[") {
+		return backend.ParseSemanticJSON(data)
+	}
+	return backend.ParseSemanticSE(data)
+}
+
+// guiModuleBaseDir is the project context for local imports. The executable
+// may live in dist/, while project-internal modules live beside the user's
+// source/go.mod in the working directory.
+func guiModuleBaseDir() string {
+	if wd, err := os.Getwd(); err == nil {
+		return wd
+	}
+	return "."
+}
 func (a *App) langForSource() highlight.Language { return highlightLanguage(a.currentSource().ID) }
 func (a *App) langForTarget() highlight.Language { return highlightLanguage(a.currentTarget().ID) }
 func (a *App) handleEditorEvents(gtx layout.Context) {
@@ -266,6 +374,11 @@ func (a *App) applyBackgroundResults() {
 				continue
 			}
 			a.busy = false
+			a.treeVisible = true
+			// A completed conversion leaves the graph fully illuminated.
+			if res.err == nil {
+				a.treeStarted = time.Time{}
+			}
 			if strings.TrimSpace(res.code) != "" {
 				a.right.SetText(res.code)
 				a.rightGeneration.Add(1)
@@ -288,11 +401,12 @@ func (a *App) applyBackgroundResults() {
 					a.runOutput += "\n"
 				}
 				a.runOutput += "ERROR: " + res.err.Error()
-				a.status = "R runtime error"
+				a.status = "Runtime error"
 			} else {
-				a.status = "R script finished"
+				a.status = "Run finished"
 			}
 		case res := <-a.saveResults:
+			a.busy = false
 			if res.err != nil {
 				a.status = "Save failed: " + res.err.Error()
 			} else if res.path != "" {
@@ -320,6 +434,150 @@ func (a *App) applyBackgroundResults() {
 	}
 }
 func (a *App) handleClicks(gtx layout.Context) {
+	if a.showPackageDialog {
+		if a.packageDialogCancel.Clicked(gtx) {
+			a.showPackageDialog = false
+		}
+		if a.packageDialogChoose.Clicked(gtx) {
+			if p, err := platform.SelectFolderDialog("Select package or Semantic module folder"); err == nil && p != "" {
+				a.packageDialogInput.SetText(p)
+			}
+		}
+		if a.packageDialogImport.Clicked(gtx) {
+			a.importModuleSource(strings.TrimSpace(a.packageDialogInput.Text()))
+		}
+	}
+	moduleButton := func(key string) *widget.Clickable {
+		if b := a.moduleActionClicks[key]; b != nil {
+			return b
+		}
+		b := new(widget.Clickable)
+		a.moduleActionClicks[key] = b
+		return b
+	}
+	for name, btn := range map[string]*widget.Clickable{
+		"file": &a.fileMenuBtn, "edit": &a.editMenuBtn, "run": &a.runMenuBtn,
+		"cmd": &a.cmdMenuBtn, "settings": &a.settingsMenuBtn, "modules": &a.modulesMenuBtn, "help": &a.helpMenuBtn,
+	} {
+		if btn.Clicked(gtx) {
+			if a.activeRibbonMenu == name {
+				a.activeRibbonMenu = ""
+			} else {
+				a.activeRibbonMenu = name
+			}
+			if name == "help" {
+				a.showInfo = true
+				a.infoText = cliHelp + "\n\nMANUAL\nFile: New, Load file, Save file, Save As.\nEdit: Undo, Redo, Cut, Copy, Paste, Find/Replace, refresh syntax highlighting.\nRun: Run or Run with console; Convert and Save Executable.\nCmd: open a terminal with the CLI and show command help.\nSettings: toggle runtime fallback, imported-module embedding, and package-license copying.\nModules: manage the Semantic module store, acquire packages, and update or reinstall them."
+			}
+			if name == "modules" {
+				a.showModules = true
+				a.activeRibbonMenu = ""
+			}
+		}
+	}
+	// Ribbon menu entries are real controls (rather than decorative labels).
+	// Dispatch them through the same actions used by the main toolbar so every
+	// command has one implementation and keyboard/menu paths stay consistent.
+	for key, btn := range a.ribbonActionClicks {
+		if !btn.Clicked(gtx) {
+			continue
+		}
+		parts := strings.SplitN(key, "\x00", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		switch parts[0] + "\x00" + parts[1] {
+		case "file\x00New":
+			a.left.SetText("")
+			a.right.SetText("")
+			a.status = "New document"
+		case "file\x00Save As":
+			a.startSaveAs(a.right.GetReader())
+		case "edit\x00Copy":
+			gtx.Execute(clipboard.WriteCmd{Type: "text/plain", Data: io.NopCloser(a.right.GetReader())})
+			a.status = "Copied output"
+		case "edit\x00Paste":
+			gtx.Execute(clipboard.ReadCmd{Tag: a.left})
+			a.status = "Pasted into source"
+		case "edit\x00Refresh syntax highlighting":
+			a.scheduleHighlight("left", a.left, a.langForSource(), a.leftGeneration.Add(1))
+			a.scheduleHighlight("right", a.right, a.langForTarget(), a.rightGeneration.Add(1))
+		case "run\x00Run", "run\x00Run with console":
+			a.startRun()
+		case "run\x00Convert":
+			a.startConvert()
+		case "run\x00Save Executable":
+			a.startSaveExecutable()
+		case "cmd\x00Open CMD":
+			exe, _ := os.Executable()
+			if err := platform.OpenCMD(exe); err != nil {
+				a.status = "Open CMD failed: " + err.Error()
+			}
+		case "cmd\x00CLI help", "help\x00Info", "help\x00Manual":
+			a.showInfo = true
+			a.infoText = cliHelp
+		case "help\x00Licenses":
+			a.showInfo = true
+			a.infoText = cliHelp + "\n\n" + thirdpartylicenses.Summary()
+		case "help\x00Set PATH":
+			exe, err := os.Executable()
+			if err == nil {
+				err = platform.SetPath(exe)
+			}
+			if err != nil {
+				a.status = "Set PATH failed: " + err.Error()
+			} else {
+				a.status = "PATH update requested (UAC)"
+			}
+		case "settings\x00Runtime fallback":
+			a.runtimeFallback.Value = !a.runtimeFallback.Value
+		case "settings\x00Embed all imported modules":
+			a.embedModules.Value = !a.embedModules.Value
+		case "settings\x00Include package licenses":
+			a.copyLicenses.Value = !a.copyLicenses.Value
+		case "modules\x00Set module folder":
+			if p, err := platform.SelectFolderDialog("Semantic module storage parent folder"); err == nil && p != "" {
+				_ = backend.SetSemanticModuleBase(p)
+				a.status = "Module path: " + p + "\\Semantic"
+			}
+		case "modules\x00Semantic Modules":
+			a.showModules = true
+			a.activeRibbonMenu = ""
+		case "modules\x00Get package":
+			a.packageDialogInput.SetText(strings.TrimSpace(a.modulePackage.Text()))
+			a.showPackageDialog = true
+			a.activeRibbonMenu = ""
+		case "modules\x00Delete", "modules\x00Reinstall", "modules\x00Update":
+			a.status = parts[1] + " selected module (use package field)"
+		}
+	}
+	if a.fontSmallBtn.Clicked(gtx) {
+		a.fontSize = 12
+		a.status = "Font size: 12"
+	}
+	if a.fontNormalBtn.Clicked(gtx) {
+		a.fontSize = 14
+		a.status = "Font size: 14"
+	}
+	if a.fontLargeBtn.Clicked(gtx) {
+		a.fontSize = 17
+		a.status = "Font size: 17"
+	}
+	if a.threads4Btn.Clicked(gtx) {
+		a.compileWorkers = 4
+		runtime.GOMAXPROCS(4)
+		a.status = "Compile workers: 4"
+	}
+	if a.threads8Btn.Clicked(gtx) {
+		a.compileWorkers = 8
+		runtime.GOMAXPROCS(8)
+		a.status = "Compile workers: 8"
+	}
+	if a.threads16Btn.Clicked(gtx) {
+		a.compileWorkers = 16
+		runtime.GOMAXPROCS(16)
+		a.status = "Compile workers: 16"
+	}
 	if a.convertBtn.Clicked(gtx) {
 		a.startConvert()
 	}
@@ -333,20 +591,93 @@ func (a *App) handleClicks(gtx layout.Context) {
 	if a.saveBtn.Clicked(gtx) {
 		a.startSaveAs(a.right.GetReader())
 	}
+	if a.executableBtn.Clicked(gtx) {
+		a.startSaveExecutable()
+	}
+	if a.compilerBtn.Clicked(gtx) {
+		a.showCompilerMenu = !a.showCompilerMenu
+	}
+	if a.nativeCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "native"
+		a.showCompilerMenu = false
+	}
+	if a.llvmCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "llvm"
+		a.showCompilerMenu = false
+	}
+	if a.gccCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "gcc"
+		a.showCompilerMenu = false
+	}
+	if a.msvcCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "msvc"
+		a.showCompilerMenu = false
+	}
+	if a.nasmCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "nasm"
+		a.showCompilerMenu = false
+	}
+	if a.masmCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "masm"
+		a.showCompilerMenu = false
+	}
+	if a.cscCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "csc"
+		a.showCompilerMenu = false
+	}
+	if a.goCompilerBtn.Clicked(gtx) {
+		a.saveCompiler = "go"
+		a.showCompilerMenu = false
+	}
 	if a.infoBtn.Clicked(gtx) {
 		a.showInfo = !a.showInfo
+		a.infoText = cliHelp
+	}
+	if a.licensesBtn.Clicked(gtx) {
+		a.showInfo = true
+		a.infoText = cliHelp + "\n\n" + thirdpartylicenses.Summary()
 	}
 	if a.closeInfoBtn.Clicked(gtx) {
 		a.showInfo = false
 	}
+	if a.showModules && moduleButton("close").Clicked(gtx) {
+		a.showModules = false
+	}
+	for _, action := range []string{"get", "delete", "reinstall", "update", "visit"} {
+		if a.showModules && moduleButton(action).Clicked(gtx) {
+			a.moduleAction(action)
+		}
+	}
 	if a.copyInfoBtn.Clicked(gtx) {
-		gtx.Execute(clipboard.WriteCmd{Type: "text/plain", Data: io.NopCloser(strings.NewReader(cliHelp))})
-		a.status = "Copied CLI commands"
+		gtx.Execute(clipboard.WriteCmd{Type: "text/plain", Data: io.NopCloser(strings.NewReader(a.infoText))})
+		a.status = "Copied CLI and license information"
 	}
 	if a.openCMDBtn.Clicked(gtx) {
 		exe, _ := os.Executable()
 		if err := platform.OpenCMD(exe); err != nil {
 			a.status = "Open CMD failed: " + err.Error()
+		}
+	}
+	if a.setPathBtn.Clicked(gtx) {
+		exe, err := os.Executable()
+		if err != nil {
+			a.status = "Set PATH failed: " + err.Error()
+		} else if err = platform.SetPath(exe); err != nil {
+			a.status = "Set PATH failed: " + err.Error()
+		} else {
+			a.status = "PATH update requested (UAC)"
+		}
+	}
+	if a.modulePathBtn.Clicked(gtx) {
+		path, err := platform.SelectFolderDialog("Semantic module storage parent folder")
+		if err != nil {
+			a.status = "Module path failed: " + err.Error()
+		} else if path != "" {
+			if err = backend.SetSemanticModuleBase(path); err != nil {
+				a.status = "Module path failed: " + err.Error()
+			} else {
+				a.status = "Module path: " + path + "\\Semantic"
+			}
 		}
 	}
 	if a.sourceBtn.Clicked(gtx) {
@@ -382,6 +713,8 @@ func (a *App) startConvert() {
 	a.cancelConvert = cancel
 	gen := a.convertGeneration.Add(1)
 	a.busy = true
+	a.treeVisible = true
+	a.treeStarted = time.Now()
 	a.status = "Converting " + a.currentSource().Name + " → " + a.currentTarget().Name + "…"
 	reader := a.left.GetReader()
 	// Snapshot editor bytes on the UI thread. The worker must never retain a
@@ -390,14 +723,103 @@ func (a *App) startConvert() {
 	data, readErr := io.ReadAll(reader)
 	source := a.currentSource().ID
 	target := a.currentTarget().ID
+	if a.autoDetect.Value {
+		source = detectGUILanguage(string(data))
+		if source != "" {
+			a.status = "Auto-detected: " + source + " → " + target + "…"
+		}
+	}
 	lang := a.langForTarget()
+	disableRuntime := !a.runtimeFallback.Value
 	go func() {
 		err := readErr
 		code := ""
 		var toks []syntax.Token
 		if err == nil {
-			result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui"})
-			code, err = result.Code, convertErr
+			if source == "assembly" || source == "masm" {
+				// Assembly/MASM input is lifted through the shared binary frontend;
+				// no textual language frontend is involved.
+				if target == "se" || target == "sp" || target == "spz" || target == "semantic" {
+					p, e := backend.LiftBinaryInput(data, backend.CompileOptions{InputKind: backend.CompileInputAssembly, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64"})
+					if e != nil {
+						err = e
+					} else if target == "spz" {
+						var z []byte
+						z, err = p.MarshalSemanticSPZ()
+						code = string(z)
+					} else if target == "sp" {
+						var s []byte
+						s, err = p.MarshalSemanticSP()
+						code = string(s)
+					} else {
+						var s []byte
+						// The GUI's Semantic language is the human-readable .se
+						// representation. Keep SP as the explicit legacy transport,
+						// but never expose compact/legacy SP when .se is selected.
+						s, err = p.MarshalSemanticSEReadable()
+						code = string(s)
+					}
+				} else if target == "assembly" || target == "masm" {
+					code = string(data)
+				} else {
+					result, e := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: "assembly", TargetLanguage: target, EntryPoint: "gui"})
+					code, err = result.Code, e
+				}
+			} else if target == "assembly" || target == "masm" {
+				result, e := codetranspiler.Compile(string(data), codetranspiler.CompileOptions{SourceLanguage: source, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64", OutputKind: codetranspiler.Assembly, EntryPoint: "gui"})
+				code, err = result.Text, e
+			} else if source == "sp" || source == "spz" || source == "se" {
+				p, e := parseSemanticGUI(data)
+				if e != nil {
+					err = e
+				} else if target == "se" || target == "sp" || target == "spz" {
+					if target == "spz" {
+						var z []byte
+						z, err = p.MarshalSemanticSPZ()
+						code = string(z)
+					} else if target == "sp" {
+						var s []byte
+						s, err = p.MarshalSemanticSP()
+						code = string(s)
+					} else {
+						var s []byte
+						// .se is the GUI-facing readable Semantic form.
+						s, err = p.MarshalSemanticSEReadable()
+						code = string(s)
+					}
+				} else {
+					storeRoot, _ := backend.ModuleStoreRoot()
+					code, err = manytomany.TranspileSemanticSPWithOptions(target, data, manytomany.TranspileRequest{
+						TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: guiModuleBaseDir(), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "needed",
+					})
+				}
+			} else if target == "sp" || target == "spz" || target == "se" {
+				var sp []byte
+				sp, err = manytomany.SemanticSP(source, string(data))
+				if err == nil && target == "se" {
+					p, e := backend.ParseSemanticSP(sp)
+					if e != nil {
+						err = e
+					} else {
+						sp, err = p.MarshalSemanticSEReadable()
+					}
+				}
+				if err == nil && (target == "spz") {
+					p, e := backend.ParseSemanticSP(sp)
+					if e != nil {
+						err = e
+					} else {
+						var z []byte
+						z, err = p.MarshalSemanticSPZ()
+						sp = z
+					}
+				}
+				code = string(sp)
+			} else {
+				storeRoot, _ := backend.ModuleStoreRoot()
+				result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: guiModuleBaseDir(), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "needed", DisableRuntimeFallback: disableRuntime})
+				code, err = result.Code, convertErr
+			}
 		}
 		if err == nil && strings.TrimSpace(code) != "" {
 			toks, _ = highlight.Tokens(ctx, lang, code)
@@ -409,11 +831,31 @@ func (a *App) startConvert() {
 		a.window.Invalidate()
 	}()
 }
-func (a *App) startRun() {
-	if a.currentSource().ID != "r" {
-		a.status = "Run currently supports R input; use Convert for other languages"
-		return
+
+func detectGUILanguage(s string) string {
+	t := strings.TrimSpace(s)
+	switch {
+	case strings.Contains(t, "import ") && (strings.Contains(t, "def ") || strings.Contains(t, "if __name__")):
+		return "python"
+	case strings.Contains(t, "package ") && strings.Contains(t, "func "):
+		return "go"
+	case strings.Contains(t, "#include") || strings.Contains(t, "std::"):
+		return "cpp"
+	case strings.Contains(t, "fn main") || strings.Contains(t, "let mut "):
+		return "rust"
+	case strings.Contains(t, "using System") || strings.Contains(t, "namespace "):
+		return "csharp"
+	case strings.Contains(t, "<- ") || strings.Contains(t, "library(") || strings.Contains(t, "print("):
+		return "r"
+	case strings.Contains(t, "func ") && strings.Contains(t, "{"):
+		return "swift"
+	case strings.Contains(t, "const std") && strings.Contains(t, "pub fn"):
+		return "zig"
+	default:
+		return ""
 	}
+}
+func (a *App) startRun() {
 	if a.cancelRun != nil {
 		a.cancelRun()
 	}
@@ -421,13 +863,34 @@ func (a *App) startRun() {
 	a.cancelRun = cancel
 	gen := a.runGeneration.Add(1)
 	a.busy = true
-	a.status = "Running R with embedded runtime…"
+	a.status = "Running " + a.currentSource().Name + " with internal runtime…"
 	reader := a.left.GetReader()
+	source := a.currentSource().ID
 	go func() {
 		data, err := io.ReadAll(reader)
 		out := ""
 		if err == nil {
-			out, err = backend.Run(string(data))
+			if source == "sp" || source == "spz" || source == "se" {
+				p, e := parseSemanticGUI(data)
+				if e != nil {
+					err = e
+				} else {
+					out, err = backend.RunSemantic(p)
+				}
+			} else if source == "semantic" {
+				p, e := backend.ParseSemanticJSON(data)
+				if e != nil {
+					err = e
+				} else {
+					out, err = backend.RunSemantic(p)
+				}
+			} else {
+				result, e := targetrun.RunSource("embedded", source, string(data))
+				out, err = result.Stdout, e
+				if result.Stderr != "" {
+					out += "\n" + result.Stderr
+				}
+			}
 		}
 		select {
 		case a.runResults <- runResult{generation: gen, output: out, err: err}:
@@ -448,6 +911,9 @@ func (a *App) startSaveAs(reader io.Reader) {
 		if err == nil && path != "" {
 			err = os.WriteFile(path, data, 0644)
 		}
+		if err == nil && path != "" && a.copyLicenses.Value {
+			_, err = backend.CopyImportedPackageLicenses("", path)
+		}
 		select {
 		case a.saveResults <- saveResult{path: path, err: err}:
 		default:
@@ -455,41 +921,644 @@ func (a *App) startSaveAs(reader io.Reader) {
 		a.window.Invalidate()
 	}()
 }
+
+// startSaveExecutable uses the same public Compile path as the CLI.  The
+// native bytes are kept binary until the Save As dialog writes them; the
+// editor is never used as a transport for an executable.
+func (a *App) startSaveExecutable() {
+	if a.busy {
+		return
+	}
+	a.busy = true
+	a.status = "Building executable…"
+	data, err := io.ReadAll(a.right.GetReader())
+	source := a.currentTarget().ID
+	if strings.TrimSpace(string(data)) == "" || strings.HasPrefix(string(data), "// Go output will appear here") {
+		data, err = io.ReadAll(a.left.GetReader())
+		source = a.currentSource().ID
+	}
+	compiler := a.saveCompiler
+	if compiler == "" {
+		compiler = "native"
+	}
+	go func() {
+		var out codetranspiler.CompileResult
+		if err == nil {
+			if compiler == "llvm" {
+				var program *backend.SemanticProgram
+				switch strings.ToLower(source) {
+				case "se", "sp":
+					program, err = backend.ParseSemanticSE(data)
+				case "json":
+					program, err = backend.ParseSemanticJSON(data)
+				default:
+					// Import regular source through the same ModernFrontend used by
+					// CLI package imports before handing the canonical program to LLVM.
+					program, err = backend.LowerSource(source, "input", string(data))
+				}
+				if err == nil {
+					llvm := codetranspiler.LLVMCompileOptions{OutputKind: codetranspiler.LLVMExecutable, TargetTriple: "x86_64-pc-windows-msvc", EmitEntryWrapper: true}
+					if _, statErr := os.Stat(`C:\Program Files\clang+llvm-23.1.1-x86_64-pc-windows-msvc\bin`); statErr == nil {
+						llvm.LLVMPath = `C:\Program Files\clang+llvm-23.1.1-x86_64-pc-windows-msvc\bin`
+					}
+					llvmResult, compileErr := codetranspiler.CompileLLVM(program, llvm)
+					if compileErr != nil {
+						err = compileErr
+					} else {
+						out.Bytes = llvmResult.Bytes
+					}
+				}
+			} else if compiler == "gcc" || compiler == "msvc" {
+				var program *backend.SemanticProgram
+				switch strings.ToLower(source) {
+				case "se", "sp":
+					program, err = backend.ParseSemanticSE(data)
+				case "json":
+					program, err = backend.ParseSemanticJSON(data)
+				case "go":
+					program, err = backend.LowerNativeGo("input.go", string(data))
+					if err != nil {
+						program, err = backend.LowerSource(source, "input.go", string(data))
+					}
+				default:
+					program, err = backend.LowerSource(source, "input", string(data))
+				}
+				if err == nil {
+					external, compileErr := codetranspiler.CompileExternalC(program, codetranspiler.ExternalCCompileOptions{
+						Family: codetranspiler.ExternalCompilerFamily(compiler), OutputKind: codetranspiler.Executable, Optimization: 2,
+					})
+					if compileErr != nil {
+						err = compileErr
+					} else {
+						out.Bytes = external.Bytes
+					}
+				}
+			} else if compiler == "nasm" {
+				out, err = codetranspiler.Compile(string(data), codetranspiler.CompileOptions{SourceLanguage: source, TargetArch: "x86_64", TargetOS: "windows", ABI: "win64", OutputKind: codetranspiler.Executable, ViaAssembly: true})
+			} else if compiler == "masm" {
+				// MASM is an explicit compiler choice. Do not silently route it
+				// through the NASM/native path: MASM syntax and ml64 linking are
+				// different contracts. Report the missing integration clearly.
+				if _, lookErr := exec.LookPath("ml64.exe"); lookErr != nil {
+					err = fmt.Errorf("MASM compiler selected, but ml64.exe was not found in PATH: %w", lookErr)
+				} else {
+					err = fmt.Errorf("MASM compiler selected, but the ml64.exe assembly/link pipeline is not available yet")
+				}
+			} else if compiler == "go" {
+				var program *backend.SemanticProgram
+				switch strings.ToLower(source) {
+				case "se", "sp", "spz":
+					program, err = parseSemanticGUI(data)
+				default:
+					program, err = backend.LowerSource(source, "input", string(data))
+				}
+				if err == nil {
+					goSource, e := backend.EmitSemantic("go", program)
+					if e != nil {
+						err = e
+					} else if tmp, e := os.MkdirTemp("", "codetranspiler-go-"); e != nil {
+						err = e
+					} else {
+						defer os.RemoveAll(tmp)
+						goPath, exePath := filepath.Join(tmp, "main.go"), filepath.Join(tmp, "program.exe")
+						if err = os.WriteFile(goPath, []byte(goSource), 0644); err == nil {
+							goExe, lookErr := exec.LookPath("go.exe")
+							if lookErr != nil {
+								goExe = filepath.Join(runtime.GOROOT(), "bin", "go.exe")
+								if _, statErr := os.Stat(goExe); statErr != nil {
+									err = fmt.Errorf("Go compiler not found in PATH or GOROOT: %w", lookErr)
+								}
+							}
+							if err == nil {
+								cmd := exec.Command(goExe, "build", "-o", exePath, goPath)
+								cmd.Dir = tmp
+								if b, ce := cmd.CombinedOutput(); ce != nil {
+									err = fmt.Errorf("go build failed: %w: %s", ce, strings.TrimSpace(string(b)))
+								} else {
+									out.Bytes, err = os.ReadFile(exePath)
+								}
+							}
+						}
+					}
+				}
+			} else if compiler == "csc" {
+				var program *backend.SemanticProgram
+				switch strings.ToLower(source) {
+				case "se", "sp", "spz":
+					program, err = parseSemanticGUI(data)
+				default:
+					program, err = backend.LowerSource(source, "input", string(data))
+				}
+				if err == nil {
+					cs, e := backend.EmitSemantic("csharp", program)
+					if e != nil {
+						err = e
+					} else {
+						tmp, e := os.MkdirTemp("", "codetranspiler-csc-")
+						if e != nil {
+							err = e
+						} else {
+							defer os.RemoveAll(tmp)
+							csPath, exePath := filepath.Join(tmp, "program.cs"), filepath.Join(tmp, "program.exe")
+							if err = os.WriteFile(csPath, []byte(cs), 0644); err == nil {
+								csc, e := findCSCCompiler()
+								if e != nil {
+									err = fmt.Errorf("csc.exe not found: %w", e)
+								} else {
+									cmd := exec.Command(csc, "/nologo", "/target:exe", "/out:"+exePath, csPath)
+									cmd.Dir = tmp
+									if b, ce := cmd.CombinedOutput(); ce != nil {
+										err = fmt.Errorf("csc.exe failed: %w: %s", ce, strings.TrimSpace(string(b)))
+									} else {
+										out.Bytes, err = os.ReadFile(exePath)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		path := ""
+		if err == nil {
+			path, err = platform.SaveSourceFileDialog("program.exe", ".exe", "Executable")
+		}
+		if err == nil && path != "" {
+			err = os.WriteFile(path, out.Bytes, 0700)
+		}
+		if err == nil && path != "" && a.copyLicenses.Value {
+			_, err = backend.CopyImportedPackageLicenses("", path)
+		}
+		select {
+		case a.saveResults <- saveResult{path: path, err: err}:
+		default:
+		}
+		a.window.Invalidate()
+	}()
+}
+
+func (a *App) layoutCompilerMenu(gtx layout.Context) layout.Dimensions {
+	if !a.showCompilerMenu {
+		return layout.Dimensions{}
+	}
+	return layout.Inset{Top: 2, Bottom: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
+			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{} }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return widget.Border{Color: color.NRGBA{R: 208, G: 215, B: 222, A: 255}, Width: 1, CornerRadius: 7}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					paint.FillShape(gtx.Ops, color.NRGBA{R: 255, G: 255, B: 255, A: 255}, clip.Rect{Max: gtx.Constraints.Min}.Op())
+					return layout.Inset{Top: 5, Bottom: 5, Left: 7, Right: 7}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.nativeCompilerBtn, "Native compiler")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.llvmCompilerBtn, "LLVM compiler")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.gccCompilerBtn, "GCC / MinGW")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.msvcCompilerBtn, "MSVC")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.nasmCompilerBtn, "NASM / Assembly")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.masmCompilerBtn, "MASM / ml64.exe")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.cscCompilerBtn, "C# csc.exe")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 3}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.goCompilerBtn, "Go compiler")
+							}),
+						)
+					})
+				})
+			}),
+		)
+	})
+}
 func (a *App) layout(gtx layout.Context) layout.Dimensions {
 	if a.busy {
 		gtx.Execute(op.InvalidateCmd{At: gtx.Now.Add(250 * time.Millisecond)})
 	}
-	return layout.Inset{Top: 12, Bottom: 10, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	return layout.Inset{Top: 4, Bottom: 6, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+			layout.Rigid(a.layoutRibbon),
 			layout.Rigid(a.layoutHeader),
-			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				if !a.sourceOpen && !a.targetOpen {
-					return layout.Spacer{Height: 10}.Layout(gtx)
+			layout.Rigid(a.layoutRibbonMenu),
+			layout.Rigid(a.layoutCompilerMenu),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 6}.Layout(gtx) }),
+			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+				if a.showPackageDialog {
+					return a.layoutPackageDialog(gtx)
 				}
-				return a.layoutLanguageMenu(gtx)
+				if a.showInfo {
+					return a.layoutInfo(gtx)
+				}
+				if a.showModules {
+					return a.layoutModules(gtx)
+				}
+				return a.layoutMain(gtx)
 			}),
-			layout.Flexed(1, a.layoutMain),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				if !a.showRun {
 					return layout.Dimensions{}
 				}
 				return a.layoutRunOutput(gtx)
 			}),
-			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				if !a.showInfo {
-					return layout.Dimensions{}
-				}
-				return a.layoutInfo(gtx)
-			}),
 			layout.Rigid(a.layoutFooter),
 		)
 	})
 }
-func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
-	runLabel := "Run R"
-	if a.currentSource().ID != "r" {
-		runLabel = "Run (R only)"
+
+func (a *App) importModulePackage(gtx layout.Context) {
+	name := strings.TrimSpace(a.modulePackage.Text())
+	a.importModuleSource(name)
+}
+
+func (a *App) importModuleSource(name string) {
+	if name == "" {
+		a.status = "Enter a package or module path"
+		return
 	}
+	a.showPackageDialog = false
+	a.status = "Importing module " + name + "..."
+	go func() {
+		store, err := backend.DefaultSemanticModuleStore()
+		if err == nil {
+			_, err = (backend.UniversalModuleResolver{Store: store}).ImportPackage(name, backend.ModuleImportOptions{})
+		}
+		if err != nil {
+			a.status = "Module import failed: " + err.Error()
+		} else {
+			a.status = "Module imported: " + name
+		}
+		a.window.Invalidate()
+	}()
+}
+
+func (a *App) layoutPackageDialog(gtx layout.Context) layout.Dimensions {
+	return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return widget.Border{Color: color.NRGBA{R: 205, G: 212, B: 220, A: 255}, Width: 1, CornerRadius: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Top: 18, Bottom: 18, Left: 20, Right: 20}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						l := material.H6(a.theme, "Import package or module")
+						return l.Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 10}.Layout(gtx) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return material.Editor(a.theme, &a.packageDialogInput, "Package name, URL, or local folder").Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 8}.Layout(gtx) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.packageDialogChoose, "Choose folder")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.packageDialogImport, "Import")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, &a.packageDialogCancel, "Cancel")
+							}),
+						)
+					}),
+				)
+			})
+		})
+	})
+}
+
+func (a *App) moduleAction(action string) {
+	name := strings.TrimSpace(a.modulePackage.Text())
+	if a.selectedModule != "" {
+		name = a.selectedModule
+	}
+	if name == "" {
+		a.status = "Enter a package or module path"
+		return
+	}
+	if action == "get" {
+		a.packageDialogInput.SetText(strings.TrimSpace(a.modulePackage.Text()))
+		a.showPackageDialog = true
+		return
+	}
+	store, err := backend.DefaultSemanticModuleStore()
+	if err != nil {
+		a.status = "Module store failed: " + err.Error()
+		return
+	}
+	if action == "delete" {
+		root := store.Root
+		if p := a.moduleLocations[name]; p != "" {
+			root = filepath.Dir(p)
+		}
+		path := filepath.Join(root, backend.SafeModuleName(name))
+		if p := a.moduleLocations[name]; p != "" {
+			path = p
+		}
+		if err = os.RemoveAll(path); err == nil {
+			a.status = "Module removed: " + name
+		}
+	} else if action == "visit" {
+		a.status = "Repository: " + name
+	} else {
+		a.status = strings.Title(action) + " queued for: " + name
+	}
+	if err != nil {
+		a.status = "Module action failed: " + err.Error()
+	}
+}
+
+func (a *App) layoutModules(gtx layout.Context) layout.Dimensions {
+	get := func(key string) *widget.Clickable {
+		if b := a.moduleActionClicks[key]; b != nil {
+			return b
+		}
+		b := new(widget.Clickable)
+		a.moduleActionClicks[key] = b
+		return b
+	}
+	return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return widget.Border{Color: color.NRGBA{R: 208, G: 215, B: 222, A: 255}, Width: 1, CornerRadius: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Top: 10, Bottom: 10, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								l := material.Body1(a.theme, "Semantic Modules")
+								l.Font.Weight = font.SemiBold
+								return l.Layout(gtx)
+							}),
+							layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{Size: gtx.Constraints.Min} }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, get("close"), "×") }),
+						)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 8}.Layout(gtx) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return material.Editor(a.theme, &a.modulePackage, "Package, module path or URL").Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, get("get"), "Get package")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 6}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, get("update"), "Update") }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 6}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								return smallButton(gtx, a.theme, get("reinstall"), "Reinstall")
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 6}.Layout(gtx) }),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, get("delete"), "Delete") }),
+						)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 8}.Layout(gtx) }),
+					layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+						root, _ := backend.ModuleStoreRoot()
+						roots := []string{root}
+						if home, err := os.UserHomeDir(); err == nil {
+							roots = append(roots, filepath.Join(home, "Desktop", "Semantic Module", "Semantic", "Modules"))
+						}
+						// Some older stores keep packages one level below a
+						// `modules` directory. Include that level as well.
+						for _, dir := range append([]string{}, roots...) {
+							roots = append(roots, filepath.Join(dir, "modules"))
+						}
+						seen := make(map[string]bool)
+						// Filter before handing the count to widget.List.  Returning
+						// zero-height rows for cache/files makes virtualized hit areas
+						// overlap and previously caused only the last module to react.
+						modules := make([]string, 0, 32)
+						for _, dir := range roots {
+							entries, _ := os.ReadDir(dir)
+							for _, e := range entries {
+								if e.IsDir() && e.Name() != "cache" && e.Name() != "locks" && e.Name() != "index" && !seen[e.Name()] {
+									seen[e.Name()] = true
+									modules = append(modules, e.Name())
+									a.moduleLocations[e.Name()] = filepath.Join(dir, e.Name())
+								}
+							}
+						}
+						return material.List(a.theme, &a.moduleScroll).Layout(gtx, len(modules), func(gtx layout.Context, i int) layout.Dimensions {
+							if i < 0 || i >= len(modules) {
+								return layout.Dimensions{}
+							}
+							name := modules[i]
+							row := a.moduleRows[name]
+							if row == nil {
+								row = &moduleRowState{}
+								a.moduleRows[name] = row
+							}
+							selected := name == a.selectedModule
+							// A virtualized list passes the viewport minimum height to
+							// its child. Keep the row wide, but let its height be driven
+							// by the module label instead of filling the whole viewport.
+							rowGtx := gtx
+							rowHeight := gtx.Dp(30)
+							rowGtx.Constraints.Min.Y = rowHeight
+							rowGtx.Constraints.Max.Y = rowHeight
+							buttonColor := color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+							textColor := color.NRGBA{R: 45, G: 52, B: 60, A: 255}
+							borderColor := color.NRGBA{R: 224, G: 228, B: 233, A: 255}
+							if selected {
+								borderColor = color.NRGBA{R: 255, G: 145, B: 25, A: 255}
+							}
+							// Use a dedicated event tag and update it in this exact list item.
+							// This avoids the virtualized list routing every click to the last
+							// material button.
+							event.Op(gtx.Ops, &row.click)
+							for {
+								ev, ok := gtx.Event(pointer.Filter{Target: &row.click, Kinds: pointer.Press})
+								if !ok {
+									break
+								}
+								if pe, ok := ev.(pointer.Event); ok {
+									if pe.Buttons.Contain(pointer.ButtonSecondary) {
+										a.selectedModule, a.showModuleContext = name, true
+									} else {
+										a.selectedModule, a.showModuleContext = name, false
+									}
+									a.modulePackage.SetText(name)
+								}
+							}
+							dims := widget.Border{Color: borderColor, Width: 1}.Layout(rowGtx, func(gtx layout.Context) layout.Dimensions {
+								return layout.Background{}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+									paint.Fill(gtx.Ops, buttonColor)
+									return layout.Dimensions{Size: gtx.Constraints.Min}
+								}, func(gtx layout.Context) layout.Dimensions {
+									return layout.Inset{Top: 3, Bottom: 3, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+										l := material.Body2(a.theme, name)
+										l.Color = textColor
+										return l.Layout(gtx)
+									})
+								})
+							})
+							return dims
+						})
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						if !a.showModuleContext || a.selectedModule == "" {
+							return layout.Dimensions{}
+						}
+						return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+							return layout.Inset{Top: 4, Bottom: 4, Left: 6, Right: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+								return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+									layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, get("delete"), "Delete") }),
+									layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, get("update"), "Update") }),
+									layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+										return smallButton(gtx, a.theme, get("reinstall"), "Reinstall")
+									}),
+									layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+										return smallButton(gtx, a.theme, get("visit"), "Visit repository")
+									}),
+								)
+							})
+						})
+					}),
+				)
+			})
+		})
+	})
+}
+
+func (a *App) layoutRibbon(gtx layout.Context) layout.Dimensions {
+	items := []struct {
+		b     *widget.Clickable
+		label string
+	}{
+		{&a.fileMenuBtn, "File"}, {&a.editMenuBtn, "Edit"}, {&a.runMenuBtn, "Run"},
+		{&a.cmdMenuBtn, "Cmd"}, {&a.settingsMenuBtn, "Settings"}, {&a.modulesMenuBtn, "Modules"}, {&a.helpMenuBtn, "Help"},
+	}
+	children := make([]layout.FlexChild, 0, len(items)*2)
+	for i, item := range items {
+		if i > 0 {
+			children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 4}.Layout(gtx) }))
+		}
+		it := item
+		children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, it.b, it.label+"  ▾") }))
+	}
+	return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return layout.Inset{Top: 4, Bottom: 4, Left: 4, Right: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx, children...)
+		})
+	})
+}
+
+func (a *App) layoutRibbonMenu(gtx layout.Context) layout.Dimensions {
+	if a.activeRibbonMenu == "" {
+		return layout.Dimensions{}
+	}
+	if a.activeRibbonMenu == "settings" {
+		return a.ribbonDropPanel(gtx, func(gtx layout.Context) layout.Dimensions {
+			return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Inset{Top: 5, Bottom: 5, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return layout.Flex{Axis: layout.Vertical, Alignment: layout.Start}.Layout(gtx,
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+							return material.CheckBox(a.theme, &a.autoDetect, "Auto-detect language").Layout(gtx)
+						}),
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+							return material.CheckBox(a.theme, &a.runtimeFallback, "Runtime fallback").Layout(gtx)
+						}),
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+							return material.CheckBox(a.theme, &a.embedModules, "Embed all imported modules").Layout(gtx)
+						}),
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+							return material.CheckBox(a.theme, &a.copyLicenses, "Licenses").Layout(gtx)
+						}),
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontSmallBtn, "A−") }),
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontNormalBtn, "A") }),
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontLargeBtn, "A+") }),
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+							return smallButton(gtx, a.theme, &a.threads4Btn, "4 threads")
+						}),
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+							return smallButton(gtx, a.theme, &a.threads8Btn, "8 threads")
+						}),
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+							return smallButton(gtx, a.theme, &a.threads16Btn, "16 threads")
+						}),
+					)
+				})
+			})
+		})
+	}
+	labels := map[string][]string{
+		"file":     {"New", "Load file", "Save file", "Save As"},
+		"edit":     {"Undo", "Redo", "Cut", "Copy", "Paste", "Find / Replace", "Refresh syntax highlighting"},
+		"run":      {"Run", "Run with console", "Convert", "Save Executable"},
+		"cmd":      {"Open CMD", "CLI help"},
+		"settings": {"Runtime fallback", "Embed all imported modules", "Include package licenses"},
+		"modules":  {"Semantic Modules", "Get package", "Set module folder", "Delete", "Reinstall", "Update"},
+		"help":     {"Manual", "Info", "Licenses", "Set PATH"},
+	}
+	items := labels[a.activeRibbonMenu]
+	// Allocate stable clickables once; a fresh local widget would lose click
+	// state between frames and made the menu appear unresponsive.
+	getAction := func(menu, label string) *widget.Clickable {
+		key := menu + "\x00" + label
+		if b := a.ribbonActionClicks[key]; b != nil {
+			return b
+		}
+		b := new(widget.Clickable)
+		a.ribbonActionClicks[key] = b
+		return b
+	}
+	return a.ribbonDropPanel(gtx, func(gtx layout.Context) layout.Dimensions {
+		return layout.Inset{Top: 1, Bottom: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				// Menus are drop-down panels: paint an opaque surface so the editor
+				// remains visible only below the panel, never through it.
+				paint.FillShape(gtx.Ops, color.NRGBA{R: 255, G: 255, B: 255, A: 255}, clip.Rect{Max: gtx.Constraints.Min}.Op())
+				return layout.Inset{Top: 4, Bottom: 4, Left: 5, Right: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					children := make([]layout.FlexChild, 0, len(items)*2)
+					for i, label := range items {
+						if i > 0 {
+							children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 5}.Layout(gtx) }))
+						}
+						textLabel := label
+						children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+							b := material.Button(a.theme, getAction(a.activeRibbonMenu, textLabel), textLabel)
+							b.Background = color.NRGBA{R: 247, G: 249, B: 251, A: 255}
+							b.Color = color.NRGBA{R: 45, G: 52, B: 60, A: 255}
+							b.CornerRadius = 5
+							b.Inset = layout.Inset{Top: 5, Bottom: 5, Left: 8, Right: 8}
+							return b.Layout(gtx)
+						}))
+					}
+					return layout.Flex{Axis: layout.Vertical, Alignment: layout.Start}.Layout(gtx, children...)
+				})
+			})
+		})
+	})
+}
+
+// ribbonDropPanel positions a compact opaque menu directly below its ribbon
+// button, matching the input/output language picker geometry.
+func (a *App) ribbonDropPanel(gtx layout.Context, panel layout.Widget) layout.Dimensions {
+	offset := map[string]int{"file": 0, "edit": 58, "run": 116, "cmd": 174, "settings": 232, "modules": 326, "help": 414}[a.activeRibbonMenu]
+	return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return layout.Spacer{Width: unit.Dp(float32(offset))}.Layout(gtx)
+		}),
+		layout.Rigid(panel),
+	)
+}
+func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
+	runLabel := "Run " + a.currentSource().Name
 	return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return smallButton(gtx, a.theme, &a.sourceBtn, "Input: "+a.currentSource().Name+"  ▼")
@@ -504,15 +1573,32 @@ func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			label := "Save Executable"
+			if a.saveCompiler == "llvm" {
+				label = "Save Executable (LLVM)"
+			} else if a.saveCompiler == "gcc" {
+				label = "Save Executable (GCC)"
+			} else if a.saveCompiler == "msvc" {
+				label = "Save Executable (MSVC)"
+			} else if a.saveCompiler == "nasm" {
+				label = "Save Executable (NASM / Assembly)"
+			} else if a.saveCompiler == "masm" {
+				label = "Save Executable (MASM / ml64.exe)"
+			} else if a.saveCompiler == "csc" {
+				label = "Save Executable (C# csc.exe)"
+			} else if a.saveCompiler == "go" {
+				label = "Save Executable (Go compiler)"
+			}
+			return smallButton(gtx, a.theme, &a.executableBtn, label)
+		}),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return smallButton(gtx, a.theme, &a.compilerBtn, "▼")
+		}),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return smallButton(gtx, a.theme, &a.openCMDBtn, "Open CMD")
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 12}.Layout(gtx) }),
-		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			label := material.Body2(a.theme, a.status)
-			label.Alignment = text.End
-			label.Color = color.NRGBA{R: 87, G: 96, B: 106, A: 255}
-			return label.Layout(gtx)
-		}),
 	)
 }
 
@@ -569,27 +1655,170 @@ func (a *App) layoutLanguageMenu(gtx layout.Context) layout.Dimensions {
 		})
 	})
 }
+
+func (a *App) layoutInlineLanguageMenu(gtx layout.Context, source bool) layout.Dimensions {
+	clicks := a.targetClicks
+	if source {
+		clicks = a.sourceClicks
+	}
+	children := make([]layout.FlexChild, 0, len(uiLanguages)*2)
+	for i := range uiLanguages {
+		idx := i
+		if i > 0 {
+			children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 2}.Layout(gtx) }))
+		}
+		children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return smallButton(gtx, a.theme, &clicks[idx], uiLanguages[idx].Name)
+		}))
+	}
+	return widget.Border{Color: color.NRGBA{R: 208, G: 215, B: 222, A: 255}, Width: 1, CornerRadius: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		paint.FillShape(gtx.Ops, color.NRGBA{R: 255, G: 255, B: 255, A: 255}, clip.Rect{Max: gtx.Constraints.Min}.Op())
+		return layout.Inset{Top: 3, Bottom: 3, Left: 3, Right: 3}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Flex{Axis: layout.Vertical}.Layout(gtx, children...)
+		})
+	})
+}
 func (a *App) layoutMain(gtx layout.Context) layout.Dimensions {
 	return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-			return a.layoutEditorPanel(gtx, "Input · "+a.currentSource().Name, a.left)
+			return layout.Stack{Alignment: layout.NW}.Layout(gtx,
+				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+					return a.layoutEditorPanel(gtx, a.currentSource().Name, a.left)
+				}),
+				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+					if !a.sourceOpen {
+						return layout.Dimensions{}
+					}
+					return layout.Inset{Top: 32, Left: 2, Right: 2}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { return a.layoutInlineLanguageMenu(gtx, true) })
+				}),
+			)
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return layout.Inset{Left: 14, Right: 14}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					btn := material.Button(a.theme, &a.convertBtn, "Convert")
-					btn.Background = color.NRGBA{R: 9, G: 105, B: 218, A: 255}
-					btn.Color = color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-					btn.CornerRadius = unit.Dp(8)
-					btn.Inset = layout.Inset{Top: 12, Bottom: 12, Left: 20, Right: 20}
-					return btn.Layout(gtx)
-				})
+			return layout.Inset{Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx,
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						btn := material.Button(a.theme, &a.convertBtn, "Convert")
+						btn.Background = color.NRGBA{R: 9, G: 105, B: 218, A: 255}
+						btn.Color = color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+						btn.CornerRadius = unit.Dp(8)
+						btn.Inset = layout.Inset{Top: 10, Bottom: 10, Left: 16, Right: 16}
+						return btn.Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 14}.Layout(gtx) }),
+					layout.Rigid(a.layoutTreeOfLife),
+				)
 			})
 		}),
 		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-			return a.layoutEditorPanel(gtx, "Output · "+a.currentTarget().Name, a.right)
+			return layout.Stack{Alignment: layout.NE}.Layout(gtx,
+				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+					return a.layoutEditorPanel(gtx, a.currentTarget().Name, a.right)
+				}),
+				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+					if !a.targetOpen {
+						return layout.Dimensions{}
+					}
+					return layout.Inset{Top: 32, Left: 2, Right: 2}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { return a.layoutInlineLanguageMenu(gtx, false) })
+				}),
+			)
 		}),
 	)
+}
+
+// layoutTreeOfLife is a lightweight, dependency-free progress visualization.
+// The graph is intentionally drawn with text glyphs so it remains available in
+// the portable GUI build. Nodes illuminate from the bottom upward while a
+// conversion is running and remain orange after completion.
+func (a *App) layoutTreeOfLife(gtx layout.Context) layout.Dimensions {
+	// Detail pages (CLI/info/licenses and module manager) own the center stage;
+	// keep the progress tree behind them instead of showing through the panel.
+	if !a.treeVisible || a.showInfo || a.showModules {
+		return layout.Dimensions{}
+	}
+	progress := float32(1)
+	if a.busy && !a.treeStarted.IsZero() {
+		progress = float32(gtx.Now.Sub(a.treeStarted)) / float32(8*time.Second)
+		if progress < 0 {
+			progress = 0
+		}
+		if progress > 0.95 {
+			progress = 0.95
+		}
+		gtx.Execute(op.InvalidateCmd{At: gtx.Now.Add(120 * time.Millisecond)})
+	}
+	// Seven horizontal levels reproduce the supplied Tree-of-Life geometry:
+	// one node, three nodes, three nodes, three nodes, one node. Edges are
+	// drawn first so the orange circular vertices remain crisp on top.
+	// Keep the central emblem compact so it does not displace either editor.
+	gtx.Constraints.Min = image.Pt(124, 204)
+	gtx.Constraints.Max = gtx.Constraints.Min
+	orange := color.NRGBA{R: 255, G: 139, B: 38, A: 255}
+	gray := color.NRGBA{R: 150, G: 156, B: 163, A: 255}
+	// Exact compact logo geometry: top, side pair, center, side pair,
+	// center, side pair, bottom. There is no separate loading bar; progress
+	// is represented by the graph itself filling from the bottom upward.
+	// A compact triangular lattice. Horizontal spacing and diagonal spacing
+	// are both one edge unit, so every drawn connection has the same length.
+	pts := []f32.Point{{62, 7}, {44, 38}, {80, 38}, {62, 69}, {44, 100}, {80, 100}, {62, 131}, {44, 162}, {80, 162}, {62, 193}}
+	links := [][2]int{{0, 1}, {0, 2}, {1, 2}, {1, 3}, {2, 3}, {1, 4}, {1, 5}, {2, 4}, {2, 5}, {4, 5}, {4, 6}, {5, 6}, {4, 7}, {4, 8}, {5, 7}, {5, 8}, {7, 8}, {7, 9}, {8, 9}}
+	for _, link := range links {
+		// A connection becomes active when the lower endpoint reaches the fill
+		// front. This makes the orange progress visibly travel through the graph.
+		lower := pts[link[0]].Y
+		if pts[link[1]].Y > lower {
+			lower = pts[link[1]].Y
+		}
+		active := progress >= 1-lower/193
+		lineColor := gray
+		if active {
+			lineColor = orange
+		}
+		drawTreeLine(gtx, pts[link[0]], pts[link[1]], lineColor, 2)
+	}
+	for _, p := range pts {
+		// The progress fill travels from the root (bottom) upward.
+		level := 1 - p.Y/193
+		c := gray
+		if progress >= level {
+			c = orange
+		}
+		paint.FillShape(gtx.Ops, c, clip.Ellipse(image.Rect(int(p.X-9), int(p.Y-9), int(p.X+9), int(p.Y+9))).Op(gtx.Ops))
+	}
+	return layout.Dimensions{Size: gtx.Constraints.Min}
+}
+
+func drawTreeLine(gtx layout.Context, a, b f32.Point, c color.NRGBA, width float32) {
+	dx, dy := b.X-a.X, b.Y-a.Y
+	l := float32(1)
+	if dx != 0 || dy != 0 {
+		l = float32((dx*dx + dy*dy))
+		for l > 1 {
+			l = l / 2
+			break
+		}
+	}
+	// A narrow polygon is sufficient for these fixed, axis/diagonal edges.
+	pad := width / 2
+	p := clip.Path{}
+	p.Begin(gtx.Ops)
+	p.MoveTo(f32.Pt(a.X-pad, a.Y-pad))
+	p.LineTo(f32.Pt(b.X-pad, b.Y-pad))
+	p.LineTo(f32.Pt(b.X+pad, b.Y+pad))
+	p.LineTo(f32.Pt(a.X+pad, a.Y+pad))
+	p.Close()
+	paint.FillShape(gtx.Ops, c, clip.Outline{Path: p.End()}.Op())
+}
+
+func (a *App) treeGlyph(gtx layout.Context, glyph string, active bool) layout.Dimensions {
+	l := material.Body1(a.theme, glyph)
+	l.Alignment = text.Middle
+	if active {
+		l.Color = color.NRGBA{R: 255, G: 145, B: 25, A: 255}
+	} else {
+		l.Color = color.NRGBA{R: 210, G: 216, B: 222, A: 255}
+	}
+	l.TextSize = unit.Sp(22)
+	return l.Layout(gtx)
 }
 func (a *App) layoutEditorPanel(gtx layout.Context, title string, ed *gvcode.Editor) layout.Dimensions {
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -606,13 +1835,57 @@ func (a *App) layoutEditorPanel(gtx layout.Context, title string, ed *gvcode.Edi
 		}),
 	)
 }
+
+// findCSCCompiler resolves the C# compiler without requiring a global PATH
+// entry. Visual Studio/.NET installations commonly keep csc.exe below either
+// Framework or Framework64, so the search is deliberately data-driven.
+func findCSCCompiler() (string, error) {
+	for _, name := range []string{"csc.exe", "csc"} {
+		if path, err := exec.LookPath(name); err == nil {
+			return path, nil
+		}
+	}
+	for _, path := range []string{
+		`C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe`,
+		`C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe`,
+	} {
+		if info, err := os.Stat(path); err == nil && !info.IsDir() {
+			return path, nil
+		}
+	}
+	root := `C:\Windows\Microsoft.NET`
+	var found string
+	walkErr := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			if os.IsPermission(err) {
+				return filepath.SkipDir
+			}
+			return err
+		}
+		if found != "" {
+			return filepath.SkipDir
+		}
+		if !entry.IsDir() && strings.EqualFold(entry.Name(), "csc.exe") {
+			found = path
+		}
+		return nil
+	})
+	if found != "" {
+		return found, nil
+	}
+	if walkErr != nil {
+		return "", walkErr
+	}
+	return "", fmt.Errorf("searched PATH and %s", root)
+}
+
 func (a *App) layoutRunOutput(gtx layout.Context) layout.Dimensions {
 	return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return widget.Border{Color: color.NRGBA{R: 208, G: 215, B: 222, A: 255}, Width: 1, CornerRadius: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{Top: 8, Bottom: 8, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						l := material.Caption(a.theme, "Embedded R runtime output")
+						l := material.Caption(a.theme, "Runtime")
 						l.Font.Weight = font.SemiBold
 						return l.Layout(gtx)
 					}),
@@ -649,10 +1922,10 @@ func (a *App) layoutInfo(gtx layout.Context) layout.Dimensions {
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						return layout.Spacer{Height: 8}.Layout(gtx)
 					}),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						label := material.Body2(a.theme, cliHelp)
+					layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+						label := material.Body2(a.theme, a.infoText)
 						label.Color = color.NRGBA{R: 31, G: 35, B: 40, A: 255}
-						return label.Layout(gtx)
+						return a.infoScroll.Layout(gtx, 1, func(gtx layout.Context, _ int) layout.Dimensions { return label.Layout(gtx) })
 					}),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -665,21 +1938,57 @@ func (a *App) layoutInfo(gtx layout.Context) layout.Dimensions {
 	})
 }
 func (a *App) layoutFooter(gtx layout.Context) layout.Dimensions {
-	return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	// Keep transient conversion/compile state in one unobtrusive, full-width
+	// status line at the very bottom of the window.
+	return layout.Inset{Top: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Top: 4, Bottom: 4, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				label := material.Caption(a.theme, a.status)
+				label.Color = color.NRGBA{R: 92, G: 101, B: 112, A: 255}
+				return label.Layout(gtx)
+			})
+		})
+	})
+	/*return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.copyBtn, "Copy") }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.saveBtn, "Save As") }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.infoBtn, "Info") }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return smallButton(gtx, a.theme, &a.licensesBtn, "Licenses")
+			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return smallButton(gtx, a.theme, &a.setPathBtn, "Set PATH")
+			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return smallButton(gtx, a.theme, &a.modulePathBtn, "Semantic Modules")
+			}),
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{Size: gtx.Constraints.Min} }),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				check := material.CheckBox(a.theme, &a.runtimeFallback, "Semantic runtime fallback")
+				return check.Layout(gtx)
+			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				check := material.CheckBox(a.theme, &a.embedModules, "Embed all imported modules")
+				return check.Layout(gtx)
+			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				check := material.CheckBox(a.theme, &a.copyLicenses, "Copy package licenses")
+				return check.Layout(gtx)
+			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 12}.Layout(gtx) }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				label := material.Caption(a.theme, fmt.Sprintf("13-language matrix | GUI thread pinned | %d Ps", runtime.GOMAXPROCS(0)))
 				label.Color = color.NRGBA{R: 110, G: 118, B: 129, A: 255}
 				return label.Layout(gtx)
 			}),
 		)
-	})
+	})*/
 }
 func smallButton(gtx layout.Context, th *material.Theme, click *widget.Clickable, label string) layout.Dimensions {
 	btn := material.Button(th, click, label)
@@ -687,19 +1996,76 @@ func smallButton(gtx layout.Context, th *material.Theme, click *widget.Clickable
 	btn.Color = color.NRGBA{R: 31, G: 35, B: 40, A: 255}
 	btn.CornerRadius = 7
 	btn.TextSize = unit.Sp(12)
-	btn.Inset = layout.Inset{Top: 6, Bottom: 6, Left: 11, Right: 11}
+	btn.Inset = layout.Inset{Top: 3, Bottom: 3, Left: 9, Right: 9}
 	return btn.Layout(gtx)
 }
 
-const cliHelp = `Code Transpiler CLI - complete command reference
+const cliHelp = `Semantic Programming Language CLI - complete command reference
+
+COMMAND ALIASES (EXACTLY EQUIVALENT)
+  sp <command> [options]     ==    CodeTranspiler.exe <command> [options]
+  Every command listed here can be invoked with either name.
 
 GENERAL
   CodeTranspiler.exe
   CodeTranspiler.exe gui
   CodeTranspiler.exe help
+  CodeTranspiler.exe --help
+  CodeTranspiler.exe -h
   CodeTranspiler.exe version
+  CodeTranspiler.exe --version
   CodeTranspiler.exe targets
+  CodeTranspiler.exe languages
   CodeTranspiler.exe runtimes
+  CodeTranspiler.exe routes
+  CodeTranspiler.exe licenses
+  CodeTranspiler.exe setpath
+  CodeTranspiler.exe bundle-info [path]
+  CodeTranspiler.exe bundle-verify [path]
+  CodeTranspiler.exe bundle-extract <bundle> <directory>
+
+SEMANTIC / UAST
+  CodeTranspiler.exe semantic-export -source <language> input -o program.semantic.json
+  CodeTranspiler.exe semantic-export -source <language> input -format sp -o program.sp
+  CodeTranspiler.exe semantic-export -native -source go input.go -o program.json
+  CodeTranspiler.exe semantic-export -input executable program.exe -o program.semantic.json
+  CodeTranspiler.exe semantic-transpile -target <language> program.semantic.json -o output
+  CodeTranspiler.exe semantic-transpile -target <language> program.se -o output
+  CodeTranspiler.exe semantic-transpile -target <language> program.sp -o output
+  CodeTranspiler.exe semantic-transpile -target <language> program.spz -o output
+  CodeTranspiler.exe semantic-convert input.json -o output.se
+  CodeTranspiler.exe semantic-convert input.se -o output.spz
+  CodeTranspiler.exe semantic-merge a.se b.sp c.spz -o merged.se
+  CodeTranspiler.exe semantic-format input.se --readable -o readable.se
+  CodeTranspiler.exe semantic-format input.se --compact -o compact.se
+  CodeTranspiler.exe semantic-validate input.se|input.sp|input.spz|input.json
+  CodeTranspiler.exe semantic-info input.se|input.sp|input.spz|input.json
+  CodeTranspiler.exe native-analysis -source <language> input -o analysis.json
+  CodeTranspiler.exe machine-ir -input executable program.exe -o machine-ir.json
+  CodeTranspiler.exe decompile -input executable program.exe -o program.semantic.json
+
+SEMANTIC MODULES
+  CodeTranspiler.exe module create a.se b.spz -o mymodule.smod
+  CodeTranspiler.exe module merge a.se b.sp -o mymodule.smod
+  CodeTranspiler.exe module import <source|module.se|module.spz>
+  CodeTranspiler.exe module import --language go <source.go>
+  CodeTranspiler.exe module import --language python six
+  CodeTranspiler.exe module import --language rust itoa
+  CodeTranspiler.exe module import --language r jsonlite
+  CodeTranspiler.exe module import --language java org.apache.commons:commons-lang3
+  CodeTranspiler.exe module path
+  CodeTranspiler.exe module setpath <parent-folder>
+  CodeTranspiler.exe module setpath --default
+  CodeTranspiler.exe module list
+  CodeTranspiler.exe module info <cache-key>
+  CodeTranspiler.exe module verify <cache-key>
+  CodeTranspiler.exe module remove <cache-key>
+  Every module command also works as: sp module <command> ...
+
+CAPABILITIES
+  CodeTranspiler.exe capability <target> <feature>
+  CodeTranspiler.exe capability-matrix [feature ...]
+  CodeTranspiler.exe implementation-matrix
 
 EMBEDDED R RUN
   CodeTranspiler.exe run input.R
@@ -731,6 +2097,19 @@ TRANSPILATION
   CodeTranspiler.exe transpile -target java input.R -o Main.java
   CodeTranspiler.exe transpile -target kotlin input.R -o output.kt
   CodeTranspiler.exe transpile -target swift input.R -o output.swift
+
+NATIVE COMPILE
+  CodeTranspiler.exe compile input.se -o input.exe
+  CodeTranspiler.exe compile input.sp -o input.exe
+  CodeTranspiler.exe compile input.spz -o input.exe
+  CodeTranspiler.exe compile input.json -o input.exe
+  CodeTranspiler.exe compile -source go -target native-x86_64-windows input.go -o program.exe
+  CodeTranspiler.exe compile -source go file1.go file2.go -o program.exe
+  CodeTranspiler.exe compile -source go package-directory -o program.exe
+
+BATCH / ANALYSIS
+  CodeTranspiler.exe transpile-batch
+  CodeTranspiler.exe run -source <language|auto> -target <embedded|language> input
 
 The -o option is optional. Without it, Code Transpiler chooses the output extension.
 

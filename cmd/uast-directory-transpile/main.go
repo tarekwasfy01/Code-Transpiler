@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // uast-directory-transpile walks a local source tree and builds a source-free
 // transpilation matrix. It never executes package code or generated output.
 package main

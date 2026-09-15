@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 // SemanticEffectSummary is computed from the effect matrix. ConservativePure

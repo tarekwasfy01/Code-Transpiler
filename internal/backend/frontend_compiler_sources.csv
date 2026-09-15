@@ -1,0 +1,48 @@
+﻿Language,Compiler,Repository,SourceArea,SourceURL,LicensePolicy
+Python,CPython,python/cpython,AST schema,https://github.com/python/cpython/blob/main/Doc/library/ast.rst,PSF-family; facts only
+Python,CPython,python/cpython,compile pipeline,https://github.com/python/cpython/blob/main/Python/compile.c,PSF-family; facts only
+Python,CPython,python/cpython,scope/symbols,https://github.com/python/cpython/blob/main/Python/symtable.c,PSF-family; facts only
+Python,Nuitka,Nuitka/Nuitka,AST build/desugaring,https://github.com/Nuitka/Nuitka/blob/develop/nuitka/tree/Building.py,"AGPL-3.0; FACTS ONLY, do not copy implementation"
+Python,Nuitka,Nuitka/Nuitka,with/async-with lowering,https://github.com/Nuitka/Nuitka/blob/develop/nuitka/tree/ReformulationWithStatements.py,"AGPL-3.0; FACTS ONLY, do not copy implementation"
+Python,Nuitka,Nuitka/Nuitka,closure analysis,https://github.com/Nuitka/Nuitka/blob/develop/nuitka/tree/VariableClosure.py,"AGPL-3.0; FACTS ONLY, do not copy implementation"
+Python,Nuitka,Nuitka/Nuitka,annotations,https://github.com/Nuitka/Nuitka/blob/develop/nuitka/tree/TreeHelpers.py,"AGPL-3.0; FACTS ONLY, do not copy implementation"
+Go,gc compiler,golang/go,syntax AST,https://github.com/golang/go/blob/master/src/cmd/compile/internal/syntax/nodes.go,BSD-style; facts only
+Go,gc compiler,golang/go,frontend phases,https://github.com/golang/go/blob/master/src/cmd/compile/internal/gc/main.go,BSD-style; facts only
+Go,gc compiler,golang/go,evaluation ordering,https://github.com/golang/go/blob/master/src/cmd/compile/internal/walk/order.go,BSD-style; facts only
+Go,gc compiler,golang/go,type semantics,https://github.com/golang/go/blob/master/src/cmd/compile/internal/typecheck/expr.go,BSD-style; facts only
+Go,gc compiler,golang/go,range lowering,https://github.com/golang/go/blob/master/src/cmd/compile/internal/walk/range.go,BSD-style; facts only
+Rust,rustc,rust-lang/rust,surface AST,https://github.com/rust-lang/rust/blob/main/compiler/rustc_ast/src/ast.rs,MIT/Apache-2.0; facts only
+Rust,rustc,rust-lang/rustc-dev-guide,frontend architecture,https://github.com/rust-lang/rustc-dev-guide/blob/main/src/overview.md,See repo license; facts only
+Rust,rustc,rust-lang/rust,HIR,https://github.com/rust-lang/rust/blob/main/compiler/rustc_hir/src/hir.rs,MIT/Apache-2.0; facts only
+Rust,rustc,rust-lang/rust,driver phases,https://github.com/rust-lang/rust/blob/main/compiler/rustc_driver_impl/src/lib.rs,MIT/Apache-2.0; facts only
+C,Clang,llvm/llvm-project,semantic analysis,https://github.com/llvm/llvm-project/blob/main/clang/lib/Sema/Sema.cpp,Apache-2.0 WITH LLVM-exception; facts only
+C,Clang,llvm/llvm-project,statement semantics,https://github.com/llvm/llvm-project/blob/main/clang/lib/Sema/SemaStmt.cpp,Apache-2.0 WITH LLVM-exception; facts only
+C,Clang,llvm/llvm-project,AST/type context,https://github.com/llvm/llvm-project/blob/main/clang/include/clang/AST/ASTContext.h,Apache-2.0 WITH LLVM-exception; facts only
+C++,Clang,llvm/llvm-project,semantic analysis,https://github.com/llvm/llvm-project/blob/main/clang/lib/Sema/Sema.cpp,Apache-2.0 WITH LLVM-exception; facts only
+C++,Clang,llvm/llvm-project,C++ declarations/lambdas,https://github.com/llvm/llvm-project/blob/main/clang/include/clang/AST/DeclCXX.h,Apache-2.0 WITH LLVM-exception; facts only
+C++,Clang,llvm/llvm-project,statement semantics,https://github.com/llvm/llvm-project/blob/main/clang/lib/Sema/SemaStmt.cpp,Apache-2.0 WITH LLVM-exception; facts only
+C#,Roslyn,dotnet/roslyn,architecture,https://github.com/dotnet/dotnet/blob/main/src/roslyn/.github/instructions/Compiler.instructions.md,MIT; facts only
+C#,Roslyn,dotnet/roslyn,syntax definitions,https://github.com/dotnet/roslyn/blob/main/src/Compilers/CSharp/Portable/Syntax/Syntax.xml,MIT; facts only
+C#,Roslyn,dotnet/roslyn,binder/scope semantics,https://github.com/dotnet/roslyn/blob/main/src/Compilers/CSharp/Portable/Compilation/CSharpSemanticModel.cs,MIT; facts only
+C#,Roslyn,dotnet/roslyn,lowering,https://github.com/dotnet/roslyn/blob/main/src/Compilers/CSharp/Portable/Lowering/LocalRewriter/LocalRewriter.cs,MIT; facts only
+Java,javac,openjdk/jdk,parser,https://github.com/openjdk/jdk/blob/master/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavacParser.java,OpenJDK repo/header terms; FACTS ONLY
+Java,javac,openjdk/jdk,type attribution,https://github.com/openjdk/jdk/blob/master/src/jdk.compiler/share/classes/com/sun/tools/javac/comp/Attr.java,OpenJDK repo/header terms; FACTS ONLY
+Java,javac,openjdk/jdk,lowering,https://github.com/openjdk/jdk/blob/master/src/jdk.compiler/share/classes/com/sun/tools/javac/comp/Lower.java,OpenJDK repo/header terms; FACTS ONLY
+Java,javac,openjdk/jdk,bytecode generation,https://github.com/openjdk/jdk/blob/master/src/jdk.compiler/share/classes/com/sun/tools/javac/jvm/Gen.java,OpenJDK repo/header terms; FACTS ONLY
+Kotlin,K2/FIR,JetBrains/kotlin,architecture,https://github.com/JetBrains/kotlin/blob/master/compiler/AGENTS.md,Apache-2.0; facts only
+Kotlin,K2/FIR,JetBrains/kotlin,FIR phases/nodes,https://github.com/JetBrains/kotlin/blob/master/docs/fir/fir-basics.md,Apache-2.0; facts only
+Kotlin,K2/FIR,JetBrains/kotlin,module/expect-actual,https://github.com/JetBrains/kotlin/blob/master/docs/fir/k2_kmp.md,Apache-2.0; facts only
+Kotlin,K2/FIR,JetBrains/kotlin,annotation metadata,https://github.com/JetBrains/kotlin/blob/master/docs/fir/fir-plugins.md,Apache-2.0; facts only
+Swift,swiftc,swiftlang/swift,compiler representations,https://github.com/swiftlang/swift/blob/main/docs/CompilerPerformance.md,Apache-2.0 with Runtime Library Exception; facts only
+Swift,swiftc,swiftlang/swift,parser,https://github.com/swiftlang/swift/blob/main/include/swift/Parse/Parser.h,Apache-2.0 with Runtime Library Exception; facts only
+Swift,swiftc,swiftlang/swift,frontend/module semantics,https://github.com/swiftlang/swift/blob/main/lib/Frontend/Frontend.cpp,Apache-2.0 with Runtime Library Exception; facts only
+Julia,Julia compiler,JuliaLang/julia,AST/lowered form,https://github.com/JuliaLang/julia/blob/master/doc/src/devdocs/ast.md,MIT; facts only
+Julia,Julia compiler,JuliaLang/julia,parse/macro expansion,https://github.com/JuliaLang/julia/blob/master/doc/src/devdocs/eval.md,MIT; facts only
+Julia,JuliaLowering,JuliaLang/JuliaLowering.jl,desugaring,https://github.com/JuliaLang/JuliaLowering.jl,MIT; facts only
+Nim,Nim compiler,nim-lang/Nim,AST nodes,https://github.com/nim-lang/Nim/blob/devel/compiler/ast.nim,MIT; facts only
+Nim,Nim compiler,nim-lang/Nim,parser/rewrite,https://github.com/nim-lang/Nim/blob/devel/compiler/parser.nim,MIT; facts only
+R,R reference implementation,wch/r-source,grammar/AST construction,https://github.com/wch/r-source/blob/trunk/src/main/gram.y,GPL-family; FACTS ONLY
+R,R reference implementation,wch/r-source,evaluation semantics,https://github.com/wch/r-source/blob/trunk/src/main/eval.c,GPL-family; FACTS ONLY
+Zig,zig compiler,ziglang/zig,AST/parser,https://github.com/ziglang/zig/blob/master/lib/std/zig/Ast.zig,MIT; facts only
+Zig,zig compiler,ziglang/zig,AST generation/lowering,https://github.com/ziglang/zig/blob/master/lib/std/zig/AstGen.zig,MIT; facts only
+Zig,zig compiler,ziglang/zig,frontend module exports,https://github.com/ziglang/zig/blob/master/lib/std/zig.zig,MIT; facts only

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -128,8 +129,12 @@ var directStatementProjectionStructures = map[string]bool{
 	"ReturnStmt":        true,
 	"BreakStmt":         true,
 	"ContinueStmt":      true,
+	"SwitchMatchStmt":   true,
 	"VariableDecl":      true,
 	"VariableDeclGroup": true,
+	// BindingPattern is a structural child of ForEachStmt. Its executable
+	// effect is consumed by the parent's iteration binding primitive.
+	"BindingPattern": true,
 }
 
 func projectionNames(values []string, at func(int) float64) []string {

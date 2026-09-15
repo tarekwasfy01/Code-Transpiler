@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import "strings"
@@ -66,6 +67,24 @@ var backendRegistry = func() []BackendSpec {
 func Frontends() []FrontendSpec { return append([]FrontendSpec(nil), frontendRegistry...) }
 func Backends() []BackendSpec   { return append([]BackendSpec(nil), backendRegistry...) }
 
+// IntermediateRouteCandidates returns only matrix-proven, cycle-free bridge
+// targets. The generated table is compiled into the binary; no CSV parsing is
+// performed on the transpilation hot path.
+func IntermediateRouteCandidates(source, target string) []string {
+	source, target = NormalizeLanguage(source), NormalizeLanguage(target)
+	seen := map[string]bool{}
+	var out []string
+	for _, spec := range Backends() {
+		mid := spec.ID
+		if mid == source || mid == target || seen[mid] || !generatedIntermediateRoutes[[3]string{source, mid, target}] {
+			continue
+		}
+		seen[mid] = true
+		out = append(out, mid)
+	}
+	return out
+}
+
 func NormalizeLanguage(name string) string {
 	name = strings.ToLower(strings.TrimSpace(name))
 	for _, spec := range frontendRegistry {
@@ -133,6 +152,14 @@ func BackendCapability(feature, backend string) CapabilityResult {
 		// runtime permission; unavailable native syntax still fails at the
 		// canonical DIRECT_NATIVE_UNAVAILABLE boundary.
 		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityLowering, Reason: "shared native scalar UAST lowering"}
+	}
+	if feature == "native.call.receiver.v1" || feature == "native.call.ordered_product.v1" || feature == "native.init.order.v1" {
+		// The three call contracts are canonical UAST facts.  Every registered
+		// target reaches the same selector/projector lowering boundary; target
+		// syntax that cannot represent a particular constructed program still
+		// fails there with a concrete preservation or emission error instead of
+		// being rejected before its existing lowering is considered.
+		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityLowering, Reason: "shared canonical call and initialization contract lowering"}
 	}
 	if SupportsCapability(BackendCapabilities(backend), feature) {
 		return CapabilityResult{Feature: feature, Backend: backend, Status: CapabilityNative}

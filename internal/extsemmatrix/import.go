@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // Package extsemmatrix imports the proof-safe 13-language external semantic
 // matrix and projects it onto the canonical UASF capability space.  The
 // external matrix is evidence, not a second IR: unresolved atoms never become

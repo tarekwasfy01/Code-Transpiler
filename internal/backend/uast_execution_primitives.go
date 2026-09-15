@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Tarek Wasfy
+
 package backend
 
 import (
@@ -229,7 +231,7 @@ func isStructuredCallValue(c universalDecodedCommon, structuralKind string) bool
 	// execution graph.  AggregateExpr is deliberately included as its own
 	// contract dimension rather than being coerced to a scalar.
 	switch c.Kind {
-	case "literal", "identifier", "aggregate", "binary", "unary", "typed_operation", "call", "index", "function", "missing_argument":
+	case "literal", "identifier", "aggregate", "binary", "unary", "typed_operation", "call", "index", "slice", "address_of", "address", "deref", "iteration", "member", "conditional", "function", "missing_argument":
 		return structuralKind != ""
 	default:
 		return structuralKind == "AggregateExpr" || structuralKind == "TupleExpr" || structuralKind == "TupleResult"

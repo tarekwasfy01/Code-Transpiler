@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -63,10 +64,12 @@ func loadSemanticFeatureBasis() error {
 
 func semanticProfileLanguage(source string) string {
 	switch strings.ToLower(strings.TrimSpace(source)) {
-	case "go", "python", "r", "rust", "kotlin", "java":
+	case "go", "python", "r", "rust", "kotlin", "java", "julia", "nim", "swift":
 		return strings.ToLower(strings.TrimSpace(source))
-	case "c", "cpp", "c++", "clang", "clang_cpp":
+	case "cpp", "c++", "clang", "clang_cpp":
 		return "clang_cpp"
+	case "c":
+		return "c"
 	case "c#", "cs", "csharp":
 		return "csharp"
 	default:
@@ -167,7 +170,7 @@ func validateSemanticFeatureModel(model *SemanticFeatureModel, source string) er
 		return err
 	}
 	if model.BasisSHA256 != semanticFeatureBase.BasisSHA256 || !reflect.DeepEqual(model.Basis, semanticFeatureBase.Basis) {
-		return fmt.Errorf("semantic feature basis differs from embedded calculated matrix")
+		return fmt.Errorf("semantic feature basis differs from authoritative basis")
 	}
 	if semanticProfileLanguage(source) != model.ProfileLanguage {
 		return fmt.Errorf("semantic feature profile does not match source language")

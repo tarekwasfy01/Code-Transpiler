@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -10,10 +11,12 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
 type runEnv struct {
+	mu        sync.RWMutex
 	parent    *runEnv
 	vars      map[string]any
 	immutable map[string]bool
@@ -24,29 +27,44 @@ func newRunEnv(parent *runEnv) *runEnv {
 }
 func (e *runEnv) get(name string) (any, bool) {
 	for p := e; p != nil; p = p.parent {
+		p.mu.RLock()
 		if v, ok := p.vars[name]; ok {
+			p.mu.RUnlock()
 			return v, true
 		}
+		p.mu.RUnlock()
 	}
 	return nil, false
 }
-func (e *runEnv) set(name string, v any) { e.vars[name] = v }
+func (e *runEnv) set(name string, v any) {
+	e.mu.Lock()
+	e.vars[name] = v
+	e.mu.Unlock()
+}
 func (e *runEnv) declare(name string, v any, mutable bool) {
+	e.mu.Lock()
 	e.vars[name] = v
 	e.immutable[name] = !mutable
+	e.mu.Unlock()
 }
 func (e *runEnv) assign(name string, v any) error {
 	for scope := e; scope != nil; scope = scope.parent {
+		scope.mu.Lock()
 		if _, ok := scope.vars[name]; !ok {
+			scope.mu.Unlock()
 			continue
 		}
 		if scope.immutable[name] {
+			scope.mu.Unlock()
 			return fmt.Errorf("cannot assign to constant %q", name)
 		}
 		scope.vars[name] = v
+		scope.mu.Unlock()
 		return nil
 	}
+	e.mu.Lock()
 	e.vars[name] = v
+	e.mu.Unlock()
 	return nil
 }
 
@@ -77,6 +95,20 @@ type runState struct {
 	jumpTarget       int
 	currentException any
 	deferred         []runUASTDeferred
+	tasks            *sync.WaitGroup
+	taskMu           *sync.Mutex
+	taskRegistry     *[]*runUASTTask
+}
+
+func newRunState() *runState {
+	return &runState{
+		rng:          rand.New(rand.NewSource(1)),
+		maxSteps:     1_000_000,
+		jumpTarget:   -1,
+		tasks:        &sync.WaitGroup{},
+		taskMu:       &sync.Mutex{},
+		taskRegistry: &[]*runUASTTask{},
+	}
 }
 
 func Run(src string) (string, error) {
@@ -84,7 +116,7 @@ func Run(src string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	st := &runState{rng: rand.New(rand.NewSource(1)), maxSteps: 1_000_000}
+	st := newRunState()
 	env := newRunEnv(nil)
 	_, sig, err := st.block(env, ast)
 	if err != nil {
@@ -114,11 +146,21 @@ func RunSemantic(program *SemanticProgram) (string, error) {
 		return "", err
 	}
 	for _, requirement := range u.Contracts.Requires {
-		if requirement != "core" && requirement != "native.go.scalar" && requirement != "native.go.functions" && requirement != ExactSignatureCapability && !exactIntegerCapability(requirement) {
+		// These native-call requirements describe the ABI contract consumed by
+		// machine selection.  The canonical UAST interpreter already executes
+		// their semantic equivalents: a receiver is a first ordinary binding,
+		// product results are ordered aggregate values, calls evaluate their
+		// arguments once from left to right, and uastBlock executes declaration
+		// and initializer statements in ordinal order.  Rejecting the contracts
+		// here therefore made the differential oracle less capable than the
+		// native backend it is supposed to verify.
+		if requirement != "core" && requirement != "native.go.scalar" && requirement != "native.go.functions" &&
+			requirement != "native.call.receiver.v1" && requirement != "native.call.ordered_product.v1" && requirement != "native.init.order.v1" &&
+			requirement != ExactSignatureCapability && !exactIntegerCapability(requirement) {
 			return "", fmt.Errorf("semantic runtime does not support required capability %q", requirement)
 		}
 	}
-	st := &runState{rng: rand.New(rand.NewSource(1)), maxSteps: 1_000_000, jumpTarget: -1}
+	st := newRunState()
 	st.exactCalls, err = validateDirectSignatureContracts(graph)
 	if err != nil {
 		return "", err
@@ -135,13 +177,51 @@ func RunSemantic(program *SemanticProgram) (string, error) {
 	if err != nil {
 		return st.out.String(), err
 	}
+	// Native Go packages expose `main` as the executable entry contract.  The
+	// UAST stores the declaration like every other function value; invoke that
+	// value once after module declarations have initialized the environment.
+	// Library packages intentionally have no implicit entry invocation.
+	if u.Metadata != nil && u.Metadata["frontend"] == "native-go-uast-v1" && u.Metadata["package"] == "main" {
+		mainBinding := ""
+		if entries, ok := u.Extensions["function_entry_bindings"].(map[string]string); ok {
+			mainBinding = entries["main"]
+		} else if entries, ok := u.Extensions["function_entry_bindings"].(map[string]any); ok {
+			mainBinding, _ = entries["main"].(string)
+		}
+		// The explicit map is the normal contract.  The deterministic binding
+		// fallback preserves executability for older canonical payloads whose
+		// extension plane predates function_entry_bindings.
+		if mainBinding == "" {
+			mainBinding = "native_function_0"
+		}
+		if value, found := env.get(mainBinding); found {
+			if fn, isFunction := value.(*runUASTFunction); isFunction {
+				if _, err := st.callUASTFunction(fn, nil, nil); err != nil {
+					return st.out.String(), err
+				}
+			}
+		}
+	}
+	st.tasks.Wait()
+	st.taskMu.Lock()
+	tasks := append([]*runUASTTask(nil), (*st.taskRegistry)...)
+	st.taskMu.Unlock()
+	for _, task := range tasks {
+		waitRunUASTTask(task)
+		st.consumeTaskOutput(task)
+	}
 	if sig == runBreak || sig == runNext {
 		return st.out.String(), fmt.Errorf("loop control used outside loop")
 	}
 	// Body is a public compatibility view. Execution above is entirely UAST
 	// based; rematerializing the view afterwards prevents a caller's legacy
 	// mutation from appearing to become a second semantic truth.
-	if u.Metadata["frontend"] != "native-go-uast-v1" {
+	// Matrix/front-end facts carry the canonical UAST directly and do not have
+	// the legacy SemanticDocument projection.  Refreshing the compatibility
+	// body is therefore meaningful only for the explicit semantic_document
+	// compatibility projection; never reject an otherwise executable canonical
+	// UAST merely because its derived legacy view is unavailable.
+	if u.Projection == "semantic_document.v1" && u.Metadata["frontend"] != "native-go-uast-v1" {
 		if err := refreshLegacyExecutableBodyView(program, u); err != nil {
 			return st.out.String(), err
 		}
@@ -625,7 +705,13 @@ func runBinary(op string, a, b any) (any, error) {
 		case "^", "**":
 			return math.Pow(X, Y), nil
 		case "%%":
-			return math.Mod(X, Y), nil
+			// Floor-modulo is distinct from the machine remainder.  Keep the
+			// canonical contract independent of the source spelling and make the
+			// divisor-sign invariant explicit for negative operands.
+			if Y == 0 {
+				return math.NaN(), nil
+			}
+			return X - math.Floor(X/Y)*Y, nil
 		case "%/%":
 			return math.Floor(X / Y), nil
 		case "==":
@@ -691,6 +777,18 @@ func (st *runState) primitive(name string, a []any, names []string) (any, error)
 	first := any(nil)
 	if len(a) > 0 {
 		first = a[0]
+	}
+	// Native frontends represent Go's typed integer conversions as canonical
+	// native_symbol_<type> calls. Resolve that transport identity to the one
+	// exact integer conversion primitive; never treat it as an environment
+	// lookup or silently return a default value.
+	if strings.HasPrefix(name, "native_symbol_") {
+		if typ, ok := nativeIntegerConversionType(strings.TrimPrefix(name, "native_symbol_")); ok {
+			if len(a) != 1 {
+				return nil, fmt.Errorf("%s requires exactly one argument", name)
+			}
+			return evaluateInteger(SemanticOperation{Name: "integer.convert", Type: typ}, a)
+		}
 	}
 	switch name {
 	case "c", "list", "expression":
@@ -1127,6 +1225,36 @@ func (st *runState) primitive(name string, a []any, names []string) (any, error)
 		return st.kernelFallback(spec.Kernel, name, a), nil
 	}
 	return nil, fmt.Errorf("could not find function %q", name)
+}
+
+func nativeIntegerConversionType(name string) (SemanticType, bool) {
+	name = strings.ToLower(strings.TrimSpace(name))
+	bits, signed := 0, false
+	switch name {
+	case "int":
+		bits, signed = 64, true
+	case "uint", "uintptr":
+		bits = 64
+	case "byte", "uint8":
+		bits = 8
+	case "int8":
+		bits, signed = 8, true
+	case "uint16":
+		bits = 16
+	case "int16":
+		bits, signed = 16, true
+	case "uint32":
+		bits = 32
+	case "int32":
+		bits, signed = 32, true
+	case "uint64":
+		bits = 64
+	case "int64":
+		bits, signed = 64, true
+	default:
+		return SemanticType{}, false
+	}
+	return SemanticType{Kind: "integer", Bits: bits, Signed: &signed, TypeOrigin: "derived"}, true
 }
 
 func (st *runState) kernelFallback(kernel, name string, a []any) any {

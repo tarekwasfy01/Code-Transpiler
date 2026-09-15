@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -47,7 +48,10 @@ type FunctionFlowEvidence struct {
 }
 
 func AnalyzeFunctionFlows(canonical string) ([]FunctionFlowEvidence, error) {
-	program, err := ParseSemantic("r", canonical)
+	// String input is accepted at this analysis API boundary, but it still
+	// enters through the modern MatrixIR frontend.  The legacy SemanticParser
+	// remains available only to explicit compatibility callers.
+	program, err := LowerMatrixLanguage("r", canonical)
 	if err != nil {
 		return nil, err
 	}

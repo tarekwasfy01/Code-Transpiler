@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package corpusmatrix
 
 // Package corpusmatrix implements the bounded, evidence-only corpus pipeline.

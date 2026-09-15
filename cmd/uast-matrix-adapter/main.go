@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // uast-matrix-adapter writes the canonical input contract for the external
 // uast-matrix-engine. It only serializes existing project facts; all matrix
 // algebra is intentionally delegated to the engine executable.

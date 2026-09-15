@@ -1,0 +1,456 @@
+language,layer,project,source_file,source_kind,compiler_node,evidence,canonical_primitive,evidence_status
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,AccessSpec,def AccessSpec : DeclNode<Decl>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,Block,"def Block : DeclNode<Decl, ""blocks"">, DeclContext;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,Captured,"def Captured : DeclNode<Decl>, DeclContext;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,CXXExpansionStmt,"def CXXExpansionStmt : DeclNode<Decl>, DeclContext;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,Decl,"def Decl : DeclNode<?, """", 1>;",BINDING_DECLARATION,STRUCTURALLY_EVIDENCED_FAMILY
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,Empty,def Empty : DeclNode<Decl>;,COMPILER_IMPLEMENTATION_DETAIL,NON_CANONICAL_COMPILER_DETAIL
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,ExplicitInstantiation,def ExplicitInstantiation : DeclNode<Decl>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,Export,"def Export : DeclNode<Decl>, DeclContext;",MODULE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,ExternCContext,"def ExternCContext : DeclNode<Decl>, DeclContext;",FFI_ABI,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,FileScopeAsm,def FileScopeAsm : DeclNode<Decl>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,Friend,def Friend : DeclNode<Decl>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,FriendTemplate,def FriendTemplate : DeclNode<Friend>;,COMPILETIME,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,HLSLBuffer,"def HLSLBuffer : DeclNode<Named, ""HLSLBuffer"">, DeclContext;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,HLSLRootSignature,"def HLSLRootSignature : DeclNode<Named, ""HLSLRootSignature"">;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,ImplicitConceptSpecialization,def ImplicitConceptSpecialization : DeclNode<Decl>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,Import,def Import : DeclNode<Decl>;,MODULE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,LifetimeExtendedTemporary,def LifetimeExtendedTemporary : DeclNode<Decl>;,CONDITIONAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,LinkageSpec,"def LinkageSpec : DeclNode<Decl>, DeclContext;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,Named,"def Named : DeclNode<Decl, ""named declarations"", 1>;",BINDING_DECLARATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,ObjCPropertyImpl,def ObjCPropertyImpl : DeclNode<Decl>;,MEMBER_ACCESS,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,OMPAllocate,def OMPAllocate : DeclNode<Decl>;,MEMORY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,OMPGroupPrivate,def OMPGroupPrivate : DeclNode<Decl>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,OMPRequires,def OMPRequires : DeclNode<Decl>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,OMPThreadPrivate,def OMPThreadPrivate : DeclNode<Decl>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,OpenACCDeclare,"def OpenACCDeclare : DeclNode<Decl, ""#pragma acc declare"">;",BINDING_DECLARATION,STRUCTURALLY_EVIDENCED_FAMILY
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,OpenACCRoutine,"def OpenACCRoutine : DeclNode<Decl, ""#pragma acc routine"">;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,OutlinedFunction,"def OutlinedFunction : DeclNode<Decl>, DeclContext;",CLOSURE_FUNCTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,PragmaComment,def PragmaComment : DeclNode<Decl>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,PragmaDetectMismatch,def PragmaDetectMismatch : DeclNode<Decl>;,SWITCH_MATCH,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,RequiresExprBody,"def RequiresExprBody : DeclNode<Decl>, DeclContext;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,StaticAssert,def StaticAssert : DeclNode<Decl>;,ASSERTION,STRUCTURALLY_EVIDENCED_SCHEMA
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,TopLevelStmt,"def TopLevelStmt : DeclNode<Decl>, DeclContext;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\DeclNodes.td,clang_decl_node,TranslationUnit,"def TranslationUnit : DeclNode<Decl>, DeclContext;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,AbstractConditionalOperator,"def AbstractConditionalOperator : StmtNode<Expr, 1>;",BINARY_UNARY_OPERATOR,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,AddrLabelExpr,def AddrLabelExpr : StmtNode<Expr>;,CONTROL_TRANSFER,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ArrayInitIndexExpr,def ArrayInitIndexExpr : StmtNode<Expr>;,INDEX_SLICE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ArrayInitLoopExpr,def ArrayInitLoopExpr : StmtNode<Expr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ArraySectionExpr,def ArraySectionExpr : StmtNode<Expr>;,INDEX_SLICE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ArraySubscriptExpr,def ArraySubscriptExpr : StmtNode<Expr>;,INDEX_SLICE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ArrayTypeTraitExpr,def ArrayTypeTraitExpr : StmtNode<Expr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,AsmStmt,"def AsmStmt : StmtNode<Stmt, 1>;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,AsTypeExpr,def AsTypeExpr : StmtNode<Expr>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,AtomicExpr,def AtomicExpr : StmtNode<Expr>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,AttributedStmt,def AttributedStmt : StmtNode<ValueStmt>;,ANNOTATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,BinaryConditionalOperator,def BinaryConditionalOperator : StmtNode<AbstractConditionalOperator>;,BINARY_UNARY_OPERATOR,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,BinaryOperator,def BinaryOperator : StmtNode<Expr>;,BINARY_UNARY_OPERATOR,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,BlockExpr,def BlockExpr : StmtNode<Expr>;,CLOSURE_FUNCTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,BreakStmt,def BreakStmt : StmtNode<LoopControlStmt>;,CONTROL_TRANSFER,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,BuiltinBitCastExpr,def BuiltinBitCastExpr : StmtNode<ExplicitCastExpr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CallExpr,def CallExpr : StmtNode<Expr>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CapturedStmt,def CapturedStmt : StmtNode<Stmt>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CaseStmt,def CaseStmt : StmtNode<SwitchCase>;,SWITCH_MATCH,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CastExpr,"def CastExpr : StmtNode<Expr, 1>;",CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CharacterLiteral,def CharacterLiteral : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ChooseExpr,def ChooseExpr : StmtNode<Expr>;,CONDITIONAL,STRUCTURALLY_EVIDENCED_FAMILY
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CoawaitExpr,def CoawaitExpr : StmtNode<CoroutineSuspendExpr>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CompoundAssignOperator,def CompoundAssignOperator : StmtNode<BinaryOperator>;,BINARY_UNARY_OPERATOR,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CompoundLiteralExpr,def CompoundLiteralExpr : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CompoundStmt,def CompoundStmt : StmtNode<Stmt>;,AGGREGATE,STRUCTURALLY_EVIDENCED_FAMILY
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ConceptSpecializationExpr,def ConceptSpecializationExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ConditionalOperator,def ConditionalOperator : StmtNode<AbstractConditionalOperator>;,BINARY_UNARY_OPERATOR,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ConstantExpr,def ConstantExpr : StmtNode<FullExpr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ContinueStmt,def ContinueStmt : StmtNode<LoopControlStmt>;,CONTROL_TRANSFER,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ConvertVectorExpr,def ConvertVectorExpr : StmtNode<Expr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CoreturnStmt,def CoreturnStmt : StmtNode<Stmt>;,CONTROL_TRANSFER,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CoroutineBodyStmt,def CoroutineBodyStmt : StmtNode<Stmt>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CoroutineSuspendExpr,"def CoroutineSuspendExpr : StmtNode<Expr, 1>;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CoyieldExpr,def CoyieldExpr : StmtNode<CoroutineSuspendExpr>;,CONTROL_TRANSFER,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CStyleCastExpr,def CStyleCastExpr : StmtNode<ExplicitCastExpr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CUDAKernelCallExpr,def CUDAKernelCallExpr : StmtNode<CallExpr>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXAddrspaceCastExpr,def CXXAddrspaceCastExpr : StmtNode<CXXNamedCastExpr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXBindTemporaryExpr,def CXXBindTemporaryExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXBoolLiteralExpr,def CXXBoolLiteralExpr : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXCatchStmt,def CXXCatchStmt : StmtNode<Stmt>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXConstCastExpr,def CXXConstCastExpr : StmtNode<CXXNamedCastExpr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXConstructExpr,def CXXConstructExpr : StmtNode<Expr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXDefaultArgExpr,def CXXDefaultArgExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXDefaultInitExpr,def CXXDefaultInitExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXDeleteExpr,def CXXDeleteExpr : StmtNode<Expr>;,DEALLOCATION,STRUCTURALLY_EVIDENCED_SCHEMA
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXDependentScopeMemberExpr,def CXXDependentScopeMemberExpr : StmtNode<Expr>;,MEMBER_ACCESS,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXDynamicCastExpr,def CXXDynamicCastExpr : StmtNode<CXXNamedCastExpr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXExpansionSelectExpr,def CXXExpansionSelectExpr : StmtNode<Expr>;,CONDITIONAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXExpansionStmtPattern,def CXXExpansionStmtPattern : StmtNode<Stmt>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXFoldExpr,def CXXFoldExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXForRangeStmt,def CXXForRangeStmt : StmtNode<Stmt>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXFunctionalCastExpr,def CXXFunctionalCastExpr : StmtNode<ExplicitCastExpr>;,CLOSURE_FUNCTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXInheritedCtorInitExpr,def CXXInheritedCtorInitExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXMemberCallExpr,def CXXMemberCallExpr : StmtNode<CallExpr>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXNamedCastExpr,"def CXXNamedCastExpr : StmtNode<ExplicitCastExpr, 1>;",CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXNewExpr,def CXXNewExpr : StmtNode<Expr>;,ALLOCATION,STRUCTURALLY_EVIDENCED_SCHEMA
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXNoexceptExpr,def CXXNoexceptExpr : StmtNode<Expr>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXNullPtrLiteralExpr,def CXXNullPtrLiteralExpr : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXOperatorCallExpr,def CXXOperatorCallExpr : StmtNode<CallExpr>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXParenListInitExpr,def CXXParenListInitExpr: StmtNode<Expr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXPseudoDestructorExpr,def CXXPseudoDestructorExpr : StmtNode<Expr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXReflectExpr,def CXXReflectExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXReinterpretCastExpr,def CXXReinterpretCastExpr : StmtNode<CXXNamedCastExpr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXRewrittenBinaryOperator,def CXXRewrittenBinaryOperator : StmtNode<Expr>;,BINARY_UNARY_OPERATOR,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXScalarValueInitExpr,def CXXScalarValueInitExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXStaticCastExpr,def CXXStaticCastExpr : StmtNode<CXXNamedCastExpr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXStdInitializerListExpr,def CXXStdInitializerListExpr : StmtNode<Expr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXTemporaryObjectExpr,def CXXTemporaryObjectExpr : StmtNode<CXXConstructExpr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXThisExpr,def CXXThisExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXThrowExpr,def CXXThrowExpr : StmtNode<Expr>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXTryStmt,def CXXTryStmt : StmtNode<Stmt>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXTypeidExpr,def CXXTypeidExpr : StmtNode<Expr>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXUnresolvedConstructExpr,def CXXUnresolvedConstructExpr : StmtNode<Expr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,CXXUuidofExpr,def CXXUuidofExpr : StmtNode<Expr>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,DeclRefExpr,def DeclRefExpr : StmtNode<Expr>;,BINDING_REFERENCE,STRUCTURALLY_EVIDENCED_SCHEMA
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,DeclStmt,def DeclStmt  : StmtNode<Stmt>;,BINDING_DECLARATION,STRUCTURALLY_EVIDENCED_FAMILY
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,DefaultStmt,def DefaultStmt : StmtNode<SwitchCase>;,SWITCH_MATCH,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,DeferStmt,def DeferStmt : StmtNode<Stmt>;,LIFETIME,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,DependentCoawaitExpr,def DependentCoawaitExpr : StmtNode<Expr>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,DependentScopeDeclRefExpr,def DependentScopeDeclRefExpr : StmtNode<Expr>;,BINDING_REFERENCE,STRUCTURALLY_EVIDENCED_SCHEMA
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,DependentTemplateIdExpr,def DependentTemplateIdExpr : StmtNode<Expr>;,COMPILETIME,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,DesignatedInitExpr,def DesignatedInitExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,DesignatedInitUpdateExpr,def DesignatedInitUpdateExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,DoStmt,def DoStmt : StmtNode<Stmt>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,EmbedExpr,def EmbedExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ExplicitCastExpr,"def ExplicitCastExpr : StmtNode<CastExpr, 1>;",CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,Expr,"def Expr : StmtNode<ValueStmt, 1>;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ExpressionTraitExpr,def ExpressionTraitExpr : StmtNode<Expr>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ExprWithCleanups,def ExprWithCleanups : StmtNode<FullExpr>;,LIFETIME,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ExtVectorElementExpr,def ExtVectorElementExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,FixedPointLiteral,def FixedPointLiteral : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,FloatingLiteral,def FloatingLiteral : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ForStmt,def ForStmt : StmtNode<Stmt>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,FullExpr,"def FullExpr : StmtNode<Expr, 1>;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,FunctionParmPackExpr,def FunctionParmPackExpr : StmtNode<Expr>;,CLOSURE_FUNCTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,GCCAsmStmt,def GCCAsmStmt : StmtNode<AsmStmt>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,GenericSelectionExpr,def GenericSelectionExpr : StmtNode<Expr>;,CONDITIONAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,GNUNullExpr,def GNUNullExpr : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,GotoStmt,def GotoStmt : StmtNode<Stmt>;,CONTROL_TRANSFER,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,HLSLOutArgExpr,def HLSLOutArgExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,IfStmt,def IfStmt : StmtNode<Stmt>;,CONDITIONAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ImaginaryLiteral,def ImaginaryLiteral : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ImplicitCastExpr,def ImplicitCastExpr : StmtNode<CastExpr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ImplicitValueInitExpr,def ImplicitValueInitExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,IndirectGotoStmt,def IndirectGotoStmt : StmtNode<Stmt>;,CONTROL_TRANSFER,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,InitListExpr,def InitListExpr : StmtNode<Expr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,IntegerLiteral,def IntegerLiteral : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,LabelStmt,def LabelStmt : StmtNode<ValueStmt>;,CONTROL_TRANSFER,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,LambdaExpr,def LambdaExpr : StmtNode<Expr>;,CLOSURE_FUNCTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,LoopControlStmt,"def LoopControlStmt : StmtNode<Stmt, 1>;",ITERATION,STRUCTURALLY_EVIDENCED_FAMILY
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,MaterializeTemporaryExpr,def MaterializeTemporaryExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,MatrixElementExpr,def MatrixElementExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,MatrixSingleSubscriptExpr,def MatrixSingleSubscriptExpr : StmtNode<Expr>;,INDEX_SLICE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,MatrixSubscriptExpr,def MatrixSubscriptExpr : StmtNode<Expr>;,INDEX_SLICE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,MemberExpr,def MemberExpr : StmtNode<Expr>;,MEMBER_ACCESS,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,MSAsmStmt,def MSAsmStmt : StmtNode<AsmStmt>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,MSDependentExistsStmt,def MSDependentExistsStmt : StmtNode<Stmt>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,MSPropertyRefExpr,def MSPropertyRefExpr : StmtNode<Expr>;,MEMBER_ACCESS,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,MSPropertySubscriptExpr,def MSPropertySubscriptExpr : StmtNode<Expr>;,INDEX_SLICE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,NoInitExpr,def NoInitExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,NullStmt,def NullStmt : StmtNode<Stmt>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCArrayLiteral,def ObjCArrayLiteral : StmtNode<ObjCObjectLiteral>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCAtCatchStmt,def ObjCAtCatchStmt : StmtNode<Stmt>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCAtFinallyStmt,def ObjCAtFinallyStmt : StmtNode<Stmt>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCAtSynchronizedStmt,def ObjCAtSynchronizedStmt : StmtNode<Stmt>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCAtThrowStmt,def ObjCAtThrowStmt : StmtNode<Stmt>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCAtTryStmt,def ObjCAtTryStmt : StmtNode<Stmt>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCAutoreleasePoolStmt,def ObjCAutoreleasePoolStmt : StmtNode<Stmt>;,DEALLOCATION,STRUCTURALLY_EVIDENCED_SCHEMA
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCAvailabilityCheckExpr,def ObjCAvailabilityCheckExpr : StmtNode<Expr>;,FFI_ABI,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCBoolLiteralExpr,def ObjCBoolLiteralExpr : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCBoxedExpr,def ObjCBoxedExpr : StmtNode<ObjCObjectLiteral>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCBridgedCastExpr,def ObjCBridgedCastExpr : StmtNode<ExplicitCastExpr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCDictionaryLiteral,def ObjCDictionaryLiteral : StmtNode<ObjCObjectLiteral>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCEncodeExpr,def ObjCEncodeExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCForCollectionStmt,def ObjCForCollectionStmt : StmtNode<Stmt>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCIndirectCopyRestoreExpr,def ObjCIndirectCopyRestoreExpr : StmtNode<Expr>;,ASSIGNMENT,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCIsaExpr,def ObjCIsaExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCIvarRefExpr,def ObjCIvarRefExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCMessageExpr,def ObjCMessageExpr : StmtNode<Expr>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCObjectLiteral,"def ObjCObjectLiteral : StmtNode<Expr, 1>;",LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCPropertyRefExpr,def ObjCPropertyRefExpr : StmtNode<Expr>;,MEMBER_ACCESS,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCProtocolExpr,def ObjCProtocolExpr : StmtNode<Expr>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCSelectorExpr,def ObjCSelectorExpr : StmtNode<Expr>;,MEMBER_ACCESS,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCStringLiteral,def ObjCStringLiteral : StmtNode<ObjCObjectLiteral>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ObjCSubscriptRefExpr,def ObjCSubscriptRefExpr : StmtNode<Expr>;,INDEX_SLICE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OffsetOfExpr,def OffsetOfExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPArrayShapingExpr,def OMPArrayShapingExpr : StmtNode<Expr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPAssumeDirective,def OMPAssumeDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPAtomicDirective,def OMPAtomicDirective : StmtNode<OMPExecutableDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPBarrierDirective,def OMPBarrierDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPCancelDirective,def OMPCancelDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPCancellationPointDirective,def OMPCancellationPointDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPCanonicalLoop,def OMPCanonicalLoop : StmtNode<Stmt>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPCriticalDirective,def OMPCriticalDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPDepobjDirective,def OMPDepobjDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPDispatchDirective,def OMPDispatchDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPDistributeDirective,def OMPDistributeDirective : StmtNode<OMPLoopDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPDistributeParallelForDirective,def OMPDistributeParallelForDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPDistributeParallelForSimdDirective,def OMPDistributeParallelForSimdDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPDistributeSimdDirective,def OMPDistributeSimdDirective : StmtNode<OMPLoopDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPErrorDirective,def OMPErrorDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPExecutableDirective,"def OMPExecutableDirective : StmtNode<Stmt, 1>;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPFlushDirective,def OMPFlushDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPForDirective,def OMPForDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPForSimdDirective,def OMPForSimdDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPGenericLoopDirective,def OMPGenericLoopDirective : StmtNode<OMPLoopDirective>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPInteropDirective,def OMPInteropDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPIteratorExpr,def OMPIteratorExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPLoopBasedDirective,"def OMPLoopBasedDirective : StmtNode<OMPExecutableDirective, 1>;",ITERATION,STRUCTURALLY_EVIDENCED_FAMILY
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPLoopDirective,"def OMPLoopDirective : StmtNode<OMPLoopBasedDirective, 1>;",ITERATION,STRUCTURALLY_EVIDENCED_FAMILY
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPMaskedDirective,def OMPMaskedDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPMaskedTaskLoopDirective,def OMPMaskedTaskLoopDirective : StmtNode<OMPLoopDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPMaskedTaskLoopSimdDirective,def OMPMaskedTaskLoopSimdDirective : StmtNode<OMPLoopDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPMasterDirective,def OMPMasterDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPMasterTaskLoopDirective,def OMPMasterTaskLoopDirective : StmtNode<OMPLoopDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPMasterTaskLoopSimdDirective,def OMPMasterTaskLoopSimdDirective : StmtNode<OMPLoopDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPMetaDirective,def OMPMetaDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPOrderedBlockAssocDirective,def OMPOrderedBlockAssocDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPOrderedStandaloneDirective,def OMPOrderedStandaloneDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelDirective,def OMPParallelDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelForDirective,def OMPParallelForDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelForSimdDirective,def OMPParallelForSimdDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelGenericLoopDirective,def OMPParallelGenericLoopDirective : StmtNode<OMPLoopDirective>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelMaskedDirective,def OMPParallelMaskedDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelMaskedTaskLoopDirective,def OMPParallelMaskedTaskLoopDirective : StmtNode<OMPLoopDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelMaskedTaskLoopSimdDirective,def OMPParallelMaskedTaskLoopSimdDirective : StmtNode<OMPLoopDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelMasterDirective,def OMPParallelMasterDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelMasterTaskLoopDirective,def OMPParallelMasterTaskLoopDirective : StmtNode<OMPLoopDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelMasterTaskLoopSimdDirective,def OMPParallelMasterTaskLoopSimdDirective : StmtNode<OMPLoopDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPParallelSectionsDirective,def OMPParallelSectionsDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPReverseDirective,def OMPReverseDirective : StmtNode<OMPCanonicalLoopNestTransformationDirective>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPScanDirective,def OMPScanDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPScopeDirective,def OMPScopeDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPSectionDirective,def OMPSectionDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPSectionsDirective,def OMPSectionsDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPSimdDirective,def OMPSimdDirective : StmtNode<OMPLoopDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPSingleDirective,def OMPSingleDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPSplitDirective,def OMPSplitDirective : StmtNode<OMPCanonicalLoopNestTransformationDirective>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPStripeDirective,def OMPStripeDirective : StmtNode<OMPCanonicalLoopNestTransformationDirective>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetDataDirective,def OMPTargetDataDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetDirective,def OMPTargetDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetEnterDataDirective,def OMPTargetEnterDataDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetExitDataDirective,def OMPTargetExitDataDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetParallelDirective,def OMPTargetParallelDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetParallelForDirective,def OMPTargetParallelForDirective : StmtNode<OMPExecutableDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetParallelForSimdDirective,def OMPTargetParallelForSimdDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetParallelGenericLoopDirective,def OMPTargetParallelGenericLoopDirective : StmtNode<OMPLoopDirective>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetSimdDirective,def OMPTargetSimdDirective : StmtNode<OMPLoopDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetTeamsDirective,def OMPTargetTeamsDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetTeamsDistributeDirective,def OMPTargetTeamsDistributeDirective : StmtNode<OMPLoopDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetTeamsDistributeParallelForDirective,def OMPTargetTeamsDistributeParallelForDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetTeamsDistributeParallelForSimdDirective,def OMPTargetTeamsDistributeParallelForSimdDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetTeamsDistributeSimdDirective,def OMPTargetTeamsDistributeSimdDirective : StmtNode<OMPLoopDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetTeamsGenericLoopDirective,def OMPTargetTeamsGenericLoopDirective : StmtNode<OMPLoopDirective>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTargetUpdateDirective,def OMPTargetUpdateDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTaskDirective,def OMPTaskDirective : StmtNode<OMPExecutableDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTaskgroupDirective,def OMPTaskgroupDirective : StmtNode<OMPExecutableDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTaskLoopDirective,def OMPTaskLoopDirective : StmtNode<OMPLoopDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTaskLoopSimdDirective,def OMPTaskLoopSimdDirective : StmtNode<OMPLoopDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTaskwaitDirective,def OMPTaskwaitDirective : StmtNode<OMPExecutableDirective>;,CONCURRENCY,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTaskyieldDirective,def OMPTaskyieldDirective : StmtNode<OMPExecutableDirective>;,CONTROL_TRANSFER,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTeamsDirective,def OMPTeamsDirective : StmtNode<OMPExecutableDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTeamsDistributeDirective,def OMPTeamsDistributeDirective : StmtNode<OMPLoopDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTeamsDistributeParallelForDirective,def OMPTeamsDistributeParallelForDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTeamsDistributeParallelForSimdDirective,def OMPTeamsDistributeParallelForSimdDirective : StmtNode<OMPLoopDirective>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTeamsDistributeSimdDirective,def OMPTeamsDistributeSimdDirective : StmtNode<OMPLoopDirective>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTeamsGenericLoopDirective,def OMPTeamsGenericLoopDirective : StmtNode<OMPLoopDirective>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPTileDirective,def OMPTileDirective : StmtNode<OMPCanonicalLoopNestTransformationDirective>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OMPUnrollDirective,def OMPUnrollDirective : StmtNode<OMPCanonicalLoopNestTransformationDirective>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpaqueValueExpr,def OpaqueValueExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCAsteriskSizeExpr,def OpenACCAsteriskSizeExpr : StmtNode<Expr>;,CONVERSION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCAtomicConstruct,def OpenACCAtomicConstruct : StmtNode<OpenACCAssociatedStmtConstruct>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCCacheConstruct,def OpenACCCacheConstruct : StmtNode<OpenACCConstructStmt>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCCombinedConstruct,def OpenACCCombinedConstruct : StmtNode<OpenACCAssociatedStmtConstruct>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCComputeConstruct,def OpenACCComputeConstruct : StmtNode<OpenACCAssociatedStmtConstruct>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCConstructStmt,"def OpenACCConstructStmt : StmtNode<Stmt, /*abstract=*/1>;",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCDataConstruct,def OpenACCDataConstruct : StmtNode<OpenACCAssociatedStmtConstruct>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCEnterDataConstruct,def OpenACCEnterDataConstruct : StmtNode<OpenACCConstructStmt>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCExitDataConstruct,def OpenACCExitDataConstruct : StmtNode<OpenACCConstructStmt>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCHostDataConstruct,def OpenACCHostDataConstruct : StmtNode<OpenACCAssociatedStmtConstruct>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCInitConstruct,def OpenACCInitConstruct : StmtNode<OpenACCConstructStmt>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCLoopConstruct,def OpenACCLoopConstruct : StmtNode<OpenACCAssociatedStmtConstruct>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCSetConstruct,def OpenACCSetConstruct : StmtNode<OpenACCConstructStmt>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCShutdownConstruct,def OpenACCShutdownConstruct : StmtNode<OpenACCConstructStmt>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCUpdateConstruct,def OpenACCUpdateConstruct : StmtNode<OpenACCConstructStmt>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OpenACCWaitConstruct,def OpenACCWaitConstruct : StmtNode<OpenACCConstructStmt>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,OverloadExpr,"def OverloadExpr : StmtNode<Expr, 1>;",BINDING_REFERENCE,STRUCTURALLY_EVIDENCED_SCHEMA
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,PackExpansionExpr,def PackExpansionExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,PackIndexingExpr,def PackIndexingExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ParenExpr,def ParenExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ParenListExpr,def ParenListExpr : StmtNode<Expr>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,PredefinedExpr,def PredefinedExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,PseudoObjectExpr,def PseudoObjectExpr : StmtNode<Expr>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,RecoveryExpr,def RecoveryExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,RequiresExpr,def RequiresExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ReturnStmt,def ReturnStmt : StmtNode<Stmt>;,CONTROL_TRANSFER,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SEHExceptStmt,def SEHExceptStmt : StmtNode<Stmt>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SEHFinallyStmt,def SEHFinallyStmt : StmtNode<Stmt>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SEHLeaveStmt,def SEHLeaveStmt : StmtNode<Stmt>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SEHTryStmt,def SEHTryStmt : StmtNode<Stmt>;,EXCEPTION,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ShuffleVectorExpr,def ShuffleVectorExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SizeOfPackExpr,def SizeOfPackExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SourceLocExpr,def SourceLocExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,Stmt,"def Stmt : StmtNode<?, 1>;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,StmtExpr,def StmtExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,StringLiteral,def StringLiteral : StmtNode<Expr>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SubstNonTypeTemplateParmExpr,def SubstNonTypeTemplateParmExpr : StmtNode<Expr>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SubstNonTypeTemplateParmPackExpr,def SubstNonTypeTemplateParmPackExpr : StmtNode<Expr>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SwitchCase,"def SwitchCase : StmtNode<Stmt, 1>;",SWITCH_MATCH,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SwitchStmt,def SwitchStmt : StmtNode<Stmt>;,SWITCH_MATCH,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SYCLKernelCallStmt,def SYCLKernelCallStmt : StmtNode<Stmt>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,SYCLUniqueStableNameExpr,def SYCLUniqueStableNameExpr : StmtNode<Expr>;,BINDING_DECLARATION,STRUCTURALLY_EVIDENCED_FAMILY
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,TypeTraitExpr,def TypeTraitExpr : StmtNode<Expr>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,UnaryExprOrTypeTraitExpr,def UnaryExprOrTypeTraitExpr : StmtNode<Expr>;,BINARY_UNARY_OPERATOR,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,UnaryOperator,def UnaryOperator : StmtNode<Expr>;,BINARY_UNARY_OPERATOR,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,UnresolvedLookupExpr,def UnresolvedLookupExpr : StmtNode<OverloadExpr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,UnresolvedMemberExpr,def UnresolvedMemberExpr : StmtNode<OverloadExpr>;,MEMBER_ACCESS,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,UnresolvedSYCLKernelCallStmt,def UnresolvedSYCLKernelCallStmt : StmtNode<Stmt>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,UserDefinedLiteral,def UserDefinedLiteral : StmtNode<CallExpr>;,CALL,STRUCTURALLY_EVIDENCED
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,VAArgExpr,def VAArgExpr : StmtNode<Expr>;,UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,ValueStmt,"def ValueStmt : StmtNode<Stmt, 1>;",UNMAPPED_ORACLE_SEMANTICS,INSUFFICIENT_SEMANTIC_EVIDENCE
+cpp,ast,LLVM/Clang,sources\c_cpp\LLVM_Clang\StmtNodes.td,clang_stmt_node,WhileStmt,def WhileStmt : StmtNode<Stmt>;,ITERATION,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,AdjustedType,"def AdjustedType : TypeNode<Type>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ArrayParameterType,def ArrayParameterType : TypeNode<ConstantArrayType>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ArrayType,"def ArrayType : TypeNode<Type, 1>;",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,AtomicType,def AtomicType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,AttributedType,"def AttributedType : TypeNode<Type>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,AutoType,def AutoType : TypeNode<DeducedType>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,BitIntType,def BitIntType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,BlockPointerType,def BlockPointerType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,BoundsAttributedType,"def BoundsAttributedType : TypeNode<Type, 1>;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,BTFTagAttributedType,"def BTFTagAttributedType : TypeNode<Type>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,BuiltinType,"def BuiltinType : TypeNode<Type>, AlwaysCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ComplexType,def ComplexType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ConstantArrayType,def ConstantArrayType : TypeNode<ArrayType>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ConstantMatrixType,def ConstantMatrixType : TypeNode<MatrixType>;,LITERAL,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,CountAttributedType,"def CountAttributedType : TypeNode<BoundsAttributedType>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DecayedType,"def DecayedType : TypeNode<AdjustedType>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DecltypeType,"def DecltypeType : TypeNode<Type>, NeverCanonicalUnlessDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DeducedTemplateSpecializationType,def DeducedTemplateSpecializationType : TypeNode<DeducedType>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DeducedType,"def DeducedType : TypeNode<Type, 1>;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DependentAddressSpaceType,"def DependentAddressSpaceType : TypeNode<Type>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DependentBitIntType,"def DependentBitIntType : TypeNode<Type>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DependentNameType,"def DependentNameType : TypeNode<Type>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DependentSizedArrayType,"def DependentSizedArrayType : TypeNode<ArrayType>, AlwaysDependent;",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DependentSizedExtVectorType,"def DependentSizedExtVectorType : TypeNode<Type>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DependentSizedMatrixType,"def DependentSizedMatrixType : TypeNode<MatrixType>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,DependentVectorType,"def DependentVectorType : TypeNode<Type>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,EnumType,def EnumType : TypeNode<TagType>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ExtVectorType,def ExtVectorType : TypeNode<VectorType>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,FunctionNoProtoType,def FunctionNoProtoType : TypeNode<FunctionType>;,CLOSURE_FUNCTION,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,FunctionProtoType,def FunctionProtoType : TypeNode<FunctionType>;,CLOSURE_FUNCTION,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,FunctionType,"def FunctionType : TypeNode<Type, 1>;",CLOSURE_FUNCTION,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,HLSLAttributedResourceType,def HLSLAttributedResourceType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,HLSLInlineSpirvType,def HLSLInlineSpirvType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,IncompleteArrayType,def IncompleteArrayType : TypeNode<ArrayType>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,InjectedClassNameType,"def InjectedClassNameType : TypeNode<TagType>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,LateParsedAttrType,"def LateParsedAttrType : TypeNode<Type>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,LValueReferenceType,def LValueReferenceType : TypeNode<ReferenceType>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,MacroQualifiedType,"def MacroQualifiedType : TypeNode<Type>, NeverCanonical;",MEMBER_ACCESS,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,MatrixType,"def MatrixType : TypeNode<Type, 1>;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,MemberPointerType,def MemberPointerType : TypeNode<Type>;,MEMBER_ACCESS,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ObjCInterfaceType,"def ObjCInterfaceType : TypeNode<ObjCObjectType>, AlwaysCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ObjCObjectPointerType,def ObjCObjectPointerType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ObjCObjectType,def ObjCObjectType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ObjCTypeParamType,"def ObjCTypeParamType : TypeNode<Type>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,OverflowBehaviorType,def OverflowBehaviorType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,PackExpansionType,"def PackExpansionType : TypeNode<Type>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,PackIndexingType,"def PackIndexingType  : TypeNode<Type>, NeverCanonicalUnlessDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ParenType,"def ParenType : TypeNode<Type>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,PipeType,def PipeType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,PointerType,def PointerType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,PredefinedSugarType,"def PredefinedSugarType : TypeNode<Type>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,RecordType,def RecordType : TypeNode<TagType>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,ReferenceType,"def ReferenceType : TypeNode<Type, 1>;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,RValueReferenceType,def RValueReferenceType : TypeNode<ReferenceType>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,SubstBuiltinTemplatePackType,"def SubstBuiltinTemplatePackType : TypeNode<SubstPackType>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,SubstPackType,"def SubstPackType : TypeNode<Type, 1>;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,SubstTemplateTypeParmPackType,"def SubstTemplateTypeParmPackType : TypeNode<SubstPackType>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,SubstTemplateTypeParmType,"def SubstTemplateTypeParmType : TypeNode<Type>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,TagType,"def TagType : TypeNode<Type, 1>;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,TemplateSpecializationType,"def TemplateSpecializationType : TypeNode<Type>, NeverCanonicalUnlessDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,TemplateTypeParmType,"def TemplateTypeParmType : TypeNode<Type>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,Type,"def Type : TypeNode<?, 1>;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,TypedefType,"def TypedefType : TypeNode<Type>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,TypeOfExprType,"def TypeOfExprType : TypeNode<Type>, NeverCanonicalUnlessDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,TypeOfType,"def TypeOfType : TypeNode<Type>, NeverCanonicalUnlessDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,UnaryTransformType,"def UnaryTransformType : TypeNode<Type>, NeverCanonicalUnlessDependent;",BINARY_UNARY_OPERATOR,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,UnresolvedUsingType,"def UnresolvedUsingType : TypeNode<Type>, AlwaysDependent;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,UsingType,"def UsingType : TypeNode<Type>, NeverCanonical;",TYPE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,VariableArrayType,def VariableArrayType : TypeNode<ArrayType>;,AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,type,LLVM/Clang,sources\c_cpp\LLVM_Clang\TypeNodes.td,clang_type_node,VectorType,def VectorType : TypeNode<Type>;,TYPE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Add,"HANDLE_BINARY_INST(14, Add  , BinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,AddrSpaceCast,"HANDLE_CAST_INST(52, AddrSpaceCast, AddrSpaceCastInst)  // addrspace cast",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Alloca,"HANDLE_MEMORY_INST(32, Alloca, AllocaInst)  // Stack management",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,And,"HANDLE_BINARY_INST(29, And  , BinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,AShr,"HANDLE_BINARY_INST(28, AShr , BinaryOperator) // Shift right (arithmetic)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,AtomicCmpXchg,"HANDLE_MEMORY_INST(37, AtomicCmpXchg , AtomicCmpXchgInst )",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,AtomicRMW,"HANDLE_MEMORY_INST(38, AtomicRMW , AtomicRMWInst )",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,BitCast,"HANDLE_CAST_INST(51, BitCast , BitCastInst )  // Type cast",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Call,"HANDLE_OTHER_INST(58, Call   , CallInst   )  // Call a function",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,CallBr,"HANDLE_TERM_INST  (12, CallBr        , CallBrInst) // A call-site terminator",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,CatchPad,"HANDLE_FUNCLETPAD_INST(54, CatchPad  , CatchPadInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,CatchRet,"HANDLE_TERM_INST  (10, CatchRet      , CatchReturnInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,CatchSwitch,"HANDLE_TERM_INST  (11, CatchSwitch   , CatchSwitchInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,CleanupPad,"HANDLE_FUNCLETPAD_INST(53, CleanupPad, CleanupPadInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,CleanupRet,"HANDLE_TERM_INST  ( 9, CleanupRet    , CleanupReturnInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,CondBr,"HANDLE_TERM_INST  ( 3, CondBr        , CondBrInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,ExtractElement,"HANDLE_OTHER_INST(63, ExtractElement, ExtractElementInst)// extract from vector",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,ExtractValue,"HANDLE_OTHER_INST(66, ExtractValue, ExtractValueInst)// extract from aggregate",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FAdd,"HANDLE_BINARY_INST(15, FAdd , FPBinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FCmp,"HANDLE_OTHER_INST(56, FCmp   , FCmpInst   )  // Floating point comparison instr.",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FDiv,"HANDLE_BINARY_INST(22, FDiv , FPBinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Fence,"HANDLE_MEMORY_INST(36, Fence , FenceInst )",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FMul,"HANDLE_BINARY_INST(19, FMul , FPBinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FNeg,"HANDLE_UNARY_INST(13, FNeg  , FPUnaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FPExt,"HANDLE_CAST_INST(47, FPExt   , FPExtInst   )  // Extend floating point",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FPToSI,"HANDLE_CAST_INST(43, FPToSI  , FPToSIInst  )  // floating point -> SInt",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FPToUI,"HANDLE_CAST_INST(42, FPToUI  , FPToUIInst  )  // floating point -> UInt",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FPTrunc,"HANDLE_CAST_INST(46, FPTrunc , FPTruncInst )  // Truncate floating point",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Freeze,"HANDLE_OTHER_INST(69, Freeze, FreezeInst) // Freeze instruction.",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FRem,"HANDLE_BINARY_INST(25, FRem , FPBinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,FSub,"HANDLE_BINARY_INST(17, FSub , FPBinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,GetElementPtr,"HANDLE_MEMORY_INST(35, GetElementPtr, GetElementPtrInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,ICmp,"HANDLE_OTHER_INST(55, ICmp   , ICmpInst   )  // Integer comparison instruction",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,IndirectBr,"HANDLE_TERM_INST  ( 5, IndirectBr    , IndirectBrInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,InsertElement,"HANDLE_OTHER_INST(64, InsertElement, InsertElementInst)  // insert into vector",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,InsertValue,"HANDLE_OTHER_INST(67, InsertValue, InsertValueInst)  // insert into aggregate",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,IntToPtr,"HANDLE_CAST_INST(50, IntToPtr, IntToPtrInst)  // Integer -> Pointer",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Invoke,"HANDLE_TERM_INST  ( 6, Invoke        , InvokeInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,LandingPad,"HANDLE_OTHER_INST(68, LandingPad, LandingPadInst)  // Landing pad instruction.",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Load,"HANDLE_MEMORY_INST(33, Load  , LoadInst  )  // Memory manipulation instrs",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,LShr,"HANDLE_BINARY_INST(27, LShr , BinaryOperator) // Shift right (logical)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Mul,"HANDLE_BINARY_INST(18, Mul  , BinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Or,"HANDLE_BINARY_INST(30, Or   , BinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,PHI,"HANDLE_OTHER_INST(57, PHI    , PHINode    )  // PHI node instruction",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,PtrToAddr,"HANDLE_CAST_INST(49, PtrToAddr, PtrToAddrInst) // Pointer -> Address",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,PtrToInt,"HANDLE_CAST_INST(48, PtrToInt, PtrToIntInst)  // Pointer -> Integer (bitcast)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Resume,"HANDLE_TERM_INST  ( 7, Resume        , ResumeInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Ret,"HANDLE_TERM_INST  ( 1, Ret           , ReturnInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,SDiv,"HANDLE_BINARY_INST(21, SDiv , BinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Select,"HANDLE_OTHER_INST(59, Select , SelectInst )  // select instruction",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,SExt,"HANDLE_CAST_INST(41, SExt    , SExtInst    )  // Sign extend integers",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Shl,"HANDLE_BINARY_INST(26, Shl  , BinaryOperator) // Shift left  (logical)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,ShuffleVector,"HANDLE_OTHER_INST(65, ShuffleVector, ShuffleVectorInst)  // shuffle two vectors.",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,SIToFP,"HANDLE_CAST_INST(45, SIToFP  , SIToFPInst  )  // SInt -> floating point",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,SRem,"HANDLE_BINARY_INST(24, SRem , BinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Store,"HANDLE_MEMORY_INST(34, Store , StoreInst )",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Sub,"HANDLE_BINARY_INST(16, Sub  , BinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Switch,"HANDLE_TERM_INST  ( 4, Switch        , SwitchInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Trunc,"HANDLE_CAST_INST(39, Trunc   , TruncInst   )  // Truncate integers",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,UDiv,"HANDLE_BINARY_INST(20, UDiv , BinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,UIToFP,"HANDLE_CAST_INST(44, UIToFP  , UIToFPInst  )  // UInt -> floating point",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,UncondBr,"HANDLE_TERM_INST  ( 2, UncondBr      , UncondBrInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Unreachable,"HANDLE_TERM_INST  ( 8, Unreachable   , UnreachableInst)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,URem,"HANDLE_BINARY_INST(23, URem , BinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,UserOp1,"HANDLE_USER_INST (60, UserOp1, Instruction)  // May be used internally in a pass",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,UserOp2,"HANDLE_USER_INST (61, UserOp2, Instruction)  // Internal to passes only",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,VAArg,"HANDLE_OTHER_INST(62, VAArg  , VAArgInst  )  // vaarg instruction",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,Xor,"HANDLE_BINARY_INST(31, Xor  , BinaryOperator)",AGGREGATE,STRUCTURALLY_EVIDENCED
+cpp,ir,LLVM,sources\c_cpp\LLVM\Instruction.def,llvm_instruction,ZExt,"HANDLE_CAST_INST(40, ZExt    , ZExtInst    )  // Zero extend integers",AGGREGATE,STRUCTURALLY_EVIDENCED

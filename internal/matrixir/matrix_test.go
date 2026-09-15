@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 import (
@@ -95,6 +96,28 @@ func TestLexicalGraphKeepsCommentMarkersInsideStrings(t *testing.T) {
 	}
 }
 
+func TestPythonTripleQuotedStringsRemainSingleLexemes(t *testing.T) {
+	for _, source := range []string{
+		"text = '''first\nsecond\nthird'''\n",
+		"text = \"\"\"first \\\"quoted\\\"\nsecond\"\"\"\n",
+	} {
+		_, tokens, err := BuildLexicalGraph("python", source)
+		if err != nil {
+			t.Fatalf("valid Python triple-quoted string was rejected: %v", err)
+		}
+		found := false
+		for _, token := range tokens {
+			if token.Class == TokenString && strings.HasPrefix(token.Text, "'''") || token.Class == TokenString && strings.HasPrefix(token.Text, "\"\"\"") {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("triple-quoted string token missing in %q", source)
+		}
+	}
+}
+
 func TestCBlockCommentsAreNotDivisionTokens(t *testing.T) {
 	tokens := Tokenize("c", "/* header */\nint x = 4 / 2; /* tail */\n")
 	comments, divisions := 0, 0
@@ -181,6 +204,95 @@ func TestCanonicalPythonSimpleLoopPatternUsesBindingPatternContract(t *testing.T
 	}
 }
 
+func TestCanonicalCPPEmptyCompoundStatementIsNoOp(t *testing.T) {
+	for _, source := range []string{
+		"void f() {}\n",
+		"void f() { }\n",
+		"void f() {   }\n",
+	} {
+		if _, err := Canonicalize("cpp", source); err != nil {
+			t.Fatalf("empty C++ compound statement %q was rejected: %v", source, err)
+		}
+	}
+}
+
+func TestCanonicalCPPRangeForDeclarationKeepsBinding(t *testing.T) {
+	program, err := Canonicalize("cpp", "for (const std::string &s : names) { use(s); }\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(program.R, "for (s in names) {") {
+		t.Fatalf("C++ range-for declaration lost its binding: %s", program.R)
+	}
+}
+
+func TestCanonicalPythonRangePreservesDynamicStepSemantics(t *testing.T) {
+	program, err := Canonicalize("python", "for item in range(start, stop, stride):\n    print(item)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(program.R, "for (item in range(start, stop, stride)) {") {
+		t.Fatalf("dynamic Python range was not preserved as an iterable call: %s", program.R)
+	}
+}
+
+func TestCanonicalPythonTuplePatternAllowsRepeatedUnderscoreName(t *testing.T) {
+	program, err := Canonicalize("python", "for name, _, _ in values:\n    print(name)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(program.R, "for ((name,_,_) in values) {") {
+		t.Fatalf("Python tuple target was not preserved: %s", program.R)
+	}
+}
+
+func TestCanonicalPythonParenthesizedTupleInCallHeader(t *testing.T) {
+	program, err := Canonicalize("python", "for (key, value) in mapping.items():\n    print(key, value)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(program.R, "for ((key,value) in mapping.items()) {") {
+		t.Fatalf("parenthesized tuple target or iterable call was damaged: %s", program.R)
+	}
+}
+
+func TestCanonicalCPPCountingLoopAllowsSideEffectInitializerAndIteratorAdvance(t *testing.T) {
+	for _, source := range []string{
+		"for (++splitter; splitter; ++splitter) { use(splitter); }\n",
+		"for (; ready(); SkipLine(&buffer, end)) { read(); }\n",
+		"for (; p < end; p += 16) { use(p); }\n",
+		"for (short idx = 0; idx < end; idx += 1, buffer_ptr += numCompsIn) { use(idx); }\n",
+		"for (const char* c = cur; *c && *c != ')'; ++c) { use(c); }\n",
+		"for (size_t i = 0; i < limit; ++i) { use(i); }\n",
+	} {
+		if _, err := Canonicalize("cpp", source); err != nil {
+			t.Errorf("C++ counting loop %q was rejected: %v", source, err)
+		}
+	}
+}
+
+func TestCanonicalPythonTupleBindingAllowsKeywordNamedVal(t *testing.T) {
+	if _, err := Canonicalize("python", "for key, val in value.items():\n    print(key, val)\n"); err != nil {
+		t.Fatalf("valid Python identifier was rejected as a binding modifier: %v", err)
+	}
+}
+
+func TestCanonicalPythonTupleBindingAllowsBuiltinNameChar(t *testing.T) {
+	if _, err := Canonicalize("python", "for i, char in enumerate(text):\n    print(char)\n"); err != nil {
+		t.Fatalf("valid Python identifier was rejected as a type word: %v", err)
+	}
+}
+
+func TestCanonicalPythonNestedTupleBindingPreservesNesting(t *testing.T) {
+	program, err := Canonicalize("python", "for i, (flag, _, _, description) in enumerate(options):\n    print(description)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(program.R, "for ((i,(flag,_,_,description)) in enumerate(options)) {") {
+		t.Fatalf("nested Python loop target lost its grouping: %s", program.R)
+	}
+}
+
 func TestCanonicalPythonUnitStepRangeUsesExistingAscendingRangeContract(t *testing.T) {
 	program, err := Canonicalize("python", "for item in range(2, 5, 1):\n    print(item)\n")
 	if err != nil {
@@ -218,6 +330,26 @@ func TestCanonicalPythonSemicolonsAndPassUseStatementMatrix(t *testing.T) {
 	}
 }
 
+func TestCanonicalPythonWhilePreservesConditionFact(t *testing.T) {
+	program, err := Canonicalize("python", "x = 0\nwhile x < 3:\n    x = x + 1\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, event := range program.SemanticEvents {
+		if event.StructureKind == "while" && event.FactFamily == ParsedIteration {
+			for _, role := range event.Roles {
+				if role.Role == "condition" {
+					found = true
+				}
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("Python while condition was not emitted as a structured fact: %+v", program.SemanticEvents)
+	}
+}
+
 func TestCanonicalPythonElifUsesNestedElseIfContract(t *testing.T) {
 	program, err := Canonicalize("python", "if x < 0:\n    print(x)\nelif x < 2:\n    print(x)\nelse:\n    print(x)\n")
 	if err != nil {
@@ -235,6 +367,53 @@ func TestCanonicalPythonSimpleLambdaUsesClosureContract(t *testing.T) {
 	}
 	if !strings.Contains(program.R, "identity <- function(value) { return(value) }") {
 		t.Fatalf("Python lambda did not use closure contract:\n%s", program.R)
+	}
+}
+
+func TestCanonicalPythonFunctionDeclarationKeepsBindingFact(t *testing.T) {
+	program, err := Canonicalize("python", "def add(a, b):\n    return a + b\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, event := range program.SemanticEvents {
+		if event.StructureKind == "closure" && event.Fields["name"] == "add" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("Python function binding was not preserved: %+v", program.SemanticEvents)
+	}
+}
+
+func TestCanonicalPythonFloorDivisionAndRemainderRemainStructured(t *testing.T) {
+	for _, tc := range []struct {
+		expression string
+		operator   string
+	}{{"17 // 5", "%/%"}, {"17 % 5", "%%"}, {"-7 // 3", "%/%"}, {"-7 % 3", "%%"}} {
+		events, err := AnalyzeSemanticExpression("python", tc.expression)
+		if err != nil {
+			t.Fatalf("%q: %v", tc.expression, err)
+		}
+		found := false
+		for _, event := range events {
+			if event.StructureKind == "binary" && event.Fields["operator"] == tc.operator {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("%q lost structured operator %q: %+v", tc.expression, tc.operator, events)
+		}
+	}
+	program, err := Canonicalize("python", "quotient = 17 // 5\nremainder = 17 % 5\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"quotient <- 17 %/% 5", "remainder <- 17 %% 5"} {
+		if !strings.Contains(program.R, want) {
+			t.Fatalf("canonical Python missing %q:\n%s", want, program.R)
+		}
 	}
 }
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package matrixir
 
 import (
@@ -11,10 +12,19 @@ type CanonicalNode struct {
 	Action Vector
 	Text   string
 	Source int
+	// Parent is the canonical action node that owns this action's block.  It is
+	// filled while the grammar/block stack is active and lets the semantic
+	// event bridge preserve body/statement structure without reparsing text.
+	Parent int
 	// Close and Post are structural action payload, not R transport text.
 	// They make block boundaries available to direct semantic lowerers.
 	Close int
 	Post  string
+	// Branch records that an `else`/`elif` header is a branch of the
+	// immediately preceding if construct.  It is parser structure, not source
+	// text; the semantic lowering layer uses it to attach the branch body to
+	// the existing IfStmt.
+	Branch string
 }
 
 type CanonicalProgram struct {
@@ -79,7 +89,7 @@ func ParsedFamilyForStructure(kind string) ParsedConstructFamily {
 	switch kind {
 	case "AggregateExpr", "TupleExpr", "ComprehensionExpr", "aggregate", "tuple", "comprehension":
 		return ParsedContainer
-	case "ForEachStmt", "LoopStmt", "IterationExpr", "foreach", "loop", "iteration":
+	case "ForEachStmt", "LoopStmt", "IterationExpr", "foreach", "loop", "iteration", "while":
 		return ParsedIteration
 	case "ClosureExpr", "FunctionExpr", "function", "closure", "lambda":
 		return ParsedClosure
@@ -159,6 +169,7 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 	var nodes []CanonicalNode
 	var events []CanonicalEvent
 	stack := []blockFrame{}
+	lastClosedIf := -1
 	rangePrefix := "__matrix_range_"
 	for strings.Contains(code, rangePrefix) {
 		rangePrefix = "_" + rangePrefix
@@ -183,9 +194,17 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			}
 		}
 	}
+	currentParent := func() int {
+		for i := len(stack) - 1; i >= 0; i-- {
+			if stack[i].node >= 0 {
+				return stack[i].node
+			}
+		}
+		return -1
+	}
 	appendAction := func(action int, text string, sourceAt int) (int, error) {
 		vector := Basis(ActionDimensions, action)
-		nodes = append(nodes, CanonicalNode{Action: vector, Text: text, Source: sourceAt})
+		nodes = append(nodes, CanonicalNode{Action: vector, Text: text, Source: sourceAt, Parent: currentParent()})
 		if text != "" {
 			output = append(output, text)
 			events = append(events, CanonicalEvent{Text: text, Source: sourceAt})
@@ -196,10 +215,16 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		for len(stack) > 0 && profile[GrammarIndent] != 0 && indent <= stack[len(stack)-1].indent {
 			frame := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
+			if frame.node >= 0 {
+				lastClosedIf = frame.node
+			}
 			closeFrame(frame)
 		}
 	}
-	for lineIndex, line := range lines {
+	for _, line := range lines {
+		// A branch can only bind to an if closed while processing this same
+		// source line.  Do not carry a stale closed frame across statements.
+		lastClosedIf = -1
 		trim := strings.TrimSpace(line.trim)
 		if trim == "" {
 			continue
@@ -221,6 +246,9 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		for ; leadingClose > 0 && len(stack) > 0; leadingClose-- {
 			frame := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
+			if frame.node >= 0 {
+				lastClosedIf = frame.node
+			}
 			closeFrame(frame)
 		}
 		if trim == "" {
@@ -251,15 +279,25 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			if profile[GrammarIndent] != 0 {
 				closeIndent(line.indent + 1)
 			}
+			branchOwner := lastClosedIf
 			if !hadLeadingClose && len(stack) > 0 {
 				frame := stack[len(stack)-1]
 				stack = stack[:len(stack)-1]
+				branchOwner = frame.node
+				if frame.node >= 0 {
+					lastClosedIf = frame.node
+				}
 				closeFrame(frame)
 			}
 			condition := strings.TrimSpace(strings.TrimPrefix(trim, "elif"))
 			condition = strings.TrimSpace(strings.TrimSuffix(condition, ":"))
 			id, _ := appendAction(ActionElse, "else if ("+normalizeExpression(source, condition, profile)+") {", line.start)
+			if id >= 0 && id < len(nodes) && branchOwner >= 0 {
+				nodes[id].Parent = branchOwner
+				nodes[id].Branch = "else-if"
+			}
 			stack = append(stack, blockFrame{indent: line.indent, semantic: true, node: id})
+			lastClosedIf = -1
 			continue
 		}
 		if strings.HasPrefix(lower, "else") {
@@ -269,13 +307,23 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			if profile[GrammarIndent] != 0 {
 				closeIndent(line.indent + 1)
 			}
+			branchOwner := lastClosedIf
 			if !hadLeadingClose && len(stack) > 0 {
 				frame := stack[len(stack)-1]
 				stack = stack[:len(stack)-1]
+				branchOwner = frame.node
+				if frame.node >= 0 {
+					lastClosedIf = frame.node
+				}
 				closeFrame(frame)
 			}
 			id, _ := appendAction(ActionElse, "else {", line.start)
+			if id >= 0 && id < len(nodes) && branchOwner >= 0 {
+				nodes[id].Parent = branchOwner
+				nodes[id].Branch = "else"
+			}
 			stack = append(stack, blockFrame{indent: line.indent, semantic: true, node: id})
+			lastClosedIf = -1
 			continue
 		}
 		// Python lambda is an expression with a ClosureExpr contract, not a
@@ -283,11 +331,13 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		// assignment through functionSignature.
 		if !(source == "python" && strings.Contains(trim, "lambda")) && isFunctionHeader(line.tokens, trim) {
 			name, params := functionSignature(source, line.tokens, trim, profile)
-			// An anonymous Go func literal is an expression grammar construct,
-			// not a named declaration. Keep the block frame for braces, while the
-			// typed token emitter below owns its parameters and closure roles.
-			if name == "" && source == "go" && startsKeyword(line.tokens, "func") {
-				id, _ := appendAction(ActionExpression, "closure", line.start)
+			// A grammar-selected unnamed function is a closure/function value,
+			// regardless of the language that produced the grammar node.  The
+			// named-declaration path below must not reject it merely because it has
+			// no binding.  Parameters remain token facts and are materialized by
+			// emitStructuredClosure; no source text is passed to a target.
+			if name == "" {
+				id, _ := appendAction(ActionFunction, "function("+strings.Join(params, ", ")+") {", line.start)
 				stack = append(stack, blockFrame{indent: line.indent, semantic: true, function: true, node: id})
 				continue
 			}
@@ -340,7 +390,9 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 				return CanonicalProgram{}, fmt.Errorf("%s range matrix: %w", source, rangeErr)
 			}
 			if plan.Counting {
-				_, _ = appendAction(ActionAssign, plan.Name+" <- "+plan.Begin, line.start)
+				if plan.Begin != "" {
+					_, _ = appendAction(ActionAssign, plan.Name+" <- "+plan.Begin, line.start)
+				}
 				id, _ := appendAction(ActionWhile, "while ("+plan.Condition+") {", line.start)
 				stack = append(stack, blockFrame{indent: line.indent, semantic: true, loop: true, post: plan.Advance, node: id})
 			} else if plan.Iterable {
@@ -382,17 +434,12 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 				}
 			}
 			if entry {
-				terminal := true
-				for _, remaining := range lines[lineIndex+1:] {
-					if strings.Trim(remaining.trim, " };\t\r\n") != "" {
-						terminal = false
-						break
-					}
-				}
-				if terminal && (expression == "0" || expression == "EXIT_SUCCESS") {
-					continue
-				}
-				return CanonicalProgram{}, fmt.Errorf("entry-point early return requires explicit exit semantics")
+				// A return from a recognized entry function is still an explicit
+				// structured control-flow result.  Older normalization discarded a
+				// terminal `return 0` but rejected every other value, turning a
+				// general Return primitive into an artificial source-parse failure.
+				// Preserve it uniformly; target legalization owns each language's
+				// entry-point exit representation.
 			}
 			_, _ = appendAction(ActionReturn, "return("+normalizeExpression(source, expression, profile)+")", line.start)
 			continue
@@ -405,11 +452,36 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 			_, _ = appendAction(ActionAssign, name+" <- "+normalizeExpression(source, expression, profile), line.start)
 			continue
 		}
-		if trim == "{" || trim == ";" || trim == "return 0;" {
+		if trim == "{" || trim == ";" || trim == "return 0;" || isEmptyCompoundStatement(trim) {
+			continue
+		}
+		// Valid Go permits a deferred/inline function invocation to close on a
+		// punctuation-only line (for example the `}()` tail of `defer func(){}`).
+		// It carries no standalone semantic operation; the surrounding function
+		// and call nodes already capture its meaning.  Treat only a run made
+		// entirely of structural punctuation as continuation, while keeping
+		// unknown operator/text lines fail-closed below.
+		if structuralPunctuationOnly(trim) {
 			continue
 		}
 		if strings.Contains(lower, "++") || strings.Contains(lower, "--") {
 			continue
+		}
+		// A standalone punctuation/operator sequence is not an executable
+		// expression.  The old line-oriented normalizer used to preserve it as
+		// an opaque expression node (for example `???`), which made malformed
+		// source look like a complete UAST.  Keep the decision lexical and
+		// structure-based: only a line with an operand token can reach the
+		// generic expression event.
+		hasOperandToken := false
+		for _, token := range line.tokens {
+			if token.Class == TokenIdentifier || token.Class == TokenNumber || token.Class == TokenString {
+				hasOperandToken = true
+				break
+			}
+		}
+		if !hasOperandToken {
+			return CanonicalProgram{}, fmt.Errorf("expected expression at source line %d: %q", line.start, strings.TrimSpace(line.text))
 		}
 		_, _ = appendAction(ActionExpression, normalizeExpression(source, trim, profile), line.start)
 	}
@@ -439,7 +511,13 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		grammarTokens[line.start] = append([]Lexeme(nil), line.tokens...)
 	}
 	nextSemanticID := 0
-	for _, node := range nodes {
+	// rootEventByNode maps a canonical grammar/action node to the root event
+	// produced for that node. Structured expression lowering can emit several
+	// child events; the final event is the construct root (assignment, loop,
+	// closure, call, ...). Keeping this mapping here preserves block ownership
+	// as a typed relation instead of reconstructing it from source text later.
+	rootEventByNode := make(map[int]int, len(nodes))
+	for nodeIndex, node := range nodes {
 		action := canonicalActionName(node.Action)
 		semantic, err := ActionSemantic(node.Action)
 		if err != nil {
@@ -449,16 +527,25 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 		if node.Text != "" {
 			fields["normalized_text"] = node.Text
 		}
+		if node.Branch != "" {
+			fields["branch"] = node.Branch
+			// Preserve the parser's branch form as structured metadata.  A plain
+			// else has no condition; an else-if owns a structured condition.  The
+			// event-to-facts bridge uses this discriminator instead of attempting to
+			// recover branch syntax from Event.Text.
+			fields["branch_kind"] = node.Branch
+		}
 		// Keep the grammar decision as the parent event, but attach the typed
 		// expression/statement children immediately here. Downstream frontends
 		// consume these roles and operands; they never need CanonicalEvent.Text.
-		base := CanonicalSemanticEvent{ID: nextSemanticID, Action: action, Semantic: semantic, StructureKind: canonicalActionStructure(action), Text: node.Text, SourceOffset: node.Source, Fields: fields, FactFamily: ParsedFamilyForStructure(canonicalActionStructure(action))}
+		base := CanonicalSemanticEvent{ID: nextSemanticID, Action: action, Semantic: semantic, StructureKind: canonicalActionStructure(action), Text: node.Text, SourceOffset: node.Source, Fields: fields, ParentID: -1, FactFamily: ParsedFamilyForStructure(canonicalActionStructure(action))}
 		structured, structuredErr := AnalyzeSemanticStatementTokens(source, base, grammarTokens[node.Source])
 		if structuredErr == nil && len(structured) != 0 {
 			offset := nextSemanticID
 			for i := range structured {
 				structured[i].ID += offset
 				structured[i].SourceOffset += node.Source
+				structured[i].ParentID = -1
 				if structured[i].Action == "" {
 					structured[i].Action = action
 				}
@@ -474,14 +561,68 @@ func Canonicalize(source, code string) (CanonicalProgram, error) {
 				}
 			}
 			semanticEvents = append(semanticEvents, structured...)
+			rootID := nextSemanticID + len(structured) - 1
+			if node.Parent >= 0 {
+				if parentID, ok := rootEventByNode[node.Parent]; ok {
+					semanticEvents[len(semanticEvents)-1].ParentID = parentID
+				}
+			}
+			ownerID := rootID
+			// A grammar function node can also contain its surrounding assignment
+			// (for example `f <- function(...)`). The assignment is the source
+			// statement root, while nested grammar nodes belong to the closure
+			// body. Select that structured body owner explicitly so return/body
+			// events are not attached to the assignment and subsequently lost.
+			if action == "function" {
+				for i := len(structured) - 1; i >= 0; i-- {
+					if structured[i].StructureKind == "closure" || structured[i].StructureKind == "function" || structured[i].StructureKind == "lambda" {
+						ownerID = structured[i].ID
+						break
+					}
+				}
+			}
+			rootEventByNode[nodeIndex] = ownerID
 			nextSemanticID += len(structured)
 			continue
 		}
+		if node.Parent >= 0 {
+			if parentID, ok := rootEventByNode[node.Parent]; ok {
+				base.ParentID = parentID
+			}
+		}
 		semanticEvents = append(semanticEvents, base)
+		rootEventByNode[nodeIndex] = nextSemanticID
 		nextSemanticID++
 	}
 	_ = lexicalGraph
 	return CanonicalProgram{Source: source, R: strings.Join(output, "\n") + "\n", Nodes: nodes, Graph: graph, Actions: actions, Grammar: profile, Roles: roles, Lexemes: lexemes, Events: events, SemanticEvents: semanticEvents}, nil
+}
+
+// isEmptyCompoundStatement recognizes a compound statement whose only tokens
+// are its opening and closing braces (and whitespace). It has no execution
+// effect, so the canonical action stream does not need a synthetic expression
+// node for it. Keep this structural and language-neutral; non-empty blocks
+// still flow through the normal statement parser.
+func isEmptyCompoundStatement(text string) bool {
+	t := strings.TrimSpace(text)
+	if len(t) < 2 || t[0] != '{' || t[len(t)-1] != '}' {
+		return false
+	}
+	return strings.TrimSpace(strings.Trim(t, "{}")) == ""
+}
+
+func structuralPunctuationOnly(s string) bool {
+	if strings.TrimSpace(s) == "" {
+		return true
+	}
+	for _, r := range s {
+		switch r {
+		case '{', '}', '(', ')', '[', ']', ';', ',', ':':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func hasGoRangeTupleBinding(tokens []Lexeme) bool {
@@ -617,7 +758,7 @@ func isModuleScaffold(tokens []Lexeme, text string) bool {
 	}
 	first := strings.ToLower(tokens[0].Text)
 	switch first {
-	case "package", "import", "use", "using", "namespace", "module":
+	case "package", "import", "from", "use", "using", "namespace", "module":
 		return true
 	}
 	for _, token := range tokens {
@@ -773,10 +914,53 @@ func firstTokenText(tokens []Lexeme) string {
 func headerExpression(text, keyword string) string {
 	trim := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(text), keyword))
 	trim = strings.TrimSpace(strings.TrimSuffix(strings.TrimSuffix(strings.TrimSuffix(trim, "{"), ":"), ";"))
-	if strings.HasPrefix(trim, "(") && strings.HasSuffix(trim, ")") {
+	if hasWrappingParens(trim) && len(trim) >= 2 {
+		// hasWrappingParens operates on runes while slicing must use byte
+		// offsets. Keep the guard here so a short/multibyte header can never
+		// produce an invalid [1:len-1] slice during package import.
 		trim = strings.TrimSpace(trim[1 : len(trim)-1])
 	}
 	return trim
+}
+
+// hasWrappingParens reports whether the first and last parentheses enclose
+// the complete expression, rather than merely appearing at its boundaries
+// around separate constructs such as `(a, b) in iterable()`.
+func hasWrappingParens(text string) bool {
+	runes := []rune(text)
+	return wrappingParenEnd(runes) == len(runes)-1
+}
+
+func wrappingParenEnd(runes []rune) int {
+	if len(runes) < 2 || runes[0] != '(' {
+		return -1
+	}
+	depth := 0
+	var quote rune
+	for i, r := range runes {
+		if quote != 0 {
+			if r == quote && (i == 0 || runes[i-1] != '\\') {
+				quote = 0
+			}
+			continue
+		}
+		if r == '\'' || r == '"' || r == '`' {
+			quote = r
+			continue
+		}
+		switch r {
+		case '(':
+			depth++
+		case ')':
+			depth--
+			if depth == 0 {
+				return i
+			} else if depth < 0 {
+				return -1
+			}
+		}
+	}
+	return -1
 }
 
 func forHasRange(tokens []Lexeme, text string) bool {
@@ -877,6 +1061,30 @@ func normalizeExpression(source, expression string, profile Vector) string {
 	e = strings.ReplaceAll(e, " and ", " && ")
 	e = strings.ReplaceAll(e, " or ", " || ")
 	e = strings.ReplaceAll(e, " div ", " %/% ")
+	// `^` is exponentiation in R, whereas it is bitwise XOR in several target
+	// languages.  Canonicalize the source-observable R meaning to the existing
+	// POWER spelling before UAST construction so target legalization can choose
+	// math.Pow/pow rather than reusing a target XOR token.
+	if source == "r" {
+		e = strings.ReplaceAll(e, "^", "**")
+	}
+	// Python has two distinct arithmetic operators that are represented by
+	// single-character tokens in the generic semantic grammar: ``//`` is
+	// floor division and ``%`` is remainder.  Keep this conversion at the
+	// canonical-expression boundary so all downstream producers see the same
+	// structured operation as the other languages.  Literals have already
+	// been protected above, so operators inside strings/comments are untouched.
+	if source == "python" {
+		// Temporarily protect the two-character floor-division spelling while
+		// normalising the remainder operator.  Replacing '%' first would turn
+		// the second character of '//' in a future extension that uses percent
+		// escapes, and more importantly would make the transformation order
+		// dependent.  The marker cannot occur in a protected source literal.
+		const floorMarker = "__matrix_python_floor_div__"
+		e = strings.ReplaceAll(e, "//", floorMarker)
+		e = strings.ReplaceAll(e, "%", "%%")
+		e = strings.ReplaceAll(e, floorMarker, "%/%")
+	}
 	if strings.Contains(e, "@divTrunc") {
 		numbers := numericTexts(Tokenize(source, e))
 		if len(numbers) >= 2 {

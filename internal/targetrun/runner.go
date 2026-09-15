@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package targetrun
 
 import (
@@ -233,7 +234,7 @@ func firstTool(names ...string) string {
 }
 
 func runCSharp(ctx context.Context, tmp, source string, res *Result, stdout, stderr *bytes.Buffer) error {
-	if csc := firstTool("csc"); csc != "" {
+	if csc := csharpCompiler(); csc != "" {
 		exe := filepath.Join(tmp, "program.exe")
 		res.Command = csc + " /nologo /out:" + exe + " " + source
 		cmd := exec.CommandContext(ctx, csc, "/nologo", "/out:"+exe, source)
@@ -284,4 +285,21 @@ func runCSharp(ctx context.Context, tmp, source string, res *Result, stdout, std
 		return fmt.Errorf("C# dotnet run failed: %w", err)
 	}
 	return nil
+}
+
+// csharpCompiler resolves the inbox .NET Framework compiler as well as PATH.
+// This keeps the C# target runner independent of a dotnet SDK installation.
+func csharpCompiler() string {
+	if csc := firstTool("csc"); csc != "" {
+		return csc
+	}
+	for _, path := range []string{
+		`C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe`,
+		`C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe`,
+	} {
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+	return ""
 }

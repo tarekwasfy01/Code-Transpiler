@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -190,8 +191,8 @@ func TestUASTDirectExecutionReportCounts(t *testing.T) {
 			t.Errorf("%s total=%d want=%d", category, report.Summary[category]["total"], total)
 		}
 	}
-	if report.Summary["facet"]["direct"] != 14 {
-		t.Errorf("direct facets=%d want=14", report.Summary["facet"]["direct"])
+	if report.Summary["facet"]["direct"] != 16 {
+		t.Errorf("direct facets=%d want=16", report.Summary["facet"]["direct"])
 	}
 	if report.Summary["relation"]["projected"] != len(projectedUASTRelations) || report.Summary["relation"]["direct"] != len(directlyConsumedUASTRelations) {
 		t.Fatal("relation report does not match executable registries")

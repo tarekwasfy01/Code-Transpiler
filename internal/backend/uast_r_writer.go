@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -47,6 +48,20 @@ func (w *semanticWriter) uastExpression(g *uastExecutionGraph, id int) (string, 
 			values = append(values, value)
 		}
 		return "list(" + strings.Join(values, ", ") + ")", nil
+	}
+	if c.Kind == "expression" || strings.EqualFold(c.Kind, "operationexpr") {
+		if child, found, err := g.firstChild(id, "expression", "value", "operand"); err != nil {
+			return "", err
+		} else if found {
+			return w.uastExpression(g, child)
+		}
+		if c.Operation.Text != "" {
+			return c.Operation.Text, nil
+		}
+		if c.Name != "" {
+			return c.Name, nil
+		}
+		return "NULL", nil
 	}
 	switch c.Kind {
 	case "literal":
@@ -214,9 +229,16 @@ func (w *semanticWriter) uastStatement(g *uastExecutionGraph, id int) (string, e
 		}
 		return out.String(), nil
 	case "assign":
-		x, _, err := one("expression", true)
+		// Matrix frontends may encode an assignment initializer under the
+		// canonical `value` role (the structured event vocabulary) or under
+		// `expression` (the compatibility vocabulary).  Both are the same
+		// semantic edge; accept either without reparsing source text.
+		x, found, err := g.firstChild(id, "expression", "value")
 		if err != nil {
 			return "", err
+		}
+		if !found {
+			return "", fmt.Errorf("assignment node %d lacks an expression/value child", id)
 		}
 		value, err := w.uastExpression(g, x)
 		op := c.Operation.AssignOp
@@ -225,12 +247,44 @@ func (w *semanticWriter) uastStatement(g *uastExecutionGraph, id int) (string, e
 		}
 		return c.Name + " " + op + " " + value + "\n", err
 	case "expression":
-		x, _, err := one("expression", true)
+		x, found, err := g.firstChild(id, "expression", "value", "operand")
 		if err != nil {
 			return "", err
 		}
+		if !found {
+			// A leaf expression is already an executable expression node; do not
+			// require a redundant wrapper edge from the statement projection.
+			value, expressionErr := w.uastExpression(g, id)
+			return value + "\n", expressionErr
+		}
 		value, err := w.uastExpression(g, x)
 		return value + "\n", err
+	case "call", "binary", "unary", "index", "slice", "aggregate", "tuple", "operationexpr":
+		if expressionOwnedByStructuredParent(g, id) {
+			return "", nil
+		}
+		// A canonical UAST may expose an expression node directly in the
+		// statement sequence (for example a parser-produced print call).  It is
+		// still a normal structured expression; serialise it without routing
+		// through the legacy text parser.
+		value, err := w.uastExpression(g, id)
+		if err != nil {
+			return "", err
+		}
+		return value + "\n", nil
+	case "identifier", "literal", "parameter", "binding", "module":
+		// A shared UAST may expose a declaration/reference node in the
+		// statement sequence as well as through its owning structured node.
+		// Such nodes have no standalone R statement form; consuming them here
+		// preserves the canonical graph instead of turning a reference into a
+		// serialization failure.
+		return "", nil
+	case "function":
+		value, err := w.uastExpression(g, id)
+		if err != nil {
+			return "", err
+		}
+		return value + "\n", nil
 	case "return":
 		value := "NULL"
 		if x, ok, err := one("expression", false); err != nil {
@@ -246,7 +300,7 @@ func (w *semanticWriter) uastStatement(g *uastExecutionGraph, id int) (string, e
 		return "break\n", nil
 	case "continue":
 		return "next\n", nil
-	case "if":
+	case "if", "ifstmt":
 		condition, _, err := one("condition", true)
 		if err != nil {
 			return "", err
@@ -274,7 +328,7 @@ func (w *semanticWriter) uastStatement(g *uastExecutionGraph, id int) (string, e
 			out += " else {\n" + otherText + "}"
 		}
 		return out + "\n", nil
-	case "while":
+	case "while", "whilestmt":
 		condition, _, err := one("condition", true)
 		if err != nil {
 			return "", err
@@ -289,7 +343,7 @@ func (w *semanticWriter) uastStatement(g *uastExecutionGraph, id int) (string, e
 		}
 		bodyText, err := w.uastStatement(g, body)
 		return "while (" + conditionText + ") {\n" + bodyText + "}\n", err
-	case "for":
+	case "for", "forstmt":
 		sequence, _, err := one("sequence", true)
 		if err != nil {
 			return "", err
@@ -304,7 +358,7 @@ func (w *semanticWriter) uastStatement(g *uastExecutionGraph, id int) (string, e
 		}
 		bodyText, err := w.uastStatement(g, body)
 		return "for (" + c.Name + " in " + sequenceText + ") {\n" + bodyText + "}\n", err
-	case "repeat":
+	case "repeat", "repeatstmt":
 		body, _, err := one("body", true)
 		if err != nil {
 			return "", err

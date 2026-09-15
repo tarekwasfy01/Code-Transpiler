@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 package backend
 
 import (
@@ -127,33 +128,44 @@ func AnalyzeUniversalEvidence(u *UniversalASTDocument) (SemanticEvidence, error)
 		e.Scopes[i] = SemanticScope{ID: i, Kind: kind, Parent: parent}
 	}
 	// Lexical bindings are derived from already-proved declaration and scope
-	// facts.  This is the same conservative rule used by the former analyser:
-	// retain all visible candidates; never choose by spelling alone.
+	// facts. Keep the earliest binding in each (name, scope) bucket, which is
+	// exactly the candidate the former ordered scan would encounter first for
+	// that scope. The old implementation scanned every binding for every
+	// identifier; on a whole-project graph that made evidence derivation
+	// O(identifiers*bindings). This index keeps the same visibility/order rule
+	// while limiting lookup to the identifier's lexical scope chain.
 	for i, node := range e.Nodes {
 		if node.Kind == "assign" || node.Kind == "parameter" {
 			e.Bindings = append(e.Bindings, SemanticBinding{ID: len(e.Bindings), Name: node.Symbol, Scope: node.Scope, Mutable: node.Kind == "assign", Definition: i, TypeOrigin: "unknown"})
 		}
 	}
 	e.Binding = matrixir.NewSparseMatrix(n, len(e.Bindings))
-	ancestor := func(scope, target int) bool {
-		for scope >= 0 {
-			if scope == target {
-				return true
-			}
-			scope = e.Scopes[scope].Parent
+	firstBindingByNameScope := make(map[string]map[int]int, len(e.Bindings))
+	for _, binding := range e.Bindings {
+		byScope := firstBindingByNameScope[binding.Name]
+		if byScope == nil {
+			byScope = make(map[int]int)
+			firstBindingByNameScope[binding.Name] = byScope
 		}
-		return false
+		if _, exists := byScope[binding.Scope]; !exists {
+			byScope[binding.Scope] = binding.ID
+		}
 	}
 	for i, node := range e.Nodes {
 		if node.Kind != "identifier" {
 			continue
 		}
-		for j, b := range e.Bindings {
-			if b.Name == node.Symbol && ancestor(node.Scope, b.Scope) {
-				e.Binding.Set(i, j, 1)
-				e.Data.Set(i, b.Definition, 1)
-				break // the executable compatibility contract has one proved binding slot
+		byScope := firstBindingByNameScope[node.Symbol]
+		bestID := -1
+		for scope := node.Scope; scope >= 0; scope = e.Scopes[scope].Parent {
+			if id, exists := byScope[scope]; exists && (bestID < 0 || id < bestID) {
+				bestID = id
 			}
+		}
+		if bestID >= 0 {
+			binding := e.Bindings[bestID]
+			e.Binding.Set(i, bestID, 1)
+			e.Data.Set(i, binding.Definition, 1)
 		}
 	}
 	return e, nil

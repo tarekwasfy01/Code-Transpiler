@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Tarek Wasfy
 // Package codetranspiler exposes the stable many-to-many Code Transpiler API.
 //
 // Import path: github.com/tarekwasfy01/Code-Transpiler
@@ -6,6 +7,7 @@ package codetranspiler
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
@@ -21,6 +23,220 @@ type Language struct {
 // boundary used by the bundled GUI and CLI.
 type TranspileRequest = manytomany.TranspileRequest
 type TranspileTrace = manytomany.TranspileTrace
+
+type CompileOptions = backend.CompileOptions
+type CompileResult = backend.CompileResult
+type CompileOutputKind = backend.CompileOutputKind
+type CompileInputKind = backend.CompileInputKind
+type SemanticProgram = backend.SemanticProgram
+type LLVMOutputKind = backend.LLVMOutputKind
+type LLVMCompileOptions = backend.LLVMCompileOptions
+type LLVMCompileResult = backend.LLVMCompileResult
+type LLVMProjectionCell = backend.LLVMProjectionCell
+type LLVMProjectionPlan = backend.LLVMProjectionPlan
+type LLVMTechnicalEvidenceProfile = backend.LLVMTechnicalEvidenceProfile
+type SemanticModuleLinkOptions = backend.SemanticModuleLinkOptions
+type SemanticModuleEmbeddingMode = backend.SemanticModuleEmbeddingMode
+type SemanticProject = backend.SemanticProject
+type LLVMProjectResult = backend.LLVMProjectResult
+type ExternalCompilerFamily = backend.ExternalCompilerFamily
+type ExternalCCompileOptions = backend.ExternalCCompileOptions
+type ExternalCCompileResult = backend.ExternalCCompileResult
+type ExternalCompilerAvailability = backend.ExternalCompilerAvailability
+
+const (
+	SemanticModulesNeeded    SemanticModuleEmbeddingMode = backend.SemanticModulesNeeded
+	SemanticModulesReference SemanticModuleEmbeddingMode = backend.SemanticModulesReference
+	SemanticModulesAll       SemanticModuleEmbeddingMode = backend.SemanticModulesAll
+)
+
+// CompileSemanticProgram compiles an already linked canonical program.  It is
+// used by directory/module compilation so all units share one semantic root.
+func CompileSemanticProgram(program *SemanticProgram, options CompileOptions) (CompileResult, error) {
+	if err := backend.LinkEmbeddedSemanticModules(program, options.ModuleBaseDir); err != nil {
+		return CompileResult{}, err
+	}
+	if len(program.Origin.Modules) > 0 {
+		resolver, err := backend.NewUniversalModuleResolver()
+		if err != nil {
+			return CompileResult{}, err
+		}
+		if options.ModuleStoreRoot != "" {
+			resolver.Store.Root = options.ModuleStoreRoot
+			if err := resolver.Store.Ensure(); err != nil {
+				return CompileResult{}, err
+			}
+		}
+		if err := resolver.LinkSemanticDependenciesWithOptions(program, SemanticModuleLinkOptions{
+			BaseDir: options.ModuleBaseDir, EmbedAll: options.EmbedAllModules, Mode: options.ModuleEmbeddingMode,
+		}); err != nil {
+			return CompileResult{}, err
+		}
+	}
+	return backend.CompileMachine(program, options)
+}
+
+// CompileSemanticProject compiles directory units independently and links only
+// their target fragments. It never materializes a merged SemanticProgram.
+func CompileSemanticProject(project *SemanticProject, options CompileOptions) (CompileResult, error) {
+	return backend.CompileSemanticProject(project, options)
+}
+
+func LoadSemanticProject(dir, entry string) (*SemanticProject, error) {
+	return backend.LoadSemanticProject(dir, entry)
+}
+
+// CompileLLVMProject compiles every SemanticCompilationUnit independently to
+// an LLVM/COFF fragment and, for LLVMExecutable, links those fragments into a
+// single PE image. Semantic bodies never cross the unit boundary.
+func CompileLLVMProject(project *SemanticProject, options LLVMCompileOptions) (LLVMProjectResult, error) {
+	return backend.CompileLLVMProject(project, options)
+}
+
+// LinkSemanticProgramModules makes module linking available to API clients
+// before emission. With EmbedAll false it obeys the program's serialized
+// semantic_module_link_roots selection. With EmbedAll true it materializes all
+// declared modules into one canonical SemanticProgram.
+func LinkSemanticProgramModules(program *SemanticProgram, options SemanticModuleLinkOptions) error {
+	resolver, err := backend.NewUniversalModuleResolver()
+	if err != nil {
+		return err
+	}
+	return resolver.LinkSemanticDependenciesWithOptions(program, options)
+}
+
+// CompileLLVM projects an already linked canonical UAST to LLVM IR and, when
+// requested, uses the installed LLVM toolchain for native emission. It is an
+// optional route; the established native compiler remains unchanged.
+func CompileLLVM(program *SemanticProgram, options LLVMCompileOptions) (LLVMCompileResult, error) {
+	return backend.CompileLLVM(program, options)
+}
+
+// CompileExternalC projects the canonical UAST through the existing C target
+// and uses GCC/MinGW or MSVC only for final native object/executable creation.
+func CompileExternalC(program *SemanticProgram, options ExternalCCompileOptions) (ExternalCCompileResult, error) {
+	return backend.CompileExternalC(program, options)
+}
+
+// DiscoverExternalCompilers is the shared CLI/GUI/API availability contract.
+func DiscoverExternalCompilers() []ExternalCompilerAvailability {
+	return backend.DiscoverExternalCompilers()
+}
+
+// BuildLLVMProjectionPlan exposes the matrix-derived UAST-to-LLVM contract
+// without emitting an artifact. It is useful for capability reports and
+// preflight diagnostics in clients embedding the package.
+func BuildLLVMProjectionPlan(program *SemanticProgram) (LLVMProjectionPlan, error) {
+	return backend.BuildLLVMProjectionPlan(program)
+}
+
+func LLVMTechnicalEvidence() LLVMTechnicalEvidenceProfile {
+	return backend.LLVMTechnicalEvidence()
+}
+
+const (
+	InputSource     CompileInputKind = backend.CompileInputSource
+	InputAssembly   CompileInputKind = backend.CompileInputAssembly
+	InputMachine    CompileInputKind = backend.CompileInputMachine
+	InputObject     CompileInputKind = backend.CompileInputObject
+	InputExecutable CompileInputKind = backend.CompileInputExecutable
+)
+
+const (
+	Source      CompileOutputKind = backend.CompileSource
+	Assembly    CompileOutputKind = backend.CompileAssembly
+	MachineCode CompileOutputKind = backend.CompileMachineCode
+	Object      CompileOutputKind = backend.CompileObject
+	Executable  CompileOutputKind = backend.CompileExecutable
+)
+
+const (
+	LLVMIR         LLVMOutputKind = backend.LLVMIR
+	LLVMAssembly   LLVMOutputKind = backend.LLVMAssembly
+	LLVMObject     LLVMOutputKind = backend.LLVMObject
+	LLVMExecutable LLVMOutputKind = backend.LLVMExecutable
+)
+
+const (
+	ExternalCompilerAuto ExternalCompilerFamily = backend.ExternalCompilerAuto
+	ExternalCompilerGCC  ExternalCompilerFamily = backend.ExternalCompilerGCC
+	ExternalCompilerMSVC ExternalCompilerFamily = backend.ExternalCompilerMSVC
+)
+
+// Compile uses the same ModernFrontend and canonical UAST as Transpile.
+// Native outputs are encoded in-process; Assembly is an optional rendering.
+func Compile(source string, options CompileOptions) (CompileResult, error) {
+	if options.InputKind != "" && options.InputKind != InputSource {
+		return backend.CompileBinaryInput([]byte(source), options)
+	}
+	// SemanticProgram JSON is an official source representation.  Reuse the
+	// same parser/validator/native pipeline as in-memory semantic programs;
+	// never route it through a textual language frontend.
+	if strings.EqualFold(options.SourceLanguage, "semantic") || strings.EqualFold(options.SourceLanguage, "uast") || strings.EqualFold(options.SourceLanguage, "sp") || strings.EqualFold(options.SourceLanguage, "se") || strings.EqualFold(options.SourceLanguage, "spz") {
+		var program *backend.SemanticProgram
+		var err error
+		if strings.EqualFold(options.SourceLanguage, "sp") || strings.EqualFold(options.SourceLanguage, "se") || strings.EqualFold(options.SourceLanguage, "spz") {
+			if len(source) >= 4 && source[:4] == "SPZ2" {
+				program, err = backend.ParseSemanticSPZ([]byte(source))
+			} else {
+				program, err = backend.ParseSemanticSP([]byte(source))
+			}
+		} else {
+			program, err = backend.ParseSemanticJSON([]byte(source))
+		}
+		if err != nil {
+			return CompileResult{}, err
+		}
+		// Semantic imports are linked before any target projection.  Local paths
+		// and cached .smod modules contribute their declarations; unresolved
+		// external names remain explicit metadata for the selected target.
+		if len(program.Origin.Modules) > 0 {
+			resolver, re := backend.NewUniversalModuleResolver()
+			if re != nil {
+				return CompileResult{}, re
+			}
+			if options.ModuleStoreRoot != "" {
+				resolver.Store.Root = options.ModuleStoreRoot
+				if re = resolver.Store.Ensure(); re != nil {
+					return CompileResult{}, re
+				}
+			}
+			if re = resolver.LinkSemanticDependenciesWithOptions(program, SemanticModuleLinkOptions{
+				BaseDir: options.ModuleBaseDir, EmbedAll: options.EmbedAllModules, Mode: options.ModuleEmbeddingMode,
+			}); re != nil {
+				return CompileResult{}, re
+			}
+		}
+		if options.OutputKind == Source {
+			text, err := backend.EmitSemanticCompatibility(options.TargetLanguage, program)
+			return CompileResult{Text: text, OutputKind: Source}, err
+		}
+		return backend.CompileMachine(program, options)
+	}
+	// Go has a structured native frontend for the executable subset.  Prefer it
+	// here so the public compiler API does not silently route Go source through
+	// the generic textual frontend (which cannot preserve native declarations,
+	// fixed-width types, or entry-point metadata).  Unsupported native constructs
+	// still use the established ModernFrontend as a compatibility path.
+	if strings.EqualFold(options.SourceLanguage, "go") {
+		if native, nativeErr := backend.LowerNativeGo("input.go", source); nativeErr == nil {
+			if options.OutputKind == Source {
+				text, err := backend.EmitSemanticCompatibility(options.TargetLanguage, native)
+				return CompileResult{Text: text, OutputKind: Source}, err
+			}
+			return backend.CompileMachine(native, options)
+		}
+	}
+	p, err := manytomany.Parse(options.SourceLanguage, source)
+	if err != nil {
+		return CompileResult{}, err
+	}
+	if options.OutputKind == Source {
+		text, err := manytomany.Emit(options.TargetLanguage, p)
+		return CompileResult{Text: text, OutputKind: Source}, err
+	}
+	return backend.CompileMachine(p.Semantic, options)
+}
 
 type Capability struct {
 	Feature string `json:"feature"`
@@ -57,12 +273,65 @@ func SemanticJSON(source, code string) ([]byte, error) {
 	return program.Semantic.MarshalSemanticJSON()
 }
 
+// SemanticSP exports a source program as the readable, lossless Semantic
+// Programming transport format.
+func SemanticSP(source, code string) ([]byte, error) {
+	return manytomany.SemanticSP(source, code)
+}
+
+// TranspileSemanticSP imports the canonical SP transport and emits a target
+// through the same UAST backend used by JSON and source APIs.
+func TranspileSemanticSP(target string, data []byte) (string, error) {
+	return manytomany.TranspileSemanticSP(target, data)
+}
+
+// ParseSemanticSP imports a readable SP document into the canonical program.
+func ParseSemanticSP(data []byte) (*SemanticProgram, error) { return backend.ParseSemanticSP(data) }
+
+// MarshalSemanticSP serializes a canonical program as readable SP.
+func MarshalSemanticSP(program *SemanticProgram) ([]byte, error) {
+	if program == nil {
+		return nil, fmt.Errorf("nil semantic program")
+	}
+	return program.MarshalSemanticSP()
+}
+
+// MarshalSemanticSPZ returns the optional compressed SP transport.
+func MarshalSemanticSPZ(program *SemanticProgram) ([]byte, error) {
+	if program == nil {
+		return nil, fmt.Errorf("nil semantic program")
+	}
+	return program.MarshalSemanticSPZ()
+}
+
+// ParseSemanticSPZ imports the optional compressed SP transport.
+func ParseSemanticSPZ(data []byte) (*SemanticProgram, error) { return backend.ParseSemanticSPZ(data) }
+
+// SemanticSE is the .se-named alias of the lossless SemanticProgram format.
+func SemanticSE(source, code string) ([]byte, error) { return manytomany.SemanticSP(source, code) }
+func TranspileSemanticSE(target string, data []byte) (string, error) {
+	return manytomany.TranspileSemanticSP(target, data)
+}
+func ParseSemanticSE(data []byte) (*SemanticProgram, error) { return backend.ParseSemanticSE(data) }
+func MarshalSemanticSE(program *SemanticProgram) ([]byte, error) {
+	if program == nil {
+		return nil, fmt.Errorf("nil semantic program")
+	}
+	return program.MarshalSemanticSE()
+}
 func TranspileSemanticJSON(target string, data []byte) (string, error) {
 	program, err := manytomany.ParseDocument(data)
 	if err != nil {
 		return "", err
 	}
 	return manytomany.Emit(target, program)
+}
+
+// CopyImportedPackageLicenses exports the licenses recorded by semantic module
+// manifests into a sibling `licenses` directory beside outputPath. It is the
+// API counterpart of the CLI -license/-l option.
+func CopyImportedPackageLicenses(storeRoot, outputPath string) (int, error) {
+	return backend.CopyImportedPackageLicenses(storeRoot, outputPath)
 }
 
 func BackendCapability(feature, target string) Capability {
@@ -110,4 +379,26 @@ func NativeSemanticJSON(source, filename, code string) ([]byte, error) {
 		return nil, err
 	}
 	return program.MarshalSemanticJSON()
+}
+
+// BinarySemanticJSON lifts an x86-64 assembly, machine-code, COFF, or PE32+
+// input through the structured machine frontend and returns the same
+// SemanticProgram JSON used by source-language inputs. Unsupported or
+// ambiguous instructions fail closed instead of being guessed as source.
+func BinarySemanticJSON(data []byte, options CompileOptions) ([]byte, error) {
+	if options.InputKind == InputSource || options.InputKind == "" {
+		return nil, fmt.Errorf("binary semantic JSON requires assembly, machine, object, or executable input")
+	}
+	program, err := backend.LiftBinaryInput(data, options)
+	if err != nil {
+		return nil, err
+	}
+	return program.MarshalSemanticJSON()
+}
+
+// DecompileSemanticJSON is the public decompilation entry point for binary
+// and assembly inputs. It returns the canonical SemanticProgram JSON emitted
+// by the structured machine frontend, without routing through a source parser.
+func DecompileSemanticJSON(data []byte, options CompileOptions) ([]byte, error) {
+	return BinarySemanticJSON(data, options)
 }
