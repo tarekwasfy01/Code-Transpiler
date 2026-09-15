@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler">
+  <a href="https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler/v2">
     <img src="https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg/v2" alt="Go Reference" />
   </a>
   &nbsp;
