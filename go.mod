@@ -1,4 +1,4 @@
-module github.com/tarekwasfy01/Code-Transpiler
+module github.com/tarekwasfy01/Code-Transpiler/v2
 
 go 1.26
 
