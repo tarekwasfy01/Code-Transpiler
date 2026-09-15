@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://pkg.go.dev/github.com/tarekwasfy01/Code-Transpiler">
-    <img src="https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg" alt="Go Reference" />
+    <img src="https://pkg.go.dev/badge/github.com/tarekwasfy01/Code-Transpiler.svg/v2" alt="Go Reference" />
   </a>
   &nbsp;
   <a href="https://get.microsoft.com/installer/download/9n1kb1kxxtmn?referrer=appbadge">
