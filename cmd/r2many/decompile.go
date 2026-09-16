@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler/v2"
 )
 
 // decompileSemantic exposes the structured machine frontend directly. The

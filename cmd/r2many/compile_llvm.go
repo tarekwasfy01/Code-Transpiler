@@ -10,8 +10,8 @@ import (
 	"sort"
 	"strings"
 
-	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler/v2"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
 )
 
 func compileLLVM(args []string) error {

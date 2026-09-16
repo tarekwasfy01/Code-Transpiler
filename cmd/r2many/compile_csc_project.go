@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/manytomany"
 )
 
 // compileCSCProject links independently projected C# compilation units.  The

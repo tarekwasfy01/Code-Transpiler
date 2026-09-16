@@ -18,8 +18,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/manytomany"
 )
 
 type primitive struct {

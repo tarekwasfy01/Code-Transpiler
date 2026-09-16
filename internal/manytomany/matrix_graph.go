@@ -3,7 +3,7 @@ package manytomany
 
 import (
 	"fmt"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
 	"sort"
 )
 

@@ -6,9 +6,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
 	"os"
 )
 

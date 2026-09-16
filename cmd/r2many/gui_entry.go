@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"gioui.org/app"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/ui"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/ui"
 )
 
 func launchGUI() {

@@ -87,7 +87,9 @@ func main() {
 	if err := runProducerSpec(*upi, filepath.Join(*upi, "tree_sitter_full"), filepath.Join(*out, "producer_spec")); err != nil {
 		panic(err)
 	}
-	if err := compileGrammarTables(filepath.Join(*upi, "tree_sitter_full"), filepath.Join(*out, "grammar_tables")); err != nil { panic(err) }
+	if err := compileGrammarTables(filepath.Join(*upi, "tree_sitter_full"), filepath.Join(*out, "grammar_tables")); err != nil {
+		panic(err)
+	}
 	if !*legacyBootstrap {
 		return
 	}

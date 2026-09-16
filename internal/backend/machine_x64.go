@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend/x86encode"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend/x86encode"
 )
 
 type x64Operand struct {

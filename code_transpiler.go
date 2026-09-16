@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Tarek Wasfy
 // Package codetranspiler exposes the stable many-to-many Code Transpiler API.
 //
-// Import path: github.com/tarekwasfy01/Code-Transpiler
+// Import path: github.com/tarekwasfy01/Code-Transpiler/v2
 package codetranspiler
 
 import (
@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/manytomany"
 )
 
 type Language struct {

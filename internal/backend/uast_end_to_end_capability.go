@@ -4,7 +4,7 @@ package backend
 import (
 	"sort"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
 )
 
 // UASTEndToEndCapabilityPlane records one boolean column per pipeline stage.

@@ -34,13 +34,13 @@ import (
 	"github.com/oligo/gvcode/textstyle/syntax"
 	gvwidget "github.com/oligo/gvcode/widget"
 
-	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/highlight"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/targetrun"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/thirdpartylicenses"
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler/v2"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/highlight"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/platform"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/targetrun"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/thirdpartylicenses"
 )
 
 // GUITranspileExternalProcesses is deliberately false: normal Convert uses

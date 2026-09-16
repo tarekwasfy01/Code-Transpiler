@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
 )
 
 // WriteUASTMatrixEngineInputs adapts existing, checked-in UAST matrices to the

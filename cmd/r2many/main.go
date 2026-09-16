@@ -18,12 +18,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/runtimeassets"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/targetrun"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/thirdpartylicenses"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/platform"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/runtimeassets"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/targetrun"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/thirdpartylicenses"
 )
 
 // Set by the local onefile build. Defaults keep source-tree invocations
