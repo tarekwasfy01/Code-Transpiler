@@ -4,3 +4,7 @@ github-release/
 dist/*.previous-*.exe
 dist/*.new.exe
 *.tmp
+
+# Generated evidence and binaries are release artifacts, not Go module sources
+/matrices/
+/dist/
