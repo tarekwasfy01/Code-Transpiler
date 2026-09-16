@@ -4,7 +4,6 @@ package ui
 import (
 	"context"
 	"fmt"
-	"image"
 	"image/color"
 	"io"
 	"os"
@@ -16,15 +15,10 @@ import (
 	"time"
 
 	"gioui.org/app"
-	"gioui.org/f32"
 	"gioui.org/font"
 	"gioui.org/io/clipboard"
-	"gioui.org/io/event"
-	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/clip"
-	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -34,13 +28,13 @@ import (
 	"github.com/oligo/gvcode/textstyle/syntax"
 	gvwidget "github.com/oligo/gvcode/widget"
 
-	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/highlight"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/targetrun"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/thirdpartylicenses"
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler/v2"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/highlight"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/platform"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/targetrun"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/thirdpartylicenses"
 )
 
 // GUITranspileExternalProcesses is deliberately false: normal Convert uses
@@ -68,10 +62,6 @@ type languageChoice struct {
 	ID        string
 	Name      string
 	Extension string
-}
-
-type moduleRowState struct {
-	click widget.Clickable
 }
 
 var uiLanguages = func() []languageChoice {
@@ -107,36 +97,24 @@ type App struct {
 	sourceOpen, targetOpen                                                                                                                                                                                                                                                                         bool
 	source, target                                                                                                                                                                                                                                                                                 int
 
-	showInfo                                                      bool
-	showModules                                                   bool
-	infoText                                                      string
-	infoScroll                                                    widget.List
-	moduleScroll                                                  widget.List
-	modulePackage                                                 widget.Editor
-	packageDialogInput                                            widget.Editor
-	packageDialogChoose, packageDialogImport, packageDialogCancel widget.Clickable
-	showPackageDialog                                             bool
-	moduleActionClicks                                            map[string]*widget.Clickable
-	moduleRows                                                    map[string]*moduleRowState
-	moduleLocations                                               map[string]string
-	selectedModule                                                string
-	showModuleContext                                             bool
-	showRun                                                       bool
-	runOutput                                                     string
-	status                                                        string
-	busy                                                          bool
-	runtimeFallback                                               widget.Bool
-	autoDetect                                                    widget.Bool
-	saveCompiler                                                  string
-	showCompilerMenu                                              bool
-	activeRibbonMenu                                              string
-	ribbonActionClicks                                            map[string]*widget.Clickable
-	fontSize                                                      unit.Sp
-	compileWorkers                                                int
-	embedModules                                                  widget.Bool
-	copyLicenses                                                  widget.Bool
-	treeVisible                                                   bool
-	treeStarted                                                   time.Time
+	showInfo         bool
+	infoText         string
+	infoScroll       widget.List
+	showRun          bool
+	runOutput        string
+	status           string
+	busy             bool
+	runtimeFallback  widget.Bool
+	autoDetect       widget.Bool
+	saveCompiler     string
+	showCompilerMenu bool
+	activeRibbonMenu string
+	fontSize         unit.Sp
+	compileWorkers   int
+	embedModules     widget.Bool
+	copyLicenses     widget.Bool
+	treeVisible      bool
+	treeStarted      time.Time
 
 	convertGeneration atomic.Uint64
 	runGeneration     atomic.Uint64
@@ -159,27 +137,20 @@ func New() *App {
 	w.Option(app.Title("Code Transpiler - Semantic Programming Language"), app.Size(unit.Dp(1280), unit.Dp(760)), app.MinSize(unit.Dp(900), unit.Dp(560)))
 	a := &App{
 		window: w, theme: th, status: "Ready", saveCompiler: "native",
-		convertResults: make(chan conversionResult, 4),
-		runResults:     make(chan runResult, 2),
-		saveResults:    make(chan saveResult, 2),
-		sourceClicks:   make([]widget.Clickable, len(uiLanguages)),
-		targetClicks:   make([]widget.Clickable, len(uiLanguages)),
-		source:         0,
-		target:         1,
-		// GUI defaults keep compatibility execution and imported module closure
-		// enabled so a newly opened project works without extra setup.
+		convertResults:  make(chan conversionResult, 4),
+		runResults:      make(chan runResult, 2),
+		saveResults:     make(chan saveResult, 2),
+		sourceClicks:    make([]widget.Clickable, len(uiLanguages)),
+		targetClicks:    make([]widget.Clickable, len(uiLanguages)),
+		source:          0,
+		target:          1,
 		runtimeFallback: widget.Bool{Value: true},
 		autoDetect:      widget.Bool{Value: false},
 		infoText:        cliHelp,
-		// Embed the complete imported module closure by default.
-		embedModules:       widget.Bool{Value: true},
-		copyLicenses:       widget.Bool{Value: true},
-		fontSize:           unit.Sp(14),
-		compileWorkers:     runtime.GOMAXPROCS(0),
-		ribbonActionClicks: make(map[string]*widget.Clickable),
-		moduleActionClicks: make(map[string]*widget.Clickable),
-		moduleRows:         make(map[string]*moduleRowState),
-		moduleLocations:    make(map[string]string),
+		embedModules:    widget.Bool{Value: true},
+		copyLicenses:    widget.Bool{Value: true},
+		fontSize:        unit.Sp(14),
+		compileWorkers:  runtime.GOMAXPROCS(0),
 	}
 	// Initialize the configured Semantic module store on GUI startup. A custom
 	// persisted base is honored; otherwise LOCALAPPDATA is used.
@@ -187,9 +158,6 @@ func New() *App {
 		a.status = "Semantic module store: " + err.Error()
 	}
 	a.infoScroll.List.Axis = layout.Vertical
-	a.moduleScroll.Axis = layout.Vertical
-	a.modulePackage.SingleLine = true
-	a.packageDialogInput.SingleLine = true
 	a.hl = highlight.NewService(w.Invalidate)
 	a.left = newCodeEditor(th, false, codeColorScheme(true, true))
 	// The output pane is also an editable Semantic/source workspace.  Convert
@@ -434,27 +402,6 @@ func (a *App) applyBackgroundResults() {
 	}
 }
 func (a *App) handleClicks(gtx layout.Context) {
-	if a.showPackageDialog {
-		if a.packageDialogCancel.Clicked(gtx) {
-			a.showPackageDialog = false
-		}
-		if a.packageDialogChoose.Clicked(gtx) {
-			if p, err := platform.SelectFolderDialog("Select package or Semantic module folder"); err == nil && p != "" {
-				a.packageDialogInput.SetText(p)
-			}
-		}
-		if a.packageDialogImport.Clicked(gtx) {
-			a.importModuleSource(strings.TrimSpace(a.packageDialogInput.Text()))
-		}
-	}
-	moduleButton := func(key string) *widget.Clickable {
-		if b := a.moduleActionClicks[key]; b != nil {
-			return b
-		}
-		b := new(widget.Clickable)
-		a.moduleActionClicks[key] = b
-		return b
-	}
 	for name, btn := range map[string]*widget.Clickable{
 		"file": &a.fileMenuBtn, "edit": &a.editMenuBtn, "run": &a.runMenuBtn,
 		"cmd": &a.cmdMenuBtn, "settings": &a.settingsMenuBtn, "modules": &a.modulesMenuBtn, "help": &a.helpMenuBtn,
@@ -469,86 +416,6 @@ func (a *App) handleClicks(gtx layout.Context) {
 				a.showInfo = true
 				a.infoText = cliHelp + "\n\nMANUAL\nFile: New, Load file, Save file, Save As.\nEdit: Undo, Redo, Cut, Copy, Paste, Find/Replace, refresh syntax highlighting.\nRun: Run or Run with console; Convert and Save Executable.\nCmd: open a terminal with the CLI and show command help.\nSettings: toggle runtime fallback, imported-module embedding, and package-license copying.\nModules: manage the Semantic module store, acquire packages, and update or reinstall them."
 			}
-			if name == "modules" {
-				a.showModules = true
-				a.activeRibbonMenu = ""
-			}
-		}
-	}
-	// Ribbon menu entries are real controls (rather than decorative labels).
-	// Dispatch them through the same actions used by the main toolbar so every
-	// command has one implementation and keyboard/menu paths stay consistent.
-	for key, btn := range a.ribbonActionClicks {
-		if !btn.Clicked(gtx) {
-			continue
-		}
-		parts := strings.SplitN(key, "\x00", 2)
-		if len(parts) != 2 {
-			continue
-		}
-		switch parts[0] + "\x00" + parts[1] {
-		case "file\x00New":
-			a.left.SetText("")
-			a.right.SetText("")
-			a.status = "New document"
-		case "file\x00Save As":
-			a.startSaveAs(a.right.GetReader())
-		case "edit\x00Copy":
-			gtx.Execute(clipboard.WriteCmd{Type: "text/plain", Data: io.NopCloser(a.right.GetReader())})
-			a.status = "Copied output"
-		case "edit\x00Paste":
-			gtx.Execute(clipboard.ReadCmd{Tag: a.left})
-			a.status = "Pasted into source"
-		case "edit\x00Refresh syntax highlighting":
-			a.scheduleHighlight("left", a.left, a.langForSource(), a.leftGeneration.Add(1))
-			a.scheduleHighlight("right", a.right, a.langForTarget(), a.rightGeneration.Add(1))
-		case "run\x00Run", "run\x00Run with console":
-			a.startRun()
-		case "run\x00Convert":
-			a.startConvert()
-		case "run\x00Save Executable":
-			a.startSaveExecutable()
-		case "cmd\x00Open CMD":
-			exe, _ := os.Executable()
-			if err := platform.OpenCMD(exe); err != nil {
-				a.status = "Open CMD failed: " + err.Error()
-			}
-		case "cmd\x00CLI help", "help\x00Info", "help\x00Manual":
-			a.showInfo = true
-			a.infoText = cliHelp
-		case "help\x00Licenses":
-			a.showInfo = true
-			a.infoText = cliHelp + "\n\n" + thirdpartylicenses.Summary()
-		case "help\x00Set PATH":
-			exe, err := os.Executable()
-			if err == nil {
-				err = platform.SetPath(exe)
-			}
-			if err != nil {
-				a.status = "Set PATH failed: " + err.Error()
-			} else {
-				a.status = "PATH update requested (UAC)"
-			}
-		case "settings\x00Runtime fallback":
-			a.runtimeFallback.Value = !a.runtimeFallback.Value
-		case "settings\x00Embed all imported modules":
-			a.embedModules.Value = !a.embedModules.Value
-		case "settings\x00Include package licenses":
-			a.copyLicenses.Value = !a.copyLicenses.Value
-		case "modules\x00Set module folder":
-			if p, err := platform.SelectFolderDialog("Semantic module storage parent folder"); err == nil && p != "" {
-				_ = backend.SetSemanticModuleBase(p)
-				a.status = "Module path: " + p + "\\Semantic"
-			}
-		case "modules\x00Semantic Modules":
-			a.showModules = true
-			a.activeRibbonMenu = ""
-		case "modules\x00Get package":
-			a.packageDialogInput.SetText(strings.TrimSpace(a.modulePackage.Text()))
-			a.showPackageDialog = true
-			a.activeRibbonMenu = ""
-		case "modules\x00Delete", "modules\x00Reinstall", "modules\x00Update":
-			a.status = parts[1] + " selected module (use package field)"
 		}
 	}
 	if a.fontSmallBtn.Clicked(gtx) {
@@ -639,14 +506,6 @@ func (a *App) handleClicks(gtx layout.Context) {
 	}
 	if a.closeInfoBtn.Clicked(gtx) {
 		a.showInfo = false
-	}
-	if a.showModules && moduleButton("close").Clicked(gtx) {
-		a.showModules = false
-	}
-	for _, action := range []string{"get", "delete", "reinstall", "update", "visit"} {
-		if a.showModules && moduleButton(action).Clicked(gtx) {
-			a.moduleAction(action)
-		}
 	}
 	if a.copyInfoBtn.Clicked(gtx) {
 		gtx.Execute(clipboard.WriteCmd{Type: "text/plain", Data: io.NopCloser(strings.NewReader(a.infoText))})
@@ -790,7 +649,7 @@ func (a *App) startConvert() {
 				} else {
 					storeRoot, _ := backend.ModuleStoreRoot()
 					code, err = manytomany.TranspileSemanticSPWithOptions(target, data, manytomany.TranspileRequest{
-						TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: guiModuleBaseDir(), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "needed",
+						TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: guiModuleBaseDir(), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "all",
 					})
 				}
 			} else if target == "sp" || target == "spz" || target == "se" {
@@ -817,7 +676,7 @@ func (a *App) startConvert() {
 				code = string(sp)
 			} else {
 				storeRoot, _ := backend.ModuleStoreRoot()
-				result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: guiModuleBaseDir(), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "needed", DisableRuntimeFallback: disableRuntime})
+				result, convertErr := manytomany.TranspileCore(manytomany.TranspileRequest{Source: string(data), SourceLanguage: source, TargetLanguage: target, EntryPoint: "gui", ModuleBaseDir: guiModuleBaseDir(), ModuleStoreRoot: storeRoot, EmbedAllModules: a.embedModules.Value, ModuleEmbeddingMode: "all", DisableRuntimeFallback: disableRuntime})
 				code, err = result.Code, convertErr
 			}
 		}
@@ -1106,7 +965,6 @@ func (a *App) layoutCompilerMenu(gtx layout.Context) layout.Dimensions {
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{} }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				return widget.Border{Color: color.NRGBA{R: 208, G: 215, B: 222, A: 255}, Width: 1, CornerRadius: 7}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					paint.FillShape(gtx.Ops, color.NRGBA{R: 255, G: 255, B: 255, A: 255}, clip.Rect{Max: gtx.Constraints.Min}.Op())
 					return layout.Inset{Top: 5, Bottom: 5, Left: 7, Right: 7}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -1151,287 +1009,28 @@ func (a *App) layout(gtx layout.Context) layout.Dimensions {
 	if a.busy {
 		gtx.Execute(op.InvalidateCmd{At: gtx.Now.Add(250 * time.Millisecond)})
 	}
-	return layout.Inset{Top: 4, Bottom: 6, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	return layout.Inset{Top: 12, Bottom: 10, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 			layout.Rigid(a.layoutRibbon),
 			layout.Rigid(a.layoutHeader),
 			layout.Rigid(a.layoutRibbonMenu),
 			layout.Rigid(a.layoutCompilerMenu),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 6}.Layout(gtx) }),
-			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-				if a.showPackageDialog {
-					return a.layoutPackageDialog(gtx)
-				}
-				if a.showInfo {
-					return a.layoutInfo(gtx)
-				}
-				if a.showModules {
-					return a.layoutModules(gtx)
-				}
-				return a.layoutMain(gtx)
-			}),
+			layout.Flexed(1, a.layoutMain),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				if !a.showRun {
 					return layout.Dimensions{}
 				}
 				return a.layoutRunOutput(gtx)
 			}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				if !a.showInfo {
+					return layout.Dimensions{}
+				}
+				return a.layoutInfo(gtx)
+			}),
 			layout.Rigid(a.layoutFooter),
 		)
-	})
-}
-
-func (a *App) importModulePackage(gtx layout.Context) {
-	name := strings.TrimSpace(a.modulePackage.Text())
-	a.importModuleSource(name)
-}
-
-func (a *App) importModuleSource(name string) {
-	if name == "" {
-		a.status = "Enter a package or module path"
-		return
-	}
-	a.showPackageDialog = false
-	a.status = "Importing module " + name + "..."
-	go func() {
-		store, err := backend.DefaultSemanticModuleStore()
-		if err == nil {
-			_, err = (backend.UniversalModuleResolver{Store: store}).ImportPackage(name, backend.ModuleImportOptions{})
-		}
-		if err != nil {
-			a.status = "Module import failed: " + err.Error()
-		} else {
-			a.status = "Module imported: " + name
-		}
-		a.window.Invalidate()
-	}()
-}
-
-func (a *App) layoutPackageDialog(gtx layout.Context) layout.Dimensions {
-	return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		return widget.Border{Color: color.NRGBA{R: 205, G: 212, B: 220, A: 255}, Width: 1, CornerRadius: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return layout.Inset{Top: 18, Bottom: 18, Left: 20, Right: 20}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						l := material.H6(a.theme, "Import package or module")
-						return l.Layout(gtx)
-					}),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 10}.Layout(gtx) }),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return material.Editor(a.theme, &a.packageDialogInput, "Package name, URL, or local folder").Layout(gtx)
-					}),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 8}.Layout(gtx) }),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								return smallButton(gtx, a.theme, &a.packageDialogChoose, "Choose folder")
-							}),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								return smallButton(gtx, a.theme, &a.packageDialogImport, "Import")
-							}),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								return smallButton(gtx, a.theme, &a.packageDialogCancel, "Cancel")
-							}),
-						)
-					}),
-				)
-			})
-		})
-	})
-}
-
-func (a *App) moduleAction(action string) {
-	name := strings.TrimSpace(a.modulePackage.Text())
-	if a.selectedModule != "" {
-		name = a.selectedModule
-	}
-	if name == "" {
-		a.status = "Enter a package or module path"
-		return
-	}
-	if action == "get" {
-		a.packageDialogInput.SetText(strings.TrimSpace(a.modulePackage.Text()))
-		a.showPackageDialog = true
-		return
-	}
-	store, err := backend.DefaultSemanticModuleStore()
-	if err != nil {
-		a.status = "Module store failed: " + err.Error()
-		return
-	}
-	if action == "delete" {
-		root := store.Root
-		if p := a.moduleLocations[name]; p != "" {
-			root = filepath.Dir(p)
-		}
-		path := filepath.Join(root, backend.SafeModuleName(name))
-		if p := a.moduleLocations[name]; p != "" {
-			path = p
-		}
-		if err = os.RemoveAll(path); err == nil {
-			a.status = "Module removed: " + name
-		}
-	} else if action == "visit" {
-		a.status = "Repository: " + name
-	} else {
-		a.status = strings.Title(action) + " queued for: " + name
-	}
-	if err != nil {
-		a.status = "Module action failed: " + err.Error()
-	}
-}
-
-func (a *App) layoutModules(gtx layout.Context) layout.Dimensions {
-	get := func(key string) *widget.Clickable {
-		if b := a.moduleActionClicks[key]; b != nil {
-			return b
-		}
-		b := new(widget.Clickable)
-		a.moduleActionClicks[key] = b
-		return b
-	}
-	return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		return widget.Border{Color: color.NRGBA{R: 208, G: 215, B: 222, A: 255}, Width: 1, CornerRadius: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return layout.Inset{Top: 10, Bottom: 10, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								l := material.Body1(a.theme, "Semantic Modules")
-								l.Font.Weight = font.SemiBold
-								return l.Layout(gtx)
-							}),
-							layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{Size: gtx.Constraints.Min} }),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, get("close"), "×") }),
-						)
-					}),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 8}.Layout(gtx) }),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return material.Editor(a.theme, &a.modulePackage, "Package, module path or URL").Layout(gtx)
-					}),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								return smallButton(gtx, a.theme, get("get"), "Get package")
-							}),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 6}.Layout(gtx) }),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, get("update"), "Update") }),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 6}.Layout(gtx) }),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								return smallButton(gtx, a.theme, get("reinstall"), "Reinstall")
-							}),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 6}.Layout(gtx) }),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, get("delete"), "Delete") }),
-						)
-					}),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Height: 8}.Layout(gtx) }),
-					layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-						root, _ := backend.ModuleStoreRoot()
-						roots := []string{root}
-						if home, err := os.UserHomeDir(); err == nil {
-							roots = append(roots, filepath.Join(home, "Desktop", "Semantic Module", "Semantic", "Modules"))
-						}
-						// Some older stores keep packages one level below a
-						// `modules` directory. Include that level as well.
-						for _, dir := range append([]string{}, roots...) {
-							roots = append(roots, filepath.Join(dir, "modules"))
-						}
-						seen := make(map[string]bool)
-						// Filter before handing the count to widget.List.  Returning
-						// zero-height rows for cache/files makes virtualized hit areas
-						// overlap and previously caused only the last module to react.
-						modules := make([]string, 0, 32)
-						for _, dir := range roots {
-							entries, _ := os.ReadDir(dir)
-							for _, e := range entries {
-								if e.IsDir() && e.Name() != "cache" && e.Name() != "locks" && e.Name() != "index" && !seen[e.Name()] {
-									seen[e.Name()] = true
-									modules = append(modules, e.Name())
-									a.moduleLocations[e.Name()] = filepath.Join(dir, e.Name())
-								}
-							}
-						}
-						return material.List(a.theme, &a.moduleScroll).Layout(gtx, len(modules), func(gtx layout.Context, i int) layout.Dimensions {
-							if i < 0 || i >= len(modules) {
-								return layout.Dimensions{}
-							}
-							name := modules[i]
-							row := a.moduleRows[name]
-							if row == nil {
-								row = &moduleRowState{}
-								a.moduleRows[name] = row
-							}
-							selected := name == a.selectedModule
-							// A virtualized list passes the viewport minimum height to
-							// its child. Keep the row wide, but let its height be driven
-							// by the module label instead of filling the whole viewport.
-							rowGtx := gtx
-							rowHeight := gtx.Dp(30)
-							rowGtx.Constraints.Min.Y = rowHeight
-							rowGtx.Constraints.Max.Y = rowHeight
-							buttonColor := color.NRGBA{R: 255, G: 255, B: 255, A: 255}
-							textColor := color.NRGBA{R: 45, G: 52, B: 60, A: 255}
-							borderColor := color.NRGBA{R: 224, G: 228, B: 233, A: 255}
-							if selected {
-								borderColor = color.NRGBA{R: 255, G: 145, B: 25, A: 255}
-							}
-							// Use a dedicated event tag and update it in this exact list item.
-							// This avoids the virtualized list routing every click to the last
-							// material button.
-							event.Op(gtx.Ops, &row.click)
-							for {
-								ev, ok := gtx.Event(pointer.Filter{Target: &row.click, Kinds: pointer.Press})
-								if !ok {
-									break
-								}
-								if pe, ok := ev.(pointer.Event); ok {
-									if pe.Buttons.Contain(pointer.ButtonSecondary) {
-										a.selectedModule, a.showModuleContext = name, true
-									} else {
-										a.selectedModule, a.showModuleContext = name, false
-									}
-									a.modulePackage.SetText(name)
-								}
-							}
-							dims := widget.Border{Color: borderColor, Width: 1}.Layout(rowGtx, func(gtx layout.Context) layout.Dimensions {
-								return layout.Background{}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-									paint.Fill(gtx.Ops, buttonColor)
-									return layout.Dimensions{Size: gtx.Constraints.Min}
-								}, func(gtx layout.Context) layout.Dimensions {
-									return layout.Inset{Top: 3, Bottom: 3, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-										l := material.Body2(a.theme, name)
-										l.Color = textColor
-										return l.Layout(gtx)
-									})
-								})
-							})
-							return dims
-						})
-					}),
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						if !a.showModuleContext || a.selectedModule == "" {
-							return layout.Dimensions{}
-						}
-						return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							return layout.Inset{Top: 4, Bottom: 4, Left: 6, Right: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-								return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-									layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, get("delete"), "Delete") }),
-									layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, get("update"), "Update") }),
-									layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-										return smallButton(gtx, a.theme, get("reinstall"), "Reinstall")
-									}),
-									layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-										return smallButton(gtx, a.theme, get("visit"), "Visit repository")
-									}),
-								)
-							})
-						})
-					}),
-				)
-			})
-		})
 	})
 }
 
@@ -1463,36 +1062,34 @@ func (a *App) layoutRibbonMenu(gtx layout.Context) layout.Dimensions {
 		return layout.Dimensions{}
 	}
 	if a.activeRibbonMenu == "settings" {
-		return a.ribbonDropPanel(gtx, func(gtx layout.Context) layout.Dimensions {
-			return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return layout.Inset{Top: 5, Bottom: 5, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return layout.Flex{Axis: layout.Vertical, Alignment: layout.Start}.Layout(gtx,
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return material.CheckBox(a.theme, &a.autoDetect, "Auto-detect language").Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return material.CheckBox(a.theme, &a.runtimeFallback, "Runtime fallback").Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return material.CheckBox(a.theme, &a.embedModules, "Embed all imported modules").Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return material.CheckBox(a.theme, &a.copyLicenses, "Licenses").Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontSmallBtn, "A−") }),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontNormalBtn, "A") }),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontLargeBtn, "A+") }),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return smallButton(gtx, a.theme, &a.threads4Btn, "4 threads")
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return smallButton(gtx, a.theme, &a.threads8Btn, "8 threads")
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return smallButton(gtx, a.theme, &a.threads16Btn, "16 threads")
-						}),
-					)
-				})
+		return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Top: 5, Bottom: 5, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return material.CheckBox(a.theme, &a.autoDetect, "Auto-detect language").Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return material.CheckBox(a.theme, &a.runtimeFallback, "Runtime fallback").Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return material.CheckBox(a.theme, &a.embedModules, "Embed modules").Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return material.CheckBox(a.theme, &a.copyLicenses, "Licenses").Layout(gtx)
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontSmallBtn, "A−") }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontNormalBtn, "A") }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.fontLargeBtn, "A+") }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return smallButton(gtx, a.theme, &a.threads4Btn, "4 threads")
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return smallButton(gtx, a.theme, &a.threads8Btn, "8 threads")
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return smallButton(gtx, a.theme, &a.threads16Btn, "16 threads")
+					}),
+				)
 			})
 		})
 	}
@@ -1501,67 +1098,50 @@ func (a *App) layoutRibbonMenu(gtx layout.Context) layout.Dimensions {
 		"edit":     {"Undo", "Redo", "Cut", "Copy", "Paste", "Find / Replace", "Refresh syntax highlighting"},
 		"run":      {"Run", "Run with console", "Convert", "Save Executable"},
 		"cmd":      {"Open CMD", "CLI help"},
-		"settings": {"Runtime fallback", "Embed all imported modules", "Include package licenses"},
+		"settings": {"Runtime fallback", "Embed imported modules", "Include package licenses"},
 		"modules":  {"Semantic Modules", "Get package", "Set module folder", "Delete", "Reinstall", "Update"},
 		"help":     {"Manual", "Info", "Licenses", "Set PATH"},
 	}
 	items := labels[a.activeRibbonMenu]
-	// Allocate stable clickables once; a fresh local widget would lose click
-	// state between frames and made the menu appear unresponsive.
-	getAction := func(menu, label string) *widget.Clickable {
-		key := menu + "\x00" + label
-		if b := a.ribbonActionClicks[key]; b != nil {
-			return b
-		}
-		b := new(widget.Clickable)
-		a.ribbonActionClicks[key] = b
-		return b
-	}
-	return a.ribbonDropPanel(gtx, func(gtx layout.Context) layout.Dimensions {
-		return layout.Inset{Top: 1, Bottom: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				// Menus are drop-down panels: paint an opaque surface so the editor
-				// remains visible only below the panel, never through it.
-				paint.FillShape(gtx.Ops, color.NRGBA{R: 255, G: 255, B: 255, A: 255}, clip.Rect{Max: gtx.Constraints.Min}.Op())
-				return layout.Inset{Top: 4, Bottom: 4, Left: 5, Right: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					children := make([]layout.FlexChild, 0, len(items)*2)
-					for i, label := range items {
-						if i > 0 {
-							children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 5}.Layout(gtx) }))
-						}
-						textLabel := label
-						children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							b := material.Button(a.theme, getAction(a.activeRibbonMenu, textLabel), textLabel)
-							b.Background = color.NRGBA{R: 247, G: 249, B: 251, A: 255}
-							b.Color = color.NRGBA{R: 45, G: 52, B: 60, A: 255}
-							b.CornerRadius = 5
-							b.Inset = layout.Inset{Top: 5, Bottom: 5, Left: 8, Right: 8}
-							return b.Layout(gtx)
-						}))
+	var noop widget.Clickable
+	return layout.Inset{Top: 4, Bottom: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Top: 4, Bottom: 4, Left: 5, Right: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				children := make([]layout.FlexChild, 0, len(items)*2)
+				for i, label := range items {
+					if i > 0 {
+						children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 5}.Layout(gtx) }))
 					}
-					return layout.Flex{Axis: layout.Vertical, Alignment: layout.Start}.Layout(gtx, children...)
-				})
+					textLabel := label
+					children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						b := material.Button(a.theme, &noop, textLabel)
+						b.Background = color.NRGBA{R: 247, G: 249, B: 251, A: 255}
+						b.Color = color.NRGBA{R: 45, G: 52, B: 60, A: 255}
+						b.CornerRadius = 5
+						b.Inset = layout.Inset{Top: 5, Bottom: 5, Left: 8, Right: 8}
+						return b.Layout(gtx)
+					}))
+				}
+				return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx, children...)
 			})
 		})
 	})
-}
-
-// ribbonDropPanel positions a compact opaque menu directly below its ribbon
-// button, matching the input/output language picker geometry.
-func (a *App) ribbonDropPanel(gtx layout.Context, panel layout.Widget) layout.Dimensions {
-	offset := map[string]int{"file": 0, "edit": 58, "run": 116, "cmd": 174, "settings": 232, "modules": 326, "help": 414}[a.activeRibbonMenu]
-	return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return layout.Spacer{Width: unit.Dp(float32(offset))}.Layout(gtx)
-		}),
-		layout.Rigid(panel),
-	)
 }
 func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
 	runLabel := "Run " + a.currentSource().Name
 	return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return smallButton(gtx, a.theme, &a.sourceBtn, "Input: "+a.currentSource().Name+"  ▼")
+			return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					return smallButton(gtx, a.theme, &a.sourceBtn, "Input: "+a.currentSource().Name+"  ▼")
+				}),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					if a.sourceOpen {
+						return a.layoutInlineLanguageMenu(gtx, true)
+					}
+					return layout.Dimensions{}
+				}),
+			)
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -1569,7 +1149,17 @@ func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
 		}),
 		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{Size: gtx.Constraints.Min} }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return smallButton(gtx, a.theme, &a.targetBtn, "Output: "+a.currentTarget().Name+"  ▼")
+			return layout.Flex{Axis: layout.Vertical, Alignment: layout.End}.Layout(gtx,
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					return smallButton(gtx, a.theme, &a.targetBtn, "Output: "+a.currentTarget().Name+"  ▼")
+				}),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					if a.targetOpen {
+						return a.layoutInlineLanguageMenu(gtx, false)
+					}
+					return layout.Dimensions{}
+				}),
+			)
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -1599,6 +1189,12 @@ func (a *App) layoutHeader(gtx layout.Context) layout.Dimensions {
 			return smallButton(gtx, a.theme, &a.openCMDBtn, "Open CMD")
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 12}.Layout(gtx) }),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			label := material.Body2(a.theme, a.status)
+			label.Alignment = text.End
+			label.Color = color.NRGBA{R: 87, G: 96, B: 106, A: 255}
+			return label.Layout(gtx)
+		}),
 	)
 }
 
@@ -1672,7 +1268,6 @@ func (a *App) layoutInlineLanguageMenu(gtx layout.Context, source bool) layout.D
 		}))
 	}
 	return widget.Border{Color: color.NRGBA{R: 208, G: 215, B: 222, A: 255}, Width: 1, CornerRadius: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		paint.FillShape(gtx.Ops, color.NRGBA{R: 255, G: 255, B: 255, A: 255}, clip.Rect{Max: gtx.Constraints.Min}.Op())
 		return layout.Inset{Top: 3, Bottom: 3, Left: 3, Right: 3}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{Axis: layout.Vertical}.Layout(gtx, children...)
 		})
@@ -1681,17 +1276,7 @@ func (a *App) layoutInlineLanguageMenu(gtx layout.Context, source bool) layout.D
 func (a *App) layoutMain(gtx layout.Context) layout.Dimensions {
 	return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-			return layout.Stack{Alignment: layout.NW}.Layout(gtx,
-				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-					return a.layoutEditorPanel(gtx, a.currentSource().Name, a.left)
-				}),
-				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-					if !a.sourceOpen {
-						return layout.Dimensions{}
-					}
-					return layout.Inset{Top: 32, Left: 2, Right: 2}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { return a.layoutInlineLanguageMenu(gtx, true) })
-				}),
-			)
+			return a.layoutEditorPanel(gtx, "Input · "+a.currentSource().Name, a.left)
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -1710,17 +1295,7 @@ func (a *App) layoutMain(gtx layout.Context) layout.Dimensions {
 			})
 		}),
 		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-			return layout.Stack{Alignment: layout.NE}.Layout(gtx,
-				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-					return a.layoutEditorPanel(gtx, a.currentTarget().Name, a.right)
-				}),
-				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-					if !a.targetOpen {
-						return layout.Dimensions{}
-					}
-					return layout.Inset{Top: 32, Left: 2, Right: 2}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { return a.layoutInlineLanguageMenu(gtx, false) })
-				}),
-			)
+			return a.layoutEditorPanel(gtx, "Output · "+a.currentTarget().Name, a.right)
 		}),
 	)
 }
@@ -1730,9 +1305,7 @@ func (a *App) layoutMain(gtx layout.Context) layout.Dimensions {
 // the portable GUI build. Nodes illuminate from the bottom upward while a
 // conversion is running and remain orange after completion.
 func (a *App) layoutTreeOfLife(gtx layout.Context) layout.Dimensions {
-	// Detail pages (CLI/info/licenses and module manager) own the center stage;
-	// keep the progress tree behind them instead of showing through the panel.
-	if !a.treeVisible || a.showInfo || a.showModules {
+	if !a.treeVisible {
 		return layout.Dimensions{}
 	}
 	progress := float32(1)
@@ -1746,67 +1319,28 @@ func (a *App) layoutTreeOfLife(gtx layout.Context) layout.Dimensions {
 		}
 		gtx.Execute(op.InvalidateCmd{At: gtx.Now.Add(120 * time.Millisecond)})
 	}
-	// Seven horizontal levels reproduce the supplied Tree-of-Life geometry:
-	// one node, three nodes, three nodes, three nodes, one node. Edges are
-	// drawn first so the orange circular vertices remain crisp on top.
-	// Keep the central emblem compact so it does not displace either editor.
-	gtx.Constraints.Min = image.Pt(124, 204)
-	gtx.Constraints.Max = gtx.Constraints.Min
-	orange := color.NRGBA{R: 255, G: 139, B: 38, A: 255}
-	gray := color.NRGBA{R: 150, G: 156, B: 163, A: 255}
-	// Exact compact logo geometry: top, side pair, center, side pair,
-	// center, side pair, bottom. There is no separate loading bar; progress
-	// is represented by the graph itself filling from the bottom upward.
-	// A compact triangular lattice. Horizontal spacing and diagonal spacing
-	// are both one edge unit, so every drawn connection has the same length.
-	pts := []f32.Point{{62, 7}, {44, 38}, {80, 38}, {62, 69}, {44, 100}, {80, 100}, {62, 131}, {44, 162}, {80, 162}, {62, 193}}
-	links := [][2]int{{0, 1}, {0, 2}, {1, 2}, {1, 3}, {2, 3}, {1, 4}, {1, 5}, {2, 4}, {2, 5}, {4, 5}, {4, 6}, {5, 6}, {4, 7}, {4, 8}, {5, 7}, {5, 8}, {7, 8}, {7, 9}, {8, 9}}
-	for _, link := range links {
-		// A connection becomes active when the lower endpoint reaches the fill
-		// front. This makes the orange progress visibly travel through the graph.
-		lower := pts[link[0]].Y
-		if pts[link[1]].Y > lower {
-			lower = pts[link[1]].Y
-		}
-		active := progress >= 1-lower/193
-		lineColor := gray
-		if active {
-			lineColor = orange
-		}
-		drawTreeLine(gtx, pts[link[0]], pts[link[1]], lineColor, 2)
-	}
-	for _, p := range pts {
-		// The progress fill travels from the root (bottom) upward.
-		level := 1 - p.Y/193
-		c := gray
-		if progress >= level {
-			c = orange
-		}
-		paint.FillShape(gtx.Ops, c, clip.Ellipse(image.Rect(int(p.X-9), int(p.Y-9), int(p.X+9), int(p.Y+9))).Op(gtx.Ops))
-	}
-	return layout.Dimensions{Size: gtx.Constraints.Min}
-}
-
-func drawTreeLine(gtx layout.Context, a, b f32.Point, c color.NRGBA, width float32) {
-	dx, dy := b.X-a.X, b.Y-a.Y
-	l := float32(1)
-	if dx != 0 || dy != 0 {
-		l = float32((dx*dx + dy*dy))
-		for l > 1 {
-			l = l / 2
-			break
-		}
-	}
-	// A narrow polygon is sufficient for these fixed, axis/diagonal edges.
-	pad := width / 2
-	p := clip.Path{}
-	p.Begin(gtx.Ops)
-	p.MoveTo(f32.Pt(a.X-pad, a.Y-pad))
-	p.LineTo(f32.Pt(b.X-pad, b.Y-pad))
-	p.LineTo(f32.Pt(b.X+pad, b.Y+pad))
-	p.LineTo(f32.Pt(a.X+pad, a.Y+pad))
-	p.Close()
-	paint.FillShape(gtx.Ops, c, clip.Outline{Path: p.End()}.Op())
+	levels := []string{"●", "● ●", "● ●", "● ●", "●", "●"}
+	return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx,
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			l := material.Caption(a.theme, "Semantic")
+			l.Font.Weight = font.SemiBold
+			l.Color = color.NRGBA{R: 87, G: 96, B: 106, A: 255}
+			return l.Layout(gtx)
+		}),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Top: 5, Bottom: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx,
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, levels[0], progress >= 0.85) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, "│", progress >= 0.68) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, levels[1], progress >= 0.52) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, "│", progress >= 0.36) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, levels[2], progress >= 0.20) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, "│", progress >= 0.08) }),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { return a.treeGlyph(gtx, levels[5], true) }),
+				)
+			})
+		}),
+	)
 }
 
 func (a *App) treeGlyph(gtx layout.Context, glyph string, active bool) layout.Dimensions {
@@ -1938,18 +1472,7 @@ func (a *App) layoutInfo(gtx layout.Context) layout.Dimensions {
 	})
 }
 func (a *App) layoutFooter(gtx layout.Context) layout.Dimensions {
-	// Keep transient conversion/compile state in one unobtrusive, full-width
-	// status line at the very bottom of the window.
-	return layout.Inset{Top: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		return widget.Border{Color: color.NRGBA{R: 218, G: 224, B: 230, A: 255}, Width: 1, CornerRadius: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return layout.Inset{Top: 4, Bottom: 4, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				label := material.Caption(a.theme, a.status)
-				label.Color = color.NRGBA{R: 92, G: 101, B: 112, A: 255}
-				return label.Layout(gtx)
-			})
-		})
-	})
-	/*return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return smallButton(gtx, a.theme, &a.copyBtn, "Copy") }),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions { return layout.Spacer{Width: 8}.Layout(gtx) }),
@@ -1974,7 +1497,7 @@ func (a *App) layoutFooter(gtx layout.Context) layout.Dimensions {
 				return check.Layout(gtx)
 			}),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				check := material.CheckBox(a.theme, &a.embedModules, "Embed all imported modules")
+				check := material.CheckBox(a.theme, &a.embedModules, "Embed imported modules")
 				return check.Layout(gtx)
 			}),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -1988,7 +1511,7 @@ func (a *App) layoutFooter(gtx layout.Context) layout.Dimensions {
 				return label.Layout(gtx)
 			}),
 		)
-	})*/
+	})
 }
 func smallButton(gtx layout.Context, th *material.Theme, click *widget.Clickable, label string) layout.Dimensions {
 	btn := material.Button(th, click, label)
@@ -1996,7 +1519,7 @@ func smallButton(gtx layout.Context, th *material.Theme, click *widget.Clickable
 	btn.Color = color.NRGBA{R: 31, G: 35, B: 40, A: 255}
 	btn.CornerRadius = 7
 	btn.TextSize = unit.Sp(12)
-	btn.Inset = layout.Inset{Top: 3, Bottom: 3, Left: 9, Right: 9}
+	btn.Inset = layout.Inset{Top: 6, Bottom: 6, Left: 11, Right: 11}
 	return btn.Layout(gtx)
 }
 

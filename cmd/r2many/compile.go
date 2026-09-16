@@ -14,9 +14,8 @@ import (
 	"strings"
 	"time"
 
-	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler/v2"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
 )
 
 func compileNative(args []string) error {
@@ -34,10 +33,9 @@ func compileNative(args []string) error {
 	via := fs.Bool("via-assembly", false, "explicitly use NASM instead of the internal encoder")
 	embedAll := fs.Bool("embed-all-modules", false, "embed every declared Semantic module instead of the program's selected link roots")
 	moduleMode := fs.String("module-mode", "needed", "Semantic imports: needed, references, or all")
-	moduleRoot := fs.String("module-root", "", "Semantic module store root")
 	directEXE := fs.Bool("direct-exe", false, "write only the final output; do not retain native build intermediates")
 	buildDir := fs.String("build-dir", "", "directory for persistent native build status and object intermediates")
-	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-source": true, "-target": true, "-o": true, "-entry": true, "-input": true, "-output": true, "-arch": true, "-os": true, "-abi": true, "-via-assembly": false, "--via-assembly": false, "--hex": false, "-module-mode": true, "-module-root": true, "-embed-all-modules": false, "--embed-all-modules": false, "-direct-exe": false, "--direct-exe": false, "-build-dir": true, "--build-dir": true})); err != nil {
+	if err := fs.Parse(reorderValueFlags(args, map[string]bool{"-source": true, "-target": true, "-o": true, "-entry": true, "-input": true, "-output": true, "-arch": true, "-os": true, "-abi": true, "-via-assembly": false, "--via-assembly": false, "--hex": false, "-module-mode": true, "-embed-all-modules": false, "--embed-all-modules": false, "-direct-exe": false, "--direct-exe": false, "-build-dir": true, "--build-dir": true})); err != nil {
 		return err
 	}
 	if *embedAll {
@@ -160,15 +158,8 @@ func compileNative(args []string) error {
 				journal.stage("partition", "compilation units partitioned", inputPath)
 				journal.stage("unit_compile", "local unit lowering and fragment generation", inputPath)
 			}
-			result, re := codetranspiler.CompileSemanticProject(project, codetranspiler.CompileOptions{TargetArch: *arch, TargetOS: *osName, ABI: *abi, OutputKind: kind, EntryPoint: *entry, ViaAssembly: *via, ModuleBaseDir: inputPath, ModuleStoreRoot: *moduleRoot, EmbedAllModules: *embedAll, ModuleEmbeddingMode: backend.SemanticModuleEmbeddingMode(*moduleMode), CacheDir: cacheDir})
+			result, re := codetranspiler.CompileSemanticProject(project, codetranspiler.CompileOptions{TargetArch: *arch, TargetOS: *osName, ABI: *abi, OutputKind: kind, EntryPoint: *entry, ViaAssembly: *via, ModuleBaseDir: inputPath, EmbedAllModules: *embedAll, ModuleEmbeddingMode: backend.SemanticModuleEmbeddingMode(*moduleMode), CacheDir: cacheDir})
 			if re != nil {
-				if journal != nil {
-					journal.fail(re)
-				}
-				return re
-			}
-			if kind == codetranspiler.Executable && result.InstructionCount == 0 {
-				re = fmt.Errorf("native executable refused: no lowered instructions were produced (incomplete semantic closure)")
 				if journal != nil {
 					journal.fail(re)
 				}
@@ -191,13 +182,6 @@ func compileNative(args []string) error {
 			output := result.Bytes
 			if kind == codetranspiler.Assembly {
 				output = []byte(result.Text)
-			}
-			if kind == codetranspiler.Executable && len(output) <= 4608 {
-				re = fmt.Errorf("native executable refused: linker produced only the empty PE image (%d bytes)", len(output))
-				if journal != nil {
-					journal.fail(re)
-				}
-				return re
 			}
 			if *out == "" {
 				return fmt.Errorf("-o is required for binary output")
@@ -262,35 +246,13 @@ func compileNative(args []string) error {
 			p, pe = backend.ParseSemanticSE(data)
 		}
 		if pe == nil {
-			result, pe = codetranspiler.CompileSemanticProgram(p, codetranspiler.CompileOptions{TargetArch: *arch, TargetOS: *osName, ABI: *abi, OutputKind: kind, EntryPoint: *entry, ViaAssembly: *via, ModuleBaseDir: filepath.Dir(inputPath), ModuleStoreRoot: *moduleRoot, EmbedAllModules: *embedAll, ModuleEmbeddingMode: backend.SemanticModuleEmbeddingMode(*moduleMode), CacheDir: cacheDir})
+			result, pe = codetranspiler.CompileSemanticProgram(p, codetranspiler.CompileOptions{TargetArch: *arch, TargetOS: *osName, ABI: *abi, OutputKind: kind, EntryPoint: *entry, ViaAssembly: *via, ModuleBaseDir: filepath.Dir(inputPath), EmbedAllModules: *embedAll, ModuleEmbeddingMode: backend.SemanticModuleEmbeddingMode(*moduleMode), CacheDir: cacheDir})
 		}
 		err = pe
 	} else {
-		// Source compilation crosses the canonical SemanticProgram boundary
-		// before selecting the native backend. This applies uniformly to Go and
-		// every registered frontend; the legacy direct source compiler remains
-		// only for binary/assembly input kinds.
-		if input == codetranspiler.InputSource {
-			program, parseErr := manytomany.Parse(*source, string(data))
-			if parseErr == nil && program.Semantic != nil {
-				result, err = codetranspiler.CompileSemanticProgram(program.Semantic, codetranspiler.CompileOptions{TargetArch: *arch, TargetOS: *osName, ABI: *abi, OutputKind: kind, EntryPoint: *entry, ViaAssembly: *via, ModuleBaseDir: filepath.Dir(inputPath), ModuleStoreRoot: *moduleRoot, EmbedAllModules: *embedAll, ModuleEmbeddingMode: backend.SemanticModuleEmbeddingMode(*moduleMode), CacheDir: cacheDir})
-			} else if parseErr != nil {
-				err = parseErr
-			} else {
-				err = fmt.Errorf("frontend produced no SemanticProgram")
-			}
-		} else {
-			result, err = codetranspiler.Compile(string(data), codetranspiler.CompileOptions{InputKind: input, SourceLanguage: *source, SourceArch: *arch, SourceAsmSyntax: "intel", TargetArch: *arch, TargetOS: *osName, ABI: *abi, OutputKind: kind, EntryPoint: *entry, ViaAssembly: *via})
-		}
+		result, err = codetranspiler.Compile(string(data), codetranspiler.CompileOptions{InputKind: input, SourceLanguage: *source, SourceArch: *arch, SourceAsmSyntax: "intel", TargetArch: *arch, TargetOS: *osName, ABI: *abi, OutputKind: kind, EntryPoint: *entry, ViaAssembly: *via})
 	}
 	if err != nil {
-		if journal != nil {
-			journal.fail(err)
-		}
-		return err
-	}
-	if kind == codetranspiler.Executable && result.InstructionCount == 0 {
-		err = fmt.Errorf("native executable refused: no lowered instructions were produced (incomplete semantic closure)")
 		if journal != nil {
 			journal.fail(err)
 		}
@@ -299,13 +261,6 @@ func compileNative(args []string) error {
 	output := result.Bytes
 	if kind == codetranspiler.Assembly {
 		output = []byte(result.Text)
-	}
-	if kind == codetranspiler.Executable && len(output) <= 4608 {
-		err = fmt.Errorf("native executable refused: linker produced only the empty PE image (%d bytes)", len(output))
-		if journal != nil {
-			journal.fail(err)
-		}
-		return err
 	}
 	if *hexOutput && kind == codetranspiler.MachineCode {
 		if *out == "" {

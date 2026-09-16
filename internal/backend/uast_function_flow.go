@@ -4,9 +4,8 @@ package backend
 import (
 	"fmt"
 	"sort"
-	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
 )
 
 // uastFunctionFlow is the flow matrix model for one UAST closure. Node IDs
@@ -26,15 +25,6 @@ type uastFunctionFlow struct {
 	reads, writes, defined matrixir.Matrix
 }
 
-func uastFlowExpressionKind(kind string) bool {
-	switch kind {
-	case "identifier", "literal", "missing_argument", "binary", "unary", "iteration", "typed_operation", "aggregate", "tuple", "tuple_result", "index", "slice", "member", "deref", "address":
-		return true
-	default:
-		return false
-	}
-}
-
 func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunctionFlow, error) {
 	if graph == nil || graph.common[functionID].Kind != "function" {
 		return nil, fmt.Errorf("missing UAST function node")
@@ -44,16 +34,10 @@ func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunc
 		return nil, fmt.Errorf("function node %d lacks body", functionID)
 	}
 	functionType := graph.common[functionID].Type
-	// Python functions may fall through any control-flow path and then return
-	// None.  That behavior is part of the source-language function contract,
-	// even when the frontend could not infer a result type (or inferred one
-	// from only the explicit-return paths).  Keep it in the canonical flow
-	// projection so target backends emit the implicit null result instead of
-	// rejecting valid Python functions as incomplete.
-	implicitVoidReturn := strings.EqualFold(graph.document.LanguageProfile, "python")
+	implicitVoidReturn := false
 	if functionType.Result != nil {
 		result := functionType.Result
-		implicitVoidReturn = implicitVoidReturn || result.Kind == "void" || (result.Kind == "tuple" && len(result.Parameters) == 0)
+		implicitVoidReturn = result.Kind == "void" || (result.Kind == "tuple" && len(result.Parameters) == 0)
 		if result.Kind == "tuple" && len(result.Parameters) == 1 && result.Parameters[0].Kind == "void" {
 			implicitVoidReturn = true
 		}
@@ -74,12 +58,8 @@ func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunc
 			}
 			return next, nil
 		}
-		// Every emitted flow node corresponds to a node in the canonical UAST.
-		// A fixed 255-node ceiling rejected large but valid functions and made
-		// project compilation size-dependent. Keep the real structural bound so
-		// malformed expansion still fails closed without an arbitrary cap.
-		if len(f.ids) > len(graph.common) {
-			return 0, fmt.Errorf("function flow expansion exceeded canonical UAST node count (%d)", len(graph.common))
+		if len(f.ids) >= 256 {
+			return 0, fmt.Errorf("function flow exceeds 255 nodes")
 		}
 		i := len(f.ids)
 		f.ids = append(f.ids, id)
@@ -134,44 +114,11 @@ func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunc
 			}
 			edges = append(edges, edge{i, bodyEntry, 1}, edge{i, next, 2})
 		case "switch", "switchstmt", "SwitchMatchStmt":
-			// Model each case body as a possible successor. A switch with a
-			// default has no unmatched continuation edge; this matters for
-			// definite-return validation when every case returns. A switch
-			// without a default may always continue after the statement.
-			hasDefault := false
-			for _, child := range graph.orderedChildren(id) {
-				role := child.Meta.Role
-				kind := strings.ToLower(strings.TrimSpace(graph.common[child.ID].Kind))
-				isStructuredCase := kind == "switch_case" || kind == "switch_default"
-				if !isStructuredCase && role != "case" && role != "branch" && role != "default" {
-					continue
-				}
-				isDefault := role == "default" || kind == "default" || kind == "default_case" || kind == "switch_default"
-				if isDefault {
-					hasDefault = true
-				}
-				body, bodyOK, bodyErr := graph.one(child.ID, "body", false)
-				if bodyErr != nil {
-					return 0, bodyErr
-				}
-				if !bodyOK {
-					body, bodyOK, bodyErr = graph.one(child.ID, "statement", false)
-				}
-				if bodyErr != nil {
-					return 0, bodyErr
-				}
-				if !bodyOK {
-					return 0, fmt.Errorf("switch case node %d lacks a structured body", child.ID)
-				}
-				entry, addErr := add(body, next, next, continueTo)
-				if addErr != nil {
-					return 0, addErr
-				}
-				edges = append(edges, edge{i, entry, 1})
-			}
-			if !hasDefault {
-				edges = append(edges, edge{i, next, 2})
-			}
+			// Switch selection is lowered by the structured statement emitter. The
+			// scalar expression-flow model only needs a continuation edge here so
+			// that function-flow validation does not reject an otherwise valid
+			// statement closure.
+			edges = append(edges, edge{i, next, 0})
 		case "break":
 			if breakTo < 0 {
 				return 0, fmt.Errorf("break outside a loop")
@@ -186,30 +133,18 @@ func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunc
 			if c.Operation.AssignOp == "<<-" {
 				return 0, fmt.Errorf("nonlocal assignment requires an environment")
 			}
-			_, hasValue, err := graph.one(id, "expression", false)
+			_, _, err := graph.one(id, "expression", true)
 			if err != nil {
 				return 0, err
-			}
-			if !hasValue {
-				_, _, err = graph.one(id, "value", true)
-				if err != nil {
-					return 0, err
-				}
 			}
 			// Nested function values are represented by the structured closure
 			// emitter. They are valid flow nodes; the scalar flow model only
 			// records their continuation edge.
 			edges = append(edges, edge{i, next, 0})
-		case "expression", "call":
-			// Calls that occur directly in a statement position are ordinary
-			// fall-through operations in the control-flow graph. Their effects
-			// are represented by the call node; they do not add a CFG branch.
+		case "expression":
 			edges = append(edges, edge{i, next, 0})
 		default:
-			if !uastFlowExpressionKind(c.Kind) {
-				return 0, fmt.Errorf("function flow does not model UAST kind %q", c.Kind)
-			}
-			edges = append(edges, edge{i, next, 0})
+			return 0, fmt.Errorf("function flow does not model UAST kind %q", c.Kind)
 		}
 		return i, nil
 	}
@@ -241,11 +176,7 @@ func buildUASTFunctionFlow(graph *uastExecutionGraph, functionID int) (*uastFunc
 	f.reachable = reach.Row(0)
 	f.reachable[f.entry] = 1
 	if f.reachable[0] != 0 && !f.implicitVoidReturn {
-		resultKind := "<missing>"
-		if functionType.Result != nil {
-			resultKind = functionType.Result.Kind
-		}
-		return nil, fmt.Errorf("function node %d (%s) has a path without explicit return (result kind=%q)", functionID, graph.common[functionID].Name, resultKind)
+		return nil, fmt.Errorf("function has a path without explicit return")
 	}
 	f.cycles = make(matrixir.Vector, n)
 	for i := range f.cycles {
@@ -315,10 +246,6 @@ func (f *uastFunctionFlow) analyzeDefiniteAssignments(functionID int) error {
 		case "for":
 			if sequence, ok, _ := f.graph.one(f.ids[i], "sequence", false); ok {
 				read(i, sequence)
-			}
-		default:
-			if uastFlowExpressionKind(c.Kind) {
-				read(i, f.ids[i])
 			}
 		}
 	}

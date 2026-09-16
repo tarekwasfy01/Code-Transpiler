@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/evidence/nasm"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/evidence/nasm"
 )
 
 func main() {
@@ -21,8 +21,6 @@ func main() {
 	queryMode := flag.String("query-mode", "", "optional mode: 16, 32 or 64")
 	queryOperands := flag.String("query-operands", "", "optional comma-separated operand classes, e.g. r32,imm32")
 	queryOpcode := flag.String("query-opcode", "", "optional reverse opcode-byte query, e.g. 05 or 0f 1f")
-	runWitnesses := flag.Bool("run-witnesses", false, "run deterministic NASM/native byte witnesses for native-rule candidates")
-	witnessLimit := flag.Int("witness-limit", 0, "maximum generated witness candidates (0 means all generatable candidates)")
 	flag.Parse()
 	if *root == "" {
 		fatal("-source is required")
@@ -48,13 +46,6 @@ func main() {
 		fatal("extract: %v", err)
 	}
 	fmt.Printf("NASM evidence generated: records=%d variants=%d encodings=%d mnemonics=%d registers=%d features=%d direct=%d derived=%d unresolved=%d\n", st.Records, st.Variants, st.Encodings, st.Mnemonics, st.Registers, st.Features, st.DirectFacts, st.DerivedFacts, st.Unresolved)
-	if *runWitnesses {
-		summary, e := nasm.RunNativeWitnessCorpus(filepath.Join(*out, "native-encoding-contracts.jsonl"), filepath.Join(*out, "nasm-native-witness-results.jsonl"), *witnessLimit)
-		if e != nil {
-			fatal("witness run: %v", e)
-		}
-		fmt.Printf("Native witnesses: candidates=%d generated=%d pass=%d fail=%d unsupported=%d skipped=%d\n", summary.Candidates, summary.Generated, summary.Pass, summary.Failed, summary.Unsupported, summary.Skipped)
-	}
 	if *queryMnemonic != "" {
 		ops := []string{}
 		if *queryOperands != "" {

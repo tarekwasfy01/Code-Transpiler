@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
 )
 
 // FrontendSemanticFacts is the short-lived, language-neutral hand-off from a
@@ -212,14 +212,12 @@ func BuildCanonicalUniversalASTFromFrontendFacts(f FrontendSemanticFacts) (*Univ
 	if err := materializeUniversalEvidenceFields(raw, evidence); err != nil {
 		return nil, fmt.Errorf("UAST evidence fields: %w", err)
 	}
-	// Relations outside syntax.child are normally canonical projections of
-	// evidence and matrix facts. A typed ABI declaration/call link is an
-	// explicit frontend boundary contract, however: rebuilding evidence cannot
-	// infer its foreign symbol or calling convention. Preserve only that narrow
-	// contract plane and rebuild all compatibility relations as before.
+	// Relations outside syntax.child are canonical projections of evidence and
+	// matrix facts. Rebuild them here so a frontend cannot retain a stale
+	// compatibility relation view beside the shared evidence result.
 	syntaxRelations := raw.Relations[:0]
 	for _, relation := range raw.Relations {
-		if relation.Kind == "syntax.child" || relation.Kind == "abi.graph" {
+		if relation.Kind == "syntax.child" {
 			syntaxRelations = append(syntaxRelations, relation)
 		}
 	}

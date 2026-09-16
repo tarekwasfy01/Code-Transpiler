@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
 	"io"
 	"reflect"
 	"sort"
@@ -65,14 +65,10 @@ type SemanticStatement struct {
 	Expression *SemanticExpression `json:"expression,omitempty"`
 	Condition  *SemanticExpression `json:"condition,omitempty"`
 	Sequence   *SemanticExpression `json:"sequence,omitempty"`
-	// Patterns preserves ordered match alternatives as semantic expressions.
-	// They are projected into first-class UAST pattern relations instead of
-	// being flattened into ordinary statements or opaque source text.
-	Patterns   []SemanticExpression `json:"patterns,omitempty"`
-	Then       *SemanticStatement   `json:"then,omitempty"`
-	Else       *SemanticStatement   `json:"else,omitempty"`
-	Body       *SemanticStatement   `json:"body,omitempty"`
-	Statements []SemanticStatement  `json:"statements,omitempty"`
+	Then       *SemanticStatement  `json:"then,omitempty"`
+	Else       *SemanticStatement  `json:"else,omitempty"`
+	Body       *SemanticStatement  `json:"body,omitempty"`
+	Statements []SemanticStatement `json:"statements,omitempty"`
 }
 
 type SemanticExpression struct {
@@ -292,11 +288,6 @@ func deriveTypeTable(root *SemanticStatement) ([]SemanticTypeDefinition, matrixi
 		if err := expression(s.Sequence); err != nil {
 			return err
 		}
-		for i := range s.Patterns {
-			if err := expression(&s.Patterns[i]); err != nil {
-				return err
-			}
-		}
 		if err := statement(s.Then); err != nil {
 			return err
 		}
@@ -501,18 +492,11 @@ func (p *SemanticProgram) documentFromCanonicalUniversalAST() (SemanticDocument,
 func installLegacyProgramView(p *SemanticProgram, doc SemanticDocument) error {
 	root, err := documentStatementAST(doc.Root)
 	if err != nil {
-		// The executable legacy tree is a compatibility adapter, not the
-		// semantic authority. New structured forms such as switch clauses may
-		// be losslessly present in SemanticDocument/UAST before the old AST
-		// executor learns to execute them. Preserve the canonical UAST and leave
-		// the optional legacy body unavailable instead of rejecting good input.
-		p.Body = nil
-		return nil
+		return err
 	}
 	body, ok := root.(*BlockStmt)
 	if !ok {
-		p.Body = nil
-		return nil
+		return fmt.Errorf("universal AST root is not an executable block")
 	}
 	p.Body = body
 	p.Evaluation, p.ValueModel, p.IndexBase, p.Types, p.Origin = doc.Evaluation, doc.ValueModel, doc.IndexBase, doc.Types, doc.Origin
@@ -813,9 +797,6 @@ func assignDocumentIDs(root *SemanticStatement) {
 		expr(s.Expression)
 		expr(s.Condition)
 		expr(s.Sequence)
-		for i := range s.Patterns {
-			expr(&s.Patterns[i])
-		}
 		stmt(s.Then)
 		stmt(s.Else)
 		stmt(s.Body)
@@ -907,9 +888,6 @@ func decorateDocument(root *SemanticStatement, evidence SemanticEvidence, indexB
 		}
 		expr(s.Condition)
 		expr(s.Sequence)
-		for i := range s.Patterns {
-			expr(&s.Patterns[i])
-		}
 		stmt(s.Then)
 		stmt(s.Else)
 		stmt(s.Body)

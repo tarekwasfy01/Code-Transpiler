@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
 )
 
 // uastFunctionHasExternalCapture is deliberately conservative. It permits a
@@ -228,14 +228,7 @@ func csharpFunctionType(arity int) (string, error) {
 func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, id int) error {
 	flow, flowErr := buildUASTFunctionFlow(graph, id)
 	if flowErr != nil && !g.nativeDirect {
-		// Compatibility targets can represent a fall-through result with the
-		// shared null value. Keep strict flow validation for native direct
-		// lowering, but do not reject a structurally valid function merely
-		// because an older Semantic snapshot omitted an explicit terminal return.
-		// The emitter appends the target's typed default below.
-		if !strings.Contains(flowErr.Error(), "path without explicit return") {
-			return flowErr
-		}
+		return flowErr
 	}
 	// Inline eligibility must not erase an assigned function that happens not
 	// to be called. Always materialize the observable function binding.
@@ -270,19 +263,6 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 				local[n] = n
 			}
 			g.bindings = append(g.bindings, local)
-			// Deferred-return materialization can be nested in conditional blocks,
-			// but the result slot is function-scoped: later cleanup paths reuse the
-			// same ordered return value. Predeclare every such slot in the current
-			// function frame before emitting nested control-flow scopes.
-			deferSlots := map[string]bool{}
-			for _, common := range graph.common {
-				if strings.HasPrefix(common.Name, "__defer_result_") {
-					deferSlots[common.Name] = true
-				}
-			}
-			for slot := range deferSlots {
-				g.line(g.nativeAssignment(slot, targetNull(g.target)))
-			}
 			err = g.uastStatementBody(graph, body)
 			g.bindings = g.bindings[:len(g.bindings)-1]
 			return err
@@ -378,12 +358,6 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		if err := emitNativeBody(); err != nil {
 			return err
 		}
-		// C# delegate values have a non-void dynamic result contract. A
-		// structured UAST body can legally fall through after conditional paths;
-		// make that contract total at the target boundary.
-		if g.target == "csharp" {
-			g.line("return R2.Null;")
-		}
 		g.indent--
 		if g.target == "zig" {
 			g.line("} }.call;")
@@ -403,16 +377,6 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		}
 		return value
 	}
-	emitDeferSlots := func() {
-		seen := map[string]bool{}
-		for _, common := range graph.common {
-			if strings.HasPrefix(common.Name, "__defer_result_") && !seen[common.Name] {
-				seen[common.Name] = true
-				g.line(g.assignment(common.Name, targetNull(g.target)))
-				g.declared[len(g.declared)-1][common.Name] = true
-			}
-		}
-	}
 	emitBody := func() error {
 		body, _, err := graph.one(id, "body", true)
 		if err != nil {
@@ -429,7 +393,6 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 			local[g.name(pc.Name)] = g.name(pc.Name)
 		}
 		g.bindings = append(append([]map[string]string(nil), savedBindings...), local)
-		emitDeferSlots()
 		err = g.uastStatementBody(graph, body)
 		g.bindings = savedBindings
 		return err
@@ -529,10 +492,9 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 		if err := emitBody(); err != nil {
 			return err
 		}
-		// Any-return is not the same as definite return: one conditional arm
-		// can return while another falls through. Func<object[], object> needs
-		// a value on every path, so provide its explicit fallthrough value.
-		g.line("return null;")
+		if !hasReturn {
+			g.line("return null;")
+		}
 		g.indent--
 		g.line("};")
 	case "kotlin":
@@ -581,9 +543,9 @@ func (g *targetGen) uastFunctionAssign(graph *uastExecutionGraph, name string, i
 	return nil
 }
 
-// uastLambdaValueExpression renders a closure value directly from its
-// structured UAST body. C++ uses an explicit capture list; C# relies on the
-// language's target-typed lambda conversion and lexical capture semantics.
+// uastLambdaValueExpression renders a C++20 closure value directly from its
+// structured UAST body. C++ is used here because ISO C has no closure value or
+// capture environment; the MSVC C++ route can preserve captures with [&].
 func (g *targetGen) uastLambdaValueExpression(graph *uastExecutionGraph, functionID int) (string, error) {
 	params := graph.many(functionID, "parameter")
 	parameterNames := make([]string, len(params))
@@ -594,11 +556,7 @@ func (g *targetGen) uastLambdaValueExpression(graph *uastExecutionGraph, functio
 		if name == "" {
 			name = fmt.Sprintf("arg%d", i)
 		}
-		if g.target == "cpp" {
-			parameterNames[i] = "auto " + name
-		} else {
-			parameterNames[i] = name
-		}
+		parameterNames[i] = "auto " + name
 		localBindings[name] = name
 		localDeclared[name] = true
 	}
@@ -620,18 +578,7 @@ func (g *targetGen) uastLambdaValueExpression(graph *uastExecutionGraph, functio
 	if err != nil {
 		return "", err
 	}
-	switch g.target {
-	case "cpp":
-		return "[&](" + strings.Join(parameterNames, ", ") + ") {\n" + inner + "}", nil
-	case "csharp":
-		parameters := "(" + strings.Join(parameterNames, ", ") + ")"
-		if len(parameterNames) == 1 {
-			parameters = parameterNames[0]
-		}
-		return parameters + " => {\n" + inner + "}", nil
-	default:
-		return "", fmt.Errorf("DIRECT_NATIVE_UNAVAILABLE: target %s has no closure value syntax", g.target)
-	}
+	return "[&](" + strings.Join(parameterNames, ", ") + ") {\n" + inner + "}", nil
 }
 
 func (g *targetGen) uastInlineCall(graph *uastExecutionGraph, functionID, callID int, args []string) (string, error) {

@@ -3,14 +3,13 @@ package backend
 
 import (
 	"fmt"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
 )
 
-// Rows are unary +, unary -, logical not, conjunction, disjunction, and
-// bitwise complement. Columns encode numeric sign, logical complement,
-// short-circuit gate polarity, and bitwise complement.
+// Rows are unary +, unary -, logical not, conjunction, disjunction. Columns
+// encode numeric sign, logical complement, and the short-circuit gate polarity.
 func expressionRuleMatrix() matrixir.Matrix {
-	m, _ := matrixir.MatrixFromRows([][]float64{{1, 0, 0, 0}, {-1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, -1, 0}, {0, 0, 0, 1}})
+	m, _ := matrixir.MatrixFromRows([][]float64{{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {0, 0, -1}})
 	return m
 }
 func (g *targetGen) lowerUnary(op, a string) (string, error) {
@@ -22,25 +21,17 @@ func (g *targetGen) lowerUnary(op, a string) (string, error) {
 		row = 1
 	case "!":
 		row = 2
-	case "^", "~":
-		row = 5
 	}
 	if row < 0 {
 		return "", fmt.Errorf("unmodeled unary operator %q", op)
 	}
-	basis, _ := matrixir.MatrixFromRows([][]float64{matrixir.Basis(6, row)})
+	basis, _ := matrixir.MatrixFromRows([][]float64{matrixir.Basis(5, row)})
 	rule, _ := basis.Multiply(expressionRuleMatrix())
 	if rule.At(0, 0) == 1 {
 		return a, nil
 	}
 	if rule.At(0, 0) == -1 {
 		return emitDispatch(g.target, "__binary_-", []string{targetNumber(g.target, "0"), a}), nil
-	}
-	if rule.At(0, 3) == 1 {
-		if g.target == "r" {
-			return "bitwNot(as.integer(" + a + "))", nil
-		}
-		return "(~" + a + ")", nil
 	}
 	not := "!"
 	if g.target == "python" || g.target == "nim" || g.target == "zig" {
@@ -53,7 +44,7 @@ func (g *targetGen) lowerLogical(op, a, b string) string {
 	if op == "||" {
 		row = 4
 	}
-	basis, _ := matrixir.MatrixFromRows([][]float64{matrixir.Basis(6, row)})
+	basis, _ := matrixir.MatrixFromRows([][]float64{matrixir.Basis(5, row)})
 	rule, _ := basis.Multiply(expressionRuleMatrix())
 	native := "&&"
 	if rule.At(0, 2) < 0 {

@@ -17,13 +17,13 @@ import (
 	"time"
 
 	"gioui.org/app"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/runtimeassets"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/targetrun"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/thirdpartylicenses"
-	"github.com/tarekwasfy01/Code-Transpiler/internal/ui"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/platform"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/runtimeassets"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/targetrun"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/thirdpartylicenses"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/ui"
 )
 
 // Set by the local onefile build. Defaults keep source-tree invocations
@@ -101,6 +101,11 @@ func main() {
 			fmt.Fprintln(os.Stderr, "r2many:", err)
 			os.Exit(1)
 		}
+	case "llvm-source-evidence":
+		if err := llvmSourceEvidence(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
 	case "compile-toolchain", "compile-gcc", "compile-msvc":
 		args := os.Args[2:]
 		if os.Args[1] == "compile-gcc" {
@@ -137,11 +142,6 @@ func main() {
 		}
 	case "compile-csc":
 		if err := compileCSC(os.Args[2:]); err != nil {
-			fmt.Fprintln(os.Stderr, "r2many:", err)
-			os.Exit(1)
-		}
-	case "compile-csc-project":
-		if err := compileCSCProject(os.Args[2:]); err != nil {
 			fmt.Fprintln(os.Stderr, "r2many:", err)
 			os.Exit(1)
 		}
@@ -327,18 +327,6 @@ func semanticExport(args []string) error {
 			BaseDir: filepath.Dir(fs.Arg(0)), EmbedAll: *embedAll, Mode: backend.SemanticModuleEmbeddingMode(*moduleMode),
 		}); err != nil {
 			return fmt.Errorf("semantic module import: %w", err)
-		}
-		// Persist the resolved module boundary in the exported document. The
-		// resolver establishes/link-checks dependencies; EmbedSemanticModules
-		// is the existing deduplicating payload/reference pass that makes the
-		// result self-contained for later target projection.
-		if *moduleMode != "references" {
-			if _, err := backend.EmbedSemanticModules(semantic, backend.SemanticModuleEmbeddingOptions{
-				BaseDir: filepath.Dir(fs.Arg(0)), StoreRoot: resolver.Store.Root, UnitPath: *out,
-				Language: semantic.Origin.SourceLanguage, NeededOnly: *moduleMode == "needed",
-			}); err != nil {
-				return fmt.Errorf("semantic module embedding: %w", err)
-			}
 		}
 	}
 	var encoded []byte
@@ -1317,7 +1305,6 @@ Native compiler (direct machine encoder; assembly optional):
 	sp compile program.se --embed-all-modules -o whole-program.exe
 	  By default, compile follows serialized semantic_module_link_roots; this
 	  flag deliberately embeds every declared module.
-	  Semantic imports can resolve from another store with -module-root DIR.
 	  Native builds retain status, source-unit inventory and a real program.obj
 	  below %TEMP%\\CodeTranspiler\\builds by default.
 	  --direct-exe disables retained intermediates; --build-dir DIR selects them.
@@ -1380,9 +1367,6 @@ GENERAL
   CodeTranspiler.exe semantic-csc input.cs -o program.semantic.json
   CodeTranspiler.exe compile-csc input.se -o program.exe
       Project a SemanticProgram through the canonical C# target and csc.exe.
-      -module-root DIR selects the Semantic module store for imported units.
-  CodeTranspiler.exe compile-csc-project semantic-directory -o program.exe
-      Link independently projected Semantic units through one csc.exe invocation.
       Parse and bind C# with the Roslyn adapter, then emit canonical UAST JSON.
   CodeTranspiler.exe semantic-export -source go input.go -format sp -o program.sp
       Export the same canonical program in readable Semantic Programming form.

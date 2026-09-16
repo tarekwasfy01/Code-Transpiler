@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -37,16 +38,14 @@ type SemanticPackageFile struct {
 }
 
 type SemanticPackageManifest struct {
-	SchemaVersion  int                   `json:"schema_version"`
-	Name           string                `json:"name"`
-	ModulePath     string                `json:"module_path,omitempty"`
-	GoRequirements map[string]string     `json:"go_requirements,omitempty"`
-	Source         string                `json:"source"`
-	Root           string                `json:"root"`
-	PackageHash    string                `json:"package_hash"`
-	Files          []SemanticPackageFile `json:"files"`
-	Licenses       []string              `json:"licenses,omitempty"`
-	Dependencies   []string              `json:"dependencies,omitempty"`
+	SchemaVersion int                   `json:"schema_version"`
+	Name          string                `json:"name"`
+	Source        string                `json:"source"`
+	Root          string                `json:"root"`
+	PackageHash   string                `json:"package_hash"`
+	Files         []SemanticPackageFile `json:"files"`
+	Licenses      []string              `json:"licenses,omitempty"`
+	Dependencies  []string              `json:"dependencies,omitempty"`
 }
 
 // CopyImportedPackageLicenses copies the licenses recorded by imported
@@ -133,6 +132,14 @@ func CopyImportedPackageLicenses(storeRoot, outputPath string) (int, error) {
 }
 
 func packageWorkerCount() int {
+	if raw := strings.TrimSpace(os.Getenv("SEMANTIC_PACKAGE_WORKERS")); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil && n > 0 {
+			if n > 64 {
+				return 64
+			}
+			return n
+		}
+	}
 	n := runtime.NumCPU() * 80 / 100
 	if n < 32 {
 		return 32
@@ -225,124 +232,6 @@ func readGoModuleRequirements(baseDir string) (string, map[string]bool) {
 		dir = parent
 	}
 	return "", requirements
-}
-
-// goModulePathInTree reads the module identity from the imported package tree.
-// Registry archives commonly have a versioned wrapper directory above go.mod,
-// so looking only at root/go.mod misses the actual module and can accidentally
-// inherit the importing compiler's parent go.mod.
-func goModulePathInTree(root string) string {
-	moduleDir := goModuleDirInTree(root)
-	if moduleDir == "" {
-		return ""
-	}
-	modulePath, _ := readGoModuleRequirements(moduleDir)
-	return modulePath
-}
-
-func goModuleDirInTree(root string) string {
-	root, err := filepath.Abs(root)
-	if err != nil {
-		return ""
-	}
-	if _, statErr := os.Stat(filepath.Join(root, "go.mod")); statErr == nil {
-		return root
-	}
-	bestDir := ""
-	bestDepth := int(^uint(0) >> 1)
-	_ = filepath.WalkDir(root, func(path string, entry os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return nil
-		}
-		if entry.IsDir() {
-			if path != root && (entry.Name() == ".git" || entry.Name() == "vendor" || entry.Name() == "testdata") {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		if entry.Name() != "go.mod" {
-			return nil
-		}
-		rel, relErr := filepath.Rel(root, filepath.Dir(path))
-		if relErr != nil {
-			return nil
-		}
-		depth := 0
-		if rel != "." {
-			depth = strings.Count(rel, string(filepath.Separator)) + 1
-		}
-		if depth < bestDepth {
-			bestDepth = depth
-			bestDir = filepath.Dir(path)
-		}
-		return nil
-	})
-	if bestDir == "" {
-		return ""
-	}
-	return bestDir
-}
-
-func readGoModuleRequirementVersions(goModPath string) map[string]string {
-	requirements := map[string]string{}
-	data, err := os.ReadFile(goModPath)
-	if err != nil {
-		return requirements
-	}
-	inRequire := false
-	for _, raw := range strings.Split(string(data), "\n") {
-		line := strings.TrimSpace(strings.SplitN(raw, "//", 2)[0])
-		if line == "" || strings.HasPrefix(line, "module ") {
-			continue
-		}
-		if line == "require (" || line == "require(" {
-			inRequire = true
-			continue
-		}
-		if inRequire && line == ")" {
-			inRequire = false
-			continue
-		}
-		if strings.HasPrefix(line, "require ") {
-			line = strings.TrimSpace(strings.TrimPrefix(line, "require "))
-		}
-		if !inRequire && !strings.Contains(line, " ") {
-			continue
-		}
-		fields := strings.Fields(line)
-		if len(fields) >= 2 && !strings.HasPrefix(fields[0], "//") {
-			requirements[fields[0]] = fields[1]
-		}
-	}
-	return requirements
-}
-
-func goModuleRequirementForImport(importPath string, requirements map[string]string) (string, string, bool) {
-	bestModule := ""
-	bestVersion := ""
-	for modulePath, version := range requirements {
-		if version == "" || !dependencyBelongsToGoModule(importPath, modulePath) {
-			continue
-		}
-		if len(modulePath) > len(bestModule) {
-			bestModule = modulePath
-			bestVersion = version
-		}
-	}
-	return bestModule, bestVersion, bestModule != ""
-}
-
-func goModuleProxyZipURL(modulePath, version string) string {
-	path := strings.ReplaceAll(modulePath, "/", "%2F")
-	return "https://proxy.golang.org/" + path + "/@v/" + url.PathEscape(version) + ".zip"
-}
-
-func splitGoModuleVersion(name string) (string, string) {
-	index := strings.LastIndex(name, "@")
-	if index <= strings.LastIndex(name, "/") || index == len(name)-1 {
-		return name, ""
-	}
-	return name[:index], name[index+1:]
 }
 
 type packageFileAnalysis struct {
@@ -653,13 +542,6 @@ func (r UniversalModuleResolver) importPackageDepth(source string, opts ModuleIm
 	}
 	dataHash := sha256.New()
 	manifest := &SemanticPackageManifest{SchemaVersion: 1, Name: name, Source: source, Root: root}
-	if NormalizeLanguage(opts.Language) == "go" {
-		moduleDir := goModuleDirInTree(root)
-		if moduleDir != "" {
-			manifest.ModulePath, _ = readGoModuleRequirements(moduleDir)
-			manifest.GoRequirements = readGoModuleRequirementVersions(filepath.Join(moduleDir, "go.mod"))
-		}
-	}
 	var files []string
 	err = filepath.WalkDir(root, func(path string, d os.DirEntry, e error) error {
 		if e != nil {
@@ -815,13 +697,6 @@ func (r UniversalModuleResolver) ensurePackageDependencies(manifest *SemanticPac
 		if dep == "" {
 			continue
 		}
-		// A Go import below the package's declared module path is another
-		// package in the same module, not a separately downloadable module.
-		// Keep this path generic: module layouts and package names vary, while
-		// the go.mod module path is the authoritative boundary.
-		if dependencyBelongsToGoModule(dep, manifest.ModulePath) {
-			continue
-		}
 		// Go standard-library packages (for example bytes, fmt, and math) are
 		// provided by the active toolchain and are not modules published through
 		// proxy.golang.org.  Treat them as satisfied dependencies; attempting to
@@ -839,26 +714,11 @@ func (r UniversalModuleResolver) ensurePackageDependencies(manifest *SemanticPac
 		if strings.HasPrefix(dep, "gioui.org/") || strings.HasPrefix(dep, "github.com/go-text/typesetting/") || strings.HasPrefix(dep, "github.com/oligo/gvcode/") || strings.HasPrefix(dep, "github.com/rdleal/intervalst/") {
 			continue
 		}
-		dependencySource := dep
-		if NormalizeLanguage(opts.Language) == "go" {
-			if modulePath, version, ok := goModuleRequirementForImport(dep, manifest.GoRequirements); ok {
-				dependencySource = modulePath + "@" + version
-			}
-		}
-		if _, err := r.importPackageDepth(dependencySource, opts, seen, depth+1); err != nil {
+		if _, err := r.importPackageDepth(dep, opts, seen, depth+1); err != nil {
 			return fmt.Errorf("transitive dependency %q of %q: %w", dep, manifest.Name, err)
 		}
 	}
 	return nil
-}
-
-func dependencyBelongsToGoModule(dependency, modulePath string) bool {
-	dependency = strings.Trim(strings.TrimSpace(dependency), "/")
-	modulePath = strings.Trim(strings.TrimSpace(modulePath), "/")
-	if dependency == "" || modulePath == "" {
-		return false
-	}
-	return dependency == modulePath || strings.HasPrefix(dependency, modulePath+"/")
 }
 
 func isGoStandardLibraryPath(path string) bool {
@@ -1106,11 +966,7 @@ func resolveNamedPackage(name, language string) (string, bool, error) {
 		}
 		return "https://crates.io/api/v1/crates/" + url.PathEscape(name) + "/" + url.PathEscape(meta.Crate.MaxVersion) + "/download", true, nil
 	case "go":
-		modulePath, requestedVersion := splitGoModuleVersion(name)
-		path := strings.ReplaceAll(modulePath, "/", "%2F")
-		if requestedVersion != "" {
-			return goModuleProxyZipURL(modulePath, requestedVersion), true, nil
-		}
+		path := strings.ReplaceAll(name, "/", "%2F")
 		resp, err := http.Get("https://proxy.golang.org/" + path + "/@latest")
 		if err != nil {
 			return "", false, fmt.Errorf("go proxy lookup: %w", err)
@@ -1128,7 +984,7 @@ func resolveNamedPackage(name, language string) (string, bool, error) {
 		if meta.Version == "" {
 			return "", false, fmt.Errorf("go module %q has no release", name)
 		}
-		return goModuleProxyZipURL(modulePath, meta.Version), true, nil
+		return "https://proxy.golang.org/" + path + "/@v/" + url.PathEscape(meta.Version) + ".zip", true, nil
 	case "node", "javascript", "typescript":
 		resp, err := http.Get("https://registry.npmjs.org/" + strings.TrimPrefix(name, "@"))
 		if err != nil {

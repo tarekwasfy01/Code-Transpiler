@@ -2,7 +2,7 @@
 package manytomany
 
 import (
-	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
 	"strings"
 	"testing"
 )

@@ -18,9 +18,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 
-	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
 )
 
 // LowerNativeGo lowers the structurally supported Go subset directly from
@@ -38,148 +37,6 @@ func LowerNativeGo(filename, source string) (*SemanticProgram, error) {
 // separate diagnostic context. No hole is returned to the canonical program.
 func LowerNativeGoWithDiagnostics(filename, source string, diagnostics *DiagnosticContext) (*SemanticProgram, error) {
 	return GoTypedSyntaxToSemantic(filename, source, diagnostics)
-}
-
-// NativeGoSourceFile is one source owned by a project export.  Passing a
-// package's files together lets the frontend perform go/types resolution once
-// and then emit one canonical SemanticProgram per file from the shared facts.
-type NativeGoSourceFile struct {
-	Filename string
-	Source   string
-}
-
-// LowerNativeGoSourcePackage lowers a package's requested files without repeating
-// the import/type-check pass for each file.  The callback receives each file
-// independently, so callers can serialize and release each SemanticProgram
-// immediately instead of retaining a package-sized collection of UASTs.
-// Unsupported/build-inactive files are delegated to the established isolated
-// path, preserving its fail-closed behavior and build-tag handling.
-func LowerNativeGoSourcePackage(files []NativeGoSourceFile, visit func(NativeGoSourceFile, *SemanticProgram, error)) error {
-	return LowerNativeGoSourcePackageWithWorkers(files, 1, visit)
-}
-
-// LowerNativeGoSourcePackageWithWorkers performs one shared package
-// parse/type-check pass, then lowers independent file bodies concurrently.
-// The unbuffered work queue bounds live SemanticPrograms to the worker count.
-func LowerNativeGoSourcePackageWithWorkers(files []NativeGoSourceFile, workers int, visit func(NativeGoSourceFile, *SemanticProgram, error)) error {
-	if len(files) == 0 {
-		return nil
-	}
-	if visit == nil {
-		return fmt.Errorf("native Go package lowering requires a result callback")
-	}
-	if workers < 1 {
-		workers = 1
-	}
-	fs := gotoken.NewFileSet()
-	type parsedFile struct {
-		input  NativeGoSourceFile
-		file   *ast.File
-		mods   []string
-		parse  error
-		active bool
-	}
-	parsed := make([]parsedFile, len(files))
-	var typeFiles []*ast.File
-	packageName := ""
-	var totalBytes int
-	for i, input := range files {
-		parsed[i].input = input
-		totalBytes += len(input.Source)
-		file, err := goparser.ParseFile(fs, input.Filename, input.Source, 0)
-		if err != nil {
-			parsed[i].parse = err
-			continue
-		}
-		if err := validateNativeGoSurface(file); err != nil {
-			parsed[i].parse = err
-			continue
-		}
-		parsed[i].file = file
-		for _, imp := range file.Imports {
-			path, err := strconv.Unquote(imp.Path.Value)
-			if err == nil {
-				parsed[i].mods = append(parsed[i].mods, path)
-			}
-		}
-		if packageName == "" {
-			packageName = file.Name.Name
-		} else if packageName != file.Name.Name {
-			return fmt.Errorf("native Go package batch mixes packages %q and %q", packageName, file.Name.Name)
-		}
-		active := true
-		if info, err := os.Stat(input.Filename); err == nil {
-			buildContext := nativeGoBuildContext()
-			if matched, matchErr := buildContext.MatchFile(filepath.Dir(input.Filename), info.Name()); matchErr == nil {
-				active = matched
-			}
-		}
-		parsed[i].active = active
-		if active && !nativeGoFileUsesC(file) {
-			typeFiles = append(typeFiles, file)
-		}
-	}
-	if len(typeFiles) == 0 || packageName == "" {
-		for _, unit := range parsed {
-			p, err := LowerNativeGo(unit.input.Filename, unit.input.Source)
-			if unit.parse != nil {
-				err = unit.parse
-			}
-			visit(unit.input, p, err)
-		}
-		return nil
-	}
-	info := nativeGoTypeInfo()
-	var checkErr error
-	if os.Getenv("UAST_GO_SKIP_TYPECHECK") != "1" {
-		conf := types.Config{Importer: nativeGoImporterFor(files[0].Filename), Sizes: types.SizesFor("gc", "amd64"), GoVersion: "go1.23"}
-		if totalBytes >= 1_000_000 || os.Getenv("UAST_GO_IGNORE_FUNC_BODIES") == "1" {
-			conf.IgnoreFuncBodies = true
-		}
-		_, checkErr = conf.Check(packageName, fs, typeFiles, info)
-		if checkErr != nil && !nativeGoBoundaryTypecheckError(checkErr) {
-			for _, unit := range parsed {
-				visit(unit.input, nil, checkErr)
-			}
-			return nil
-		}
-	}
-	lowerUnit := func(unit parsedFile) {
-		if unit.parse != nil {
-			visit(unit.input, nil, unit.parse)
-			return
-		}
-		if !unit.active || nativeGoFileUsesC(unit.file) {
-			p, err := LowerNativeGo(unit.input.Filename, unit.input.Source)
-			visit(unit.input, p, err)
-			return
-		}
-		p, err := lowerNativeGoPrepared(unit.input.Filename, unit.input.Source, nil, fs, unit.file, info, typeFiles, packageName, unit.mods, false)
-		if checkErr != nil {
-			recordNativeGoBoundaryFailure(nil, unit.input.Filename, unit.file, "type.contract", "GO_TYPE_CONTRACT", checkErr)
-		}
-		visit(unit.input, p, err)
-	}
-	if workers > len(parsed) {
-		workers = len(parsed)
-	}
-	unitJobs := make(chan parsedFile)
-	var unitWG sync.WaitGroup
-	for i := 0; i < workers; i++ {
-		unitWG.Add(1)
-		go func() {
-			defer unitWG.Done()
-			for unit := range unitJobs {
-				lowerUnit(unit)
-			}
-		}()
-	}
-	for _, unit := range parsed {
-		unitJobs <- unit
-	}
-	close(unitJobs)
-	unitWG.Wait()
-	return nil
 }
 
 // GoTypedSyntaxToSemantic is the productive compiler boundary for Go. It
@@ -222,7 +79,7 @@ func GoTypedSyntaxToSemantic(filename, source string, diagnostics *DiagnosticCon
 	// supplies declarations and source spans; defer type resolution to an
 	// explicit project compile where the build context is known.
 	buildConstrained := strings.Contains(source, "//go:build") || strings.Contains(source, "// +build")
-	if !buildConstrained && os.Getenv("UAST_GO_SKIP_TYPECHECK") != "1" {
+	if !buildConstrained {
 		moduleImporter := nativeGoImporterFor(filename)
 		// Match the language version declared by the VirtualDisplays module and
 		// preserve alias/variadic contracts such as []any -> ...interface{}.
@@ -233,12 +90,7 @@ func GoTypedSyntaxToSemantic(filename, source string, diagnostics *DiagnosticCon
 		// thousands of repetitive function bodies. Keep package/declaration/type
 		// facts while deferring body-level checks to the structural AST lowering.
 		// This is language-neutral and only activates for genuinely large units.
-		// Self-hosting of compiler packages may contain large mutually
-		// recursive helper bodies whose full go/types pass is disproportionate
-		// to the semantic export.  The structural AST lowering below still
-		// records those bodies; callers opt into declaration-focused checking
-		// through the environment rather than a source-file special case.
-		if len(source) >= 1_000_000 || os.Getenv("UAST_GO_IGNORE_FUNC_BODIES") == "1" {
+		if len(source) >= 1_000_000 {
 			conf.IgnoreFuncBodies = true
 		}
 		_, err = conf.Check(packageName, fs, typeFiles, info)
@@ -266,9 +118,6 @@ func lowerNativeGoPrepared(filename, source string, diagnostics *DiagnosticConte
 		fs: fs, info: info, symbols: map[types.Object]string{}, types: map[string]SemanticType{},
 		functions: map[types.Object]string{}, functionDecls: map[*ast.FuncDecl]string{},
 		functionNames: map[string]string{}, diagnostics: diagnostics, filename: filename,
-		structFieldKeys:   nativeGoStructLiteralFieldKeys(file, info, typeFiles),
-		packageValueNames: nativeGoPackageValueNames(typeFiles),
-		packageImports:    nativeGoImportNames(file),
 	}
 	var main *ast.FuncDecl
 	var helpers []*ast.FuncDecl
@@ -755,293 +604,21 @@ func nativeGoBuildContext() build.Context {
 }
 
 type goScalarLowerer struct {
-	fs                *gotoken.FileSet
-	info              *types.Info
-	symbols           map[types.Object]string
-	types             map[string]SemanticType
-	err               error
-	loopDepth         int
-	switchDepth       int
-	functions         map[types.Object]string
-	functionDecls     map[*ast.FuncDecl]string
-	functionNames     map[string]string
-	inFunction        bool
-	integerFeatures   map[string]bool
-	structFieldKeys   map[*ast.Ident]bool
-	packageValueNames map[string]bool
-	packageImports    map[string]bool
-	diagnostics       *DiagnosticContext
-	filename          string
-	resultTempSeq     int
-}
-
-// nativeGoPackageValueNames preserves project-level variable/constant identity
-// when go/types returns partial information after an unrelated package error.
-// Local declarations still use their resolved object identity whenever it is
-// available; these names are a fail-closed rescue only for unresolved uses.
-func nativeGoPackageValueNames(files []*ast.File) map[string]bool {
-	names := map[string]bool{}
-	for _, file := range files {
-		if file == nil {
-			continue
-		}
-		for _, declaration := range file.Decls {
-			general, ok := declaration.(*ast.GenDecl)
-			if !ok || (general.Tok != gotoken.VAR && general.Tok != gotoken.CONST) {
-				continue
-			}
-			for _, spec := range general.Specs {
-				valueSpec, ok := spec.(*ast.ValueSpec)
-				if !ok {
-					continue
-				}
-				for _, name := range valueSpec.Names {
-					if name != nil && name.Name != "_" {
-						names[name.Name] = true
-					}
-				}
-			}
-		}
-	}
-	return names
-}
-
-func nativeGoImportNames(file *ast.File) map[string]bool {
-	names := map[string]bool{}
-	if file == nil {
-		return names
-	}
-	for _, specification := range file.Imports {
-		if specification == nil || specification.Path == nil {
-			continue
-		}
-		importPath, err := strconv.Unquote(specification.Path.Value)
-		if err != nil {
-			continue
-		}
-		name := importPath
-		if index := strings.LastIndex(name, "/"); index >= 0 {
-			name = name[index+1:]
-		}
-		if specification.Name != nil {
-			name = specification.Name.Name
-		}
-		if name != "" && name != "_" && name != "." {
-			names[name] = true
-		}
-	}
-	return names
-}
-
-// nativeGoStructLiteralFieldKeys marks keyed struct-literal identifiers using
-// the type of their enclosing composite literal. A KeyValueExpr key has no
-// independent symbol meaning; type information belongs to its parent literal.
-// This structural prepass remains useful when go/types omits Uses entries for
-// field labels in a partially checked package.
-func nativeGoStructLiteralFieldKeys(file *ast.File, info *types.Info, packageFiles []*ast.File) map[*ast.Ident]bool {
-	keys := map[*ast.Ident]bool{}
-	if file == nil || info == nil {
-		return keys
-	}
-	if len(packageFiles) == 0 {
-		packageFiles = []*ast.File{file}
-	}
-	typeExpressions := make(map[string]ast.Expr)
-	for _, packageFile := range packageFiles {
-		if packageFile == nil {
-			continue
-		}
-		for _, declaration := range packageFile.Decls {
-			general, ok := declaration.(*ast.GenDecl)
-			if !ok || general.Tok != gotoken.TYPE {
-				continue
-			}
-			for _, specification := range general.Specs {
-				typeSpec, ok := specification.(*ast.TypeSpec)
-				if ok && typeSpec.Name != nil {
-					typeExpressions[typeSpec.Name.Name] = typeSpec.Type
-				}
-			}
-		}
-	}
-	var structTypeOf func(ast.Expr, map[string]bool) *ast.StructType
-	structTypeOf = func(expression ast.Expr, seen map[string]bool) *ast.StructType {
-		switch value := expression.(type) {
-		case *ast.StructType:
-			return value
-		case *ast.Ident:
-			if seen[value.Name] {
-				return nil
-			}
-			typeExpr, exists := typeExpressions[value.Name]
-			if !exists {
-				return nil
-			}
-			next := make(map[string]bool, len(seen)+1)
-			for name, present := range seen {
-				next[name] = present
-			}
-			next[value.Name] = true
-			return structTypeOf(typeExpr, next)
-		case *ast.StarExpr:
-			return structTypeOf(value.X, seen)
-		case *ast.ParenExpr:
-			return structTypeOf(value.X, seen)
-		case *ast.IndexExpr:
-			return structTypeOf(value.X, seen)
-		case *ast.IndexListExpr:
-			return structTypeOf(value.X, seen)
-		}
-		return nil
-	}
-	fieldType := func(structure *ast.StructType, name string) ast.Expr {
-		if structure == nil || structure.Fields == nil {
-			return nil
-		}
-		for _, field := range structure.Fields.List {
-			for _, fieldName := range field.Names {
-				if fieldName.Name == name {
-					return field.Type
-				}
-			}
-		}
-		return nil
-	}
-	parents := map[ast.Node]ast.Node{}
-	stack := make([]ast.Node, 0, 32)
-	ast.Inspect(file, func(node ast.Node) bool {
-		if node == nil {
-			if len(stack) > 0 {
-				stack = stack[:len(stack)-1]
-			}
-			return false
-		}
-		if len(stack) > 0 {
-			parents[node] = stack[len(stack)-1]
-		}
-		stack = append(stack, node)
-		return true
-	})
-	var impliedType func(*ast.CompositeLit) types.Type
-	impliedType = func(literal *ast.CompositeLit) types.Type {
-		if typ := info.TypeOf(literal); typ != nil {
-			return typ
-		}
-		parent := parents[literal]
-		switch value := parent.(type) {
-		case *ast.CompositeLit:
-			containerType := info.TypeOf(value)
-			if containerType == nil {
-				return nil
-			}
-			switch container := types.Unalias(containerType).Underlying().(type) {
-			case *types.Slice:
-				return container.Elem()
-			case *types.Array:
-				return container.Elem()
-			}
-		case *ast.KeyValueExpr:
-			container, ok := parents[value].(*ast.CompositeLit)
-			if !ok {
-				return nil
-			}
-			containerType := info.TypeOf(container)
-			if containerType == nil {
-				return nil
-			}
-			switch parentType := types.Unalias(containerType).Underlying().(type) {
-			case *types.Map:
-				return parentType.Elem()
-			case *types.Struct:
-				label, ok := value.Key.(*ast.Ident)
-				if !ok {
-					return nil
-				}
-				for i := 0; i < parentType.NumFields(); i++ {
-					field := parentType.Field(i)
-					if field.Name() == label.Name {
-						return field.Type()
-					}
-				}
-			}
-		}
-		return nil
-	}
-	var impliedSyntaxType func(*ast.CompositeLit) ast.Expr
-	impliedSyntaxType = func(literal *ast.CompositeLit) ast.Expr {
-		if literal == nil {
-			return nil
-		}
-		if literal.Type != nil {
-			return literal.Type
-		}
-		switch parent := parents[literal].(type) {
-		case *ast.CompositeLit:
-			if array, ok := parent.Type.(*ast.ArrayType); ok {
-				return array.Elt
-			}
-		case *ast.KeyValueExpr:
-			container, ok := parents[parent].(*ast.CompositeLit)
-			if !ok {
-				return nil
-			}
-			containerType := impliedSyntaxType(container)
-			label, ok := parent.Key.(*ast.Ident)
-			if !ok {
-				return nil
-			}
-			return fieldType(structTypeOf(containerType, map[string]bool{}), label.Name)
-		}
-		return nil
-	}
-	markASTStructKeys := func(literal *ast.CompositeLit, structure *ast.StructType) {
-		if literal == nil || structure == nil {
-			return
-		}
-		for _, element := range literal.Elts {
-			pair, ok := element.(*ast.KeyValueExpr)
-			if !ok {
-				continue
-			}
-			label, ok := pair.Key.(*ast.Ident)
-			if ok && fieldType(structure, label.Name) != nil {
-				keys[label] = true
-			}
-		}
-	}
-	ast.Inspect(file, func(node ast.Node) bool {
-		literal, ok := node.(*ast.CompositeLit)
-		if !ok {
-			return true
-		}
-		if structure := structTypeOf(impliedSyntaxType(literal), map[string]bool{}); structure != nil {
-			markASTStructKeys(literal, structure)
-		}
-		typ := impliedType(literal)
-		if typ == nil {
-			return true
-		}
-		structure, ok := types.Unalias(typ).Underlying().(*types.Struct)
-		if !ok {
-			return true
-		}
-		fields := make(map[string]bool, structure.NumFields())
-		for i := 0; i < structure.NumFields(); i++ {
-			fields[structure.Field(i).Name()] = true
-		}
-		for _, element := range literal.Elts {
-			pair, ok := element.(*ast.KeyValueExpr)
-			if !ok {
-				continue
-			}
-			label, ok := pair.Key.(*ast.Ident)
-			if ok && fields[label.Name] {
-				keys[label] = true
-			}
-		}
-		return true
-	})
-	return keys
+	fs              *gotoken.FileSet
+	info            *types.Info
+	symbols         map[types.Object]string
+	types           map[string]SemanticType
+	err             error
+	loopDepth       int
+	switchDepth     int
+	functions       map[types.Object]string
+	functionDecls   map[*ast.FuncDecl]string
+	functionNames   map[string]string
+	inFunction      bool
+	integerFeatures map[string]bool
+	diagnostics     *DiagnosticContext
+	filename        string
+	resultTempSeq   int
 }
 
 func (l *goScalarLowerer) functionBinding(fn *ast.FuncDecl) string {
@@ -1392,7 +969,7 @@ func materializeFunctionCleanup(body SemanticStatement) SemanticStatement {
 			}
 			prefix = append(prefix, reverse()...)
 			prefix = append(prefix, stmt)
-			return SemanticStatement{Kind: "block", Source: stmt.Source, Attributes: map[string]any{"synthetic_scope": "transparent"}, Statements: prefix}
+			return SemanticStatement{Kind: "block", Source: stmt.Source, Statements: prefix}
 		case "block":
 			for i := range stmt.Statements {
 				stmt.Statements[i] = inject(stmt.Statements[i])
@@ -1695,9 +1272,6 @@ func (l *goScalarLowerer) name(n *ast.Ident) string {
 		object = l.info.Uses[n]
 	}
 	if object == nil && n.Name != "_" {
-		if l.packageValueNames[n.Name] {
-			return n.Name
-		}
 		// go/types can intentionally return partial facts when an admitted
 		// package importer reports a boundary error (for example a synthetic
 		// fmt declaration). Preserve the lexical binding in that bounded case;
@@ -1739,19 +1313,6 @@ func (l *goScalarLowerer) name(n *ast.Ident) string {
 	typ := nativeGoType(object.Type(), map[types.Type]bool{})
 	l.types[name] = typ
 	return name
-}
-
-func (l *goScalarLowerer) isPackageQualifier(ident *ast.Ident) bool {
-	if l == nil || ident == nil {
-		return false
-	}
-	if object, ok := l.info.Uses[ident].(*types.PkgName); ok && object != nil {
-		return true
-	}
-	if l.info.Uses[ident] != nil {
-		return false
-	}
-	return l.packageImports[ident.Name]
 }
 func (l *goScalarLowerer) scalar(t types.Type) bool {
 	if _, ok := nativeFixedInteger(t); ok {
@@ -1955,37 +1516,9 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 		return e
 	case *ast.KeyValueExpr:
 		e.Kind = "aggregate"
-		key := l.expr(x.Key)
-		// In a keyed struct literal, Go's key identifier denotes a declared
-		// field label, not a variable reference. Lowering it through expr()
-		// invents bindings such as native_var_ID and makes downstream targets
-		// emit unresolved identifiers. go/types marks these identifiers as
-		// field Vars; map-literal keys remain ordinary expressions and keep
-		// their normal evaluation/binding semantics.
-		if ident, ok := x.Key.(*ast.Ident); ok {
-			field, typedField := l.info.Uses[ident].(*types.Var)
-			if l.structFieldKeys[ident] || (typedField && field.IsField()) {
-				fieldName := ident.Name
-				if typedField && field.Name() != "" {
-					fieldName = field.Name()
-				}
-				key = &SemanticExpression{Kind: "literal", LiteralKind: "string", Text: strconv.Quote(fieldName), Source: l.span(ident)}
-			}
-		}
-		e.Arguments = []SemanticArgument{{Value: key}, {Value: l.expr(x.Value)}}
+		e.Arguments = []SemanticArgument{{Value: l.expr(x.Key)}, {Value: l.expr(x.Value)}}
 		return e
 	case *ast.CallExpr:
-		// A conversion of nil to a nil-able Go type is the same null value with
-		// an explicit destination type. Preserve that type contract directly;
-		// treating the conversion's type expression as a callable fabricates
-		// bindings such as native_var_string when go/types has partial facts.
-		if len(x.Args) == 1 && nativeGoIsNilIdent(x.Args[0]) && nativeGoNilableTypeSyntax(x.Fun) {
-			targetType := nativeGoASTSemanticType(x.Fun)
-			if resolved := nativeGoType(l.info.TypeOf(x), map[types.Type]bool{}); !isUnknownSemanticType(resolved) {
-				targetType = resolved
-			}
-			return &SemanticExpression{Kind: "literal", LiteralKind: "null", Text: "null", Type: targetType, TypeOrigin: "explicit", Source: l.span(x)}
-		}
 		if id, ok := x.Fun.(*ast.Ident); ok && id.Name == "len" && len(x.Args) == 1 {
 			return &SemanticExpression{Kind: "call", Operator: "eager_left_to_right", Value: &SemanticExpression{Kind: "identifier", Name: "length"}, Arguments: []SemanticArgument{{Value: l.expr(x.Args[0])}}, Source: l.span(x)}
 		}
@@ -2070,15 +1603,6 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 	case *ast.ParenExpr:
 		return l.expr(x.X)
 	case *ast.Ident:
-		// nil is Go's predeclared untyped-nil literal, not a source binding.
-		// Keeping it as an identifier invents a local named native_var_nil and
-		// makes later target projection emit an unresolved symbol.
-		if x.Name == "nil" {
-			e.Kind = "literal"
-			e.LiteralKind = "null"
-			e.Text = "null"
-			return e
-		}
 		e.Kind = "identifier"
 		if object := l.info.Uses[x]; object != nil {
 			if functionBinding := l.functions[object]; functionBinding != "" {
@@ -2097,13 +1621,13 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 			e.Kind = "member"
 			e.Value = l.expr(x.X)
 			e.Name = x.Sel.Name
-		} else if qualifier, ok := x.X.(*ast.Ident); ok && l.isPackageQualifier(qualifier) {
-			e.Kind = "identifier"
-			e.Name = qualifier.Name + "." + x.Sel.Name
 		} else {
-			e.Kind = "member"
-			e.Value = l.expr(x.X)
-			e.Name = x.Sel.Name
+			e.Kind = "identifier"
+			if pkg, ok := x.X.(*ast.Ident); ok {
+				e.Name = pkg.Name + "." + x.Sel.Name
+			} else {
+				e.Name = x.Sel.Name
+			}
 		}
 	case *ast.StarExpr:
 		e.Kind = "unary"
@@ -2152,33 +1676,6 @@ func (l *goScalarLowerer) expr(n ast.Expr) *SemanticExpression {
 	return e
 }
 
-func nativeGoIsNilIdent(expression ast.Expr) bool {
-	ident, ok := expression.(*ast.Ident)
-	return ok && ident.Name == "nil"
-}
-
-func nativeGoNilableTypeSyntax(expression ast.Expr) bool {
-	switch value := expression.(type) {
-	case *ast.ArrayType, *ast.MapType, *ast.InterfaceType, *ast.StarExpr, *ast.FuncType, *ast.ChanType:
-		return true
-	case *ast.ParenExpr:
-		return nativeGoNilableTypeSyntax(value.X)
-	}
-	return false
-}
-
-func goTypeSwitchGuardExpr(statement ast.Stmt) ast.Expr {
-	assignment, ok := statement.(*ast.ExprStmt)
-	if !ok {
-		return nil
-	}
-	assertion, ok := assignment.X.(*ast.TypeAssertExpr)
-	if !ok || assertion.Type != nil {
-		return nil
-	}
-	return assertion.X
-}
-
 func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 	s := SemanticStatement{Source: l.span(n)}
 	switch x := n.(type) {
@@ -2216,7 +1713,7 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 				// those bindings.  This also covers `x, y = y, x`; lowering the
 				// pairs directly would overwrite x before y is read.
 				if len(x.Rhs) == len(x.Lhs) {
-					parallel := SemanticStatement{Kind: "block", Source: l.span(n), Attributes: map[string]any{"synthetic_scope": "transparent"}}
+					parallel := SemanticStatement{Kind: "block", Source: l.span(n)}
 					temps := make([]string, len(x.Rhs))
 					for i, rhs := range x.Rhs {
 						temps[i] = fmt.Sprintf("native_parallel_%d_%d", l.resultTempSeq, i)
@@ -2256,7 +1753,7 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 			temp := fmt.Sprintf("native_result_product_%d", l.resultTempSeq)
 			l.resultTempSeq++
 			product := SemanticStatement{Kind: "assign", Name: temp, AssignOp: "<-", Source: l.span(n), Expression: value, Attributes: map[string]any{"synthetic": true, "result_product": "ordered", "evaluate_once": true}}
-			block := SemanticStatement{Kind: "block", Source: l.span(n), Attributes: map[string]any{"synthetic_scope": "transparent"}, Statements: []SemanticStatement{product}}
+			block := SemanticStatement{Kind: "block", Source: l.span(n), Statements: []SemanticStatement{product}}
 			for i, lhs := range x.Lhs {
 				ident, ok := lhs.(*ast.Ident)
 				if !ok {
@@ -2279,7 +1776,7 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 				// Go evaluates all right-hand sides before writing any left-hand
 				// target. Preserve that contract as an explicit temporary product;
 				// the native selector then performs ordinary ordered stores.
-				parallel := SemanticStatement{Kind: "block", Source: l.span(n), Attributes: map[string]any{"synthetic_scope": "transparent"}}
+				parallel := SemanticStatement{Kind: "block", Source: l.span(n)}
 				temps := make([]string, len(x.Rhs))
 				for i, rhs := range x.Rhs {
 					temps[i] = fmt.Sprintf("native_parallel_%d_%d", l.resultTempSeq, i)
@@ -2569,83 +2066,48 @@ func (l *goScalarLowerer) stmt(n ast.Stmt) SemanticStatement {
 			s.Expression = l.expr(x.X)
 		}
 	case *ast.SwitchStmt:
-		// Preserve each clause as a first-class semantic child. Flattening all
-		// clause bodies into one statement list erased branch boundaries,
-		// patterns, and default coverage, making both CFG return analysis and
-		// target projection unsound.
+		// Switch cases are represented as a structured control node.  Keeping
+		// every clause body and the optional tag in attributes lets the common
+		// UAST projector preserve control-flow shape without a Go-specific
+		// emitter branch.
 		s.Kind = "switch"
-		s.Attributes = map[string]any{"go_switch": true, "go_switch_expressionless": x.Tag == nil}
+		s.Attributes = map[string]any{"go_switch": true, "case_count": len(x.Body.List)}
 		if x.Tag != nil {
-			s.Condition = l.expr(x.Tag)
-		} else {
-			s.Condition = &SemanticExpression{Kind: "literal", LiteralKind: "bool", Text: "true", Scope: s.Scope}
+			s.Attributes["tag"] = l.expr(x.Tag)
 		}
 		l.switchDepth++
 		for _, clause := range x.Body.List {
 			if cc, ok := clause.(*ast.CaseClause); ok {
-				caseStmt := SemanticStatement{Kind: "switch_case", Scope: s.Scope, Source: l.span(cc)}
-				for _, pattern := range cc.List {
-					caseStmt.Patterns = append(caseStmt.Patterns, *l.expr(pattern))
-				}
-				if len(cc.List) == 0 {
-					caseStmt.Kind = "switch_default"
-				}
-				body := SemanticStatement{Kind: "block", Scope: s.Scope, Source: l.span(cc)}
 				for _, bodyStmt := range cc.Body {
-					body.Statements = append(body.Statements, l.stmt(bodyStmt))
+					s.Statements = append(s.Statements, l.stmt(bodyStmt))
 				}
-				caseStmt.Body = &body
-				s.Statements = append(s.Statements, caseStmt)
 			}
 		}
 		l.switchDepth--
 	case *ast.TypeSwitchStmt:
 		s.Kind = "switch"
-		s.Attributes = map[string]any{"go_type_switch": true}
+		s.Attributes = map[string]any{"go_type_switch": true, "case_count": len(x.Body.List)}
 		if x.Assign != nil {
 			s.Attributes["assignment"] = fmt.Sprintf("%T", x.Assign)
-			if expr := goTypeSwitchGuardExpr(x.Assign); expr != nil {
-				s.Condition = l.expr(expr)
-			}
 		}
 		l.switchDepth++
 		for _, clause := range x.Body.List {
 			if cc, ok := clause.(*ast.CaseClause); ok {
-				caseStmt := SemanticStatement{Kind: "switch_case", Scope: s.Scope, Source: l.span(cc), Attributes: map[string]any{"pattern_kind": "type"}}
-				for _, pattern := range cc.List {
-					caseStmt.Patterns = append(caseStmt.Patterns, *l.expr(pattern))
-				}
-				if len(cc.List) == 0 {
-					caseStmt.Kind = "switch_default"
-				}
-				body := SemanticStatement{Kind: "block", Scope: s.Scope, Source: l.span(cc)}
 				for _, bodyStmt := range cc.Body {
-					body.Statements = append(body.Statements, l.stmt(bodyStmt))
+					s.Statements = append(s.Statements, l.stmt(bodyStmt))
 				}
-				caseStmt.Body = &body
-				s.Statements = append(s.Statements, caseStmt)
 			}
 		}
 		l.switchDepth--
 	case *ast.SelectStmt:
 		s.Kind = "switch"
-		s.Attributes = map[string]any{"go_select": true}
+		s.Attributes = map[string]any{"go_select": true, "case_count": len(x.Body.List)}
 		l.switchDepth++
 		for _, clause := range x.Body.List {
 			if cc, ok := clause.(*ast.CommClause); ok {
-				caseStmt := SemanticStatement{Kind: "select_case", Scope: s.Scope, Source: l.span(cc)}
-				if cc.Comm != nil {
-					caseStmt.Statements = append(caseStmt.Statements, l.stmt(cc.Comm))
-				}
-				body := SemanticStatement{Kind: "block", Scope: s.Scope, Source: l.span(cc)}
 				for _, bodyStmt := range cc.Body {
-					body.Statements = append(body.Statements, l.stmt(bodyStmt))
+					s.Statements = append(s.Statements, l.stmt(bodyStmt))
 				}
-				caseStmt.Body = &body
-				if cc.Comm == nil {
-					caseStmt.Kind = "select_default"
-				}
-				s.Statements = append(s.Statements, caseStmt)
 			}
 		}
 		l.switchDepth--
