@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
 func resolutionMatrix(t *testing.T, rows [][]float64) matrixir.Matrix {

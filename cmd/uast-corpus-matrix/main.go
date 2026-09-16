@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/corpusmatrix"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/corpusmatrix"
 )
 
 func main() {

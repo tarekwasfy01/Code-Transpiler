@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
 // SemanticTypeEquivalence proves exact type-domain equality only. It is not

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
 func TestPythonSharedFactsFrontendEquivalence(t *testing.T) {
@@ -95,6 +95,25 @@ func TestPythonSimpleLoopPatternUsesExistingBindingPattern(t *testing.T) {
 	}
 	if !loop || !pattern {
 		t.Fatalf("expected ForEachStmt + BindingPattern, got %#v", p.UniversalAST.Nodes)
+	}
+}
+
+func TestPythonNestedLoopPatternPreservesNestedBindingNodes(t *testing.T) {
+	p, err := LowerPython("for i, (flag, _, _, description) in enumerate(options):\n    print(description)\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateSemanticProgram(p); err != nil {
+		t.Fatal(err)
+	}
+	patterns := 0
+	for _, n := range p.UniversalAST.Nodes {
+		if n.StructuralKind == "BindingPattern" {
+			patterns++
+		}
+	}
+	if patterns != 2 {
+		t.Fatalf("got %d BindingPattern nodes, want an outer and nested pattern", patterns)
 	}
 }
 

@@ -4,7 +4,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 	"os"
 	"path/filepath"
 	"strings"
@@ -83,7 +83,16 @@ func semanticModuleCommand(args []string) error {
 		}
 		registryLang := backend.NormalizeLanguage(lang)
 		isMavenCoordinate := (registryLang == "java" || registryLang == "kotlin") && strings.Contains(path, ":")
-		isNamedRegistryPackage := ((registryLang == "python" || registryLang == "rust" || registryLang == "r" || registryLang == "go" || registryLang == "node" || registryLang == "javascript" || registryLang == "typescript" || registryLang == "csharp" || registryLang == "dotnet" || registryLang == "c" || registryLang == "cpp" || registryLang == "c++" || registryLang == "julia" || registryLang == "nim" || registryLang == "swift") && filepath.Ext(path) == "") || isMavenCoordinate
+		isNamedRegistryPackage := ((registryLang == "python" || registryLang == "rust" || registryLang == "r" || registryLang == "node" || registryLang == "javascript" || registryLang == "typescript" || registryLang == "csharp" || registryLang == "dotnet" || registryLang == "c" || registryLang == "cpp" || registryLang == "c++" || registryLang == "julia" || registryLang == "nim" || registryLang == "swift") && filepath.Ext(path) == "") || isMavenCoordinate
+		// Go module/package identities commonly contain dots (for example
+		// gioui.org). Treat a non-existent Go path as a registry package even
+		// when filepath.Ext reports a suffix; existing files/directories still
+		// take the local-source path above.
+		if registryLang == "go" && !isDir {
+			if _, statErr := os.Stat(path); os.IsNotExist(statErr) {
+				isNamedRegistryPackage = true
+			}
+		}
 		if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") || strings.EqualFold(filepath.Ext(path), ".zip") || isDir || isNamedRegistryPackage {
 			var stop = make(chan struct{})
 			var wg sync.WaitGroup

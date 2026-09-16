@@ -6,17 +6,19 @@ package backend
 // lossless authority; the envelope deliberately does not introduce another IR.
 
 import (
+	"bufio"
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
 const SemanticSPVersion = 1
@@ -443,6 +445,65 @@ func (p *SemanticProgram) MarshalSemanticSEReadable() ([]byte, error) {
 		}
 	}
 	return b.Bytes(), nil
+}
+
+// WriteSemanticSEReadable writes the readable SE envelope directly to w.
+// Unlike MarshalSemanticSEReadable it does not build a second formatted
+// document buffer.  Callers can therefore create the destination file before
+// formatting starts and observe incremental output while the unit is written.
+func (p *SemanticProgram) WriteSemanticSEReadable(w io.Writer) error {
+	if w == nil {
+		return fmt.Errorf("nil SE writer")
+	}
+	raw, err := p.MarshalSemanticSESemanticOnly()
+	if err != nil {
+		return err
+	}
+	out := bufio.NewWriterSize(w, 64*1024)
+	lines := strings.Split(strings.ReplaceAll(string(raw), "\r\n", "\n"), "\n")
+	seenSection := false
+	sectionKeys := map[string]bool{"contracts": true, "evidence": true, "extensions": true, "metadata": true, "nodes": true, "relations": true, "type_contract": true, "type_graph": true, "type_relations": true, "type_table": true}
+	write := func(s string) error { _, e := io.WriteString(out, s); return e }
+	for _, line := range lines {
+		t := strings.TrimSpace(line)
+		if t == "" {
+			continue
+		}
+		if t == "program {" || t == "}" || strings.HasPrefix(t, "#") || t == "se 1" {
+			if err := write(t + "\n"); err != nil {
+				return err
+			}
+			continue
+		}
+		if t == "schema=1" {
+			if err := write("    schema = 1\n"); err != nil {
+				return err
+			}
+			continue
+		}
+		if strings.Contains(t, "=") {
+			parts := strings.SplitN(t, "=", 2)
+			key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+			if seenSection && sectionKeys[key] {
+				if err := write("\n"); err != nil {
+					return err
+				}
+			}
+			if sectionKeys[key] {
+				seenSection = true
+			}
+			if parsed, e := parseNativeSEValue(value); e == nil {
+				if err := write("    " + key + " = " + prettySEValue(parsed, 4) + "\n"); err != nil {
+					return err
+				}
+			} else if err := write("    " + key + " = " + value + "\n"); err != nil {
+				return err
+			}
+		} else if err := write("    " + t + "\n"); err != nil {
+			return err
+		}
+	}
+	return out.Flush()
 }
 
 func prettySEValue(v spValue, indent int) string {

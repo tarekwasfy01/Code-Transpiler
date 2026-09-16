@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
 // roundtripSourceVisitor supplies nonsemantic source evidence to every legacy

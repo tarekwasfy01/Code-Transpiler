@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend/x86encode"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend/x86encode"
 )
 
 type x64Operand struct {
@@ -86,6 +86,28 @@ const (
 // source languages. No parser or source text participates in encoding.
 var x64BinaryOpcodes = map[string]byte{"add": 0x03, "sub": 0x2b, "and": 0x23, "or": 0x0b, "xor": 0x33, "cmp": 0x3b, "test": 0x85}
 var x64Conditions = map[string]byte{"jo": 0, "jno": 1, "jb": 2, "jae": 3, "je": 4, "jne": 5, "jbe": 6, "ja": 7, "js": 8, "jns": 9, "jp": 10, "jnp": 11, "jl": 12, "jge": 13, "jle": 14, "jg": 15}
+
+func orderedMachineDataNames(names []string) []string {
+	sorted := append([]string(nil), names...)
+	sort.Strings(sorted)
+	ordered := make([]string, 0, len(sorted))
+	for _, name := range sorted {
+		if strings.HasPrefix(name, "uast_") && !strings.HasPrefix(name, "uast_global_") {
+			ordered = append(ordered, name)
+		}
+	}
+	for _, name := range sorted {
+		if strings.HasPrefix(name, "uast_global_") || strings.HasPrefix(name, "__project_data_") {
+			ordered = append(ordered, name)
+		}
+	}
+	for _, name := range sorted {
+		if !strings.HasPrefix(name, "uast_") && !strings.HasPrefix(name, "__project_data_") {
+			ordered = append(ordered, name)
+		}
+	}
+	return ordered
+}
 
 func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 	if code, ok, err := encodeSharedRegisterSubset(p); ok {
@@ -477,30 +499,7 @@ func encodeX64(p x64Program) ([]byte, map[string]int, error) {
 	for name := range p.Data {
 		dataNames = append(dataNames, name)
 	}
-	sort.Strings(dataNames)
-	orderedDataNames := make([]string, 0, len(dataNames))
-	for _, name := range dataNames {
-		if strings.HasPrefix(name, "uast_") {
-			orderedDataNames = append(orderedDataNames, name)
-		}
-	}
-	for _, name := range dataNames {
-		if strings.HasPrefix(name, "__project_data_") {
-			orderedDataNames = append(orderedDataNames, name)
-		}
-	}
-	for _, name := range dataNames {
-		found := false
-		for _, ordered := range orderedDataNames {
-			if ordered == name {
-				found = true
-				break
-			}
-		}
-		if !found {
-			orderedDataNames = append(orderedDataNames, name)
-		}
-	}
+	orderedDataNames := orderedMachineDataNames(dataNames)
 	for _, name := range orderedDataNames {
 		if _, exists := labels[name]; exists {
 			return nil, nil, fmt.Errorf("duplicate data label %s", name)

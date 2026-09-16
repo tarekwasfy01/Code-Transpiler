@@ -10,9 +10,11 @@ import (
 	"go/types"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 // LowerNativeGoPackage lowers explicitly selected files from one Go package.
@@ -81,26 +83,116 @@ func LowerNativeGoPackageEach(filenames []string, visit func(filename string, pr
 		files = append(files, file)
 		sources[path] = string(data)
 	}
+	totalBytes := 0
+	for _, path := range paths {
+		totalBytes += len(sources[path])
+	}
+	// A large package-wide go/types graph can be many orders of magnitude
+	// larger than its source (notably the compiler backend package). In that
+	// case use the same fail-closed structural frontend one file at a time and
+	// release each SemanticProgram immediately. This preserves source/UAST
+	// facts while avoiding an unbounded whole-package graph.
+	if totalBytes >= 1_000_000 || os.Getenv("UAST_GO_PACKAGE_STREAMING") == "1" {
+		prior := os.Getenv("UAST_GO_SKIP_TYPECHECK")
+		_ = os.Setenv("UAST_GO_SKIP_TYPECHECK", "1")
+		defer func() {
+			if prior == "" {
+				_ = os.Unsetenv("UAST_GO_SKIP_TYPECHECK")
+			} else {
+				_ = os.Setenv("UAST_GO_SKIP_TYPECHECK", prior)
+			}
+		}()
+		for _, path := range paths {
+			// Parse and lower this file in an isolated FileSet. Do not call
+			// LowerNativeGo here: that convenience path discovers sibling files
+			// for package type checking and defeats the streaming memory bound.
+			unitSet := gotoken.NewFileSet()
+			unitFile, parseErr := goparser.ParseFile(unitSet, path, sources[path], 0)
+			var program *SemanticProgram
+			lowerErr := parseErr
+			if lowerErr == nil {
+				lowerErr = validateNativeGoSurface(unitFile)
+			}
+			if lowerErr == nil {
+				var modules []string
+				for _, imp := range unitFile.Imports {
+					if importPath, unquoteErr := strconv.Unquote(imp.Path.Value); unquoteErr == nil {
+						modules = append(modules, importPath)
+					}
+				}
+				program, lowerErr = lowerNativeGoPrepared(path, sources[path], nil, unitSet, unitFile, nativeGoTypeInfo(), []*ast.File{unitFile}, unitFile.Name.Name, modules, true)
+			}
+			if visitErr := visit(path, program, lowerErr); visitErr != nil {
+				return visitErr
+			}
+			program = nil
+		}
+		return nil
+	}
 	info := nativeGoTypeInfo()
 	conf := types.Config{Importer: nativeGoImporterFor(paths[0]), Sizes: types.SizesFor("gc", "amd64")}
+	// Large compiler packages do not need a second full body walk: the
+	// structural lowering below still preserves every function body, while
+	// go/types body checking can retain an enormous temporary graph. Keep the
+	// declaration/type contracts and make the expensive body phase explicit.
+	if totalBytes >= 1_000_000 || os.Getenv("UAST_GO_IGNORE_FUNC_BODIES") == "1" {
+		conf.IgnoreFuncBodies = true
+	}
 	if _, err := conf.Check(packageName, fs, files, info); err != nil && !nativeGoBoundaryTypecheckError(err) {
 		return fmt.Errorf("Go package typecheck: %w", err)
 	}
-	for _, file := range files {
-		filename := fs.Position(file.Pos()).Filename
-		var modules []string
-		for _, imp := range file.Imports {
-			path, err := strconv.Unquote(imp.Path.Value)
-			if err != nil {
-				continue
+	// Lower independent file bodies concurrently.  The callback remains
+	// serialized because exporters update shared registries/counters, while
+	// the expensive AST-to-semantic work runs in parallel.  The budget follows
+	// the project-wide policy: 80%% of CPUs, with a floor of 32 workers, capped
+	// by the number of files in this package.
+	workers := runtime.NumCPU() * 80 / 100
+	if configured := strings.TrimSpace(os.Getenv("SEMANTIC_EXPORT_FILE_WORKERS")); configured != "" {
+		if n, parseErr := strconv.Atoi(configured); parseErr == nil && n > 0 {
+			workers = n
+		}
+	}
+	if workers < 1 {
+		workers = 1
+	}
+	if workers > len(files) {
+		workers = len(files)
+	}
+	jobs := make(chan *ast.File)
+	var visitMu sync.Mutex
+	var firstErr error
+	var wg sync.WaitGroup
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for file := range jobs {
+				filename := fs.Position(file.Pos()).Filename
+				var modules []string
+				for _, imp := range file.Imports {
+					path, err := strconv.Unquote(imp.Path.Value)
+					if err != nil {
+						continue
+					}
+					modules = append(modules, path)
+				}
+				program, err := lowerNativeGoPrepared(filename, sources[filename], nil, fs, file, info, files, packageName, modules, false)
+				visitMu.Lock()
+				if firstErr == nil {
+					firstErr = visit(filename, program, err)
+				}
+				visitMu.Unlock()
+				program = nil
 			}
-			modules = append(modules, path)
-		}
-		program, err := lowerNativeGoPrepared(filename, sources[filename], nil, fs, file, info, files, packageName, modules, false)
-		if visitErr := visit(filename, program, err); visitErr != nil {
-			return visitErr
-		}
-		program = nil
+		}()
+	}
+	for _, file := range files {
+		jobs <- file
+	}
+	close(jobs)
+	wg.Wait()
+	if firstErr != nil {
+		return firstErr
 	}
 	return nil
 }

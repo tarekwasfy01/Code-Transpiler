@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Tarek Wasfy
 package backend
 
-import "github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
+import "github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 
 // StructuredConstructInput is a short-lived parser DTO. It deliberately has
 // no target, runtime, UAST facet, or execution information.

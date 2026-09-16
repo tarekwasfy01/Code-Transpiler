@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
 const ExactCallResolutionCapability = "call.resolution.exact.v1"

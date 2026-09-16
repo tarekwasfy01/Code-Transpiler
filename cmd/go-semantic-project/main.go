@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 )
 
 type result struct {
@@ -64,7 +64,7 @@ func main() {
 	// graph. Twenty seconds classified valid large files as TIMEOUT before the
 	// frontend had a chance to finish; keep the limit bounded but give one
 	// package-resolution pass enough time to complete.
-	timeoutSeconds := flag.Int("timeout", 120, "per-file frontend timeout in seconds")
+	timeoutSeconds := flag.Int("timeout", 600, "per-file frontend timeout in seconds")
 	flag.Parse()
 	if *embedMode != "full" && *embedMode != "needed" {
 		panic("embed-mode must be full or needed")
@@ -141,97 +141,133 @@ func main() {
 	if *workers < 1 {
 		*workers = 1
 	}
-	jobs := make(chan int)
+	type packageJob []int
+	byDir := make(map[string][]int)
+	var dirs []string
+	for i, file := range files {
+		dir := filepath.Dir(file)
+		if _, exists := byDir[dir]; !exists {
+			dirs = append(dirs, dir)
+		}
+		byDir[dir] = append(byDir[dir], i)
+	}
+	sort.Slice(dirs, func(i, j int) bool {
+		if len(byDir[dirs[i]]) != len(byDir[dirs[j]]) {
+			return len(byDir[dirs[i]]) > len(byDir[dirs[j]])
+		}
+		return dirs[i] < dirs[j]
+	})
+	jobs := make(chan packageJob)
+	process := func(i int, p *backend.SemanticProgram, lowerErr error, data []byte, started time.Time) {
+		file := files[i]
+		rel, _ := filepath.Rel(*root, file)
+		sum := sha256.Sum256(data)
+		r := result{File: rel, Hash: fmt.Sprintf("%x", sum[:]), Bytes: int64(len(data)), DurationMS: time.Since(started).Milliseconds()}
+		if lowerErr != nil {
+			r.Status = "FAIL"
+			r.Phase = "SOURCE_TO_SEMANTIC"
+			if lowerErr == context.DeadlineExceeded {
+				r.Status, r.Phase = "TIMEOUT", "TIMEOUT"
+			}
+			r.Diagnostic = compact(lowerErr.Error())
+		} else if x := backend.CompleteCanonicalUASTContracts(p); x != nil {
+			r.Status, r.Phase, r.Diagnostic = "FAIL", "UAST_CONTRACT_COMPLETION", compact(x.Error())
+		} else {
+			r.Modules = append([]string(nil), p.Origin.Modules...)
+			name := strings.TrimSuffix(rel, filepath.Ext(rel)) + "." + *format
+			r.Output = filepath.Join("semantic-"+*format, name)
+			var x error
+			if *embedModules {
+				r.Embeddings, x = backend.EmbedSemanticModules(p, backend.SemanticModuleEmbeddingOptions{
+					BaseDir: *root, StoreRoot: embedStoreRoot, UnitPath: filepath.Join(*out, r.Output), Language: p.Origin.SourceLanguage, NeededOnly: *embedMode == "needed", Registry: embedRegistry,
+				})
+			}
+			var wire []byte
+			if x == nil && *format == "se" {
+				wire, x = p.MarshalSemanticSEWithSource()
+			} else if x == nil {
+				wire, x = p.MarshalSemanticJSON()
+			}
+			if x != nil {
+				r.Status, r.Phase, r.Diagnostic = "FAIL", "SEMANTIC_SERIALIZE_OR_EMBED", compact(x.Error())
+			} else {
+				r.Status, r.Phase = "PASS", "SOURCE_TO_SEMANTIC"
+				outputPath := filepath.Join(*out, r.Output)
+				if x = os.MkdirAll(filepath.Dir(outputPath), 0755); x == nil {
+					x = os.WriteFile(outputPath, wire, 0644)
+				}
+				if x == nil {
+					unitID := filepath.ToSlash(rel)
+					var summary backend.SemanticUnitSummary
+					summary, x = backend.BuildSemanticUnitSummary(outputPath, unitID)
+					if x == nil {
+						var summaryBytes []byte
+						summaryBytes, x = json.Marshal(summary)
+						if x == nil {
+							x = os.WriteFile(outputPath+".summary.json", append(summaryBytes, '\n'), 0644)
+						}
+					}
+				}
+				if x != nil {
+					r.Status, r.Phase, r.Diagnostic = "FAIL", "SEMANTIC_WRITE_OR_SUMMARY", compact(x.Error())
+				}
+			}
+		}
+		results[i] = r
+		failureLog.record(i, r)
+	}
 	var wg sync.WaitGroup
-	for n := 0; n < *workers; n++ {
+	// Package checking is intentionally single-flight. Each checked package
+	// then fans out to the configured unit workers, so the requested CPU
+	// parallelism is not multiplied by the number of simultaneously checked
+	// packages.
+	for n := 0; n < 1; n++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for i := range jobs {
-				file := files[i]
-				data, e := os.ReadFile(file)
-				if e != nil {
-					results[i] = result{File: file, Status: "FAIL", Phase: "READ", Diagnostic: e.Error()}
-					failureLog.record(i, results[i])
+			for job := range jobs {
+				started := time.Now()
+				batch := make([]backend.NativeGoSourceFile, 0, len(job))
+				contents := make(map[int][]byte, len(job))
+				indexByPath := make(map[string]int, len(job))
+				for _, i := range job {
+					data, readErr := os.ReadFile(files[i])
+					if readErr != nil {
+						process(i, nil, readErr, nil, started)
+						continue
+					}
+					contents[i] = data
+					batch = append(batch, backend.NativeGoSourceFile{Filename: files[i], Source: string(data)})
+					indexByPath[files[i]] = i
+				}
+				if len(batch) == 0 {
 					continue
 				}
-				sum := sha256.Sum256(data)
-				rel, _ := filepath.Rel(*root, file)
-				start := time.Now()
-				p, e := lowerWithRetry(file, string(data), time.Duration(*timeoutSeconds)*time.Second)
-				r := result{File: rel, Hash: fmt.Sprintf("%x", sum[:]), Bytes: int64(len(data)), DurationMS: time.Since(start).Milliseconds()}
-				if e != nil {
-					r.Status = "FAIL"
-					r.Phase = "SOURCE_TO_SEMANTIC"
-					if e == context.DeadlineExceeded {
-						r.Status = "TIMEOUT"
-						r.Phase = "TIMEOUT"
-					}
-					r.Diagnostic = compact(e.Error())
-				} else {
-					var x error
-					if x = backend.CompleteCanonicalUASTContracts(p); x != nil {
-						r.Status = "FAIL"
-						r.Phase = "UAST_CONTRACT_COMPLETION"
-						r.Diagnostic = compact(x.Error())
-					} else {
-						r.Modules = append([]string(nil), p.Origin.Modules...)
-						name := strings.TrimSuffix(rel, filepath.Ext(rel)) + "." + *format
-						r.Output = filepath.Join("semantic-"+*format, name)
-						if *embedModules {
-							r.Embeddings, x = backend.EmbedSemanticModules(p, backend.SemanticModuleEmbeddingOptions{
-								BaseDir: *root, StoreRoot: embedStoreRoot, UnitPath: filepath.Join(*out, r.Output), Language: p.Origin.SourceLanguage, NeededOnly: *embedMode == "needed", Registry: embedRegistry,
-							})
-						}
-						if x != nil {
-							r.Status = "FAIL"
-							r.Phase = "SEMANTIC_MODULE_EMBED"
-							r.Diagnostic = compact(x.Error())
-						}
-						var wire []byte
-						if x == nil && *format == "se" {
-							wire, x = p.MarshalSemanticSEWithSource()
-						} else if x == nil {
-							wire, x = p.MarshalSemanticJSON()
-						}
-						if x != nil {
-							r.Status = "FAIL"
-							r.Phase = "SEMANTIC_SERIALIZE"
-							r.Diagnostic = compact(x.Error())
-						} else {
-							r.Status = "PASS"
-							r.Phase = "SOURCE_TO_SEMANTIC"
-							outputPath := filepath.Join(*out, r.Output)
-							if x = os.MkdirAll(filepath.Dir(outputPath), 0755); x == nil {
-								x = os.WriteFile(outputPath, wire, 0644)
-							}
-							if x == nil {
-								unitID := filepath.ToSlash(rel)
-								var summary backend.SemanticUnitSummary
-								summary, x = backend.BuildSemanticUnitSummary(outputPath, unitID)
-								if x == nil {
-									var summaryBytes []byte
-									summaryBytes, x = json.Marshal(summary)
-									if x == nil {
-										x = os.WriteFile(outputPath+".summary.json", append(summaryBytes, '\n'), 0644)
-									}
-								}
-							}
-							if x != nil {
-								r.Status = "FAIL"
-								r.Phase = "SEMANTIC_WRITE_OR_SUMMARY"
-								r.Diagnostic = compact(x.Error())
-							}
-						}
+				if *singleFile != "" && len(batch) == 1 {
+					p, lowerErr := lowerWithRetry(batch[0].Filename, batch[0].Source, time.Duration(*timeoutSeconds)*time.Second)
+					i := indexByPath[batch[0].Filename]
+					process(i, p, lowerErr, contents[i], started)
+					continue
+				}
+				err := backend.LowerNativeGoSourcePackageWithWorkers(batch, *workers, func(unit backend.NativeGoSourceFile, p *backend.SemanticProgram, lowerErr error) {
+					i := indexByPath[unit.Filename]
+					process(i, p, lowerErr, contents[i], started)
+				})
+				if err != nil {
+					// A directory can contain multiple Go package identities or
+					// otherwise be unsuitable for a shared check. Preserve the
+					// established per-file semantics for that exceptional group.
+					for _, unit := range batch {
+						i := indexByPath[unit.Filename]
+						p, lowerErr := lowerWithRetry(unit.Filename, unit.Source, time.Duration(*timeoutSeconds)*time.Second)
+						process(i, p, lowerErr, contents[i], started)
 					}
 				}
-				results[i] = r
-				failureLog.record(i, r)
 			}
 		}()
 	}
-	for i := range files {
-		jobs <- i
+	for _, dir := range dirs {
+		jobs <- packageJob(byDir[dir])
 	}
 	close(jobs)
 	wg.Wait()

@@ -13,17 +13,17 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
-	"gioui.org/app"
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/manytomany"
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/platform"
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/runtimeassets"
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/targetrun"
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/thirdpartylicenses"
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/ui"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/manytomany"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/platform"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/runtimeassets"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/targetrun"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/thirdpartylicenses"
 )
 
 // Set by the local onefile build. Defaults keep source-tree invocations
@@ -101,11 +101,6 @@ func main() {
 			fmt.Fprintln(os.Stderr, "r2many:", err)
 			os.Exit(1)
 		}
-	case "llvm-source-evidence":
-		if err := llvmSourceEvidence(os.Args[2:]); err != nil {
-			fmt.Fprintln(os.Stderr, "r2many:", err)
-			os.Exit(1)
-		}
 	case "compile-toolchain", "compile-gcc", "compile-msvc":
 		args := os.Args[2:]
 		if os.Args[1] == "compile-gcc" {
@@ -142,6 +137,11 @@ func main() {
 		}
 	case "compile-csc":
 		if err := compileCSC(os.Args[2:]); err != nil {
+			fmt.Fprintln(os.Stderr, "r2many:", err)
+			os.Exit(1)
+		}
+	case "compile-csc-project":
+		if err := compileCSCProject(os.Args[2:]); err != nil {
 			fmt.Fprintln(os.Stderr, "r2many:", err)
 			os.Exit(1)
 		}
@@ -328,6 +328,18 @@ func semanticExport(args []string) error {
 		}); err != nil {
 			return fmt.Errorf("semantic module import: %w", err)
 		}
+		// Persist the resolved module boundary in the exported document. The
+		// resolver establishes/link-checks dependencies; EmbedSemanticModules
+		// is the existing deduplicating payload/reference pass that makes the
+		// result self-contained for later target projection.
+		if *moduleMode != "references" {
+			if _, err := backend.EmbedSemanticModules(semantic, backend.SemanticModuleEmbeddingOptions{
+				BaseDir: filepath.Dir(fs.Arg(0)), StoreRoot: resolver.Store.Root, UnitPath: *out,
+				Language: semantic.Origin.SourceLanguage, NeededOnly: *moduleMode == "needed",
+			}); err != nil {
+				return fmt.Errorf("semantic module embedding: %w", err)
+			}
+		}
 	}
 	var encoded []byte
 	if isSemanticCompressedFormat(*format) || isSemanticCompressedPath(*out) {
@@ -429,59 +441,119 @@ func semanticExportProject(args []string) error {
 	}
 	var exported, failed int
 	var failures []string
-	for _, dir := range dirs {
-		err := backend.LowerNativeGoPackageEach(groups[dir], func(source string, program *backend.SemanticProgram, lowerErr error) error {
-			if lowerErr != nil {
-				failed++
-				failures = append(failures, fmt.Sprintf("%s: %v", source, lowerErr))
-				return nil
-			}
-			rel, err := filepath.Rel(rootPath, source)
-			if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-				failed++
-				failures = append(failures, fmt.Sprintf("%s: source lies outside root %s", source, rootPath))
-				return nil
-			}
-			target := filepath.Join(base, strings.TrimSuffix(rel, filepath.Ext(rel))+".se")
-			if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
-				failed++
-				failures = append(failures, fmt.Sprintf("%s: %v", source, err))
-				return nil
-			}
-			// LowerNativeGo records source imports in the native frontend shape.
-			// Normalize them to canonical pkg:* module identities before resolving
-			// and embedding, otherwise the project exporter cannot observe external
-			// Go modules even though the source contains imports.
-			backend.NormalizeGoPackageModuleReferences(program, filepath.Dir(source))
-			if *moduleMode == "references" {
-				// Reference-only exports keep imports as metadata and do not copy
-				// module bodies into any unit.
-				if program.Metadata == nil {
-					program.Metadata = map[string]string{}
-				}
-				program.Metadata["semantic_module_embedding_mode"] = "references"
-			} else if _, err = backend.EmbedSemanticModules(program, backend.SemanticModuleEmbeddingOptions{BaseDir: filepath.Dir(source), StoreRoot: resolver.Store.Root, UnitPath: target, Registry: embeddingRegistry}); err != nil {
-				failed++
-				failures = append(failures, fmt.Sprintf("%s: %v", source, err))
-				return nil
-			}
-			data, err := program.MarshalSemanticSEReadable()
-			if err == nil {
-				err = os.WriteFile(target, data, 0644)
-			}
-			if err != nil {
-				failed++
-				failures = append(failures, fmt.Sprintf("%s: %v", source, err))
-				return nil
-			}
-			exported++
-			return nil
-		})
-		if err != nil {
-			failed += len(groups[dir])
-			failures = append(failures, fmt.Sprintf("%s: %v", dir, err))
+	// Package groups used to run serially even though each package already
+	// lowers its files concurrently. Run a bounded number of independent
+	// packages as well; the cap avoids multiplying the per-package worker pool
+	// into an unbounded oversubscription on large machines.
+	packageWorkers := runtime.NumCPU() * 80 / 100
+	if configured := strings.TrimSpace(os.Getenv("SEMANTIC_EXPORT_PACKAGE_WORKERS")); configured != "" {
+		if n, parseErr := strconv.Atoi(configured); parseErr == nil && n > 0 {
+			packageWorkers = n
 		}
 	}
+	if packageWorkers < 2 {
+		packageWorkers = 2
+	}
+	if packageWorkers > 8 {
+		packageWorkers = 8
+	}
+	if packageWorkers > len(dirs) {
+		packageWorkers = len(dirs)
+	}
+	jobs := make(chan string)
+	var resultMu sync.Mutex
+	var wg sync.WaitGroup
+	for i := 0; i < packageWorkers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for dir := range jobs {
+				err := backend.LowerNativeGoPackageEach(groups[dir], func(source string, program *backend.SemanticProgram, lowerErr error) error {
+					if lowerErr != nil {
+						resultMu.Lock()
+						failed++
+						failures = append(failures, fmt.Sprintf("%s: %v", source, lowerErr))
+						resultMu.Unlock()
+						return nil
+					}
+					rel, err := filepath.Rel(rootPath, source)
+					if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+						resultMu.Lock()
+						failed++
+						failures = append(failures, fmt.Sprintf("%s: source lies outside root %s", source, rootPath))
+						resultMu.Unlock()
+						return nil
+					}
+					target := filepath.Join(base, strings.TrimSuffix(rel, filepath.Ext(rel))+".se")
+					// Resume exports are safe because each unit is an independent
+					// artifact. Keep a valid existing unit and avoid rebuilding it.
+					if st, statErr := os.Stat(target); statErr == nil && st.Size() > 0 {
+						return nil
+					}
+					if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+						resultMu.Lock()
+						failed++
+						failures = append(failures, fmt.Sprintf("%s: %v", source, err))
+						resultMu.Unlock()
+						return nil
+					}
+					// LowerNativeGo records source imports in the native frontend shape.
+					// Normalize them to canonical pkg:* module identities before resolving
+					// and embedding, otherwise the project exporter cannot observe external
+					// Go modules even though the source contains imports.
+					backend.NormalizeGoPackageModuleReferences(program, filepath.Dir(source))
+					if *moduleMode == "references" {
+						// Reference-only exports keep imports as metadata and do not copy
+						// module bodies into any unit.
+						if program.Metadata == nil {
+							program.Metadata = map[string]string{}
+						}
+						program.Metadata["semantic_module_embedding_mode"] = "references"
+					} else if _, err = backend.EmbedSemanticModules(program, backend.SemanticModuleEmbeddingOptions{BaseDir: filepath.Dir(source), StoreRoot: resolver.Store.Root, UnitPath: target, Registry: embeddingRegistry}); err != nil {
+						resultMu.Lock()
+						failed++
+						failures = append(failures, fmt.Sprintf("%s: %v", source, err))
+						resultMu.Unlock()
+						return nil
+					}
+					// Stream the unit directly to disk. This keeps a growing .se
+					// artifact visible and avoids a second full formatted-output
+					// buffer in addition to the SemanticProgram.
+					var outFile *os.File
+					outFile, err = os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+					if err == nil {
+						err = program.WriteSemanticSEReadable(outFile)
+						closeErr := outFile.Close()
+						if err == nil {
+							err = closeErr
+						}
+					}
+					if err != nil {
+						resultMu.Lock()
+						failed++
+						failures = append(failures, fmt.Sprintf("%s: %v", source, err))
+						resultMu.Unlock()
+						return nil
+					}
+					resultMu.Lock()
+					exported++
+					resultMu.Unlock()
+					return nil
+				})
+				if err != nil {
+					resultMu.Lock()
+					failed += len(groups[dir])
+					failures = append(failures, fmt.Sprintf("%s: %v", dir, err))
+					resultMu.Unlock()
+				}
+			}
+		}()
+	}
+	for _, dir := range dirs {
+		jobs <- dir
+	}
+	close(jobs)
+	wg.Wait()
 	fmt.Printf("GO_PACKAGE_GROUPS=%d\nGO_FILES_EXPORTED=%d\nGO_FILES_FAILED=%d\nOUTPUT=%s\n", len(dirs), exported, failed, base)
 	for _, failure := range failures {
 		fmt.Fprintln(os.Stderr, failure)
@@ -1159,17 +1231,6 @@ func semanticInfo(args []string) error {
 	}
 	return json.NewEncoder(os.Stdout).Encode(info)
 }
-func launchGUI() {
-	go func() {
-		a := ui.New()
-		if err := a.Run(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-		os.Exit(0)
-	}()
-	app.Main()
-}
 func runSource(args []string) error {
 	fs := flag.NewFlagSet("run", flag.ContinueOnError)
 	source := fs.String("source", "auto", "source language or auto")
@@ -1305,6 +1366,7 @@ Native compiler (direct machine encoder; assembly optional):
 	sp compile program.se --embed-all-modules -o whole-program.exe
 	  By default, compile follows serialized semantic_module_link_roots; this
 	  flag deliberately embeds every declared module.
+	  Semantic imports can resolve from another store with -module-root DIR.
 	  Native builds retain status, source-unit inventory and a real program.obj
 	  below %TEMP%\\CodeTranspiler\\builds by default.
 	  --direct-exe disables retained intermediates; --build-dir DIR selects them.
@@ -1367,6 +1429,9 @@ GENERAL
   CodeTranspiler.exe semantic-csc input.cs -o program.semantic.json
   CodeTranspiler.exe compile-csc input.se -o program.exe
       Project a SemanticProgram through the canonical C# target and csc.exe.
+      -module-root DIR selects the Semantic module store for imported units.
+  CodeTranspiler.exe compile-csc-project semantic-directory -o program.exe
+      Link independently projected Semantic units through one csc.exe invocation.
       Parse and bind C# with the Roslyn adapter, then emit canonical UAST JSON.
   CodeTranspiler.exe semantic-export -source go input.go -format sp -o program.sp
       Export the same canonical program in readable Semantic Programming form.

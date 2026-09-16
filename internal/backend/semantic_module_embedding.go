@@ -84,6 +84,14 @@ func EmbedSemanticModules(p *SemanticProgram, opts SemanticModuleEmbeddingOption
 			continue
 		}
 		seen[dep] = true
+		// A project export already emits every source file of its own module as
+		// an independent Semantic unit. Embedding the owning module again would
+		// make the compiler import itself and create redundant/external entries.
+		// Keep genuine third-party and standard-library imports on the normal
+		// store/download path below.
+		if isOwningGoModuleImport(dep, opts.BaseDir) {
+			continue
+		}
 		depOpts := opts
 		if depOpts.NeededOnly && len(depOpts.NeededSymbols) == 0 {
 			depOpts.NeededSymbols = semanticNeededSymbols(p, dep)
@@ -472,9 +480,21 @@ func localGoModuleCandidate(importPath, baseDir string) string {
 	if err != nil {
 		return ""
 	}
-	data, err := os.ReadFile(filepath.Join(root, "go.mod"))
-	if err != nil {
-		return ""
+	// Imports are resolved from files in nested package directories. Walk
+	// upward to the owning module root instead of requiring go.mod beside the
+	// importing file; this keeps project-internal packages embeddable without
+	// treating them as external modules.
+	var data []byte
+	for {
+		data, err = os.ReadFile(filepath.Join(root, "go.mod"))
+		if err == nil {
+			break
+		}
+		parent := filepath.Dir(root)
+		if parent == root {
+			return ""
+		}
+		root = parent
 	}
 	modulePath := ""
 	for _, line := range strings.Split(string(data), "\n") {
@@ -494,6 +514,34 @@ func localGoModuleCandidate(importPath, baseDir string) string {
 		return candidate
 	}
 	return ""
+}
+
+func isOwningGoModuleImport(importPath, baseDir string) bool {
+	if baseDir == "" || filepath.IsAbs(importPath) {
+		return false
+	}
+	root, err := filepath.Abs(baseDir)
+	if err != nil {
+		return false
+	}
+	for {
+		data, readErr := os.ReadFile(filepath.Join(root, "go.mod"))
+		if readErr == nil {
+			for _, line := range strings.Split(string(data), "\n") {
+				fields := strings.Fields(line)
+				if len(fields) == 2 && fields[0] == "module" {
+					modulePath := strings.TrimSpace(fields[1])
+					return importPath == modulePath || strings.HasPrefix(importPath, modulePath+"/")
+				}
+			}
+			return false
+		}
+		parent := filepath.Dir(root)
+		if parent == root {
+			return false
+		}
+		root = parent
+	}
 }
 
 // DecodeSemanticEmbeddedModule is used by consumers that want to materialize

@@ -18,7 +18,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 )
 
 type unitResult struct {
@@ -44,6 +44,7 @@ func main() {
 	out := flag.String("out", "compiler-migration/csc/selfhost/semantic", "output directory")
 	workers := flag.Int("workers", 8, "parallel Roslyn binding workers")
 	format := flag.String("format", "json", "output format: json or se")
+	wholeProgram := flag.Bool("whole-program", true, "bind the discovered C# files as one compiler closure")
 	flag.Parse()
 	if *format != "json" && *format != "se" {
 		fatal("format must be json or se")
@@ -71,8 +72,30 @@ func main() {
 		fatal(err.Error())
 	}
 	sort.Strings(files)
+	// CompilerSubset.cs is the historical single-file fixture.  Once the
+	// real Program/Compiler/HostBoundary closure is present it would add a
+	// second Main method and make Roslyn correctly reject the compilation as
+	// ambiguous.  Keep it usable when it is the only source, but never merge
+	// it into the real compiler closure.
+	if len(files) > 1 {
+		filtered := files[:0]
+		for _, file := range files {
+			if strings.EqualFold(filepath.Base(file), "CompilerSubset.cs") {
+				continue
+			}
+			filtered = append(filtered, file)
+		}
+		files = filtered
+	}
+	if len(files) == 0 {
+		fatal("no C# source files discovered")
+	}
 	if err := os.MkdirAll(*out, 0755); err != nil {
 		fatal(err.Error())
+	}
+	if *wholeProgram {
+		runWholeProgram(files, *root, *out, *format)
+		return
 	}
 	results := make([]unitResult, len(files))
 	jobs := make(chan int)
@@ -142,6 +165,81 @@ func main() {
 	fmt.Printf("CSC_SEMANTIC_UNITS=%d PASS=%d FAIL=%d REPORT=%s\n", r.Total, r.Pass, r.Fail, path)
 	if r.Fail != 0 {
 		os.Exit(1)
+	}
+}
+
+// runWholeProgram is the self-hosting route.  A compiler is not a bag of
+// independently bindable source files: Program, Compiler and HostBoundary
+// resolve each other's symbols.  Concatenating the discovered compilation
+// units gives Roslyn one normal C# compilation while retaining every original
+// source file verbatim in the report.  This creates one canonical UAST rather
+// than an ad-hoc C# IR or a per-file fallback.
+func runWholeProgram(files []string, root, out, format string) {
+	parts := make([]string, 0, len(files))
+	usingSet := map[string]bool{}
+	usingLines := make([]string, 0)
+	for _, file := range files {
+		data, err := os.ReadFile(file)
+		if err != nil {
+			writeWholeProgramReport(root, out, []unitResult{{File: filepath.ToSlash(file), Status: "FAIL", Diagnostic: err.Error()}})
+			fatal(err.Error())
+		}
+		body := make([]string, 0)
+		for _, line := range strings.Split(string(data), "\n") {
+			trimmed := strings.TrimSpace(line)
+			if strings.HasPrefix(trimmed, "using ") && strings.HasSuffix(trimmed, ";") {
+				if !usingSet[trimmed] {
+					usingSet[trimmed] = true
+					usingLines = append(usingLines, trimmed)
+				}
+				continue
+			}
+			body = append(body, line)
+		}
+		// Preserve line boundaries between source units.  Roslyn's spans then
+		// still point into a deterministic, auditable compiler closure.
+		parts = append(parts, "// semantic-csc-unit: "+filepath.ToSlash(file)+"\n"+strings.Join(body, "\n"))
+	}
+	start := time.Now()
+	program, err := backend.RoslynBoundToSemantic("semantic-csc-selfhost.cs", strings.Join(usingLines, "\n")+"\n\n"+strings.Join(parts, "\n\n"))
+	result := unitResult{File: "<whole-program>", DurationMS: time.Since(start).Milliseconds()}
+	if err == nil {
+		err = backend.CompleteCanonicalUASTContracts(program)
+	}
+	if err == nil {
+		var wire []byte
+		if format == "se" {
+			wire, err = program.MarshalSemanticSEWithSource()
+		} else {
+			wire, err = program.MarshalUniversalASTJSON()
+		}
+		if err == nil {
+			result.Output = filepath.Join(out, "semantic-csc-selfhost."+format)
+			err = os.WriteFile(result.Output, wire, 0644)
+		}
+	}
+	if err != nil {
+		result.Status, result.Diagnostic = "FAIL", err.Error()
+		writeWholeProgramReport(root, out, []unitResult{result})
+		fmt.Fprintf(os.Stderr, "CSC_SELFHOST_WHOLE_PROGRAM=FAIL diagnostic=%s\n", result.Diagnostic)
+		os.Exit(1)
+	}
+	result.Status = "PASS"
+	writeWholeProgramReport(root, out, []unitResult{result})
+	fmt.Printf("CSC_SELFHOST_WHOLE_PROGRAM=PASS sources=%d output=%s\n", len(files), result.Output)
+}
+
+func writeWholeProgramReport(root, out string, units []unitResult) {
+	pass := 0
+	for _, unit := range units {
+		if unit.Status == "PASS" {
+			pass++
+		}
+	}
+	r := report{SchemaVersion: "csc-selfhost-semantic-v2", SourceRoot: root, OutputRoot: out, Total: len(units), Pass: pass, Fail: len(units) - pass, Units: units}
+	b, err := json.MarshalIndent(r, "", "  ")
+	if err == nil {
+		_ = os.WriteFile(filepath.Join(out, "report.json"), append(b, '\n'), 0644)
 	}
 }
 

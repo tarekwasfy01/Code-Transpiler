@@ -2,7 +2,7 @@
 package runtimeassets
 
 import (
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 	"os"
 	"path/filepath"
 	"testing"

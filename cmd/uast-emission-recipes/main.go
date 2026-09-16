@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/backend"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/backend"
 )
 
 func main() {

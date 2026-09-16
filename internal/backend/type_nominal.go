@@ -4,7 +4,7 @@ package backend
 import (
 	"sort"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
 // Identity columns group views of the same nominal declaration/instantiation.

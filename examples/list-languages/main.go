@@ -4,7 +4,7 @@ package main
 import (
 	"fmt"
 
-	codetranspiler "github.com/tarekwasfy01/Code-Transpiler/v2"
+	codetranspiler "github.com/tarekwasfy01/Code-Transpiler"
 )
 
 func main() {

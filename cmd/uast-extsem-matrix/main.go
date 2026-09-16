@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/extsemmatrix"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/extsemmatrix"
 )
 
 func main() {

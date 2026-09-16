@@ -9,7 +9,7 @@ import (
 	"go/types"
 	"reflect"
 
-	"github.com/tarekwasfy01/Code-Transpiler/v2/internal/matrixir"
+	"github.com/tarekwasfy01/Code-Transpiler/internal/matrixir"
 )
 
 // NativeFrontend extracts structured facts without reconstructing source text.
