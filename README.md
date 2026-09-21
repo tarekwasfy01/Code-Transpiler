@@ -11,8 +11,11 @@
   &nbsp;
   <a href="https://get.microsoft.com/installer/download/9n1kb1kxxtmn?referrer=appbadge">
     <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200" alt="Get it from Microsoft" />
-  </a>
+<a href="https://snapcraft.io/semantic-programming-language">
+  <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" />
+</a>  </a>
 </p>
+
 
 ## Semantic Programming Language
 
