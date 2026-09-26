@@ -1,0 +1,17 @@
+[
+  {
+    "file": "examples/list-languages/main.go",
+    "status": "manual",
+    "reason": "empty output"
+  },
+  {
+    "file": "module-embed-witness/hello_no_import/main.go",
+    "status": "converted",
+    "chars": 10767
+  },
+  {
+    "file": "internal/manytomany/direct_projection_family_test.go",
+    "status": "converted",
+    "chars": 33
+  }
+]

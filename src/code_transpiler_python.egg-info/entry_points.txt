@@ -1,0 +1,3 @@
+[console_scripts]
+code-transpiler = codetranspiler.cli:main
+code-transpiler-gui = codetranspiler.gui:main

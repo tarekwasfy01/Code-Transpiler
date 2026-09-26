@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "code-transpiler-python"
+version = "0.2.0"
+description = "Python package facade and Tkinter GUI for Tarek Wasfy's Code Transpiler"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Tarek Wasfy"}]
+keywords = ["transpiler", "compiler", "semantic-programming", "uast"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux"
+]
+
+[project.scripts]
+code-transpiler = "codetranspiler.cli:main"
+code-transpiler-gui = "codetranspiler.gui:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+codetranspiler = ["_engine/*", "licenses/*"]
