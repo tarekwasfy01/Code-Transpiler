@@ -1,10 +1,6 @@
 name: Publish Maven package
 
 on:
-  push:
-    branches: [ java ]
-    paths:
-      - '.github/publish-1.0.0'
   workflow_dispatch:
     inputs:
       version:
@@ -29,11 +25,11 @@ jobs:
           server-id: github
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
-      - name: Verify Maven package 1.0.0
+      - name: Verify Maven package
         working-directory: java
-        run: mvn -B -ntp -Drevision=1.0.0 verify
-      - name: Publish 1.0.0 to GitHub Packages
+        run: mvn -B -ntp -Drevision=${{ inputs.version }} verify
+      - name: Publish to GitHub Packages
         working-directory: java
-        run: mvn -B -ntp -Drevision=1.0.0 deploy -DskipTests
+        run: mvn -B -ntp -Drevision=${{ inputs.version }} deploy -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
