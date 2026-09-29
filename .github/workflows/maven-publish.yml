@@ -1,10 +1,14 @@
 name: Publish Maven package
 
 on:
+  push:
+    branches: [ java ]
+    paths:
+      - '.github/publish-1.0.0'
   workflow_dispatch:
     inputs:
       version:
-        description: 'Maven package version (for example 1.0.0)'
+        description: 'Maven package version'
         required: true
         default: '1.0.0'
 
@@ -17,7 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -26,13 +29,11 @@ jobs:
           server-id: github
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
-
-      - name: Verify Maven package
+      - name: Verify Maven package 1.0.0
         working-directory: java
-        run: mvn -B -ntp -Drevision=${{ inputs.version }} verify
-
-      - name: Publish to GitHub Packages
+        run: mvn -B -ntp -Drevision=1.0.0 verify
+      - name: Publish 1.0.0 to GitHub Packages
         working-directory: java
-        run: mvn -B -ntp -Drevision=${{ inputs.version }} deploy -DskipTests
+        run: mvn -B -ntp -Drevision=1.0.0 deploy -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
