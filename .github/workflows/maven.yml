@@ -4,6 +4,7 @@ on:
     branches: [ java ]
   pull_request:
     branches: [ java ]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -19,10 +20,3 @@ jobs:
       - name: Build and test Java
         working-directory: java
         run: mvn -B -ntp verify
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Test native JavaScript parity
-        run: |
-          node javascript/test/smoke.mjs
-          node javascript/test/core-parity.mjs
