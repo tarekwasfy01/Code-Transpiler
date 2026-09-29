@@ -1,0 +1,13 @@
+plugins { id 'base' }
+allprojects {
+    group = 'io.github.tarekwasfy01'
+    version = findProperty('releaseVersion') ?: '1.0.0-SNAPSHOT'
+    repositories { mavenCentral() }
+}
+subprojects {
+    tasks.withType(JavaCompile).configureEach {
+        options.release = 21
+        options.encoding = 'UTF-8'
+    }
+    tasks.withType(Test).configureEach { useJUnitPlatform() }
+}

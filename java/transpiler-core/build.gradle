@@ -1,0 +1,37 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+    withSourcesJar()
+    withJavadocJar()
+}
+dependencies { testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4' }
+publishing {
+    publications {
+        github(MavenPublication) {
+            from components.java
+            artifactId = 'code-transpiler-gradle-core'
+            pom {
+                name = 'Code Transpiler Gradle Core'
+                description = 'Native Java core of Code Transpiler, built and published with Gradle.'
+                url = 'https://github.com/tarekwasfy01/Code-Transpiler'
+                licenses { license { name = 'MIT License'; url = 'https://opensource.org/licenses/MIT'; distribution = 'repo' } }
+                developers { developer { name = 'Tarek Wasfy'; url = 'https://github.com/tarekwasfy01' } }
+                scm {
+                    connection = 'scm:git:https://github.com/tarekwasfy01/Code-Transpiler.git'
+                    developerConnection = 'scm:git:https://github.com/tarekwasfy01/Code-Transpiler.git'
+                    url = 'https://github.com/tarekwasfy01/Code-Transpiler'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/tarekwasfy01/Code-Transpiler')
+            credentials { username = System.getenv('USERNAME'); password = System.getenv('TOKEN') }
+        }
+    }
+}
