@@ -11,8 +11,6 @@ on:
   push:
     branches:
       - NuGet
-    tags:
-      - 'v*'
 
 jobs:
   pack:
@@ -20,7 +18,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    environment: release
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v6
@@ -39,12 +36,12 @@ jobs:
             artifacts/*.snupkg
 
       - name: NuGet login (OIDC trusted publishing)
-        if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'push' && github.ref == 'refs/heads/NuGet' && contains(github.event.head_commit.message, '[publish]')) || inputs.publish }}
+        if: ${{ (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish]')) || inputs.publish }}
         uses: NuGet/login@v1
         id: login
         with:
-          user: tarekwasfy01
+          user: Tarek_Wasfy
 
       - name: Publish to nuget.org
-        if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'push' && github.ref == 'refs/heads/NuGet' && contains(github.event.head_commit.message, '[publish]')) || inputs.publish }}
+        if: ${{ (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish]')) || inputs.publish }}
         run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
