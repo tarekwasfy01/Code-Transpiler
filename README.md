@@ -17,6 +17,8 @@
   <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" />
 </a>  </a>
 <a href="https://www.semantic-programming-language.com/module.html?name=code-transpiler-python&url=https%3A%2F%2Fgithub.com%2FSemanticProgrammingLanguage%2FSemantic-Module-Store%2Freleases%2Fdownload%2Fcode-transpiler-python-20260926-044457%2Fcode-transpiler-python-20260926-044457.zip&official=1&source=archive"><img alt="code-transpiler-python — Semantic code-transpiler-python-20260926-044457" src="https://img.shields.io/endpoint?url=https://www.semantic-programming-language.com/assets/badges/semantic-badge.json" /></a>
+<img alt="PyPI Version" src="https://img.shields.io/pypi/v/code-transpiler-python">
+
 </p>
 
 
