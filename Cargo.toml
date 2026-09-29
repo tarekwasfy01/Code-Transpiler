@@ -1,0 +1,24 @@
+[package]
+name = "code-transpiler"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+authors = ["Tarek Wasfy", "code-transpiler contributors"]
+description = "Pure-Rust incremental port of the Code-Transpiler semantic/UAST engine"
+license = "MIT"
+readme = "README.md"
+documentation = "https://docs.rs/code-transpiler"
+keywords = ["transpiler", "compiler", "codegen", "uast", "translation"]
+categories = ["compilers", "development-tools"]
+exclude = ["bootstrap/raw/**"]
+
+[lib]
+name = "code_transpiler"
+path = "src/lib.rs"
+
+[[bin]]
+name = "code-transpiler"
+path = "src/bin/code-transpiler.rs"
+
+[features]
+default = []
