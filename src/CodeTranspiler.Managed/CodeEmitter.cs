@@ -328,7 +328,9 @@ internal static class CodeEmitter
     private static void EmitFor(StringBuilder sb, SemanticFor f, LanguageId t, int n)
     {
         if (t is LanguageId.Python or LanguageId.Nim or LanguageId.Julia or LanguageId.R) { EmitWhile(sb, new SemanticWhile(f.Condition ?? new SemanticLiteral(true, "bool"), f.Body, f.SourceLine), t, n); return; }
-        var init = Inline(f.Init, t), cond = f.Condition is null ? "" : Expr(f.Condition, t), step = Inline(f.Step, t);
+        var init = Inline(f.Init, t);
+        var cond = f.Condition is null ? "" : Expr(f.Condition, t);
+        var step = Inline(f.Step, t);
         sb.AppendLine($"{I(n)}for ({init}; {cond}; {step}) {{"); EmitBlock(sb, f.Body, t, n + 1); sb.AppendLine($"{I(n)}}}");
     }
 
