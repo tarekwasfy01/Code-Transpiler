@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Maven package version (for example 0.2.0)'
+        description: 'Maven package version (for example 1.0.0)'
         required: true
-        default: '0.2.0'
+        default: '1.0.0'
 
 permissions:
   contents: read
