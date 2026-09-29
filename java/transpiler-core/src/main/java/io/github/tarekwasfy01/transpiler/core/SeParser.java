@@ -39,33 +39,27 @@ public final class SeParser {
                 }
             }
         }
-
         return new SemanticProgram(projection, evaluation, indexBase, nodes);
     }
 
     private static SemanticNode parseNode(String line) {
-        String idMarker = ""id":";
-        String kindMarker = ""structural_kind":"";
-        String fieldsMarker = ""fields":{";
+        String q = Character.toString(34);
+        String idMarker = q + "id" + q + ":";
+        String kindMarker = q + "structural_kind" + q + ":" + q;
+        String fieldsMarker = q + "fields" + q + ":{";
 
         int idPos = line.indexOf(idMarker);
         int kindPos = line.indexOf(kindMarker);
         int fieldsPos = line.indexOf(fieldsMarker);
-        if (idPos < 0 || kindPos < 0 || fieldsPos < 0) {
-            return null;
-        }
+        if (idPos < 0 || kindPos < 0 || fieldsPos < 0) return null;
 
         int idStart = idPos + idMarker.length();
         int idEnd = line.indexOf(',', idStart);
-        if (idEnd < 0) {
-            return null;
-        }
+        if (idEnd < 0) return null;
 
         int kindStart = kindPos + kindMarker.length();
-        int kindEnd = line.indexOf('"', kindStart);
-        if (kindEnd < 0) {
-            return null;
-        }
+        int kindEnd = line.indexOf((char)34, kindStart);
+        if (kindEnd < 0) return null;
 
         long id = Long.parseLong(line.substring(idStart, idEnd).trim());
         String structuralKind = line.substring(kindStart, kindEnd);
@@ -81,44 +75,33 @@ public final class SeParser {
         readField(fieldsText, "kind", fields);
         readField(fieldsText, "name", fields);
         readField(fieldsText, "scope_id", fields);
-
         return new SemanticNode(id, structuralKind, fields);
     }
 
     private static void readField(String text, String key, Map<String, String> out) {
-        String marker = """ + key + "":";
+        String q = Character.toString(34);
+        String marker = q + key + q + ":";
         int pos = text.indexOf(marker);
-        if (pos < 0) {
-            return;
-        }
-        int start = pos + marker.length();
-        while (start < text.length() && Character.isWhitespace(text.charAt(start))) {
-            start++;
-        }
-        if (start >= text.length()) {
-            return;
-        }
+        if (pos < 0) return;
 
-        if (text.charAt(start) == '"') {
-            int end = text.indexOf('"', start + 1);
-            if (end > start) {
-                out.put(key, text.substring(start + 1, end));
-            }
+        int start = pos + marker.length();
+        while (start < text.length() && Character.isWhitespace(text.charAt(start))) start++;
+        if (start >= text.length()) return;
+
+        if (text.charAt(start) == 34) {
+            int end = text.indexOf((char)34, start + 1);
+            if (end > start) out.put(key, text.substring(start + 1, end));
             return;
         }
 
         int end = start;
-        while (end < text.length() && Character.isDigit(text.charAt(end))) {
-            end++;
-        }
-        if (end > start) {
-            out.put(key, text.substring(start, end));
-        }
+        while (end < text.length() && Character.isDigit(text.charAt(end))) end++;
+        if (end > start) out.put(key, text.substring(start, end));
     }
 
     private static String unquote(String s) {
         s = s.trim();
-        if (s.length() > 1 && s.charAt(0) == '"' && s.charAt(s.length() - 1) == '"') {
+        if (s.length() > 1 && s.charAt(0) == 34 && s.charAt(s.length() - 1) == 34) {
             return s.substring(1, s.length() - 1);
         }
         return s;
