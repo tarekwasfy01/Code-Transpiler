@@ -1,21 +1,23 @@
 name: Publish Maven package
+
 on:
-  push:
-    tags: ['v*']
   workflow_dispatch:
     inputs:
       version:
-        description: 'Maven version (for example 0.2.0)'
+        description: 'Maven package version (for example 0.2.0)'
         required: true
         default: '0.2.0'
+
 permissions:
   contents: read
   packages: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -24,27 +26,13 @@ jobs:
           server-id: github
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
-      - name: Resolve release version
-        id: version
-        shell: bash
-        run: |
-          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
-            VERSION="${GITHUB_REF_NAME#v}"
-          else
-            VERSION="${{ inputs.version }}"
-          fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Publishing Maven version $VERSION"
-      - name: Verify release version
+
+      - name: Verify Maven package
         working-directory: java
-        run: mvn -B -ntp -Drevision=${{ steps.version.outputs.version }} verify
-      - name: Publish Maven artifacts to GitHub Packages
+        run: mvn -B -ntp -Drevision=${{ inputs.version }} verify
+
+      - name: Publish to GitHub Packages
         working-directory: java
-        run: mvn -B -ntp -Drevision=${{ steps.version.outputs.version }} deploy -DskipTests
+        run: mvn -B -ntp -Drevision=${{ inputs.version }} deploy -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload standalone CLI jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-transpiler-cli-${{ steps.version.outputs.version }}
-          path: java/transpiler-cli/target/*-all.jar
