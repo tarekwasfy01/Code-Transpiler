@@ -22,7 +22,7 @@
   </developers>
   <modules><module>transpiler-core</module><module>transpiler-cli</module></modules>
   <properties>
-    <revision>0.2.0-SNAPSHOT</revision>
+    <revision>1.0.0-SNAPSHOT</revision>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
